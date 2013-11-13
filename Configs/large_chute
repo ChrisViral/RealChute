@@ -1,0 +1,218 @@
+PART
+{
+	// --- general parameters ---
+	name = RC_main_large
+	module = Part
+	author = NovaSilisko, stupid_chris
+
+	MODEL
+	{
+		model = Squad/Parts/Utility/parachuteLarge/model
+   		position = 0, 0, 0
+   		scale = 1, 1, 1
+   		rotation = 0, 0, 0
+   		texture = model000 , Squad/Parts/Utility/parachuteLarge/model000
+   		texture = model001 , Squad/Parts/Utility/parachuteLarge/model001
+	}
+
+	// --- asset parameters ---
+	scale = 0.1
+	rescaleFactor = 1
+
+	// --- node definitions ---
+	// definition format is Position X, Position Y, Position Z, Up X, Up Y, Up Z, size
+	node_stack_bottom = 0.0, -0.020649, 0.0, 0.0, 1.0, 0.0, 1
+	node_attach = 0.0, -0.020649, 0.0, 0.0, -1.0, 0.0
+
+	// --- FX definitions ---
+	sound_parachute_open = activate
+
+	// --- editor parameters ---
+	TechRequired = advLanding
+	entryCost = 3500
+	cost = 400
+	category = Utility
+	subcategory = 0
+	title = RealChute main chute 1.25m
+	manufacturer = RealChute
+	description = After Bill complained the current parachutes were too rough for him, the engineers came up with this. This one is a large main chute.
+
+	// attachment rules: stack, srfAttach, allowStack, allowSrfAttach, allowCollision
+	attachRules = 1,0,0,1,0
+
+	// --- standard part parameters ---
+	mass = 0.2
+	dragModelType = default
+	angularDrag = 3
+	crashTolerance = 12
+	maxTemp = 3100
+
+	breakingForce = 100
+	breakingTorque = 50
+
+	stageOffset = -1
+
+	MODULE
+	{
+		name = RealChuteModule
+		preDeployedDrag = 2
+		deployedDrag = 500
+		stowedDrag = 0.22
+		minDeploymentAlt = 40000
+		deploymentAlt = 700
+		preDeploymentSpeed = 2
+		deploymentSpeed = 6
+		cutSpeed = 0.5
+		preDeploymentAnimation = semiDeployLarge
+		deploymentAnimation = fullyDeployLarge
+		parachuteName = canopy
+		capName = cap
+		spareChutes = 5
+	}
+}
+
+PART
+{
+	// --- general parameters ---
+	name = RC_drogue_large
+	module = Part
+	author = NovaSilisko, stupid_chris
+
+	MODEL
+	{
+		model = Squad/Parts/Utility/parachuteDrogue/model
+   		position = 0, 0, 0
+   		scale = 1, 1, 1
+   		rotation = 0, 0, 0
+   		texture = model000 , Squad/Parts/Utility/parachuteDrogue/model000
+   		texture = model001 , Squad/Parts/Utility/parachuteDrogue/model001
+	}
+
+	// --- asset parameters ---
+	scale = 0.1
+	rescaleFactor = 1
+
+	// --- node definitions ---
+	// definition format is Position X, Position Y, Position Z, Up X, Up Y, Up Z, size
+	node_stack_bottom = 0.0, -0.020649, 0.0, 0.0, 1.0, 0.0, 1
+	node_attach = 0.0, -0.020649, 0.0, 0.0, -1.0, 0.0
+
+	// --- FX definitions ---
+	sound_parachute_open = activate
+
+	// --- editor parameters ---
+	TechRequired = advLanding
+	entryCost = 3500
+	cost = 400
+	category = Utility
+	subcategory = 0
+	title = RealChute drogue chute 1.25m
+	manufacturer = RealChute
+	description = After Bill complained the current parachutes were too rough for him, the engineers came up with this. This one is a large drogue chute.
+
+	// attachment rules: stack, srfAttach, allowStack, allowSrfAttach, allowCollision
+	attachRules = 1,0,0,1,0
+
+	// --- standard part parameters ---
+	mass = 0.2
+	dragModelType = default
+	angularDrag = 3
+	crashTolerance = 12
+	maxTemp = 3100
+
+	breakingForce = 100
+	breakingTorque = 50
+
+	stageOffset = -1
+
+	MODULE
+	{
+		name = RealChuteModule
+		preDeployedDrag = 5
+		deployedDrag = 250
+		stowedDrag = 0.22
+		minDeploymentAlt = 45000
+		deploymentAlt = 2500
+		preDeploymentSpeed = 1
+		deploymentSpeed = 4
+		cutSpeed = 0.5
+		preDeploymentAnimation = semiDeployLarge
+		deploymentAnimation = fullyDeployLarge
+		parachuteName = canopy
+		capName = cap
+		spareChutes = 5
+	}
+}
+
+PART
+{
+	// --- general parameters ---
+	name = RC_drag_large
+	module = Part
+	author = NovaSilisko, stupid_chris
+
+	MODEL
+	{
+		model = Squad/Parts/Utility/parachuteDrogue/model
+   		position = 0, 0, 0
+   		scale = 1, 0.75, 1
+   		rotation = 0, 0, 0
+   		texture = model000 , Squad/Parts/Utility/parachuteDrogue/model000
+   		texture = model001 , Squad/Parts/Utility/parachuteDrogue/model001
+	}	
+
+	// --- asset parameters ---
+	scale = 0.1
+	rescaleFactor = 1
+
+	// --- node definitions ---
+	// definition format is Position X, Position Y, Position Z, Up X, Up Y, Up Z, size
+	node_stack_bottom = 0.0, -0.020649, 0.0, 0.0, 1.0, 0.0, 1
+	node_attach = 0.0, -0.020649, 0.0, 0.0, -1.0, 0.0
+
+	// --- FX definitions ---
+	sound_parachute_open = activate
+
+	// --- editor parameters ---
+	TechRequired = advLanding
+	entryCost = 3500
+	cost = 400
+	category = Utility
+	subcategory = 0
+	title = RealChute drag chute 1.25m
+	manufacturer = RealChute
+	description = After Bill complained the current parachutes were too rough for him, the engineers came up with this. This one is a large drag chute.
+
+	// attachment rules: stack, srfAttach, allowStack, allowSrfAttach, allowCollision
+	attachRules = 1,0,0,1,0
+
+	// --- standard part parameters ---
+	mass = 0.15
+	dragModelType = default
+	angularDrag = 3
+	crashTolerance = 12
+	maxTemp = 3100
+
+	breakingForce = 100
+	breakingTorque = 50
+
+	stageOffset = -1
+
+	MODULE
+	{
+		name = RealChuteModule
+		preDeployedDrag = 1
+		deployedDrag = 75
+		stowedDrag = 0.22
+		minDeploymentAlt = 200
+		deploymentAlt = 50
+		preDeploymentSpeed = 1
+		deploymentSpeed = 3
+		cutSpeed = 5
+		preDeploymentAnimation = semiDeployLarge
+		deploymentAnimation = fullyDeployLarge
+		parachuteName = canopy
+		capName = cap
+		spareChutes = 5
+	}
+}
