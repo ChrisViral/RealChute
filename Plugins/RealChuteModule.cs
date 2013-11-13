@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-/*RealChute was made by stupid_chris and is licensed under CC-BY-NC-SA. You can remix, modify and redistribute the work, but
- you must give attribution to the original author and you cannot sell your derivatives.
- For more informtion contact me on the forum.*/
+/*RealChute was made by stupid_chris and is licensed under CC-BY-NC-SA. You can remix, modify and redistribute
+ * the work, but you must give attribution to the original author and you cannot sell your derivatives.
+ * For more informtion contact me on the forum.*/
 
 
 namespace stupid_chris
