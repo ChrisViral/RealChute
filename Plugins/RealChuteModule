@@ -172,13 +172,13 @@ namespace stupid_chris
 
         public float GetTrueAlt()
         {
-            //Gets the altitude from the ground or water
+             //Gets the altitude from the ground or water
             CoM = vessel.findWorldCenterOfMass();
             up = (CoM - vessel.mainBody.position).normalized;
             ASL = (float)vessel.mainBody.GetAltitude(CoM);
-            if (Physics.Raycast(CoM, -up, out surface, ASL + 10000f, 1 << 15))
+            if (Physics.Raycast( CoM, -up, out source, ASL + 10000, 1 << 15))
             {
-                altitude = surface.distance;
+                altitude = Mathf.Min(source.distance, ASL);
             }
             else
             {
