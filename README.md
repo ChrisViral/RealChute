@@ -4,6 +4,7 @@ RealChute was created and is maintained by stupid_chris. Message me on the forum
 http://forum.kerbalspaceprogram.com/members/63758
 
 Changelog:
+
 November 13th 2013
 v0.1.1a
 -Hotfix of a few deployment bugs that could cause weird unresponsive parachutes
