@@ -28,6 +28,8 @@ namespace stupid_chris
         [KSPField]
         public float deploymentAlt;
         [KSPField]
+        public float cutAlt;
+        [KSPField]
         public float preDeploymentSpeed;
         [KSPField]
         public float deploymentSpeed;
@@ -41,16 +43,18 @@ namespace stupid_chris
         public string capName;
         [KSPField]
         public float spareChutes;
-
-        //Persistant values
         [KSPField]
         public float cutSpeed;
+
+        //Persistant values
         [KSPField(isPersistant = true)]
         public bool initiated = false;
         [KSPField(isPersistant = true)]
         public bool capOff;
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
         public float chuteCount;
+        [KSPField(isPersistant = true)]
+        public float autocutAlt;
 
         //Variables
         public Vector3 dragVector;
@@ -61,7 +65,7 @@ namespace stupid_chris
         public Transform cap;
         public float altitude;
         public float ASL;
-        public RaycastHit surface;
+        public RaycastHit source;
         public string deploymentState;
         public bool setCount = false;
         public float debutTime;
@@ -118,14 +122,20 @@ namespace stupid_chris
         public void GUIDeploy()
         {
             //Forces the parachute to deploy
-            this.part.force_activate();
+            if (CanDeployChute())
+            {
+                this.part.force_activate();
+            }
         }
 
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Cut chute")]
         public void GUICut()
         {
             //Cuts chute
-            Cut();
+            if (isDeployed())
+            {
+                Cut();
+            }
         }
         [KSPEvent(guiActive = false, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
         public void GUIRepack()
@@ -145,14 +155,20 @@ namespace stupid_chris
         public void ActionDeploy(KSPActionParam param)
         {
             //Forces the parachute to deploy
-            this.part.force_activate();
+            if (CanDeployChute())
+            {
+                this.part.force_activate();
+            }
         }
 
         [KSPAction("Cut chute")]
         public void ActionCut(KSPActionParam param)
         {
             //Cuts the chute
-            Cut();
+            if (isDeployed())
+            {
+                Cut();
+            }
         }
 
         //------------------------- Methods -------------------------
@@ -172,7 +188,7 @@ namespace stupid_chris
 
         public float GetTrueAlt()
         {
-             //Gets the altitude from the ground or water
+            //Gets the altitude from the ground or water
             CoM = vessel.findWorldCenterOfMass();
             up = (CoM - vessel.mainBody.position).normalized;
             ASL = (float)vessel.mainBody.GetAltitude(CoM);
@@ -190,7 +206,7 @@ namespace stupid_chris
         public bool CanDeployChute()
         {
             //Checks if the parachute can be deployed
-            if (this.vessel.atmDensity > 0 && !CheckGroundStop() && GetTrueAlt() <= minDeploymentAlt)
+            if (this.vessel.atmDensity > 0 && !CheckGroundStop() && GetTrueAlt() <= minDeploymentAlt && GetTrueAlt() >= autocutAlt)
             {
                 return true;
             }
@@ -204,7 +220,19 @@ namespace stupid_chris
         public bool isDeployed()
         {
             //Check if the chute is completely deployed
-            if (deploymentState == "DEPLOYED" || deploymentState == "LOWDEPLOYED")
+            if (deploymentState == "DEPLOYED" || deploymentState == "LOWDEPLOYED" || deploymentState == "PREDEPLOYED")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public bool ChuteMustStop()
+        {
+            if (!CanDeployChute() && isDeployed())
             {
                 return true;
             }
@@ -356,9 +384,20 @@ namespace stupid_chris
                 {
                     chuteCount = spareChutes;
                 }
+
                 else
                 {
                     chuteCount = float.NaN;
+                }
+
+                if (cutAlt >= 0)
+                {
+                    autocutAlt = cutAlt;
+                }
+
+                else
+                {
+                    autocutAlt = -10000;
                 }
             }
 
@@ -378,11 +417,16 @@ namespace stupid_chris
             infoList += String.Format("Deployed drag: {0}\n", deployedDrag);
             infoList += String.Format("Minimum deployment altitude: {0}m\n", minDeploymentAlt);
             infoList += String.Format("Deployment altitude: {0}m\n", deploymentAlt);
+            if (cutAlt >= 0)
+            {
+                infoList += String.Format("Autocut altitude: {0}m\n", cutAlt);
+            }
+
             infoList += String.Format("Predeployment speed: {0}s\n", preDeploymentSpeed);
             infoList += String.Format("Deployment speed: {0}s\n", deploymentSpeed);
             infoList += String.Format("Autocut speed: {0}m/s\n", cutSpeed);
 
-            if (spareChutes != float.NaN)
+            if (spareChutes >= 0)
             {
                 infoList += String.Format("Spare chutes: {0}", spareChutes);
             }
@@ -444,7 +488,7 @@ namespace stupid_chris
                 }
             }
 
-            else if (CheckGroundStop() && isDeployed())
+            else if (ChuteMustStop())
             {
                 Cut();
             }
