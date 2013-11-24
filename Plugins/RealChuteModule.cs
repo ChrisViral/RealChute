@@ -97,14 +97,15 @@ namespace stupid_chris
         public bool isPlaying;
         public Vector3 dragVector;
         public Vector3 up;
-        public Vector3 CoM;
+        public float pressure;
+        public Vector3d pos;
+        public float ASL;
         public Quaternion parachuteRotation;
         public Transform parachute;
         public Transform cap;
         public Transform secParachute;
         public Transform secCap;
         public float altitude;
-        public float ASL;
         public float terrainHeight;
         public float altitudeToUse;
         public RaycastHit craft;
@@ -289,8 +290,7 @@ namespace stupid_chris
         public float GetTrueAlt()
         {
             //Gets the altitude from the ground or water
-            ASL = (float)this.vessel.mainBody.GetAltitude(CoM);
-            if (Physics.Raycast( CoM, -up, out craft, ASL + 10000, 1 << 15))
+            if (Physics.Raycast(pos, -up, out craft, ASL + 10000, 1 << 15))
             {
                 altitude = Mathf.Min(craft.distance, ASL);
             }
@@ -397,7 +397,7 @@ namespace stupid_chris
             {
                 if (cutAlt == -1)
                 {
-                    if (this.vessel.atmDensity > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt)
+                    if (pressure > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt)
                     {
                         return true;
                     }
@@ -410,7 +410,7 @@ namespace stupid_chris
 
                 else
                 {
-                    if (this.vessel.atmDensity > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt && GetTrueAlt() > cutAlt)
+                    if (pressure > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt && GetTrueAlt() > cutAlt)
                     {
                         return true;
                     }
@@ -429,12 +429,12 @@ namespace stupid_chris
                 {
                     if (cutAlt == -1)
                     {
-                        if (this.vessel.atmDensity > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt)
+                        if (pressure > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt)
                         {
                             return true;
                         }
 
-                        else if (this.vessel.atmDensity > 0 && !CheckGroundStop() && secCutAlt != -1 && secCutAlt > minDeploymentAlt)
+                        else if (pressure > 0 && !CheckGroundStop() && secCutAlt != -1 && secCutAlt > minDeploymentAlt)
                         {
                             return true;
                         }
@@ -447,12 +447,12 @@ namespace stupid_chris
 
                     else
                     {
-                        if (this.vessel.atmDensity > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt && GetTrueAlt() > cutAlt)
+                        if (pressure > 0 && !CheckGroundStop() && AltToUse(minDeploymentAlt) <= minDeploymentAlt && GetTrueAlt() > cutAlt)
                         {
                             return true;
                         }
 
-                        else if (this.vessel.atmDensity > 0 && !CheckGroundStop() && secCutAlt != -1 && secCutAlt > minDeploymentAlt && GetTrueAlt() > cutAlt)
+                        else if (pressure > 0 && !CheckGroundStop() && secCutAlt != -1 && secCutAlt > minDeploymentAlt && GetTrueAlt() > cutAlt)
                         {
                             return true;
                         }
@@ -554,11 +554,11 @@ namespace stupid_chris
             chute.Rotate(rotationAngle);
         }
 
-        public Quaternion GetDragDirection()
+        public Quaternion GetDragDirection(Vector3 parachuteUp)
         {
             //Returns the drag direction
-            dragVector = -(Vector3)this.vessel.srf_velocity.normalized;
-            parachuteRotation.SetLookRotation(dragVector, up);
+            dragVector = -(this.vessel.srf_velocity + Krakensbane.GetFrameVelocityV3f()).normalized;
+            parachuteRotation.SetLookRotation(dragVector, parachuteUp);
             return parachuteRotation;
         }
 
@@ -1002,8 +1002,10 @@ namespace stupid_chris
 
             //Universal values
             currentTime = Time.time;
-            CoM = this.vessel.findWorldCenterOfMass();
-            up = (CoM - this.vessel.mainBody.position);
+            pos = this.part.transform.position;
+            pressure = (float)FlightGlobals.getStaticPressure(pos);
+            up = FlightGlobals.getUpAxis(pos);
+            ASL = (float)FlightGlobals.getAltitudeAtPos(pos);
 
             //Deployment clauses and actions. Go figure how they work, I just know they do :P
 
@@ -1015,7 +1017,7 @@ namespace stupid_chris
                 {
                     if (deploymentState == "STOWED")
                     {
-                        if (GetTrueAlt() > minDeploymentAlt)
+                        if (secondaryChute && GetTrueAlt() > minDeploymentAlt)
                         {
                             this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                         }
@@ -1034,7 +1036,7 @@ namespace stupid_chris
 
                     else if (deploymentState == "PREDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection();
+                        parachute.rotation = GetDragDirection(parachute.transform.up);
                         ParachuteNoise(parachute);
                         if (!dragSet)
                         {
@@ -1058,7 +1060,7 @@ namespace stupid_chris
 
                     else if (deploymentState == "LOWDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection();
+                        parachute.rotation = GetDragDirection(parachute.transform.up);
                         ParachuteNoise(parachute);
                         if (!dragSet)
                         {
@@ -1077,7 +1079,7 @@ namespace stupid_chris
 
                     else if (deploymentState == "DEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection();
+                        parachute.rotation = GetDragDirection(parachute.transform.up);
                         ParachuteNoise(parachute);
                         if (!dragSet)
                         {
@@ -1102,14 +1104,14 @@ namespace stupid_chris
             }
 
             //Secondary chute
-            if (CanDeployChute("SecChute"))
+            if (secondaryChute && CanDeployChute("SecChute"))
             {
                 oneWasDeployed = true;
                 if (!wait)
                 {
                     if (secDeploymentState == "STOWED")
                     {
-                        if (GetTrueAlt() > secMinDeploymentAlt)
+                        if (secondaryChute && GetTrueAlt() > secMinDeploymentAlt)
                         {
                             this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                         }
@@ -1127,7 +1129,7 @@ namespace stupid_chris
 
                     else if (secDeploymentState == "PREDEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection();
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
                         ParachuteNoise(secParachute);
                         if (!secDragSet)
                         {
@@ -1147,7 +1149,7 @@ namespace stupid_chris
 
                     else if (secDeploymentState == "LOWDEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection();
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
                         ParachuteNoise(secParachute);
                         if (!secDragSet)
                         {
@@ -1166,7 +1168,7 @@ namespace stupid_chris
 
                     else if (secDeploymentState == "DEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection();
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
                         ParachuteNoise(secParachute);
                         if (!secDragSet)
                         {
@@ -1196,7 +1198,7 @@ namespace stupid_chris
                 SetRepack();
             }
 
-            else if (BothMustStop())
+            else if (secondaryChute && BothMustStop())
             {
                 if (IsDeployed(deploymentState))
                 {
