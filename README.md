@@ -61,5 +61,14 @@ second set of parachute transform/animation
 **v0.1a**  
 *Initial release  
 
-This work is licensed under CC-BY-NC-SA  
+---
+
+RealChute.dll was made by stupid_chris  
+The parts provided with the pack were all made by sumghai  
+The parachute cut sound was made by ymir9  
+
+Forum thread: http://forum.kerbalspaceprogram.com/threads/57988  
+Development thread: http://forum.kerbalspaceprogram.com/threads/57987  
+
+The plugin and parts are both licensed under CC-BY-NC-SA  
 http://creativecommons.org/licenses/by-nc-sa/3.0/  
