@@ -246,7 +246,7 @@ namespace RealChute_drag_calculator
             else
             {
                 speed2 = (decimal)Math.Pow((double)speed, 2);
-                diameter = (decimal)Math.Sqrt((double)((8 * mass * gravity) / ((decimal)Math.PI * speed2 * Cd * density))) / parachutes;
+                diameter = (decimal)Math.Sqrt((double)((8 * mass * gravity) / ((decimal)Math.PI * speed2 * Cd * density * parachutes)));
                 txtDiameter.Text = diameter.ToString("#0.00");
             }
         }
@@ -320,7 +320,7 @@ namespace RealChute_drag_calculator
             else
             {
                 speed2 = (decimal)Math.Pow((double)speed, 2);
-                diameter = (decimal)Math.Sqrt((double)((8 * mass * deceleration) / ((decimal)Math.PI * speed2 * Cd * density))) / parachutes;
+                diameter = (decimal)Math.Sqrt((double)((8 * mass * deceleration) / ((decimal)Math.PI * speed2 * Cd * density * parachutes)));
                 txtDiameterDrag.Text = diameter.ToString("#0.00");
             }
         }
