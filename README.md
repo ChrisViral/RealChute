@@ -12,7 +12,7 @@ http://forum.kerbalspaceprogram.com/members/63758
 *Fixed a bug with dual chutes not cutting properly  
 *Fixed yet another bug with predeployment of main chutes always having the same drag  
 *Added an "reverseOrientation" clause in case a modeller builds the parachute transform the wrong way  
-*Parachutes no create drag from the very area where they originate from. This means a chute on the side will hang   realistically without a CoM offset
+*Parachutes no create drag from the very area where they originate from. This means a chute on the side will hang   realistically without a CoM offset  
 *Rescaled all the parachutes to have the real size in game. If you find this too big, tell me on the forum and I'll   revise them (note, this is not procedural yet, if you change the part yourself, you need to change the scale)  
 *Fixed a bug with the calculator when calculating the diameter of multiple chutes  
 *Added a sound on repack, thanks to ymir9 once again  
