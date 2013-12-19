@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 
-/* RealChute was made by stupid_chris and is licensed under CC-BY-NC-SA. You can remix, modify and redistribute
- * the work, but you must give attribution to the original author and you cannot sell your derivatives.
- * For more informtion contact me on the forum.*/
+/* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and *
+ * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives. *
+ * For more informtion contact me on the forum. */
 
 
-namespace stupid_chris
+namespace RealChute
 {
     //------------------------- Part Module -------------------------
     public class RealChuteModule : PartModule
@@ -21,36 +21,40 @@ namespace stupid_chris
         [KSPField]
         public float caseMass = 0.1f;
         [KSPField]
-        public string material = "Nylon";       
+        public string material = "Nylon";
         [KSPField]
+        public string secMaterial = "empty";
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut speed", guiUnits = "m/s", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 10, stepIncrement = 0.5f)]
+        public float cutSpeed = 0.5f;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiUnits = "s", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 60, stepIncrement = 0.5f)]
         public float timer = 0;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Must down"), UI_Toggle(enabledText = "true", disabledText = "false")]
         public bool mustGoDown = false;
         [KSPField]
         public bool reverseOrientation = false;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spares"), UI_FloatRange(minValue = -1, maxValue = 10, stepIncrement = 1)]
         public float spareChutes = 5;
         [KSPField]
         public bool secondaryChute = false;
 
         //Main parachute
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float preDeployedDiameter = 1;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float deployedDiameter = 25;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Press pre"), UI_Toggle(enabledText = "true", disabledText = "false")]
         public bool minIsPressure = false;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep alt", guiUnits = "m"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 50)]
         public float minDeployment = 40000;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep press", guiUnits = "atm", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
+        public float minPressure = 0.01f;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep alt", guiUnits = "m"), UI_FloatRange(minValue = 0, maxValue = 30000, stepIncrement = 50)]
         public float deploymentAlt = 700;
-        [KSPField]
-        public float cutSpeed = 0.5f;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut alt", guiUnits = "m"), UI_FloatRange(minValue = -50, maxValue = 30000, stepIncrement = 50)]
         public float cutAlt = -1;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float preDeploymentSpeed = 2;
-        [KSPField]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float deploymentSpeed = 6;
         [KSPField]
         public string preDeploymentAnimation = "semiDeploy";
@@ -60,32 +64,38 @@ namespace stupid_chris
         public string parachuteName = "parachute";
         [KSPField]
         public string capName = "cap";
+        [KSPField]
+        public Vector3 forcedOrientation = new Vector3(0, 0, 0);
 
         //Second parachute
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        public float secPreDeployedDiameter = 1;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        public float secDeployedDiameter = 25;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Press pre2"), UI_Toggle(enabledText = "true", disabledText = "false")]
+        public bool secMinIsPressure = false;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 alt", guiUnits = "m"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 50)]
+        public float secMinDeployment = 40000;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 press", guiUnits = "atm", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
+        public float secMinPressure = 0.01f;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 alt", guiUnits = "m"), UI_FloatRange(minValue = 0, maxValue = 30000, stepIncrement = 50)]
+        public float secDeploymentAlt = 700;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut2 alt", guiUnits = "m"), UI_FloatRange(minValue = -50, maxValue = 30000, stepIncrement = 50)]
+        public float secCutAlt = -1;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        public float secPreDeploymentSpeed = 2;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        public float secDeploymentSpeed = 6;
         [KSPField]
-        public float secPreDeployedDiameter;
+        public string secPreDeploymentAnimation = "secSemiDeploy";
         [KSPField]
-        public float secDeployedDiameter;
+        public string secDeploymentAnimation = "secFullDeploy";
         [KSPField]
-        public bool secMinIsPressure;
+        public string secParachuteName = "secParachute";
         [KSPField]
-        public float secMinDeployment;
+        public string secCapName = "secCap";
         [KSPField]
-        public float secDeploymentAlt;
-        [KSPField]
-        public float secCutAlt;
-        [KSPField]
-        public float secPreDeploymentSpeed;
-        [KSPField]
-        public float secDeploymentSpeed;
-        [KSPField]
-        public string secPreDeploymentAnimation;
-        [KSPField]
-        public string secDeploymentAnimation;
-        [KSPField]
-        public string secParachuteName;
-        [KSPField]
-        public string secCapName;
+        public Vector3 secForcedOrientation = new Vector3(0, 0, 0);
 
         #endregion
 
@@ -104,7 +114,9 @@ namespace stupid_chris
         //Variables
         public Vector3 dragVector, up;
         public Vector3 forcePosition, secForcePosition;
-        public Vector3d pos;
+        public Vector3 forceOrient, secForceOrient;
+        public Vector3d pos, CoM;
+        private Animation anim;
         public Transform parachute, secParachute;
         public Transform cap, secCap;
         public RaycastHit craft;
@@ -115,13 +127,21 @@ namespace stupid_chris
         public float preDeployedArea, secPreDeployedArea;
         public float deployedArea, secDeployedArea;
         public float parachuteDensity, dragCoef, chuteArea;
+        public float secParachuteDensity, secDragCoef;
         public float chuteMass, secChuteMass;
         public float currentForce, ASL, sqrSpeed;
         public float currentTime, debutTime, deltaTime, deploymentTime;
         public float atmPressure, atmDensity;
+        public float random_x, random_y;
+        public float secRandom_x, secRandom_y;
+        public float randomDebut, randomDelta, randomTime;
+        public float secRandomDebut, secRandomDelta, secRandomTime;
         public bool queued = false, secQueued = false;
+        public bool timerSet = false, randomized = false, secRandomized = false;
+        public bool randomSet = false, secRandomSet = false;
         public bool wait = true, armed = false, oneWasDeployed = false;
-        public bool timerSet = false, timeSet = false, setCount = false;
+        public bool timeSet = false, setCount = false;
+        public UI_FloatRange poop;
 
         #endregion
 
@@ -130,27 +150,27 @@ namespace stupid_chris
         public void InitiateAnimation(string animationName)
         {
             //Initiates the default values for animations
-            foreach (var animation in part.FindModelAnimators(animationName))
+            foreach (Animation anim in part.FindModelAnimators(animationName))
             {
-                var animationState = animation[animationName];
-                animationState.normalizedTime = 0;
-                animationState.normalizedSpeed = 0;
-                animationState.enabled = false;
-                animationState.wrapMode = WrapMode.Clamp;
-                animationState.layer = 1;
+                AnimationState state = anim[animationName];
+                state.normalizedTime = 0;
+                state.normalizedSpeed = 0;
+                state.enabled = false;
+                state.wrapMode = WrapMode.Clamp;
+                state.layer = 1;
             }
         }
 
-        public void PlayAnimation(string animationName, float animationTime, float animationSpeed)
+        public void PlayAnimation(string animationName, float animationSpeed)
         {
             //Plays the animation
-            foreach (var animation in part.FindModelAnimators(animationName))
+            foreach (Animation anim in part.FindModelAnimators(animationName))
             {
-                var animationState = animation[animationName];
-                animationState.normalizedTime = animationTime;
-                animationState.normalizedSpeed = animationSpeed;
-                animationState.enabled = true;
-                animation.Play(animationName);
+                AnimationState state = anim[animationName];
+                state.normalizedTime = 0;
+                state.normalizedSpeed = animationSpeed;
+                state.enabled = true;
+                anim.Play(animationName);
             }
         }
 
@@ -158,7 +178,7 @@ namespace stupid_chris
         {
             //Checks if a given animation is playing
             bool isPlaying = false;
-            foreach (var animation in part.FindModelAnimators(animationName)) { isPlaying = animation.IsPlaying(animationName); }
+            foreach (Animation anim in part.FindModelAnimators(animationName)) { isPlaying = anim.IsPlaying(animationName); }
             return isPlaying;
         }
 
@@ -276,17 +296,22 @@ namespace stupid_chris
         public float GetTrueAlt()
         {
             //Gets the altitude from the ground or water
-            if (Physics.Raycast(pos, -up, out craft, ASL + 10000, 1 << 15)) { return Mathf.Min(craft.distance, ASL); }
+            if (Physics.Raycast(pos, -up, out craft, ASL + 10000, 1 << 15)) 
+            {
+                if (this.vessel.mainBody.ocean) { return Mathf.Min(craft.distance, ASL); }
+
+                else { return craft.distance; }
+            }
 
             else { return ASL; }
         }
 
-        public bool MinDeployment(float minDeploy, bool isPressure)
+        public bool MinDeployment(float minDeploy, float minPress, bool isPressure)
         {
             //Returns the right value to check
             if (isPressure)
             {
-                if (atmPressure >= minDeploy) { return true; }
+                if (atmPressure >= minPress) { return true; }
 
                 else { return false; }
             }
@@ -306,9 +331,7 @@ namespace stupid_chris
             bool goesDown = true;
 
             //Timer
-            if (timer <= 0) { timerSpent = true; }
-
-            else if (deltaTime < timer)
+            if (timer > 0 && deltaTime < timer)
             {
                 timerSpent = false;
                 if (!timerSet)
@@ -318,18 +341,17 @@ namespace stupid_chris
                 }
 
                 deltaTime = currentTime - debutTime;
-                ScreenMessages.PostScreenMessage(String.Format("Deployment in {0}s", (timer - deltaTime).ToString("#0.0")), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(String.Format("Deployment in {0}s", (timer - deltaTime).ToString("0.#")), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
             }
 
             //Goes down
-            if (!mustGoDown) { goesDown = true; }
-
-            else if (this.vessel.verticalSpeed >= 0)
+            if (mustGoDown && this.vessel.verticalSpeed >= 0)
             {
                 goesDown = false;
                 ScreenMessages.PostScreenMessage("Deployment awaiting negative vertical velocity", Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
-                ScreenMessages.PostScreenMessage(String.Format("Current vertical velocity: {0}m/s", this.vessel.verticalSpeed.ToString("#0.0")), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(String.Format("Current vertical velocity: {0}m/s", this.vessel.verticalSpeed.ToString("0.#")), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
             }
+
 
             //Can deploy or not
             if (timerSpent && goesDown) { wait = false; }
@@ -339,6 +361,41 @@ namespace stupid_chris
                 this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                 wait = true;
             }
+        }
+
+        public bool RandomDeployment(string whichChute)
+        {
+            //Short random deployment delayer
+            if (whichChute == "MainChute")
+            {
+                if (!randomSet)
+                {
+                    this.randomTime = UnityEngine.Random.value;
+                    this.randomDebut = currentTime;
+                    this.randomSet = true;
+                }
+
+                this.randomDelta = currentTime - this.randomDebut;
+                if (this.randomDelta < this.randomTime) { return false; }
+
+                else { return true; }
+            }
+
+            else
+            {
+                if (!secRandomSet)
+                {
+                    this.secRandomTime = UnityEngine.Random.value;
+                    this.secRandomDebut = currentTime;
+                    this.secRandomSet = true;
+                }
+
+                this.secRandomDelta = currentTime - this.secRandomDebut;
+                if (this.secRandomDelta < this.secRandomTime) { return false; }
+
+                else { return true; }
+            }
+            
         }
 
         public bool CanDeployChute(string whichChute)
@@ -351,9 +408,11 @@ namespace stupid_chris
             {
                 if (deploymentState == "CUT") { return false; }
 
-                else if (MinDeployment(minDeployment, minIsPressure) && cutAlt == -1) { return true; }
+                else if (MinDeployment(minDeployment, minPressure, minIsPressure) && cutAlt == -1) { return true; }
 
-                else if (MinDeployment(minDeployment, minIsPressure) && GetTrueAlt() > cutAlt) { return true; }
+                else if (MinDeployment(minDeployment, minPressure, minIsPressure) && GetTrueAlt() > cutAlt) { return true; }
+
+                else if (secondaryChute && !MinDeployment(minDeployment, minPressure, minIsPressure) && GetTrueAlt() <= secCutAlt) { return true; }
 
                 else { return false; }
             }
@@ -363,9 +422,11 @@ namespace stupid_chris
             {
                 if (secDeploymentState == "CUT") { return false; }
 
-                else if (MinDeployment(secMinDeployment, secMinIsPressure)  && secCutAlt == -1) { return true; }
+                else if (MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && secCutAlt == -1) { return true; }
 
-                else if (MinDeployment(secMinDeployment, secMinIsPressure)  && GetTrueAlt() > secCutAlt) { return true; }
+                else if (MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && GetTrueAlt() > secCutAlt) { return true; }
+
+                else if (!MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && GetTrueAlt() <= cutAlt) { return true; }
 
                 else { return false; }
             }
@@ -414,16 +475,45 @@ namespace stupid_chris
         public void ParachuteNoise(Transform chute)
         {
             //Gives a random noise to the parachute orientation
-            Vector3 rotationAngle = new Vector3(5 * (Mathf.PerlinNoise(currentTime, 0) - 0.5f), 5 * (Mathf.PerlinNoise(currentTime, 20) - 0.5f), 0);
+            float x = 0;
+            float y = 0;
+
+            if (chute == parachute)
+            {
+                if (!this.randomized)
+                {
+                    this.random_x = UnityEngine.Random.Range(0f, 100f);
+                    this.random_y = UnityEngine.Random.Range(0f, 100f);
+                    this.randomized = true;
+                }
+
+                x = random_x;
+                y = random_y;
+            }
+
+            else if (chute == secParachute)
+            {
+                if (!this.secRandomized)
+                {
+                    this.secRandom_x = UnityEngine.Random.Range(0f, 100f);
+                    this.secRandom_y = UnityEngine.Random.Range(0f, 100f);
+                    this.secRandomized = true;
+                }
+
+                x = secRandom_x;
+                y = secRandom_y;
+            }
+
+            Vector3 rotationAngle = new Vector3(5 * (Mathf.PerlinNoise(currentTime, x + Mathf.Sin(currentTime)) - 0.5f), 5 * (Mathf.PerlinNoise(currentTime, y + Mathf.Sin(currentTime)) - 0.5f), 0);
             chute.Rotate(rotationAngle);
         }
 
-        public Quaternion GetDragDirection(Vector3 parachuteUp)
+        public Quaternion GetDragDirection(Vector3 parachuteUp, Vector3 forced)
         {
             //Makes the parachute follow air flow
-            if (reverseOrientation) { return Quaternion.LookRotation(-dragVector, parachuteUp); }
+            if (reverseOrientation) { return Quaternion.LookRotation(-(dragVector + forced).normalized, parachuteUp); }
 
-            else { return Quaternion.LookRotation(dragVector, parachuteUp); }
+            else { return Quaternion.LookRotation((dragVector + forced).normalized, parachuteUp); }
         }
 
         #endregion
@@ -432,30 +522,29 @@ namespace stupid_chris
         //------------------------- Deployment code -------------------------
         public void LowDeploy(string whichChute)
         {
-            //Parachute low deployment code
-            this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            capOff = true;
-            Events["GUIDeploy"].active = false;
-            Events["GUIArm"].active = false;
-            if (whichChute == "MainChute")
-            {
-                deploymentState = "LOWDEPLOYED";                
-                parachute.gameObject.SetActive(true);
-                cap.gameObject.SetActive(false);
-                deployFX.Burst();
-                Events["GUICut"].active = true;
-                PlayAnimation(preDeploymentAnimation, 0, 1 / preDeploymentSpeed);
-            }
+                this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+                capOff = true;
+                Events["GUIDeploy"].active = false;
+                Events["GUIArm"].active = false;
+                if (whichChute == "MainChute")
+                {
+                    this.part.Effect("rcdeploy");
+                    deploymentState = "LOWDEPLOYED";
+                    parachute.gameObject.SetActive(true);
+                    cap.gameObject.SetActive(false);
+                    Events["GUICut"].active = true;
+                    PlayAnimation(preDeploymentAnimation, 1 / preDeploymentSpeed);
+                }
 
-            else if (whichChute == "SecChute")
-            {
-                secDeploymentState = "LOWDEPLOYED";
-                secParachute.gameObject.SetActive(true);
-                secCap.gameObject.SetActive(false);
-                secDeployFX.Burst();
-                Events["GUISecCut"].active = true;
-                PlayAnimation(secPreDeploymentAnimation, 0, 1 / secPreDeploymentSpeed);
-            }
+                else if (whichChute == "SecChute")
+                {
+                    this.part.Effect("rcdeploy");
+                    secDeploymentState = "LOWDEPLOYED";
+                    secParachute.gameObject.SetActive(true);
+                    secCap.gameObject.SetActive(false);
+                    Events["GUISecCut"].active = true;
+                    PlayAnimation(secPreDeploymentAnimation, 1 / secPreDeploymentSpeed);
+                }
         }
 
         public void PreDeploy(string whichChute)
@@ -467,23 +556,24 @@ namespace stupid_chris
             Events["GUIArm"].active = false;
             if (whichChute == "MainChute")
             {
+                this.part.Effect("rcpredeploy");
                 deploymentState = "PREDEPLOYED";
                 parachute.gameObject.SetActive(true);
                 cap.gameObject.SetActive(false);
-                preDeployFX.Burst();
                 Events["GUICut"].active = true;
-                PlayAnimation(preDeploymentAnimation, 0, 1 / preDeploymentSpeed);
+                PlayAnimation(preDeploymentAnimation, 1 / preDeploymentSpeed);
             }
 
             else if (whichChute == "SecChute")
             {
+                this.part.Effect("rcpredeploy");
                 secDeploymentState = "PREDEPLOYED";
                 secParachute.gameObject.SetActive(true);
                 secCap.gameObject.SetActive(false);
-                secPreDeployFX.Burst();
                 Events["GUISecCut"].active = true;
-                PlayAnimation(secPreDeploymentAnimation, 0, 1 / secPreDeploymentSpeed);
+                PlayAnimation(secPreDeploymentAnimation, 1 / secPreDeploymentSpeed);
             }
+
         }
 
         public void Deploy(string whichChute)
@@ -492,16 +582,16 @@ namespace stupid_chris
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             if (whichChute == "MainChute")
             {
+                this.part.Effect("rcdeploy");
                 deploymentState = "DEPLOYED";
-                deployFX.Burst();
-                PlayAnimation(deploymentAnimation, 0, 1 / deploymentSpeed);
+                PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
             }
 
             else if (whichChute == "SecChute")
             {
+                this.part.Effect("rcdeploy");
                 secDeploymentState = "DEPLOYED";
-                secDeployFX.Burst();
-                PlayAnimation(secDeploymentAnimation, 0, 1 / secDeploymentSpeed);
+                PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
             }
         }
 
@@ -516,7 +606,7 @@ namespace stupid_chris
         public void Cut(string whichChute)
         {
             //Cuts the chute
-            cutFX.Burst();
+            this.part.Effect("rccut");
             if (whichChute == "MainChute")
             {
                 deploymentState = "CUT";
@@ -556,11 +646,12 @@ namespace stupid_chris
             //Repacks a cut chute
             if (chuteCount > 0 || chuteCount == -1)
             {
+                this.part.Effect("rcrepack");
                 Events["GUIRepack"].guiActiveUnfocused = false;
                 Events["GUIDeploy"].active = true;
                 Events["GUIArm"].active = true;
-                repackFX.Burst();
                 oneWasDeployed = false;
+                randomSet = false;
                 deploymentState = "STOWED";
                 cap.gameObject.SetActive(true);
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
@@ -643,6 +734,22 @@ namespace stupid_chris
                 Events["GUICut"].guiName = "Cut chute";
             }
 
+            //Tweakables tooltip
+            if (!secondaryChute)
+            {
+                Fields["forcedOrientation"].guiActiveEditor = false;
+                Fields["secPreDeployedDiameter"].guiActiveEditor = false;
+                Fields["secDeployedDiameter"].guiActiveEditor = false;
+                Fields["secMinIsPressure"].guiActiveEditor = false;
+                Fields["secMinDeployment"].guiActiveEditor = false;
+                Fields["secMinPressure"].guiActiveEditor = false;
+                Fields["secDeploymentAlt"].guiActiveEditor = false;
+                Fields["secCutAlt"].guiActiveEditor = false;
+                Fields["secPreDeploymentSpeed"].guiActiveEditor = false;
+                Fields["secDeploymentSpeed"].guiActiveEditor = false;
+                Fields["secForcedOrientation"].guiActiveEditor = false;
+            }
+
             //Calculates parachute area
             preDeployedArea = GetArea(preDeployedDiameter);
             deployedArea = GetArea(deployedDiameter);
@@ -653,26 +760,19 @@ namespace stupid_chris
             }
 
             //Initiates parachute mass
-            this.part.mass = caseMass;
-            this.part.mass += chuteMass;
-            if (secondaryChute) { this.part.mass += secChuteMass; }
+            if (!secondaryChute) { this.part.mass = caseMass + chuteMass; }
 
-            //FX groups
-            this.deployFX = this.part.findFxGroup("rcdeploy");
-            this.preDeployFX = this.part.findFxGroup("rcpredeploy");
-            this.secDeployFX = this.part.findFxGroup("rcsecdeploy");
-            this.secPreDeployFX = this.part.findFxGroup("rcsecpredeploy");
-            this.cutFX = this.part.findFxGroup("rccut");
-            this.repackFX = this.part.findFxGroup("rcrepack");
+            else { this.part.mass = caseMass + chuteMass + secChuteMass; }
 
-            //Initiates animation
+            //Initiates animations
+            anim = part.FindModelAnimators(capName).FirstOrDefault();
             this.cap = this.part.FindModelTransform(capName);
             this.parachute = this.part.FindModelTransform(parachuteName);
             parachute.gameObject.SetActive(false);
             InitiateAnimation(preDeploymentAnimation);
             InitiateAnimation(deploymentAnimation);
 
-            //Initiates the second parachute if any
+            //Initiates the second parachute animations if any
             if (secondaryChute)
             {
                 this.secCap = this.part.FindModelTransform(secCapName);
@@ -711,23 +811,7 @@ namespace stupid_chris
 
         public override void OnLoad(ConfigNode node)
         {
-            //Creates the FXgroups
-            this.preDeployFX = new FXGroup("rcpredeploy");
-            this.deployFX = new FXGroup("rcdeploy");
-            this.secDeployFX = new FXGroup("rcsecdeploy");
-            this.secPreDeployFX = new FXGroup("rcsecpredeploy");
-            this.cutFX = new FXGroup("rccut");
-            this.repackFX = new FXGroup("rcrepack");
-
-            //Adds the FX groups to the part's list
-            this.part.fxGroups.Add(preDeployFX);
-            this.part.fxGroups.Add(deployFX);
-            this.part.fxGroups.Add(secDeployFX);
-            this.part.fxGroups.Add(secPreDeployFX);
-            this.part.fxGroups.Add(cutFX);
-            this.part.fxGroups.Add(repackFX);
-
-            //Gets values from the resource definition file
+            //Gets values from the material definition file
             foreach (ConfigNode cfg in GameDatabase.Instance.GetConfigNodes("MATERIAL"))
             {
                 if (cfg.HasValue("name") && cfg.GetValue("name") == material)
@@ -746,19 +830,46 @@ namespace stupid_chris
                         if (float.TryParse(cfg.GetValue("areaDensity"), out aD)) { parachuteDensity = aD; }
                     }
                 }
+
+                if (secondaryChute && cfg.HasValue("name") && cfg.GetValue("name") == secMaterial)
+                {
+                    //Get second drag coefficient
+                    if (cfg.HasValue("dragCoefficient"))
+                    {
+                        float Cd;
+                        if (float.TryParse(cfg.GetValue("dragCoefficient"), out Cd)) { secDragCoef = Cd; }
+                    }
+
+                    //Get second area density
+                    if (cfg.HasValue("areaDensity"))
+                    {
+                        float aD;
+                        if (float.TryParse(cfg.GetValue("areaDensity"), out aD)) { secParachuteDensity = aD; }
+                    }                  
+                }
+            }
+
+            if (secondaryChute && secMaterial == "empty")
+            {
+                secDragCoef = dragCoef;
+                secParachuteDensity = parachuteDensity;
             }
 
             chuteMass = GetArea(deployedDiameter) * parachuteDensity;
-            if (secondaryChute) { secChuteMass = GetArea(secDeployedDiameter) * parachuteDensity; }
+            if (secondaryChute) { secChuteMass = GetArea(secDeployedDiameter) * secParachuteDensity; }
         }
 
         public override string GetInfo()
         { 
             //Info in the editor part window
             string infoList;
-            infoList = "RealChute module:\n";
-            infoList += String.Format("Parachute material: {0}\n", material);
-            infoList += String.Format("Drag coefficient: {0}\n", dragCoef);
+            infoList = String.Format("Parachute material: {0}\n", material);
+            if (secondaryChute && material != secMaterial) { infoList += String.Format("Secondary parachute material: {0}\n", secMaterial); }
+
+            if (material != secMaterial) { infoList += String.Format("Drag coefficient: {0}\n", dragCoef); }
+
+            else { infoList += String.Format("Drag coefficients: {0}, {1}\n", dragCoef, secDragCoef); }
+
             if (timer > 0) { infoList += String.Format("Deployment timer: {0}s\n", timer); }
 
             if (mustGoDown) { infoList += "Must go downwards to deploy: true\n"; }
@@ -767,18 +878,18 @@ namespace stupid_chris
 
             if (!secondaryChute)
             {
-                infoList += String.Format("Total parachute mass: {0}t\n", (caseMass + chuteMass).ToString("#0.0000"));
+                infoList += String.Format("Total parachute mass: {0}t\n", (caseMass + chuteMass).ToString("0.####"));
                 infoList += String.Format("Predeployed diameter: {0}m\n", preDeployedDiameter);
                 infoList += String.Format("Deployed diameter: {0}m\n", deployedDiameter);
                 if (!minIsPressure) { infoList += String.Format("Minimum deployment altitude: {0}m\n", minDeployment); }
 
-                else { infoList += String.Format("Minimum deployment pressure: {0}atm\n", minDeployment); }
+                else { infoList += String.Format("Minimum deployment pressure: {0}atm\n", minPressure); }
               
                 infoList += String.Format("Deployment altitude: {0}m\n", deploymentAlt);
                 infoList += String.Format("Predeployment speed: {0}s\n", preDeploymentSpeed);
                 infoList += String.Format("Deployment speed: {0}s\n", deploymentSpeed);
                 infoList += String.Format("Autocut speed: {0}m/s\n", cutSpeed);
-                if (cutAlt != -1) { infoList += String.Format("Autocut altitude: {0}m\n", cutAlt); }
+                if (cutAlt >= 0) { infoList += String.Format("Autocut altitude: {0}m\n", cutAlt); }
             }
 
             //In case of dual chutes
@@ -786,7 +897,7 @@ namespace stupid_chris
             {
                 infoList += String.Format("Predeployed diameters: {0}m, {1}m\n", preDeployedDiameter, secPreDeployedDiameter);
                 infoList += String.Format("Deployed diameters: {0}m, {1}m\n", deployedDiameter, secDeployedDiameter);
-                infoList += String.Format("Total parachute mass: {0}t\n", (caseMass + chuteMass + secChuteMass).ToString("#0.0000"));
+                infoList += String.Format("Total parachute mass: {0}t\n", (caseMass + chuteMass + secChuteMass).ToString("0.####"));
                 if (!minIsPressure && !secMinIsPressure) { infoList += String.Format("Minimum deployment altitudes: {0}m, {1}m\n", minDeployment, secMinDeployment); }
 
                 else if (minIsPressure && !secMinIsPressure) { infoList += String.Format("Minimum deployment clauses: {0}atm, {1}m\n", minDeployment, secMinDeployment); }
@@ -799,32 +910,91 @@ namespace stupid_chris
                 infoList += String.Format("Predeployment speeds: {0}s, {1}s\n", preDeploymentSpeed, secPreDeploymentSpeed);
                 infoList += String.Format("Deployment speeds: {0}s, {1}s\n", deploymentSpeed, secDeploymentSpeed);
                 infoList += String.Format("Autocut speed: {0}m/s\n", cutSpeed);
-                if (cutAlt != -1 && secCutAlt != -1) { infoList += String.Format("Autocut altitudes: {0}m, {1}m\n", cutAlt, secCutAlt); }
+                if (cutAlt >= 0 && secCutAlt >= 0) { infoList += String.Format("Autocut altitudes: {0}m, {1}m\n", cutAlt, secCutAlt); }
 
-                else if (cutAlt != -1 && secCutAlt == -1) { infoList += String.Format("Main chute autocut altutude: {0}m\n", cutAlt); }
+                else if (cutAlt >= 0 && secCutAlt < 0) { infoList += String.Format("Main chute autocut altutude: {0}m\n", cutAlt); }
 
-                else if (cutAlt == -1 && secCutAlt != -1) { infoList += String.Format("Secondary chute autocut altitude: {0}m\n", secCutAlt); }
+                else if (cutAlt < 0 && secCutAlt >= 0) { infoList += String.Format("Secondary chute autocut altitude: {0}m\n", secCutAlt); }
             }
             return infoList;
         }
 
         public void Update()
         {
-            //Preventing weird shit
-            if (!HighLogic.LoadedSceneIsFlight) { return; }
+            //Tweakables pressure/altitude preddeployment clauses
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                //main chute
+                if (this.minIsPressure)
+                {
+                    Fields["minDeployment"].guiActiveEditor = false;
+                    Fields["minPressure"].guiActiveEditor = true;
+                }
+
+                else
+                {
+                    Fields["minDeployment"].guiActiveEditor = true;
+                    Fields["minPressure"].guiActiveEditor = false;
+                }
+
+                //Secondary chute
+                if (this.secondaryChute)
+                {
+                    if (this.secMinIsPressure)
+                    {
+                        Fields["secMinDeployment"].guiActiveEditor = false;
+                        Fields["secMinPressure"].guiActiveEditor = true;
+                    }
+
+                    else
+                    {
+                        Fields["secMinDeployment"].guiActiveEditor = true;
+                        Fields["secMinPressure"].guiActiveEditor = false;
+                    }
+                }
+
+                //Updates the spare chute count correctly
+                chuteCount = spareChutes;
+                if (spareChutes < 0) { Fields["chuteCount"].guiActive = false; }
+
+                //Calculates parachute area
+                preDeployedArea = GetArea(preDeployedDiameter);
+                deployedArea = GetArea(deployedDiameter);
+                if (secondaryChute)
+                {
+                    secPreDeployedArea = GetArea(secPreDeployedDiameter);
+                    secDeployedArea = GetArea(secDeployedDiameter);
+                }
+
+                chuteMass = deployedArea * parachuteDensity;
+                if (secondaryChute) { secChuteMass = secDeployedArea * secParachuteDensity; }
+
+                else { secChuteMass = 0; }
+
+                this.part.mass = caseMass + chuteMass + secChuteMass;
+            }
+
+            //To prevent weird shit
+            else if (!HighLogic.LoadedSceneIsFlight || this.part.Rigidbody == null) { return; }
 
             //Universal values
-            currentTime = Time.time;
-            pos = this.part.transform.position;
-            ASL = (float)FlightGlobals.getAltitudeAtPos(pos);
-            atmPressure = (float)FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
-            if (atmPressure < 0.000001) { atmPressure = 0; }
-            atmDensity = (float)FlightGlobals.getAtmDensity(atmPressure);
-            up = FlightGlobals.getUpAxis(pos);
-            sqrSpeed = this.part.Rigidbody.velocity.sqrMagnitude;
-            dragVector = -this.part.Rigidbody.velocity.normalized;
-            forcePosition = this.parachute.transform.position;
-            if (secondaryChute) { secForcePosition = this.secParachute.transform.position; }
+            else
+            {
+                currentTime = Time.time;
+                pos = this.part.transform.position;
+                CoM = this.vessel.findWorldCenterOfMass();
+                ASL = (float)FlightGlobals.getAltitudeAtPos(pos);
+                atmPressure = (float)FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
+                if (atmPressure < 0.000001) { atmPressure = 0; }
+                atmDensity = (float)FlightGlobals.getAtmDensity(atmPressure);
+                up = FlightGlobals.getUpAxis(pos);
+                sqrSpeed = (this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).sqrMagnitude;
+                dragVector = -(this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).normalized;
+                forcePosition = this.parachute.transform.position;
+                if (secondaryChute) { secForcePosition = this.secParachute.transform.position; }
+                forceOrient = this.part.transform.up - forcedOrientation;
+                if (secondaryChute) { secForceOrient = this.part.transform.up - forcedOrientation; }
+            }
         }
 
         public override void OnFixedUpdate()
@@ -849,18 +1019,18 @@ namespace stupid_chris
                     //When the chute is stowed
                     if (deploymentState == "STOWED")
                     {
-                        Events["GUIDeploy"].active = false;
-                        if (GetTrueAlt() > deploymentAlt) { PreDeploy("MainChute"); }
+                        this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+                        if (GetTrueAlt() > deploymentAlt && MinDeployment(minDeployment, minPressure, minIsPressure)) { if (RandomDeployment("MainChute")) { PreDeploy("MainChute"); } }
 
-                        else if (GetTrueAlt() <= deploymentAlt) { LowDeploy("MainChute"); }
+                        else if (GetTrueAlt() <= deploymentAlt) { if (RandomDeployment("MainChute")) { LowDeploy("MainChute"); } }
                     }
 
                     //When the chute is predeployed
                     else if (deploymentState == "PREDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up);
+                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, dragCoef, preDeploymentSpeed), forcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, dragCoef, preDeploymentSpeed), forcePosition, ForceMode.Force);
                         if (GetTrueAlt() <= deploymentAlt)
                         {
                             Deploy("MainChute");
@@ -871,12 +1041,12 @@ namespace stupid_chris
                     //When the chute was deployed below full deployment altitude
                     else if (deploymentState == "LOWDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up);
+                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(0, deployedArea, dragCoef, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, dragCoef, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
                         if (!CheckAnimationPlaying(preDeploymentAnimation) && !queued)
                         {
-                            PlayAnimation(deploymentAnimation, 0, 1 / deploymentSpeed);
+                            PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
                             queued = true;
                         }
                     }
@@ -884,9 +1054,9 @@ namespace stupid_chris
                     //When the parachute is fully deployed
                     else if (deploymentState == "DEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up);
+                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, dragCoef, deploymentSpeed), forcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, dragCoef, deploymentSpeed), forcePosition, ForceMode.Force);
                     }
                 }
 
@@ -906,18 +1076,18 @@ namespace stupid_chris
                     //When the chute is stowed
                     if (secDeploymentState == "STOWED")
                     {
-                        if (GetTrueAlt() > secDeploymentAlt) { PreDeploy("SecChute"); }
+                        this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+                        if (GetTrueAlt() > secDeploymentAlt && MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure)) { if (RandomDeployment("SecChute")) { PreDeploy("SecChute"); } }
 
-                        else if (GetTrueAlt() <= secDeploymentAlt) { LowDeploy("SecChute"); }
+                        else if (GetTrueAlt() <= secDeploymentAlt) { if (RandomDeployment("SecChute")) { LowDeploy("SecChute"); } }
                     }
 
                     //When the chute is predeployed
                     else if (secDeploymentState == "PREDEPLOYED")
                     {
-
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(0, secPreDeployedArea, dragCoef, secPreDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, secPreDeployedArea, secDragCoef, secPreDeploymentSpeed), secForcePosition, ForceMode.Force);
                         if (GetTrueAlt() <= secDeploymentAlt)
                         {
                             Deploy("SecChute");
@@ -928,12 +1098,12 @@ namespace stupid_chris
                     //If the chute was deployed bellow full deployment altitude
                     else if (secDeploymentState == "LOWDEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(0, secDeployedArea, dragCoef, secPreDeploymentSpeed + secDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, secDeployedArea, secDragCoef, secPreDeploymentSpeed + secDeploymentSpeed), secForcePosition, ForceMode.Force);
                         if (!CheckAnimationPlaying(secPreDeploymentAnimation) && !secQueued)
                         {
-                            PlayAnimation(secDeploymentAnimation, 0, 1 / secDeploymentSpeed);
+                            PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
                             secQueued = true;
                         }
                     }
@@ -941,9 +1111,9 @@ namespace stupid_chris
                     //When the parachute is fully deployed
                     else if (secDeploymentState == "DEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up);
+                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.part.Rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, dragCoef, secDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.vessel.rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, secDragCoef, secDeploymentSpeed), secForcePosition, ForceMode.Force);
                     }
                 }
 
