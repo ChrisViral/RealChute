@@ -24,9 +24,9 @@ namespace RealChute
         public string material = "Nylon";
         [KSPField]
         public string secMaterial = "empty";
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut speed", guiUnits = "m/s", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 10, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut speed", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 10, stepIncrement = 0.5f)]
         public float cutSpeed = 0.5f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiUnits = "s", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 60, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 30, stepIncrement = 1)]
         public float timer = 0;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Must down"), UI_Toggle(enabledText = "true", disabledText = "false")]
         public bool mustGoDown = false;
@@ -38,23 +38,23 @@ namespace RealChute
         public bool secondaryChute = false;
 
         //Main parachute
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float preDeployedDiameter = 1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float deployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Press pre"), UI_Toggle(enabledText = "true", disabledText = "false")]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep"), UI_Toggle(enabledText = "pressure", disabledText = "altitude")]
         public bool minIsPressure = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep alt", guiUnits = "m"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
         public float minDeployment = 40000;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep press", guiUnits = "atm", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep press", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
         public float minPressure = 0.01f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep alt", guiUnits = "m"), UI_FloatRange(minValue = 0, maxValue = 30000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep alt"), UI_FloatRange(minValue = 0, maxValue = 10000, stepIncrement = 50)]
         public float deploymentAlt = 700;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut alt", guiUnits = "m"), UI_FloatRange(minValue = -50, maxValue = 30000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut alt"), UI_FloatRange(minValue = -50, maxValue = 10000, stepIncrement = 50)]
         public float cutAlt = -1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float preDeploymentSpeed = 2;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float deploymentSpeed = 6;
         [KSPField]
         public string preDeploymentAnimation = "semiDeploy";
@@ -65,26 +65,26 @@ namespace RealChute
         [KSPField]
         public string capName = "cap";
         [KSPField]
-        public Vector3 forcedOrientation = new Vector3(0, 0, 0);
+        public Vector3 forcedOrientation = Vector3.zero;
 
         //Second parachute
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float secPreDeployedDiameter = 1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiUnits = "m", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float secDeployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Press pre2"), UI_Toggle(enabledText = "true", disabledText = "false")]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2"), UI_Toggle(enabledText = "pressure", disabledText = "altitude")]
         public bool secMinIsPressure = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 alt", guiUnits = "m"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
         public float secMinDeployment = 40000;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 press", guiUnits = "atm", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 press", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
         public float secMinPressure = 0.01f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 alt", guiUnits = "m"), UI_FloatRange(minValue = 0, maxValue = 30000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 alt"), UI_FloatRange(minValue = 0, maxValue = 10000, stepIncrement = 50)]
         public float secDeploymentAlt = 700;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut2 alt", guiUnits = "m"), UI_FloatRange(minValue = -50, maxValue = 30000, stepIncrement = 50)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut2 alt"), UI_FloatRange(minValue = -50, maxValue = 10000, stepIncrement = 50)]
         public float secCutAlt = -1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float secPreDeploymentSpeed = 2;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 time", guiUnits = "s"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
         public float secDeploymentSpeed = 6;
         [KSPField]
         public string secPreDeploymentAnimation = "secSemiDeploy";
@@ -95,7 +95,7 @@ namespace RealChute
         [KSPField]
         public string secCapName = "secCap";
         [KSPField]
-        public Vector3 secForcedOrientation = new Vector3(0, 0, 0);
+        public Vector3 secForcedOrientation = Vector3.zero;
 
         #endregion
 
@@ -112,42 +112,40 @@ namespace RealChute
 
         #region Variables
         //Variables
-        public Vector3 dragVector, up;
+        private Vector3 dragVector, up;
         public Vector3 forcePosition, secForcePosition;
         public Vector3 forceOrient, secForceOrient;
-        public Vector3d pos, CoM;
+        private Vector3 phase = Vector3.zero, secPhase = Vector3.zero;
+        private Vector3d pos;
         private Animation anim;
         public Transform parachute, secParachute;
         public Transform cap, secCap;
-        public RaycastHit craft;
-        public FXGroup deployFX, secDeployFX;
-        public FXGroup preDeployFX, secPreDeployFX;
-        public FXGroup cutFX, repackFX;
+        private RaycastHit craft;
         public string deploymentState = "STOWED", secDeploymentState = "STOWED";
         public float preDeployedArea, secPreDeployedArea;
         public float deployedArea, secDeployedArea;
         public float parachuteDensity, dragCoef, chuteArea;
         public float secParachuteDensity, secDragCoef;
         public float chuteMass, secChuteMass;
-        public float currentForce, ASL, sqrSpeed;
-        public float currentTime, debutTime, deltaTime, deploymentTime;
-        public float atmPressure, atmDensity;
+        private float currentForce, ASL, sqrSpeed;
+        private float currentTime, debutTime, deltaTime, deploymentTime;
+        private float atmPressure, atmDensity;
         public float random_x, random_y;
         public float secRandom_x, secRandom_y;
         public float randomDebut, randomDelta, randomTime;
         public float secRandomDebut, secRandomDelta, secRandomTime;
-        public bool queued = false, secQueued = false;
-        public bool timerSet = false, randomized = false, secRandomized = false;
-        public bool randomSet = false, secRandomSet = false;
-        public bool wait = true, armed = false, oneWasDeployed = false;
-        public bool timeSet = false, setCount = false;
-        public UI_FloatRange poop;
+        private bool queued = false, secQueued = false;
+        private bool timerSet = false, randomized = false, secRandomized = false;
+        private bool randomSet = false, secRandomSet = false;
+        private bool wait = true, armed = false, oneWasDeployed = false;
+        private bool timeSet = false, setCount = false;
+        private bool fullPlayed = false, secFullPlayed = false;
 
         #endregion
 
         #region Animations
         //------------------------- Animations -------------------------
-        public void InitiateAnimation(string animationName)
+        private void InitiateAnimation(string animationName)
         {
             //Initiates the default values for animations
             foreach (Animation anim in part.FindModelAnimators(animationName))
@@ -161,7 +159,7 @@ namespace RealChute
             }
         }
 
-        public void PlayAnimation(string animationName, float animationSpeed)
+        private void PlayAnimation(string animationName, float animationSpeed)
         {
             //Plays the animation
             foreach (Animation anim in part.FindModelAnimators(animationName))
@@ -293,7 +291,7 @@ namespace RealChute
             else { return false; }
         }
 
-        public float GetTrueAlt()
+        private float GetTrueAlt()
         {
             //Gets the altitude from the ground or water
             if (Physics.Raycast(pos, -up, out craft, ASL + 10000, 1 << 15)) 
@@ -370,7 +368,6 @@ namespace RealChute
             {
                 if (!randomSet)
                 {
-                    this.randomTime = UnityEngine.Random.value;
                     this.randomDebut = currentTime;
                     this.randomSet = true;
                 }
@@ -385,7 +382,6 @@ namespace RealChute
             {
                 if (!secRandomSet)
                 {
-                    this.secRandomTime = UnityEngine.Random.value;
                     this.secRandomDebut = currentTime;
                     this.secRandomSet = true;
                 }
@@ -447,7 +443,7 @@ namespace RealChute
             //Checks if both parachutes must stop
             if (secondaryChute && (CheckGroundStop() || atmPressure == 0))
             {
-                if (!armed) {return true;}
+                if (armed) { return false; }
 
                 else if (deploymentState == "CUT" || secDeploymentState == "CUT") { return true; }
 
@@ -472,7 +468,7 @@ namespace RealChute
             else { return false; }
         }
 
-        public void ParachuteNoise(Transform chute)
+        private void ParachuteNoise(Transform chute)
         {
             //Gives a random noise to the parachute orientation
             float x = 0;
@@ -508,12 +504,42 @@ namespace RealChute
             chute.Rotate(rotationAngle);
         }
 
-        public Quaternion GetDragDirection(Vector3 parachuteUp, Vector3 forced)
+        private Vector3 LerpDrag(Transform chute, Vector3 to)
         {
-            //Makes the parachute follow air flow
-            if (reverseOrientation) { return Quaternion.LookRotation(-(dragVector + forced).normalized, parachuteUp); }
+            if (chute == parachute)
+            {
+                if (phase.magnitude < (to.magnitude - 0.01f) || phase.magnitude > (to.magnitude + 0.01f)) { phase = Vector3.Lerp(phase, to, 0.1f); }
 
-            else { return Quaternion.LookRotation((dragVector + forced).normalized, parachuteUp); }
+                else { phase = to; }
+
+                return phase;
+            }
+
+            else
+            {
+                if (secPhase.magnitude < (to.magnitude - 0.01f) || secPhase.magnitude > (to.magnitude + 0.01f)) { secPhase = Vector3.Lerp(secPhase, to, 0.1f); }
+
+                else { secPhase = to; }
+
+                return secPhase;
+            }
+        }
+
+        private void GetDragDirection(Transform chute, Vector3 forced)
+        {
+            //Smoothes the forced vector
+            Vector3 orient = Vector3.zero;
+            if (secondaryChute && IsDeployed(deploymentState) && IsDeployed(secDeploymentState)) { orient = LerpDrag(chute, forced); }
+
+            else if (secondaryChute && (!IsDeployed(deploymentState) || !IsDeployed(secDeploymentState))) { orient = LerpDrag(chute, Vector3.zero); }
+
+            //Makes the parachute follow air flow
+            Quaternion drag = Quaternion.identity;
+            if (reverseOrientation) { drag = Quaternion.LookRotation(-(dragVector + chute.TransformDirection(orient)).normalized, chute.up); }
+
+            else { drag = Quaternion.LookRotation((dragVector + chute.TransformDirection(orient)).normalized, chute.up); }
+
+            chute.rotation = drag;
         }
 
         #endregion
@@ -526,9 +552,9 @@ namespace RealChute
                 capOff = true;
                 Events["GUIDeploy"].active = false;
                 Events["GUIArm"].active = false;
+                this.part.Effect("rcdeploy");
                 if (whichChute == "MainChute")
                 {
-                    this.part.Effect("rcdeploy");
                     deploymentState = "LOWDEPLOYED";
                     parachute.gameObject.SetActive(true);
                     cap.gameObject.SetActive(false);
@@ -538,7 +564,6 @@ namespace RealChute
 
                 else if (whichChute == "SecChute")
                 {
-                    this.part.Effect("rcdeploy");
                     secDeploymentState = "LOWDEPLOYED";
                     secParachute.gameObject.SetActive(true);
                     secCap.gameObject.SetActive(false);
@@ -554,9 +579,9 @@ namespace RealChute
             capOff = true;
             Events["GUIDeploy"].active = false;
             Events["GUIArm"].active = false;
+            this.part.Effect("rcpredeploy");
             if (whichChute == "MainChute")
             {
-                this.part.Effect("rcpredeploy");
                 deploymentState = "PREDEPLOYED";
                 parachute.gameObject.SetActive(true);
                 cap.gameObject.SetActive(false);
@@ -566,7 +591,6 @@ namespace RealChute
 
             else if (whichChute == "SecChute")
             {
-                this.part.Effect("rcpredeploy");
                 secDeploymentState = "PREDEPLOYED";
                 secParachute.gameObject.SetActive(true);
                 secCap.gameObject.SetActive(false);
@@ -580,18 +604,29 @@ namespace RealChute
         {
             //Parachute full deployment code
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+            this.part.Effect("rcdeploy");
             if (whichChute == "MainChute")
             {
-                this.part.Effect("rcdeploy");
                 deploymentState = "DEPLOYED";
-                PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
+                if (!CheckAnimationPlaying(preDeploymentAnimation))
+                {
+                    PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
+                    fullPlayed = true;
+                }
+
+                else { fullPlayed = false; }
             }
 
             else if (whichChute == "SecChute")
             {
-                this.part.Effect("rcdeploy");
                 secDeploymentState = "DEPLOYED";
-                PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
+                if (!CheckAnimationPlaying(secPreDeploymentAnimation))
+                {
+                    PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
+                    secFullPlayed = true;
+                }
+
+                else { secFullPlayed = false; }
             }
         }
 
@@ -600,7 +635,7 @@ namespace RealChute
             //Deactivates the part
             this.part.deactivate();
             armed = false;
-            this.part.inverseStage = Staging.CurrentStage;
+            this.part.inverseStage = this.part.inverseStage - 1;
         }
 
         public void Cut(string whichChute)
@@ -636,7 +671,7 @@ namespace RealChute
             this.part.stackIcon.SetIconColor(XKCDColors.Red);
             timeSet = false;
             timerSet = false;
-            wait = false;
+            wait = true;
             StagingReset();
             if (chuteCount > 0 || chuteCount == -1) { Events["GUIRepack"].guiActiveUnfocused = true; }
         }
@@ -652,8 +687,11 @@ namespace RealChute
                 Events["GUIArm"].active = true;
                 oneWasDeployed = false;
                 randomSet = false;
+                fullPlayed = false;
+                secFullPlayed = false;
                 deploymentState = "STOWED";
                 cap.gameObject.SetActive(true);
+
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
                 capOff = false;
                 if (chuteCount != -1) { chuteCount--; }
@@ -670,12 +708,12 @@ namespace RealChute
 
         #region Drag code
         //------------------------- Drag code -------------------------
-        public float GetArea(float diameter)
+        private float GetArea(float diameter)
         {
             return Mathf.Pow(diameter, 2) * Mathf.PI / 4;
         }
 
-        public float DragDeployment(float time, float debutArea, float endArea)
+        private float DragDeployment(float time, float debutArea, float endArea)
         {
             //Calculates how much drag a part has since deployment
             if (!timeSet)
@@ -694,12 +732,12 @@ namespace RealChute
             else { return endArea; }
         }
 
-        public float DragCalculation(float area, float Cd)
+        private float DragCalculation(float area, float Cd)
         {
             return atmDensity * sqrSpeed * Cd * area / 2000;
         }
 
-        public Vector3 DragForce(float startArea, float targetArea, float Cd, float time)
+        private Vector3 DragForce(float startArea, float targetArea, float Cd, float time)
         {
             //Calculates a part's drag
             float chuteArea = DragDeployment(time, startArea, targetArea);
@@ -759,11 +797,6 @@ namespace RealChute
                 secDeployedArea = GetArea(secDeployedDiameter);
             }
 
-            //Initiates parachute mass
-            if (!secondaryChute) { this.part.mass = caseMass + chuteMass; }
-
-            else { this.part.mass = caseMass + chuteMass + secChuteMass; }
-
             //Initiates animations
             anim = part.FindModelAnimators(capName).FirstOrDefault();
             this.cap = this.part.FindModelTransform(capName);
@@ -807,6 +840,10 @@ namespace RealChute
                     secCap.gameObject.SetActive(false);
                 }
             }
+
+            //Sets random deployment times
+            this.randomTime = UnityEngine.Random.value;
+            this.secRandomTime = UnityEngine.Random.value;
         }
 
         public override void OnLoad(ConfigNode node)
@@ -849,12 +886,14 @@ namespace RealChute
                 }
             }
 
+            //Sets secondary parachute material
             if (secondaryChute && secMaterial == "empty")
             {
                 secDragCoef = dragCoef;
                 secParachuteDensity = parachuteDensity;
             }
 
+            //Calculates mass for GetInfo()
             chuteMass = GetArea(deployedDiameter) * parachuteDensity;
             if (secondaryChute) { secChuteMass = GetArea(secDeployedDiameter) * secParachuteDensity; }
         }
@@ -864,7 +903,7 @@ namespace RealChute
             //Info in the editor part window
             string infoList;
             infoList = String.Format("Parachute material: {0}\n", material);
-            if (secondaryChute && material != secMaterial) { infoList += String.Format("Secondary parachute material: {0}\n", secMaterial); }
+            if (secondaryChute && secMaterial != material && secMaterial != "empty") { infoList += String.Format("Secondary parachute material: {0}\n", secMaterial); }
 
             if (material != secMaterial) { infoList += String.Format("Drag coefficient: {0}\n", dragCoef); }
 
@@ -966,6 +1005,7 @@ namespace RealChute
                     secDeployedArea = GetArea(secDeployedDiameter);
                 }
 
+                //Calculates parachute mass
                 chuteMass = deployedArea * parachuteDensity;
                 if (secondaryChute) { secChuteMass = secDeployedArea * secParachuteDensity; }
 
@@ -982,7 +1022,6 @@ namespace RealChute
             {
                 currentTime = Time.time;
                 pos = this.part.transform.position;
-                CoM = this.vessel.findWorldCenterOfMass();
                 ASL = (float)FlightGlobals.getAltitudeAtPos(pos);
                 atmPressure = (float)FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
                 if (atmPressure < 0.000001) { atmPressure = 0; }
@@ -1028,9 +1067,9 @@ namespace RealChute
                     //When the chute is predeployed
                     else if (deploymentState == "PREDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
+                        GetDragDirection(parachute, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, dragCoef, preDeploymentSpeed), forcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, dragCoef, preDeploymentSpeed), forcePosition, ForceMode.Force);
                         if (GetTrueAlt() <= deploymentAlt)
                         {
                             Deploy("MainChute");
@@ -1041,9 +1080,9 @@ namespace RealChute
                     //When the chute was deployed below full deployment altitude
                     else if (deploymentState == "LOWDEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
+                        GetDragDirection(parachute, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, dragCoef, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, dragCoef, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
                         if (!CheckAnimationPlaying(preDeploymentAnimation) && !queued)
                         {
                             PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
@@ -1054,9 +1093,14 @@ namespace RealChute
                     //When the parachute is fully deployed
                     else if (deploymentState == "DEPLOYED")
                     {
-                        parachute.rotation = GetDragDirection(parachute.transform.up, forcedOrientation);
+                        GetDragDirection(parachute, forcedOrientation);
                         ParachuteNoise(parachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, dragCoef, deploymentSpeed), forcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, dragCoef, deploymentSpeed), forcePosition, ForceMode.Force);
+                        if (!fullPlayed && !CheckAnimationPlaying(preDeploymentAnimation))
+                        {
+                            PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
+                            fullPlayed = true;
+                        }
                     }
                 }
 
@@ -1085,9 +1129,9 @@ namespace RealChute
                     //When the chute is predeployed
                     else if (secDeploymentState == "PREDEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
+                        GetDragDirection(secParachute, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, secPreDeployedArea, secDragCoef, secPreDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(0, secPreDeployedArea, secDragCoef, secPreDeploymentSpeed), secForcePosition, ForceMode.Force);
                         if (GetTrueAlt() <= secDeploymentAlt)
                         {
                             Deploy("SecChute");
@@ -1098,9 +1142,9 @@ namespace RealChute
                     //If the chute was deployed bellow full deployment altitude
                     else if (secDeploymentState == "LOWDEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
+                        GetDragDirection(secParachute, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(0, secDeployedArea, secDragCoef, secPreDeploymentSpeed + secDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(0, secDeployedArea, secDragCoef, secPreDeploymentSpeed + secDeploymentSpeed), secForcePosition, ForceMode.Force);
                         if (!CheckAnimationPlaying(secPreDeploymentAnimation) && !secQueued)
                         {
                             PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
@@ -1111,9 +1155,14 @@ namespace RealChute
                     //When the parachute is fully deployed
                     else if (secDeploymentState == "DEPLOYED")
                     {
-                        secParachute.rotation = GetDragDirection(secParachute.transform.up, secForcedOrientation);
+                        GetDragDirection(secParachute, secForcedOrientation);
                         ParachuteNoise(secParachute);
-                        this.vessel.rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, secDragCoef, secDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        this.part.rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, secDragCoef, secDeploymentSpeed), secForcePosition, ForceMode.Force);
+                        if (!secFullPlayed && !CheckAnimationPlaying(secPreDeploymentAnimation))
+                        {
+                            PlayAnimation(secDeploymentAnimation, 1 / secDeploymentSpeed);
+                            secFullPlayed = true;
+                        }
                     }
                 }
 
