@@ -11,7 +11,7 @@ http://forum.kerbalspaceprogram.com/members/63758
 -Fixed the stack main chutes animation problem  
 
 *January 8th 2014*  
-**v0.3.3.1*  
+**v0.3.3.1**  
 *Hotfix*  
 -Fixed a bug where single parachutes would still not arm propoerly  
 -Fixed stack main chute configs to have the right canopies so they actually work  
@@ -119,7 +119,7 @@ second set of parachute transform/animation
 
 RealChute.dll was made by stupid_chris  
 The parts provided with the pack were all made by sumghai  
-The parachute cut sound was made by ymir9  
+The parachute cut and repack sounds were made by ymir9  
 
 Forum thread: http://forum.kerbalspaceprogram.com/threads/57988  
 Development thread: http://forum.kerbalspaceprogram.com/threads/57987  
