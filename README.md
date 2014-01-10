@@ -5,6 +5,60 @@ http://forum.kerbalspaceprogram.com/members/63758
 
 **Changelog**:  
 
+*January 9th 2014*
+**v0.3.3.2**
+*Hotfix*
+-Fixed the stack main chutes animation problem
+
+*January 8th 2014*
+**v0.3.3.1*
+*Hotfix*
+-Fixed a bug where single parachutes would still not arm propoerly
+-Fixed stack main chute configs to have the right canopies so they actually work
+-Fixed a problem with staging reset bugging the staging list
+-Changed the default drag values of parts to 0.32 to actually match the real stock values
+-Changed altitude detection to a faster, safer system
+-Hopefully, the change above to altitude detection fixes parachutes deploying too early
+
+*January 7th 2014*
+**v0.3.3**
+-Fixed a bug where dual chutes would not arm
+-Changed default predeployment altitudes to 30km for drogues and 25km for mains
+-Changed predeployment on drags to 100m and full deployment to 50m
+-Switched triple canopies to single canopies on the stack 1.25m main chutes
+-Fixed forced orientation so that it actually follows vessel orientation
+-Fixed forced orientation remaining even if only one parachute is deployed.
+-Small tweaks to attachement notes on stack chutes (thanks to eggrobin)
+-Fixed caps being inverted on stack chutes (thanks to eggrobin again for making me notice)
+-Changed behaviour or repacked chutes, if not in the last stage, they might not need to be moved to e reactivated.
+-Moved the random deployment timer to OnStart() for future MechJeb implementation
+-Various tweaks to the tweakables UI controllers
+-Fixed a bug where dual chutes with the same material would show "empty" as a second material
+-Fixed a bug where full deployment shortly after deployment would result in the animations skipping
+-Fixed an annoying and unreliable bug where parachutes would make your craft spin out of control by making the force applied to the part once more
+
+*December 18th 2013 (take two)*
+**v0.3.2.1**
+*Hotfix*
+-Fixed the bug where dual parachutes would take mass forever
+-Fixed a bug with combo chutes having ridiculous starting weight
+-Finally fixed the bug with the FASA and Bargain Rocket parachutes, they will now animate properly (big thanks to sirkut)
+-All the ModuleManager files are now included with the main download, remove those you don't want.
+
+*December 18th 2013*
+**v0.3.2**
+*KSP 0.23 compatibility update!*
+-Added combo chutes which contain both a drogue and a main for soft landings in one part
+-Added the ability to define a second material for the second parachute
+-Added the ability to force the parachutes partially in one direction, thus eliminating clipping chutes on dual parts!
+-The force is now applied on the whole vessel, so no more weird hangings if the part origin is weird
+-Tweakables! Nearly every value that can be changed in the editor can now be. This is only until I set the editor window up on my side.
+-Fixed a bug with parachutes facing downwards on reentry
+-Added a random deployment delay for parachutes! They will now take between 0 and 1 second to deploy. This is chose randomly for every parachute
+-Every parachute now has random "movement noise" different from every other parachutes currently active
+-Said random noise will now appear to be much smoother than before
+-Usage of the new EFFECTS node has permited to get rid of FXGroups and to remove all those nasty .wav files all around!
+
 *Decemer 7th 2013*  
 **v0.3.1**  
 *Hotfix*  
