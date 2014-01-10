@@ -1,0 +1,163 @@
+@PART[br_parachute]
+{
+
+	maximum_drag = 0.32
+
+	!MODULE[ModuleParachute]{}
+
+	MODULE
+	{
+		name = RealChuteModule
+		material = Canvas
+		caseMass = 0.1
+		preDeployedDiameter = 1
+		deployedDiameter = 25
+		minIsPressure = true
+		minPressure = 0.01
+		deploymentAlt = 700
+		cutAlt = -1
+		timer = 0
+		mustGoDown = false
+		preDeploymentSpeed = 2
+		deploymentSpeed = 6
+		cutSpeed = 0.5
+		preDeploymentAnimation = paraSemiDeploy
+		deploymentAnimation = paraFullDeploy
+		parachuteName = canopy
+		capName = cap
+		spareChutes = 5
+		reverseOrientation = true
+	}
+
+	EFFECTS
+	{
+		rcpredeploy
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = sound_parachute_open
+				volume = 1
+			}
+		}
+
+		rcdeploy
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = sound_parachute_single
+				volume = 1
+			}
+		}
+
+		rccut
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = RealChute/Sounds/sound_parachute_cut
+				volume = 1
+			}
+		}
+
+		rcrepack
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = RealChute/Sounds/sound_parachute_repack
+				volume = 1
+			}
+		}
+	}
+}
+
+@PART[br_parachute_tiny]
+{
+
+	maximum_drag = 0.32
+
+	!MODULE[ModuleParachute]{}
+
+	MODULE
+	{
+		name = RealChuteModule
+		material = Plastic bag
+		caseMass = 0.02
+		preDeployedDiameter = 1
+		deployedDiameter = 20
+		minIsPressure = true
+		minPressure = 0.01
+		deploymentAlt = 700
+		cutAlt = -1
+		timer = 0
+		mustGoDown = false
+		preDeploymentSpeed = 1
+		deploymentSpeed = 4
+		cutSpeed = 0.5
+		preDeploymentAnimation = paraSemiDeploy_t
+		deploymentAnimation = paraFullDeploy_t
+		parachuteName = chute
+		capName = cap
+		spareChutes = 5
+		reverseOrientation = true
+	}
+
+	EFFECTS
+	{
+		rcpredeploy
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = sound_parachute_open
+				volume = 1
+			}
+		}
+
+		rcdeploy
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = sound_parachute_single
+				volume = 1
+			}
+		}
+
+		rccut
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = RealChute/Sounds/sound_parachute_cut
+				volume = 1
+			}
+		}
+
+		rcrepack
+		{
+			AUDIO
+			{
+				channel = Ship
+				clip = RealChute/Sounds/sound_parachute_repack
+				volume = 1
+			}
+		}
+	}
+}
+
+MATERIAL
+{
+	name = Canvas
+	areaDensity = 0.00007
+	dragCoefficient = 0.7
+}
+
+MATERIAL
+{
+	name = Plastic bag
+	areaDensity = 0.00005
+	dragCoefficient = 0.65
+}
