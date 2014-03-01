@@ -33,6 +33,14 @@
             this.toolstripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grbInfo = new System.Windows.Forms.GroupBox();
+            this.chkManualCd = new System.Windows.Forms.CheckBox();
+            this.cmbMaterial = new System.Windows.Forms.ComboBox();
+            this.lblm2 = new System.Windows.Forms.Label();
+            this.numDeployment = new System.Windows.Forms.NumericUpDown();
+            this.lblDeploymentAlt = new System.Windows.Forms.Label();
+            this.grbChutes = new System.Windows.Forms.GroupBox();
+            this.rdoDrogues = new System.Windows.Forms.RadioButton();
+            this.rdoMains = new System.Windows.Forms.RadioButton();
             this.lblms = new System.Windows.Forms.Label();
             this.numParachutes = new System.Windows.Forms.NumericUpDown();
             this.lblParachutes = new System.Windows.Forms.Label();
@@ -46,7 +54,7 @@
             this.lblSpeed = new System.Windows.Forms.Label();
             this.numCd = new System.Windows.Forms.NumericUpDown();
             this.numMass = new System.Windows.Forms.NumericUpDown();
-            this.labelCd = new System.Windows.Forms.Label();
+            this.lblCd = new System.Windows.Forms.Label();
             this.lblT = new System.Windows.Forms.Label();
             this.lblMass = new System.Windows.Forms.Label();
             this.lblDiameter = new System.Windows.Forms.Label();
@@ -59,6 +67,8 @@
             this.txtDiameterDrag = new System.Windows.Forms.TextBox();
             this.lblDiameterDrag = new System.Windows.Forms.Label();
             this.grbInfoDrag = new System.Windows.Forms.GroupBox();
+            this.cmbMaterialDrag = new System.Windows.Forms.ComboBox();
+            this.chkManualCdDrag = new System.Windows.Forms.CheckBox();
             this.lblms2 = new System.Windows.Forms.Label();
             this.numDeceleration = new System.Windows.Forms.NumericUpDown();
             this.lblDeceleration = new System.Windows.Forms.Label();
@@ -78,14 +88,12 @@
             this.lblCdDrag = new System.Windows.Forms.Label();
             this.lblTDrag = new System.Windows.Forms.Label();
             this.lblMassDrag = new System.Windows.Forms.Label();
-            this.grbChutes = new System.Windows.Forms.GroupBox();
-            this.rdoMains = new System.Windows.Forms.RadioButton();
-            this.rdoDrogues = new System.Windows.Forms.RadioButton();
-            this.lblDeploymentAlt = new System.Windows.Forms.Label();
-            this.numDeployment = new System.Windows.Forms.NumericUpDown();
-            this.lblm2 = new System.Windows.Forms.Label();
+            this.lblPartsDrag = new System.Windows.Forms.Label();
+            this.lblParts = new System.Windows.Forms.Label();
             this.mnuMenuBar.SuspendLayout();
             this.grbInfo.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numDeployment)).BeginInit();
+            this.grbChutes.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numParachutes)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numSpeed)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCd)).BeginInit();
@@ -99,8 +107,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.numSpeedDrag)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCdDrag)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMassDrag)).BeginInit();
-            this.grbChutes.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numDeployment)).BeginInit();
             this.SuspendLayout();
             // 
             // mnuMenuBar
@@ -130,6 +136,9 @@
             // 
             // grbInfo
             // 
+            this.grbInfo.Controls.Add(this.lblParts);
+            this.grbInfo.Controls.Add(this.chkManualCd);
+            this.grbInfo.Controls.Add(this.cmbMaterial);
             this.grbInfo.Controls.Add(this.lblm2);
             this.grbInfo.Controls.Add(this.numDeployment);
             this.grbInfo.Controls.Add(this.lblDeploymentAlt);
@@ -147,16 +156,108 @@
             this.grbInfo.Controls.Add(this.lblSpeed);
             this.grbInfo.Controls.Add(this.numCd);
             this.grbInfo.Controls.Add(this.numMass);
-            this.grbInfo.Controls.Add(this.labelCd);
+            this.grbInfo.Controls.Add(this.lblCd);
             this.grbInfo.Controls.Add(this.lblT);
             this.grbInfo.Controls.Add(this.lblMass);
-            this.grbInfo.Location = new System.Drawing.Point(18, 6);
+            this.grbInfo.Location = new System.Drawing.Point(8, 6);
             this.grbInfo.Name = "grbInfo";
-            this.grbInfo.Size = new System.Drawing.Size(229, 425);
+            this.grbInfo.Size = new System.Drawing.Size(250, 425);
             this.grbInfo.TabIndex = 1;
             this.grbInfo.TabStop = false;
             this.grbInfo.Tag = "s";
             this.grbInfo.Text = "Values";
+            // 
+            // chkManualCd
+            // 
+            this.chkManualCd.AutoSize = true;
+            this.chkManualCd.Location = new System.Drawing.Point(136, 149);
+            this.chkManualCd.Name = "chkManualCd";
+            this.chkManualCd.Size = new System.Drawing.Size(110, 17);
+            this.chkManualCd.TabIndex = 24;
+            this.chkManualCd.Text = "Manually input Cd";
+            this.chkManualCd.UseVisualStyleBackColor = true;
+            this.chkManualCd.CheckedChanged += new System.EventHandler(this.chkManualCd_CheckedChanged);
+            // 
+            // cmbMaterial
+            // 
+            this.cmbMaterial.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMaterial.FormattingEnabled = true;
+            this.cmbMaterial.Items.AddRange(new object[] {
+            "Nylon (1.00)",
+            "Kevlar (1.25)",
+            "Silk (0.75)"});
+            this.cmbMaterial.Location = new System.Drawing.Point(10, 147);
+            this.cmbMaterial.Name = "cmbMaterial";
+            this.cmbMaterial.Size = new System.Drawing.Size(121, 21);
+            this.cmbMaterial.TabIndex = 23;
+            this.cmbMaterial.SelectedIndexChanged += new System.EventHandler(this.cmbMaterial_SelectedIndexChanged);
+            // 
+            // lblm2
+            // 
+            this.lblm2.AutoSize = true;
+            this.lblm2.Location = new System.Drawing.Point(136, 228);
+            this.lblm2.Name = "lblm2";
+            this.lblm2.Size = new System.Drawing.Size(15, 13);
+            this.lblm2.TabIndex = 21;
+            this.lblm2.Text = "m";
+            // 
+            // numDeployment
+            // 
+            this.numDeployment.Enabled = false;
+            this.numDeployment.Location = new System.Drawing.Point(10, 226);
+            this.numDeployment.Maximum = new decimal(new int[] {
+            50000,
+            0,
+            0,
+            0});
+            this.numDeployment.Name = "numDeployment";
+            this.numDeployment.Size = new System.Drawing.Size(120, 20);
+            this.numDeployment.TabIndex = 20;
+            this.numDeployment.ValueChanged += new System.EventHandler(this.numDeployment_ValueChanged);
+            // 
+            // lblDeploymentAlt
+            // 
+            this.lblDeploymentAlt.AutoSize = true;
+            this.lblDeploymentAlt.Location = new System.Drawing.Point(10, 210);
+            this.lblDeploymentAlt.Name = "lblDeploymentAlt";
+            this.lblDeploymentAlt.Size = new System.Drawing.Size(117, 13);
+            this.lblDeploymentAlt.TabIndex = 19;
+            this.lblDeploymentAlt.Text = "Full deployment altitude";
+            // 
+            // grbChutes
+            // 
+            this.grbChutes.Controls.Add(this.rdoDrogues);
+            this.grbChutes.Controls.Add(this.rdoMains);
+            this.grbChutes.Location = new System.Drawing.Point(6, 19);
+            this.grbChutes.Name = "grbChutes";
+            this.grbChutes.Size = new System.Drawing.Size(117, 71);
+            this.grbChutes.TabIndex = 18;
+            this.grbChutes.TabStop = false;
+            this.grbChutes.Text = "Type of parachute";
+            // 
+            // rdoDrogues
+            // 
+            this.rdoDrogues.AutoSize = true;
+            this.rdoDrogues.Location = new System.Drawing.Point(7, 44);
+            this.rdoDrogues.Name = "rdoDrogues";
+            this.rdoDrogues.Size = new System.Drawing.Size(95, 17);
+            this.rdoDrogues.TabIndex = 1;
+            this.rdoDrogues.Text = "Drogue chutes";
+            this.rdoDrogues.UseVisualStyleBackColor = true;
+            this.rdoDrogues.CheckedChanged += new System.EventHandler(this.rdoDrogues_CheckedChanged);
+            // 
+            // rdoMains
+            // 
+            this.rdoMains.AutoSize = true;
+            this.rdoMains.Checked = true;
+            this.rdoMains.Location = new System.Drawing.Point(7, 20);
+            this.rdoMains.Name = "rdoMains";
+            this.rdoMains.Size = new System.Drawing.Size(83, 17);
+            this.rdoMains.TabIndex = 0;
+            this.rdoMains.TabStop = true;
+            this.rdoMains.Text = "Main chutes";
+            this.rdoMains.UseVisualStyleBackColor = true;
+            this.rdoMains.CheckedChanged += new System.EventHandler(this.rdoMains_CheckedChanged);
             // 
             // lblms
             // 
@@ -173,7 +274,6 @@
             this.numParachutes.Name = "numParachutes";
             this.numParachutes.Size = new System.Drawing.Size(120, 20);
             this.numParachutes.TabIndex = 16;
-            this.numParachutes.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numParachutes.Value = new decimal(new int[] {
             1,
             0,
@@ -253,7 +353,7 @@
             this.lblPlanet.Name = "lblPlanet";
             this.lblPlanet.Size = new System.Drawing.Size(70, 13);
             this.lblPlanet.TabIndex = 9;
-            this.lblPlanet.Text = "Which planet";
+            this.lblPlanet.Text = "Target planet";
             // 
             // numSpeed
             // 
@@ -273,7 +373,6 @@
             this.numSpeed.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numSpeed.Size = new System.Drawing.Size(120, 20);
             this.numSpeed.TabIndex = 7;
-            this.numSpeed.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numSpeed.Value = new decimal(new int[] {
             10,
             0,
@@ -294,10 +393,10 @@
             // 
             this.numCd.DecimalPlaces = 2;
             this.numCd.Increment = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
-            65536});
+            131072});
             this.numCd.Location = new System.Drawing.Point(10, 148);
             this.numCd.Maximum = new decimal(new int[] {
             5,
@@ -308,12 +407,12 @@
             this.numCd.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numCd.Size = new System.Drawing.Size(120, 20);
             this.numCd.TabIndex = 5;
-            this.numCd.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numCd.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
+            this.numCd.Visible = false;
             this.numCd.ValueChanged += new System.EventHandler(this.numCd_ValueChanged);
             // 
             // numMass
@@ -330,7 +429,6 @@
             this.numMass.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numMass.Size = new System.Drawing.Size(120, 20);
             this.numMass.TabIndex = 4;
-            this.numMass.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numMass.Value = new decimal(new int[] {
             10,
             0,
@@ -338,14 +436,14 @@
             0});
             this.numMass.ValueChanged += new System.EventHandler(this.numMass_ValueChanged);
             // 
-            // labelCd
+            // lblCd
             // 
-            this.labelCd.AutoSize = true;
-            this.labelCd.Location = new System.Drawing.Point(10, 132);
-            this.labelCd.Name = "labelCd";
-            this.labelCd.Size = new System.Drawing.Size(82, 13);
-            this.labelCd.TabIndex = 3;
-            this.labelCd.Text = "Drag coefficient";
+            this.lblCd.AutoSize = true;
+            this.lblCd.Location = new System.Drawing.Point(10, 132);
+            this.lblCd.Name = "lblCd";
+            this.lblCd.Size = new System.Drawing.Size(44, 13);
+            this.lblCd.TabIndex = 3;
+            this.lblCd.Text = "Material";
             // 
             // lblT
             // 
@@ -462,6 +560,9 @@
             // 
             // grbInfoDrag
             // 
+            this.grbInfoDrag.Controls.Add(this.lblPartsDrag);
+            this.grbInfoDrag.Controls.Add(this.cmbMaterialDrag);
+            this.grbInfoDrag.Controls.Add(this.chkManualCdDrag);
             this.grbInfoDrag.Controls.Add(this.lblms2);
             this.grbInfoDrag.Controls.Add(this.numDeceleration);
             this.grbInfoDrag.Controls.Add(this.lblDeceleration);
@@ -483,11 +584,36 @@
             this.grbInfoDrag.Controls.Add(this.lblMassDrag);
             this.grbInfoDrag.Location = new System.Drawing.Point(8, 6);
             this.grbInfoDrag.Name = "grbInfoDrag";
-            this.grbInfoDrag.Size = new System.Drawing.Size(261, 353);
+            this.grbInfoDrag.Size = new System.Drawing.Size(250, 353);
             this.grbInfoDrag.TabIndex = 2;
             this.grbInfoDrag.TabStop = false;
             this.grbInfoDrag.Tag = "s";
             this.grbInfoDrag.Text = "Values";
+            // 
+            // cmbMaterialDrag
+            // 
+            this.cmbMaterialDrag.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMaterialDrag.FormattingEnabled = true;
+            this.cmbMaterialDrag.Items.AddRange(new object[] {
+            "Nylon (1.00)",
+            "Kevlar (1.25)",
+            "Silk (0.75)"});
+            this.cmbMaterialDrag.Location = new System.Drawing.Point(6, 70);
+            this.cmbMaterialDrag.Name = "cmbMaterialDrag";
+            this.cmbMaterialDrag.Size = new System.Drawing.Size(121, 21);
+            this.cmbMaterialDrag.TabIndex = 21;
+            this.cmbMaterialDrag.SelectedIndexChanged += new System.EventHandler(this.cmbMaterialDrag_SelectedIndexChanged);
+            // 
+            // chkManualCdDrag
+            // 
+            this.chkManualCdDrag.AutoSize = true;
+            this.chkManualCdDrag.Location = new System.Drawing.Point(132, 72);
+            this.chkManualCdDrag.Name = "chkManualCdDrag";
+            this.chkManualCdDrag.Size = new System.Drawing.Size(110, 17);
+            this.chkManualCdDrag.TabIndex = 6;
+            this.chkManualCdDrag.Text = "Manually input Cd";
+            this.chkManualCdDrag.UseVisualStyleBackColor = true;
+            this.chkManualCdDrag.CheckedChanged += new System.EventHandler(this.chkManualCdDrag_CheckedChanged);
             // 
             // lblms2
             // 
@@ -510,7 +636,6 @@
             this.numDeceleration.Name = "numDeceleration";
             this.numDeceleration.Size = new System.Drawing.Size(120, 20);
             this.numDeceleration.TabIndex = 19;
-            this.numDeceleration.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numDeceleration.Value = new decimal(new int[] {
             10,
             0,
@@ -542,7 +667,6 @@
             this.numParachutesDrag.Name = "numParachutesDrag";
             this.numParachutesDrag.Size = new System.Drawing.Size(120, 20);
             this.numParachutesDrag.TabIndex = 16;
-            this.numParachutesDrag.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numParachutesDrag.Value = new decimal(new int[] {
             1,
             0,
@@ -622,7 +746,7 @@
             this.lblPlanetDrag.Name = "lblPlanetDrag";
             this.lblPlanetDrag.Size = new System.Drawing.Size(70, 13);
             this.lblPlanetDrag.TabIndex = 9;
-            this.lblPlanetDrag.Text = "Which planet";
+            this.lblPlanetDrag.Text = "Target planet";
             // 
             // numSpeedDrag
             // 
@@ -642,7 +766,6 @@
             this.numSpeedDrag.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numSpeedDrag.Size = new System.Drawing.Size(120, 20);
             this.numSpeedDrag.TabIndex = 7;
-            this.numSpeedDrag.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numSpeedDrag.Value = new decimal(new int[] {
             100,
             0,
@@ -663,10 +786,10 @@
             // 
             this.numCdDrag.DecimalPlaces = 2;
             this.numCdDrag.Increment = new decimal(new int[] {
-            1,
+            5,
             0,
             0,
-            65536});
+            131072});
             this.numCdDrag.Location = new System.Drawing.Point(6, 71);
             this.numCdDrag.Maximum = new decimal(new int[] {
             5,
@@ -677,12 +800,12 @@
             this.numCdDrag.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numCdDrag.Size = new System.Drawing.Size(120, 20);
             this.numCdDrag.TabIndex = 5;
-            this.numCdDrag.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numCdDrag.Value = new decimal(new int[] {
             1,
             0,
             0,
             0});
+            this.numCdDrag.Visible = false;
             this.numCdDrag.ValueChanged += new System.EventHandler(this.numCdDrag_ValueChanged);
             // 
             // numMassDrag
@@ -699,7 +822,6 @@
             this.numMassDrag.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numMassDrag.Size = new System.Drawing.Size(120, 20);
             this.numMassDrag.TabIndex = 4;
-            this.numMassDrag.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.numMassDrag.Value = new decimal(new int[] {
             10,
             0,
@@ -712,9 +834,9 @@
             this.lblCdDrag.AutoSize = true;
             this.lblCdDrag.Location = new System.Drawing.Point(6, 55);
             this.lblCdDrag.Name = "lblCdDrag";
-            this.lblCdDrag.Size = new System.Drawing.Size(82, 13);
+            this.lblCdDrag.Size = new System.Drawing.Size(44, 13);
             this.lblCdDrag.TabIndex = 3;
-            this.lblCdDrag.Text = "Drag coefficient";
+            this.lblCdDrag.Text = "Material";
             // 
             // lblTDrag
             // 
@@ -734,78 +856,23 @@
             this.lblMassDrag.TabIndex = 0;
             this.lblMassDrag.Text = "Craft mass";
             // 
-            // grbChutes
+            // lblPartsDrag
             // 
-            this.grbChutes.Controls.Add(this.rdoDrogues);
-            this.grbChutes.Controls.Add(this.rdoMains);
-            this.grbChutes.Location = new System.Drawing.Point(6, 19);
-            this.grbChutes.Name = "grbChutes";
-            this.grbChutes.Size = new System.Drawing.Size(117, 71);
-            this.grbChutes.TabIndex = 18;
-            this.grbChutes.TabStop = false;
-            this.grbChutes.Text = "Type of parachute";
+            this.lblPartsDrag.AutoSize = true;
+            this.lblPartsDrag.Location = new System.Drawing.Point(132, 190);
+            this.lblPartsDrag.Name = "lblPartsDrag";
+            this.lblPartsDrag.Size = new System.Drawing.Size(30, 13);
+            this.lblPartsDrag.TabIndex = 22;
+            this.lblPartsDrag.Text = "parts";
             // 
-            // rdoMains
+            // lblParts
             // 
-            this.rdoMains.AutoSize = true;
-            this.rdoMains.Checked = true;
-            this.rdoMains.Location = new System.Drawing.Point(7, 20);
-            this.rdoMains.Name = "rdoMains";
-            this.rdoMains.Size = new System.Drawing.Size(83, 17);
-            this.rdoMains.TabIndex = 0;
-            this.rdoMains.TabStop = true;
-            this.rdoMains.Text = "Main chutes";
-            this.rdoMains.UseVisualStyleBackColor = true;
-            this.rdoMains.CheckedChanged += new System.EventHandler(this.rdoMains_CheckedChanged);
-            // 
-            // rdoDrogues
-            // 
-            this.rdoDrogues.AutoSize = true;
-            this.rdoDrogues.Location = new System.Drawing.Point(7, 44);
-            this.rdoDrogues.Name = "rdoDrogues";
-            this.rdoDrogues.Size = new System.Drawing.Size(95, 17);
-            this.rdoDrogues.TabIndex = 1;
-            this.rdoDrogues.Text = "Drogue chutes";
-            this.rdoDrogues.UseVisualStyleBackColor = true;
-            this.rdoDrogues.CheckedChanged += new System.EventHandler(this.rdoDrogues_CheckedChanged);
-            // 
-            // lblDeploymentAlt
-            // 
-            this.lblDeploymentAlt.AutoSize = true;
-            this.lblDeploymentAlt.Location = new System.Drawing.Point(10, 210);
-            this.lblDeploymentAlt.Name = "lblDeploymentAlt";
-            this.lblDeploymentAlt.Size = new System.Drawing.Size(117, 13);
-            this.lblDeploymentAlt.TabIndex = 19;
-            this.lblDeploymentAlt.Text = "Full deployment altitude";
-            // 
-            // numDeployment
-            // 
-            this.numDeployment.Enabled = false;
-            this.numDeployment.Location = new System.Drawing.Point(10, 226);
-            this.numDeployment.Maximum = new decimal(new int[] {
-            50000,
-            0,
-            0,
-            0});
-            this.numDeployment.Name = "numDeployment";
-            this.numDeployment.Size = new System.Drawing.Size(120, 20);
-            this.numDeployment.TabIndex = 20;
-            this.numDeployment.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.numDeployment.Value = new decimal(new int[] {
-            700,
-            0,
-            0,
-            0});
-            this.numDeployment.ValueChanged += new System.EventHandler(this.numDeployment_ValueChanged);
-            // 
-            // lblm2
-            // 
-            this.lblm2.AutoSize = true;
-            this.lblm2.Location = new System.Drawing.Point(136, 228);
-            this.lblm2.Name = "lblm2";
-            this.lblm2.Size = new System.Drawing.Size(15, 13);
-            this.lblm2.TabIndex = 21;
-            this.lblm2.Text = "m";
+            this.lblParts.AutoSize = true;
+            this.lblParts.Location = new System.Drawing.Point(136, 267);
+            this.lblParts.Name = "lblParts";
+            this.lblParts.Size = new System.Drawing.Size(30, 13);
+            this.lblParts.TabIndex = 25;
+            this.lblParts.Text = "parts";
             // 
             // RCDragCalc
             // 
@@ -823,6 +890,9 @@
             this.mnuMenuBar.PerformLayout();
             this.grbInfo.ResumeLayout(false);
             this.grbInfo.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.numDeployment)).EndInit();
+            this.grbChutes.ResumeLayout(false);
+            this.grbChutes.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numParachutes)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numSpeed)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCd)).EndInit();
@@ -839,9 +909,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.numSpeedDrag)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numCdDrag)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.numMassDrag)).EndInit();
-            this.grbChutes.ResumeLayout(false);
-            this.grbChutes.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numDeployment)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -854,7 +921,7 @@
         private System.Windows.Forms.ToolStripMenuItem quitToolStripMenuItem;
         private System.Windows.Forms.GroupBox grbInfo;
         private System.Windows.Forms.Label lblMass;
-        private System.Windows.Forms.Label labelCd;
+        private System.Windows.Forms.Label lblCd;
         private System.Windows.Forms.Label lblT;
         private System.Windows.Forms.NumericUpDown numMass;
         private System.Windows.Forms.NumericUpDown numCd;
@@ -904,6 +971,12 @@
         private System.Windows.Forms.GroupBox grbChutes;
         private System.Windows.Forms.RadioButton rdoDrogues;
         private System.Windows.Forms.RadioButton rdoMains;
+        private System.Windows.Forms.ComboBox cmbMaterialDrag;
+        private System.Windows.Forms.CheckBox chkManualCdDrag;
+        private System.Windows.Forms.CheckBox chkManualCd;
+        private System.Windows.Forms.ComboBox cmbMaterial;
+        private System.Windows.Forms.Label lblParts;
+        private System.Windows.Forms.Label lblPartsDrag;
     }
 }
 

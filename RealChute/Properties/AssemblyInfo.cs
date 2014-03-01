@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
@@ -10,7 +9,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) CC-BY-NC-SA")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) CC-BY-NC-SA 2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

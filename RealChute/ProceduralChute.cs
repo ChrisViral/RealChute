@@ -848,6 +848,8 @@ namespace RealChute
                             depSpeed = "2";
                             break;
                         }
+                    default:
+                        break;
                 }
             }
             if (lastSecTypeID != secTypeID)
@@ -880,6 +882,8 @@ namespace RealChute
                             secDepSpeed = "2";
                             break;
                         }
+                    default:
+                        break;
                 }
             }
         }

@@ -206,7 +206,7 @@ namespace RealChute
         public float secRandom_x, secRandom_y;
         public float randomTime, secRandomTime;
         private bool randomized = false, secRandomized = false;
-        private bool displayed = false, autoArm = false, locked = false;
+        private bool displayed = false, autoArm = false;
 
         //Vessel info
         private double terrainAlt, ASL, trueAlt;
@@ -958,6 +958,8 @@ namespace RealChute
                                         }
                                         break;
                                     }
+                                default:
+                                    break;
                             }
                         }
                         else { CheckForWait(); }
@@ -1019,6 +1021,8 @@ namespace RealChute
                                         }
                                         break;
                                     }
+                                default:
+                                    break;
                             }
                         }
                         else { CheckForWait(); }

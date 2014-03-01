@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Windows.Forms;
 
+/* The RealChute drag calculator was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
+ * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
+ * For more informtion contact me on the forum. */
+
 namespace RealChute_drag_calculator
 {
     public partial class RCDragCalc : Form
@@ -9,41 +13,102 @@ namespace RealChute_drag_calculator
         public RCDragCalc()
         {
             InitializeComponent();
+            cmbMaterial.SelectedIndex = 0;
+            cmbMaterialDrag.SelectedIndex = 0;
+        }
+
+        //Body class
+        private class Body
+        {
+            #region Propreties
+            /// <summary>
+            /// Surface gravity of the body (m/s²)
+            /// </summary>
+            public double gravity { get; private set; }
+
+            /// <summary>
+            /// Scale height of the body
+            /// </summary>
+            public double scale { get; private set; }
+
+            /// <summary>
+            /// Atmospheric pressure of the body ASL
+            /// </summary>
+            public double pressure { get; private set; }
+
+            /// <summary>
+            /// Atmospheric density of the boddy ASL
+            /// </summary>
+            public double density
+            {
+                get { return this.gravity * 1.223d; }
+            }
+            #endregion
+
+            #region Constructor
+            /// <summary>
+            /// Assigns the readonly values according to the body
+            /// </summary>
+            /// <param name="name">Name of the body</param>
+            public Body(string name)
+            {
+                switch (name)
+                {
+                    case "Kerbin":
+                        {
+                            gravity = 9.807d;
+                            pressure = 1d;
+                            scale = 5000d;
+                            break;
+                        }
+                    case "Duna":
+                        {
+                            gravity = 2.943d;
+                            pressure = 0.2d;
+                            scale = 3000d;
+                            break;
+                        }
+
+                    case "Eve":
+                        {
+                            gravity = 16.677d;
+                            pressure = 5d;
+                            scale = 7000;
+                            break;
+                        }
+                    case "Laythe":
+                        {
+                            gravity = 7.848d;
+                            pressure = 0.8d;
+                            scale = 4000;
+                            break;
+                        }
+                    default:
+                        break;
+                }
+            }
+            #endregion
         }
 
         #region Fields
         //Variables
-        public decimal gravity = kerbinGravity;
-        public decimal density = kerbinDensity;
-        public decimal pressure = kerbinPressure;
-        public decimal scale = kerbinScale;
-        public decimal mass = 10000;
-        public decimal Cd = 1;
-        public decimal speed = 10;
-        public decimal deceleration = 10;
-        public decimal parachutes = 1;
-        public decimal speed2;
-        public decimal diameter;
+        private double mass = 10000d;
+        private double Cd = 1d;
+        private double altitude = 0d;
+        private double speed = 100d;
+        private double deceleration = 10d;
+        private double parachutes = 1d;
+        private double diameter = 0d;
+        private Body body = new Body("Kerbin");
+        private readonly double[] materialsCd = { 1d, 1.25d, 0.75d };
         #endregion
 
-        #region Constants
-        //Constants
-        public const decimal kerbinGravity = 9.81m;
-        public const decimal kerbinDensity = 1.223m;
-        public const decimal kerbinPressure = 1;
-        public const decimal kerbinScale = 5000;
-        public const decimal dunaGravity = 2.943m;
-        public const decimal dunaDensity = 0.245m;
-        public const decimal dunaPressure = 0.2m;
-        public const decimal dunaScale = 3000;
-        public const decimal eveGravity = 16.677m;
-        public const decimal eveDensity = 6.115m;
-        public const decimal evePressure = 5;
-        public const decimal eveScale = 7000;
-        public const decimal laytheGravity = 7.848m;
-        public const decimal laytheDensity = 0.978m;
-        public const decimal laythePressure = 0.8m;
-        public const decimal laytheScale = 4000;
+        #region Methods
+        //Returns the density according to the altitude
+        private double GetDensityAtAlt(double altitude)
+        {
+            return 1.223d * body.pressure * Math.Exp(-altitude / body.scale);
+        }
         #endregion
 
         #region Menus
@@ -57,26 +122,28 @@ namespace RealChute_drag_calculator
         private void tabSelection_Selected(object sender, TabControlEventArgs e)
         {
             //Non changing values
-            density = kerbinDensity;
-            mass = 10000;
-            Cd = 1;
-            parachutes = 1;
+            body = new Body("Kerbin");
+            mass = 10000d;
+            Cd = 1d;
+            parachutes = 1d;
+            altitude = 0d;
+            speed = 100d;
 
             //Main tab values
             if (tabSelection.SelectedTab == tabSelection.TabPages["tabMains"])
             {
                 rdoMains.Checked = true;
-                gravity = kerbinGravity;
-                pressure = kerbinPressure;
-                scale = kerbinScale;
-                speed = 10;
-                numMass.Value = 10;
-                numCd.Value = 1;
+                numMass.Value = 10m;
+                chkManualCd.Checked = false;
+                cmbMaterial.SelectedIndex = 0;
+                lblCd.Text = "Material";
+                numCd.Value = 1m;
                 lblSpeed.Text = "Wanted touchdown speed";
-                numSpeed.Value = 10;
-                numDeployment.Value = 700;
+                numSpeed.Value = 10m;
+                altitude = 0d;
+                numDeployment.Value = 0m;
                 numDeployment.Enabled = false;
-                numParachutes.Value = 1;
+                numParachutes.Value = 1m;
                 rdoKerbin.Checked = true;
                 txtDiameter.Text = "0";
             }
@@ -84,24 +151,18 @@ namespace RealChute_drag_calculator
             //Second tab values
             else if (tabSelection.SelectedTab == tabSelection.TabPages["tabDrags"])
             {
-                speed = 100;
-                deceleration = 10;
-                numMassDrag.Value = 10;
-                numCdDrag.Value = 1;
-                numSpeedDrag.Value = 100;
-                numDeceleration.Value = 10;
-                numParachutesDrag.Value = 1;
+                deceleration = 10d;
+                numMassDrag.Value = 10m;
+                chkManualCdDrag.Checked = false;
+                cmbMaterialDrag.SelectedIndex = 0;
+                lblCdDrag.Text = "Material";
+                numCdDrag.Value = 1m;
+                numSpeedDrag.Value = 10m;
+                numDeceleration.Value = 10m;
+                numParachutesDrag.Value = 1m;
                 rdoKerbinDrag.Checked = true;
                 txtDiameterDrag.Text = "0";
             }
-        }
-        #endregion
-
-        #region Methods
-        //Returns the density according to the altitude
-        public decimal GetDensity(decimal altitude)
-        {
-            return kerbinDensity * (pressure * (decimal)Math.Exp((double)(-altitude / scale)));
         }
         #endregion
 
@@ -109,139 +170,120 @@ namespace RealChute_drag_calculator
         //Kerbin checkbox
         private void rdoKerbin_CheckedChanged(object sender, EventArgs e)
         {
-            gravity = kerbinGravity;
-            density = kerbinDensity;
-            pressure = kerbinPressure;
-            scale = kerbinScale;
+            body = new Body("Kerbin");
         }
 
         //Duna checkbox
         private void rdoDuna_CheckedChanged(object sender, EventArgs e)
         {
-            gravity = dunaGravity;
-            density = dunaDensity;
-            pressure = dunaPressure;
-            scale = dunaScale;
+            body = new Body("Duna");
         }
 
         //Eve checkbox
         private void rdoEve_CheckedChanged(object sender, EventArgs e)
         {
-            gravity = eveGravity;
-            density = eveDensity;
-            pressure = evePressure;
-            scale = eveScale;
+            body = new Body("Eve");
         }
 
         //Laythe checkbox
         private void rdoLaythe_CheckedChanged(object sender, EventArgs e)
         {
-            gravity = laytheGravity;
-            density = laytheDensity;
-            pressure = laythePressure;
-            scale = laytheScale;
+            body = new Body("Laythe");
         }
 
         //Main chutes checkbox
         private void rdoMains_CheckedChanged(object sender, EventArgs e)
         {
-            numMass.Value = 10;
-            mass = 10000;
+            numMass.Value = 10m;
+            mass = 10000d;
             lblSpeed.Text = "Wanted touchdown speed";
-            numSpeed.Value = 10;
-            numSpeed.Maximum = 500;
-            speed = 10;
+            numSpeed.Value = 10m;
+            numSpeed.Maximum = 500m;
+            speed = 100d;
+            altitude = 0d;
             numDeployment.Enabled = false;
-
-            if (rdoKerbin.Checked)
-            {
-                density = kerbinDensity;
-                pressure = kerbinPressure;
-                scale = kerbinScale;
-            }
-
-            else if (rdoDuna.Checked)
-            {
-                density = dunaDensity;
-                pressure = dunaPressure;
-                scale = dunaScale;
-            }
-
-            else if (rdoEve.Checked)
-            {
-                density = eveDensity;
-                pressure = evePressure;
-                scale = eveScale;
-            }
-
-            else if (rdoLaythe.Checked)
-            {
-                density = laytheDensity;
-                pressure = laythePressure;
-                scale = laytheScale;
-            }
+            numDeployment.Value = 0m;
         }
 
-        //Drag chutes checkbox
+        //Drogue chutes checkbox
         private void rdoDrogues_CheckedChanged(object sender, EventArgs e)
         {
-            numMass.Value = 50;
-            mass = 50000;
+            numMass.Value = 50m;
+            mass = 50000d;
             lblSpeed.Text = "Wanted speed at deployment";
-            numSpeed.Value = 80;
-            numSpeed.Maximum = 2000;
-            speed = 80;
+            numSpeed.Value = 80m;
+            numSpeed.Maximum = 2000m;
+            speed = 6400d;
+            altitude = 700d;
             numDeployment.Enabled = true;
-            numDeployment.Value = 700;
-            density = GetDensity(700);
+            numDeployment.Value = 700m;
         }
 
         //Mass selection
         private void numMass_ValueChanged(object sender, EventArgs e)
         {
-            mass = numMass.Value * 1000;
+            mass = (double)numMass.Value * 1000d;
         }
 
-        //Cd selection
+        //Selects manual or automatic Cd selection
+        private void chkManualCd_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkManualCd.Checked)
+            {
+                lblCd.Text = "Drag coefficient";
+                cmbMaterial.Visible = false;
+                numCd.Visible = true;
+                Cd = (double)numCd.Value;
+            }
+
+            else
+            {
+                lblCd.Text = "Material";
+                cmbMaterial.Visible = true;
+                numCd.Visible = false;
+                Cd = materialsCd[cmbMaterial.SelectedIndex];
+            }
+        }
+
+        //Automatic Cd selection
+        private void cmbMaterial_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Cd = materialsCd[cmbMaterial.SelectedIndex];
+        }
+
+        //Manual Cd selection
         private void numCd_ValueChanged(object sender, EventArgs e)
         {
-            Cd = numCd.Value;
+            Cd = (double)numCd.Value;
         }
 
         //Speed selection
         private void numSpeed_ValueChanged(object sender, EventArgs e)
         {
-            speed = numSpeed.Value;
+            speed = Math.Pow((double)numSpeed.Value, 2d);
         }
 
         //Deployment altitude selection
         private void numDeployment_ValueChanged(object sender, EventArgs e)
         {
-            density = GetDensity(numDeployment.Value);
+            altitude = (double)numDeployment.Value;
         }
 
         //Parachute count selection
         private void numParachutes_ValueChanged(object sender, EventArgs e)
         {
-            parachutes = numParachutes.Value;
+            parachutes = (double)numParachutes.Value;
         }
 
         //Calculations
         private void btnCalculate_Click(object sender, EventArgs e)
         {
             //If a parameter is null
-            if (density <= 0 || gravity <= 0 || mass <= 0 || Cd <= 0 || speed <= 0 || parachutes <= 0)
-            {
-                return;
-            }
+            if (body.density <= 0 || body.gravity <= 0 || mass <= 0 || Cd <= 0 || speed <= 0 || parachutes <= 0) { return; }
             
             //Calculates diameter
-            else
-            {
-                speed2 = (decimal)Math.Pow((double)speed, 2);
-                diameter = (decimal)Math.Sqrt((double)((8 * mass * gravity) / ((decimal)Math.PI * speed2 * Cd * density * parachutes)));
-                txtDiameter.Text = diameter.ToString("#0.00");
-            }
+            diameter = Math.Sqrt((8d * mass * body.gravity) / (Math.PI * speed * Cd * GetDensityAtAlt(altitude) * parachutes));
+            txtDiameter.Text = diameter.ToString("0.##");
         }
         #endregion
 
@@ -249,73 +291,92 @@ namespace RealChute_drag_calculator
         //Kerbin checkbox
         private void rdoKerbinDrag_CheckedChanged(object sender, EventArgs e)
         {
-            density = kerbinDensity;
+            body = new Body("Kerbin");
         }
 
         //Duna checkbox
         private void rdoDunaDrag_CheckedChanged(object sender, EventArgs e)
         {
-            density = dunaDensity;
+            body = new Body("Duna");
         }
 
         //Eve checkbox
         private void rdoEveDrag_CheckedChanged(object sender, EventArgs e)
         {
-            density = eveDensity;
+            body = new Body("Eve");
         }
 
         //Laythe checkbox
         private void rdoLaytheDrag_CheckedChanged(object sender, EventArgs e)
         {
-            density = laytheDensity;
+            body = new Body("Laythe");
         }
 
         //Mass selection
         private void numMassDrag_ValueChanged(object sender, EventArgs e)
         {
-            mass = numMassDrag.Value * 1000;
+            mass = (double)numMassDrag.Value * 1000d;
         }
 
-        //Cd selection
+        //Selects manual or automatic Cd selection
+        private void chkManualCdDrag_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkManualCdDrag.Checked)
+            {
+                lblCdDrag.Text = "Drag coefficient";
+                cmbMaterialDrag.Visible = false;
+                numCdDrag.Visible = true;
+                Cd = (double)numCdDrag.Value;
+            }
+
+            else
+            {
+                lblCdDrag.Text = "Material";
+                cmbMaterialDrag.Visible = true;
+                numCdDrag.Visible = false;
+                Cd = materialsCd[cmbMaterialDrag.SelectedIndex];
+            }
+        }
+
+        //Automatic Cd selection
+        private void cmbMaterialDrag_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Cd = materialsCd[cmbMaterialDrag.SelectedIndex];
+        }
+
+        //Manual Cd selection
         private void numCdDrag_ValueChanged(object sender, EventArgs e)
         {
-            Cd = numCdDrag.Value;
+            Cd = (double)numCdDrag.Value;
         }
 
         //Landing speed selection
         private void numSpeedDrag_ValueChanged(object sender, EventArgs e)
         {
-            speed = numSpeedDrag.Value;
+            speed = Math.Pow((double)numSpeedDrag.Value, 2d);
         }
 
         //Deceleration selection
         private void numDeceleration_ValueChanged(object sender, EventArgs e)
         {
-            deceleration = numDeceleration.Value;
+            deceleration = (double)numDeceleration.Value;
         }
 
         //Parachute count selection
         private void numParachutesDrag_ValueChanged(object sender, EventArgs e)
         {
-            parachutes = numParachutesDrag.Value;
+            parachutes = (double)numParachutesDrag.Value;
         }
 
         //Calculations
         private void btnCalculateDrag_Click(object sender, EventArgs e)
         {
             //If a parameter is null
-            if (density <= 0 || deceleration <= 0 || mass <= 0 || Cd <= 0 || speed <= 0 || parachutes <= 0)
-            {
-                return;
-            }
+            if (body.density <= 0 || deceleration <= 0 || mass <= 0 || Cd <= 0 || speed <= 0 || parachutes <= 0) { return; }
 
             //Calculates the diameter
-            else
-            {
-                speed2 = (decimal)Math.Pow((double)speed, 2);
-                diameter = (decimal)Math.Sqrt((double)((8 * mass * deceleration) / ((decimal)Math.PI * speed2 * Cd * density * parachutes)));
-                txtDiameterDrag.Text = diameter.ToString("#0.00");
-            }
+            diameter = Math.Sqrt(((8 * mass * deceleration) / (Math.PI * speed * Cd * body.density * parachutes)));
+            txtDiameterDrag.Text = diameter.ToString("0.##");
         }
         #endregion
     }
