@@ -269,6 +269,7 @@ namespace RealChute
         public void GUIDisarm()
         {
             armed = false;
+            this.part.stackIcon.SetIconColor(XKCDColors.White);
             DeactivateRC();
         }
 
@@ -373,6 +374,7 @@ namespace RealChute
             if(armed)
             {
                 armed = false;
+                this.part.stackIcon.SetIconColor(XKCDColors.White);
                 DeactivateRC();
             }
         }
@@ -474,6 +476,7 @@ namespace RealChute
                 else if (MinDeployment(minDeployment, minPressure, minIsPressure) && cutAlt == -1) { return true; }
                 else if (MinDeployment(minDeployment, minPressure, minIsPressure) && trueAlt > cutAlt) { return true; }
                 else if (secondaryChute && !MinDeployment(minDeployment, minPressure, minIsPressure) && trueAlt <= secCutAlt) { return true; }
+                else if (!MinDeployment(minDeployment, minPressure, minIsPressure) && IsDeployed(deploymentState)) { return true; }
             }
             //Checks if the secondary chute can deploy
             else
@@ -482,6 +485,7 @@ namespace RealChute
                 else if (MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && secCutAlt == -1) { return true; }
                 else if (MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && trueAlt > secCutAlt) { return true; }
                 else if (!MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && trueAlt <= cutAlt) { return true; }
+                else if (!MinDeployment(secMinDeployment, secMinPressure, secMinIsPressure) && IsDeployed(secDeploymentState)) { return true; }
             }
             return false;
         }
@@ -586,6 +590,8 @@ namespace RealChute
         {
             this.staged = false;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
+            Events["GUIDeploy"].active = true;
+            Events["GUIArm"].active = true;
         }
 
         //Copies stats from the info window to the symmetry counterparts
@@ -834,7 +840,7 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsEditor)
             {
                 //Tweakables pressure/altitude predeployment clauses
-                if (!this.part.Modules.Contains("ProceduralChute"))
+                if (!this.part.Modules.Contains("ProceduralChute") && isTweakable)
                 {
                     //Main chute
                     if (this.minIsPressure)
@@ -1118,6 +1124,17 @@ namespace RealChute
                 Actions["ActionCutBoth"].active = false;
                 Actions["ActionCut"].guiName = "Cut chute";
                 Events["GUICut"].guiName = "Cut chute";
+            }
+
+            if (autoArm)
+            {
+                Events["GUIArm"].active = false;
+                Actions["ActionArm"].active = false;
+            }
+            else
+            {
+                Events["GUIArm"].active = true;
+                Actions["ActionArm"].active = true;
             }
 
             //Tweakables tooltip

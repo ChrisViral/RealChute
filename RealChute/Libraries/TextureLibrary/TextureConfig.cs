@@ -111,9 +111,9 @@ namespace RealChute
                     continue;
                 }
             }
-            _caseNames = _cases.Select(c => c.name).ToArray();
-            _canopyNames = _canopies.Select(c => c.name).ToArray();
-            _modelNames = _models.Select(m => m.name).ToArray();
+            if (_cases.Count > 0) { _caseNames = _cases.Select(c => c.name).ToArray(); }
+            if (_canopies.Count > 0) { _canopyNames = _canopies.Select(c => c.name).ToArray(); }
+            if (_models.Count > 0) { _modelNames = _models.Select(m => m.name).ToArray(); }
         }
         #endregion
 
@@ -157,7 +157,7 @@ namespace RealChute
                 parachuteCase = GetCase(name);
                 return true;
             }
-            if (name != string.Empty) { Debug.LogWarning("[RealChute]: Could not find the " + name + " case texture within library"); }
+            if (name != string.Empty && name != "none") { Debug.LogWarning("[RealChute]: Could not find the " + name + " case texture within library"); }
             return false;
         }
 
@@ -229,7 +229,7 @@ namespace RealChute
                 canopy = GetCanopy(name);
                 return true;
             }
-            if (name != string.Empty) { Debug.LogWarning("[RealChute]: Could not find the " + name + " canopy texture within library"); }
+            if (name != string.Empty && name != "none") { Debug.LogWarning("[RealChute]: Could not find the " + name + " canopy texture within library"); }
             return false;
         }
 
@@ -305,7 +305,7 @@ namespace RealChute
                 model = GetModel(name, isTransformName);
                 return true;
             }
-            if (name != string.Empty) { Debug.LogWarning("[RealChute]: Could not find the " + name + " parachute model within library"); }
+            if (name != string.Empty && name != "none") { Debug.LogWarning("[RealChute]: Could not find the " + name + " parachute model within library"); }
             return false;
         }
 

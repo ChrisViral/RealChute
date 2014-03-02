@@ -16,13 +16,13 @@ namespace RealChute
         [KSPField]
         public string textureLibrary = "none";
         [KSPField]
-        public string type = string.Empty;
+        public string type = "Cone";
         [KSPField]
-        public string currentCase = string.Empty;
+        public string currentCase = "none";
         [KSPField]
-        public string currentCanopy = string.Empty;
+        public string currentCanopy = "none";
         [KSPField]
-        public string secCurentCanopy = string.Empty;
+        public string secCurentCanopy = "none";
         #endregion
 
         #region Persistent values
@@ -107,7 +107,6 @@ namespace RealChute
         private bool warning = false;
         private bool visible = false, failedVisible = false, successfulVisible = false;
         private bool materialsVisible = false, secMaterialsVisible = false;
-        private bool locked = false;
         private string[] cases = new string[] { }, canopies = new string[] { }, models = new string[] { };
         #endregion
 
@@ -116,11 +115,11 @@ namespace RealChute
         {
             if (textureLibrary == "none") { return new string[] { }; }
 
-            if (entries == "case") { return textures.caseNames.Where(c => textures.GetCase(c).types.Contains(type)).ToArray(); }
+            if (entries == "case" && textures.caseNames.Length > 1) { return textures.caseNames.Where(c => textures.GetCase(c).types.Contains(type)).ToArray(); }
 
-            if (entries == "chute") { return textures.canopyNames; }
+            if (entries == "chute" && textures.canopyNames.Length > 1) { return textures.canopyNames; }
 
-            if (entries == "model") { return textures.modelNames; }
+            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames; }
 
             return new string[] { };
         }
@@ -289,15 +288,20 @@ namespace RealChute
                     print(String.Concat("[RealChute]: ", this.part.partInfo.title, " MAIN - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                     rcModule.deployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * material.dragCoefficient * density * float.Parse(chuteCount))));
-                    if (rcModule.deployedDiameter > model.maxDiam)
+                    if ((textureLibrary != "none" || textures.modelNames.Length > 0) && rcModule.deployedDiameter > model.maxDiam)
                     {
                         rcModule.deployedDiameter = model.maxDiam;
+                        warning = true;
+                    }
+                    else if ((textureLibrary == "none" || textures.modelNames.Length <= 0) && rcModule.deployedDiameter > 70f)
+                    {
+                        rcModule.deployedDiameter = 70f;
                         warning = true;
                     }
                     else { warning = false; }
                     if (typeID == 0) { rcModule.preDeployedDiameter = RCUtils.Round(rcModule.deployedDiameter / 20); }
                     else { rcModule.preDeployedDiameter = RCUtils.Round(rcModule.deployedDiameter / 2); }
-                    float scale = RCUtils.GetDiameter(rcModule.deployedArea / model.count) / model.diameter;
+                    float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(rcModule.deployedArea / model.count) / model.diameter : 1f;
                     rcModule.parachute.localScale = new Vector3(scale, scale, scale);
                     print(String.Concat("[RealChute]: ", this.part.partInfo.title, " MAIN - depDiam: ", rcModule.deployedDiameter, "m, preDepDiam: ", rcModule.preDeployedDiameter, "m, scale: ", scale));
                 }
@@ -337,15 +341,20 @@ namespace RealChute
                         print(String.Concat("[RealChute]: ", this.part.partInfo.title, " SECONDARY - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                         rcModule.secDeployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * secMaterial.dragCoefficient * density * float.Parse(secChuteCount))));
-                        if (rcModule.secDeployedDiameter > secModel.maxDiam)
+                        if ((textureLibrary != "none" || textures.modelNames.Length > 0) && rcModule.secDeployedDiameter > secModel.maxDiam)
                         {
                             rcModule.secDeployedDiameter = secModel.maxDiam;
+                            warning = true;
+                        }
+                        else if ((textureLibrary == "none" || textures.modelNames.Length <= 0) && rcModule.secDeployedDiameter > 70f)
+                        {
+                            rcModule.deployedDiameter = 70f;
                             warning = true;
                         }
                         else { warning = false; }
                         if (secTypeID == 0) { rcModule.secPreDeployedDiameter = RCUtils.Round(rcModule.secDeployedDiameter / 20); }
                         else { rcModule.secPreDeployedDiameter = RCUtils.Round(rcModule.secDeployedDiameter / 2); }
-                        float scale = RCUtils.GetDiameter(rcModule.secDeployedArea / secModel.count) / secModel.diameter;
+                        float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(rcModule.secDeployedArea / secModel.count) / secModel.diameter : 1f;
                         rcModule.secParachute.localScale = new Vector3(scale, scale, scale);
                         print(String.Concat("[RealChute]: ", this.part.partInfo.title, " SECONDARY - depDiam: ", rcModule.secDeployedDiameter, "m, preDepDiam: ", rcModule.secPreDeployedDiameter, "m, scale: ", scale));
                     }
@@ -407,10 +416,10 @@ namespace RealChute
                         print(String.Concat("[RealChute]: ", part.partInfo.title, " MAIN - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                         module.deployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * material.dragCoefficient * density * float.Parse(chuteCount))));
-                        if (module.deployedDiameter > model.maxDiam) { module.deployedDiameter = model.maxDiam; }
+                        if ((textureLibrary != "none" || textures.modelNames.Length > 0) && module.deployedDiameter > model.maxDiam) { module.deployedDiameter = model.maxDiam; }
+                        else if ((textureLibrary == "none" || textures.modelNames.Length <= 0) && module.deployedDiameter > 70f) { module.deployedDiameter = 70f; }
                         if (typeID == 0) { module.preDeployedDiameter = RCUtils.Round(module.deployedDiameter / 20); }
-                        else { module.preDeployedDiameter = RCUtils.Round(module.deployedDiameter / 2); }
-                        float scale = RCUtils.GetDiameter(module.deployedArea / model.count) / model.diameter;
+                        float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(module.deployedArea / model.count) /model.diameter : 1f;
                         module.parachute.localScale = new Vector3(scale, scale, scale);
                         print(String.Concat("[RealChute]: ", part.partInfo.title, " MAIN - depDiam: ", module.deployedDiameter, "m, preDepDiam: ", module.preDeployedDiameter, "m, scale: ", scale));
                     }
@@ -449,10 +458,11 @@ namespace RealChute
                             print(String.Concat("[RealChute]: ", part.partInfo.title, " SECONDARY - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                             module.secDeployedDiameter = RCUtils.Round(Mathf.Sqrt((8f * m * acc) / (Mathf.PI * speed2 * secMaterial.dragCoefficient * density * float.Parse(secChuteCount))));
-                            if (module.secDeployedDiameter > secModel.maxDiam) { module.secDeployedDiameter = secModel.maxDiam; }
+                            if ((textureLibrary != "none" || textures.modelNames.Length > 0) && module.secDeployedDiameter > secModel.maxDiam) { module.secDeployedDiameter = secModel.maxDiam; }
+                            else if ((textureLibrary == "none" || textures.modelNames.Length <= 0) && module.secDeployedDiameter > 70f) { module.secDeployedDiameter = 70f; }
                             if (secTypeID == 0) { module.secPreDeployedDiameter = RCUtils.Round(module.secDeployedDiameter / 10); }
                             else { module.secPreDeployedDiameter = RCUtils.Round(module.secDeployedDiameter / 2); }
-                            float scale = RCUtils.GetDiameter(module.secDeployedArea / secModel.count) / secModel.diameter;
+                            float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(module.secDeployedArea / secModel.count) / secModel.diameter : 1f;
                             module.secParachute.localScale = new Vector3(scale, scale, scale);
                             print(String.Concat("[RealChute]: ", part.partInfo.title, " SECONDARY - depDiam: ", module.secDeployedDiameter, "m, preDepDiam: ", module.secPreDeployedDiameter, "m, scale: ", scale));
                         }
@@ -495,7 +505,8 @@ namespace RealChute
         }
 
         private void UpdateScale(Part part, RealChuteModule module)
-        {        
+        {
+            if (sizes.Count <= 1) { return; }
             part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, currentSize);
             sizes.TryGetValue(currentSize, out module.caseMass);
             if ((HighLogic.LoadedSceneIsEditor && part == EditorLogic.SortedShipList[0]) || (HighLogic.LoadedSceneIsFlight  && this.vessel.rootPart == part))
@@ -581,6 +592,7 @@ namespace RealChute
 
         private void UpdateCaseTexture(Part part, RealChuteModule module)
         {
+            if (textureLibrary == "none" || currentCase == "none") { return; }
             if (textures.TryGetCase(caseID, type, ref parachuteCase))
             {
                 if (string.IsNullOrEmpty(parachuteCase.textureURL))
@@ -603,7 +615,8 @@ namespace RealChute
 
         private void UpdateCanopyTexture(RealChuteModule module, bool secondary)
         {
-            if (!secondary)
+            if (textureLibrary == "none") { return; }
+            if (!secondary && currentCanopy != "none")
             {
                 if (textures.TryGetCanopy(chuteID, ref canopy))
                 {
@@ -624,7 +637,7 @@ namespace RealChute
                 }
                 lastChuteID = chuteID;
             }
-            else
+            else if (secCurentCanopy != "none")
             {
                 if (textures.TryGetCanopy(secChuteID, ref secCanopy))
                 {
@@ -649,11 +662,12 @@ namespace RealChute
 
         private void UpdateCanopy(Part part, RealChuteModule module, bool secondary)
         {
+            if (textureLibrary == "none") { return; }
             int id = secondary ? secModelID : modelID;
             ModelConfig model = new ModelConfig();
             if (textures.TryGetModel(textures.modelNames[id], ref model))
             {
-                ParachuteParameters parameters = secondary ? model.secondary : model.main;
+                ModelConfig.ParachuteParameters parameters = secondary ? model.secondary : model.main;
                 if (string.IsNullOrEmpty(parameters.modelURL))
                 {
                     Debug.LogWarning("[RealChute]: The " + textures.modelNames[modelID] + (secondary ? "main" : "secondary") + "URL is empty");
@@ -901,9 +915,12 @@ namespace RealChute
             secondaryChute = rcModule.secondaryChute;
 
             //Creation of the sizes dictionary
-            sizes = vectors.ToDictionary(v => new Vector3(v.x, v.y, v.z), v => v.w);
-            currentSize = sizes.Keys.ToArray()[size];
-            originalSize = this.part.transform.localScale;
+            if (vectors.Count > 1)
+            {
+                sizes = vectors.ToDictionary(v => new Vector3(v.x, v.y, v.z), v => v.w);
+                currentSize = sizes.Keys.ToArray()[size];
+                originalSize = this.part.transform.localScale;
+            }
 
             //Creation of the materials library
             materials = MaterialsLibrary.instance;
@@ -935,11 +952,11 @@ namespace RealChute
                 cases = textures.caseNames;
                 canopies = textures.canopyNames;
                 models = textures.modelNames;
-                parachuteCase = textures.GetCase(caseID, type);
-                canopy = textures.GetCanopy(chuteID);
-                secCanopy = textures.GetCanopy(lastSecChuteID);
-                model = textures.GetModel(modelID);
-                secModel = textures.GetModel(secModelID);
+                textures.TryGetCase(caseID, type, ref parachuteCase);
+                textures.TryGetCanopy(chuteID, ref canopy);
+                textures.TryGetCanopy(lastSecChuteID, ref secCanopy);
+                textures.TryGetModel(modelID, ref model);
+                textures.TryGetModel(secModelID, ref secModel);
                 lastCaseID = caseID;
                 lastChuteID = chuteID;
                 lastSecChuteID = secChuteID;
@@ -1096,7 +1113,7 @@ namespace RealChute
 
                 if (this.successfulVisible)
                 {
-                    this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200));
+                    this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200), GUILayout.ExpandHeight(true));
                 }
             }
         }
@@ -1334,7 +1351,7 @@ namespace RealChute
                     CreateEntryArea("Mains planned deployment alt (m):", ref refDepAlt, 10, 45000, 100);
                 }
 
-                CreateEntryArea("Parachutes used (parts):", ref chuteCount, 1, 100, 100);
+                CreateEntryArea("Parachutes used (parachutes):", ref chuteCount, 1, 100, 100);
             }
             #endregion
 
@@ -1645,7 +1662,7 @@ namespace RealChute
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
-            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.###"), skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.Label("Area density:", skins.label);
             GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].areaDensity * 1000 + "kg/m²", skins.label);
@@ -1677,7 +1694,7 @@ namespace RealChute
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
-            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.###"), skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.Label("Area density:", skins.label);
             GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].areaDensity * 1000 + "kg/m²", skins.label);
@@ -1700,7 +1717,7 @@ namespace RealChute
         {
             GUILayout.Label("Some parameters could not be applied", skins.label);
 
-            failedScroll = GUILayout.BeginScrollView(failedScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(200));
+            failedScroll = GUILayout.BeginScrollView(failedScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, GUILayout.MaxHeight(200));
             CreateErrors();
             GUILayout.EndScrollView();
 
