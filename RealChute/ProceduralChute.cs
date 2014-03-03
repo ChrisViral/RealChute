@@ -865,6 +865,7 @@ namespace RealChute
                     default:
                         break;
                 }
+                lastTypeID = typeID;
             }
             if (lastSecTypeID != secTypeID)
             {
@@ -899,6 +900,7 @@ namespace RealChute
                     default:
                         break;
                 }
+                lastSecTypeID = secTypeID;
             }
         }
         #endregion
@@ -919,8 +921,8 @@ namespace RealChute
             {
                 sizes = vectors.ToDictionary(v => new Vector3(v.x, v.y, v.z), v => v.w);
                 currentSize = sizes.Keys.ToArray()[size];
-                originalSize = this.part.transform.localScale;
             }
+            originalSize = this.part.transform.localScale;
 
             //Creation of the materials library
             materials = MaterialsLibrary.instance;
@@ -1046,13 +1048,16 @@ namespace RealChute
          
 
             //Updates the part
-            UpdateCanopy(this.part, rcModule, false);
-            if (secondaryChute)
+            if (textureLibrary != "none")
             {
-                UpdateCanopy(this.part, rcModule, true);
+                UpdateCanopy(this.part, rcModule, false);
+                if (secondaryChute)
+                {
+                    UpdateCanopy(this.part, rcModule, true);
+                }
+                UpdateCaseTexture(this.part, rcModule);
             }
-            UpdateScale(this.part, rcModule);
-            UpdateCaseTexture(this.part, rcModule);
+            if (sizes.Count > 1) { UpdateScale(this.part, rcModule); }
         }
 
         public override void OnLoad(ConfigNode node)
@@ -1060,7 +1065,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
-            if (vectors.Count == 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
+            if (node.GetValues("size").Length > 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
 
             if (this.part.findAttachNode("top") != null)
             {

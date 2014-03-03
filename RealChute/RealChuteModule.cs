@@ -898,8 +898,8 @@ namespace RealChute
             dragVector = -(this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).normalized;
             forcePosition = this.parachute.transform.position;
             if (secondaryChute) { secForcePosition = this.secParachute.transform.position; }
-            if (GameSettings.LAUNCH_STAGES.GetKeyDown() && this.part.inverseStage == Staging.CurrentStage) { ActivateRC(); }
-
+            if (GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel == FlightGlobals.ActiveVessel && this.part.inverseStage == Staging.CurrentStage && !this.staged) { ActivateRC(); }
+            
             if (this.staged)
             {
                 //Checks if the parachute must disarm
@@ -1161,25 +1161,19 @@ namespace RealChute
             //Initiates animations
             anim = part.FindModelAnimators(capName).FirstOrDefault();
             this.cap = this.part.FindModelTransform(capName);
-            if (!this.part.Modules.Contains("ProceduralChute") || !initiated)
-            {
-                this.parachute = this.part.FindModelTransform(parachuteName);
-                this.parachute.gameObject.SetActive(false);
-                this.part.InitiateAnimation(preDeploymentAnimation);
-                this.part.InitiateAnimation(deploymentAnimation);
-            }
+            this.parachute = this.part.FindModelTransform(parachuteName);
+            this.parachute.gameObject.SetActive(false);
+            this.part.InitiateAnimation(preDeploymentAnimation);
+            this.part.InitiateAnimation(deploymentAnimation);
 
             //Initiates the second parachute animations if any
             if (secondaryChute)
             {
                 this.secCap = this.part.FindModelTransform(secCapName);
-                if (!this.part.Modules.Contains("ProceduralChute") || !initiated)
-                {
-                    this.secParachute = this.part.FindModelTransform(secParachuteName);
-                    this.secParachute.gameObject.SetActive(false);
-                    this.part.InitiateAnimation(secPreDeploymentAnimation);
-                    this.part.InitiateAnimation(secDeploymentAnimation);
-                }
+                this.secParachute = this.part.FindModelTransform(secParachuteName);
+                this.secParachute.gameObject.SetActive(false);
+                this.part.InitiateAnimation(secPreDeploymentAnimation);
+                this.part.InitiateAnimation(secDeploymentAnimation);
             }
 
             //First initiation of the part
