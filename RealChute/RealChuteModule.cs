@@ -270,6 +270,8 @@ namespace RealChute
         {
             armed = false;
             this.part.stackIcon.SetIconColor(XKCDColors.White);
+            Events["GUIDeploy"].active = true;
+            Events["GUIArm"].active = true;
             DeactivateRC();
         }
 
@@ -375,6 +377,8 @@ namespace RealChute
             {
                 armed = false;
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
+                Events["GUIDeploy"].active = true;
+                Events["GUIArm"].active = true;
                 DeactivateRC();
             }
         }
@@ -590,8 +594,6 @@ namespace RealChute
         {
             this.staged = false;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
-            Events["GUIDeploy"].active = true;
-            Events["GUIArm"].active = true;
         }
 
         //Copies stats from the info window to the symmetry counterparts

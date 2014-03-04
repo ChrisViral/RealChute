@@ -419,6 +419,7 @@ namespace RealChute
                         if ((textureLibrary != "none" || textures.modelNames.Length > 0) && module.deployedDiameter > model.maxDiam) { module.deployedDiameter = model.maxDiam; }
                         else if ((textureLibrary == "none" || textures.modelNames.Length <= 0) && module.deployedDiameter > 70f) { module.deployedDiameter = 70f; }
                         if (typeID == 0) { module.preDeployedDiameter = RCUtils.Round(module.deployedDiameter / 20); }
+                        else { module.preDeployedDiameter = RCUtils.Round(module.deployedDiameter / 2); }
                         float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(module.deployedArea / model.count) /model.diameter : 1f;
                         module.parachute.localScale = new Vector3(scale, scale, scale);
                         print(String.Concat("[RealChute]: ", part.partInfo.title, " MAIN - depDiam: ", module.deployedDiameter, "m, preDepDiam: ", module.preDeployedDiameter, "m, scale: ", scale));
@@ -755,7 +756,7 @@ namespace RealChute
         private void Update()
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            if (!HighLogic.LoadedSceneIsEditor || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
+            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
             if (this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, currentSize))
             {
@@ -921,8 +922,8 @@ namespace RealChute
             {
                 sizes = vectors.ToDictionary(v => new Vector3(v.x, v.y, v.z), v => v.w);
                 currentSize = sizes.Keys.ToArray()[size];
+                originalSize = this.part.transform.localScale;
             }
-            originalSize = this.part.transform.localScale;
 
             //Creation of the materials library
             materials = MaterialsLibrary.instance;
@@ -1057,7 +1058,7 @@ namespace RealChute
                 }
                 UpdateCaseTexture(this.part, rcModule);
             }
-            if (sizes.Count > 1) { UpdateScale(this.part, rcModule); }
+            UpdateScale(this.part, rcModule);
         }
 
         public override void OnLoad(ConfigNode node)
@@ -1065,7 +1066,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
-            if (node.GetValues("size").Length > 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
+            if (vectors.Count == 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
 
             if (this.part.findAttachNode("top") != null)
             {
