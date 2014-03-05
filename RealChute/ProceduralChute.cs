@@ -26,6 +26,7 @@ namespace RealChute
         #endregion
 
         #region Persistent values
+        //Selection grid IDs
         [KSPField(isPersistant = true)]
         public int caseID = 0, chuteID = 0, modelID = 0;
         [KSPField(isPersistant = true)]
@@ -42,12 +43,18 @@ namespace RealChute
         public int typeID = 0, secTypeID = 0;
         [KSPField(isPersistant = true)]
         public int lastTypeID = 0, lastSecTypeID = 0;
+
+        //Size vectors
         [KSPField(isPersistant = true)]
         public Vector3 currentSize = new Vector3(), lastSize = new Vector3(), originalSize = new Vector3();
         [KSPField(isPersistant = true)]
         public Vector3 position = Vector3.zero, secPosition = Vector3.zero;
+
+        //Attach nodes
         [KSPField(isPersistant = true)]
         public float top = 0, bottom = 0, debut = 0;
+
+        //Bools
         [KSPField(isPersistant = true)]
         public bool initiated = false;
         [KSPField(isPersistant = true)]
@@ -58,6 +65,8 @@ namespace RealChute
         private bool getMass = true, secGetMass = true;
         [KSPField(isPersistant = true)]
         private bool secondaryChute = false;
+
+        //GUI strings
         [KSPField(isPersistant = true)]
         public string originalTransform = string.Empty, secOriginalTransform = string.Empty;
         [KSPField(isPersistant = true)]
@@ -79,9 +88,8 @@ namespace RealChute
         #endregion
 
         #region Fields
+        //Libraries
         private EditorActionGroups actionPanel = EditorActionGroups.Instance;
-        private GUISkin skins = HighLogic.Skin;
-        private GUIStyle redLabel = new GUIStyle(), boldLabel = new GUIStyle();
         private RealChuteModule rcModule = null;
         private AtmoPlanets bodies = new AtmoPlanets();
         private MaterialsLibrary materials = null;
@@ -91,6 +99,10 @@ namespace RealChute
         private CaseConfig parachuteCase = new CaseConfig();
         private CanopyConfig canopy = new CanopyConfig(), secCanopy = new CanopyConfig();
         private ModelConfig model = new ModelConfig(), secModel = new ModelConfig();
+
+        //GUI
+        private GUISkin skins = HighLogic.Skin;
+        private GUIStyle redLabel = new GUIStyle(), boldLabel = new GUIStyle();
         private Rect window = new Rect(), failedWindow = new Rect(), successfulWindow = new Rect();
         private Rect materialsWindow = new Rect(), secMaterialsWindow = new Rect();
         private int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
@@ -99,11 +111,15 @@ namespace RealChute
         private Vector2 mainScroll = new Vector2(), failedScroll = new Vector2();
         private Vector2 parachuteScroll = new Vector2(), secParachuteScroll = new Vector2();
         private Vector2 materialsScroll = new Vector2(), secMaterialsScroll = new Vector2();
+
+        //Vectors from the module node
         [SerializeField]
         private List<Vector4> vectors = new List<Vector4>();
         private Dictionary<Vector3, float> sizes = new Dictionary<Vector3, float>();
         [SerializeField]
         private Transform parent = null;
+
+        //GUI fields
         private bool warning = false;
         private bool visible = false, failedVisible = false, successfulVisible = false;
         private bool materialsVisible = false, secMaterialsVisible = false;
@@ -111,6 +127,7 @@ namespace RealChute
         #endregion
 
         #region Methods
+        //Gets the strings for the selection grids
         private string[] TextureEntries(string entries)
         {
             if (textureLibrary == "none") { return new string[] { }; }
@@ -124,11 +141,13 @@ namespace RealChute
             return new string[] { };
         }
 
+        //Gets the total mass of the craft
         private float GetCraftMass()
         {
             return EditorLogic.SortedShipList.Sum(part => part.TotalMass());
         }
 
+        //Creates a label + text field
         private void CreateEntryArea(string label, ref string value, float min, float max, float width = 150)
         {
             GUILayout.Space(5);
@@ -140,6 +159,7 @@ namespace RealChute
             GUILayout.EndHorizontal();
         }
 
+        //Lists the errors of a given type
         private List<string> GetErrors(string type)
         {
             if (type == "general")
@@ -208,6 +228,7 @@ namespace RealChute
             return new List<string>();
         }
 
+        //Creates labels for errors.
         private void CreateErrors()
         {
             GUILayout.BeginVertical();
@@ -249,6 +270,7 @@ namespace RealChute
             GUILayout.EndVertical();
         }
 
+        //Applies the parameters to the parachute
         private void Apply()
         {
             if ((GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0)))
@@ -258,6 +280,7 @@ namespace RealChute
             }
             else
             {
+                rcModule.mustGoDown = mustGoDown;
                 rcModule.material = material.name;
                 rcModule.mat = material;
                 if (secondaryChute)
@@ -377,6 +400,7 @@ namespace RealChute
             }
         }
 
+        //Applies the parameters to all symmetry counterparts
         private void Apply(bool toSymmetryCounterparts)
         {
             Apply();
@@ -385,7 +409,7 @@ namespace RealChute
                 foreach (Part part in this.part.symmetryCounterparts)
                 {
                     RealChuteModule module = part.Modules["RealChuteModule"] as RealChuteModule;
-
+                    module.mustGoDown = mustGoDown;
                     module.material = material.name;
                     module.mat = material;
                     if (module.secondaryChute)
@@ -482,19 +506,22 @@ namespace RealChute
                         module.secDeploymentSpeed = float.Parse(secDepSpeed);
                     }
 
-                    UpdateScale(part, module);
+                    UpdateCaseTexture(part, module);
                     UpdateCanopy(part, module, false);
                     if (secondaryChute)
                     {
                         UpdateCanopy(part, module, true);
                     }
-                    UpdateCaseTexture(part, module);
+                    UpdateScale(part, module);
 
                     ProceduralChute pChute = part.Modules["ProceduralChute"] as ProceduralChute;
+                    pChute.currentSize = this.currentSize;
+                    pChute.size = this.size;
                     pChute.caseID = this.caseID;
                     pChute.chuteID = this.chuteID;
                     pChute.secChuteID = this.secChuteID;
                     pChute.modelID = this.modelID;
+                    pChute.lastSize = this.lastSize;
                     pChute.secModelID = this.secModelID;
                     pChute.lastCaseID = this.lastCaseID;
                     pChute.lastChuteID = this.lastChuteID;
@@ -505,6 +532,7 @@ namespace RealChute
             }
         }
 
+        //Modifies the size of a part
         private void UpdateScale(Part part, RealChuteModule module)
         {
             if (sizes.Count <= 1) { return; }
@@ -591,6 +619,7 @@ namespace RealChute
             lastSize = currentSize;
         }
 
+        //Modifies the case texture of a part
         private void UpdateCaseTexture(Part part, RealChuteModule module)
         {
             if (textureLibrary == "none" || currentCase == "none") { return; }
@@ -614,10 +643,11 @@ namespace RealChute
             lastCaseID = caseID;
         }
 
+        //Modifies the texture of a canopy
         private void UpdateCanopyTexture(RealChuteModule module, bool secondary)
         {
             if (textureLibrary == "none") { return; }
-            if (!secondary && currentCanopy != "none")
+            if (!secondary)
             {
                 if (textures.TryGetCanopy(chuteID, ref canopy))
                 {
@@ -638,7 +668,7 @@ namespace RealChute
                 }
                 lastChuteID = chuteID;
             }
-            else if (secCurentCanopy != "none")
+            else
             {
                 if (textures.TryGetCanopy(secChuteID, ref secCanopy))
                 {
@@ -661,6 +691,7 @@ namespace RealChute
             }
         }
 
+        //Changes the canopy model
         private void UpdateCanopy(Part part, RealChuteModule module, bool secondary)
         {
             if (textureLibrary == "none") { return; }
@@ -742,19 +773,21 @@ namespace RealChute
             {
                 lastModelID = modelID;
                 lastTransform = model.main.transformName;
+                UpdateCanopyTexture(module, false);
             }
             else
             {
                 lastSecModelID = secModelID;
                 secLastTransform = model.secondary.transformName;
+                UpdateCanopyTexture(module, true);
             }
-            UpdateCanopyTexture(module, secondary);
         }
         #endregion
 
         #region Functions
         private void Update()
         {
+            //Updating of size if possible
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
@@ -763,12 +796,14 @@ namespace RealChute
                 UpdateScale(this.part, rcModule);
             }
 
+            //If unselected
             if (!HighLogic.LoadedSceneIsEditor || !EditorLogic.fetch || EditorLogic.fetch.editorScreen != EditorLogic.EditorScreen.Actions || !this.part.Modules.Contains("RealChuteModule"))
             {
                 this.visible = false;
                 return;
             }
 
+            //Makes the main material window follow the second one.
             if (this.materialsVisible && !this.secMaterialsVisible)
             {
                 matX = (int)materialsWindow.x;
@@ -777,6 +812,7 @@ namespace RealChute
                 secMaterialsWindow.y = matY;
             }
 
+            //Makes the second material window follow the main one
             if (this.secMaterialsVisible && !this.materialsVisible)
             {
                 matX = (int)secMaterialsWindow.x;
@@ -785,6 +821,7 @@ namespace RealChute
                 materialsWindow.y = matY;
             }
 
+            //Checks if the part is selected
             if (actionPanel.GetSelectedParts().Contains(this.part))
             {
                 this.visible = true;
@@ -793,7 +830,6 @@ namespace RealChute
                     currentSize = sizes.Keys.ToArray()[size];
                 }
             }
-
             else
             {
                 this.visible = false;
@@ -803,36 +839,43 @@ namespace RealChute
                 this.successfulVisible = false;
             }
 
+            //Checks if size must update
             if (lastSize != currentSize)
             {
                 UpdateScale(this.part, rcModule);
             }
 
+            //Checks if case texture must update
             if (lastCaseID != caseID)
             {
                 UpdateCaseTexture(this.part, rcModule);
             }
 
+            //Checks if main canopy texture must update
             if (lastChuteID != chuteID)
             {
                 UpdateCanopyTexture(rcModule, false);
             }
 
+            //Checks if secondary canopy texture must update
             if (lastSecChuteID != secChuteID)
             {
                 UpdateCanopyTexture(rcModule, true);
             }
 
+            //Checks if main canopy model must update
             if (lastModelID != modelID)
             {
                 UpdateCanopy(this.part, rcModule, false);
             }
 
+            //Checks if second canopy texture must update
             if (lastSecModelID != secModelID)
             {
                 UpdateCanopy(this.part, rcModule, true);
             }
 
+            //Detects a change in selected parachute type
             if (lastTypeID != typeID)
             {
                 switch (typeID)
@@ -1051,12 +1094,12 @@ namespace RealChute
             //Updates the part
             if (textureLibrary != "none")
             {
+                UpdateCaseTexture(this.part, rcModule);
                 UpdateCanopy(this.part, rcModule, false);
                 if (secondaryChute)
                 {
                     UpdateCanopy(this.part, rcModule, true);
                 }
-                UpdateCaseTexture(this.part, rcModule);
             }
             UpdateScale(this.part, rcModule);
         }
@@ -1066,17 +1109,22 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
+            //Size vectors
             if (vectors.Count == 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
 
+            //Top node original location
             if (this.part.findAttachNode("top") != null)
             {
                 top = this.part.findAttachNode("top").originalPosition.y;
             }
 
+            //Bottom node original location
             if (this.part.findAttachNode("bottom") != null)
             {
                 bottom = this.part.findAttachNode("bottom").originalPosition.y;
             }
+
+            //Original part size
             if (debut == 0) { debut = this.part.transform.GetChild(0).localScale.y; }   
         }
 
@@ -1092,6 +1140,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
+            //Rendering manager
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsEditor)
             {
@@ -1124,6 +1173,7 @@ namespace RealChute
             }
         }
 
+        //Main GUI window
         private void Window(int id)
         {
             GUILayout.BeginVertical();
@@ -1657,6 +1707,7 @@ namespace RealChute
             GUILayout.EndVertical();
         }
 
+        //Materials window of themain parachute
         private void Materials(int id)
         {
             GUI.DragWindow(new Rect(0, 0, materialsWindow.width, 25));
@@ -1689,6 +1740,7 @@ namespace RealChute
             
         }
 
+        //Materials window of the second parachute
         private void SecMaterials(int id)
         {
             GUI.DragWindow(new Rect(0, 0, secMaterialsWindow.width, 25));
@@ -1700,16 +1752,16 @@ namespace RealChute
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
-            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[secMaterialsID].dragCoefficient.ToString("0.00#"), skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.Label("Area density:", skins.label);
-            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].areaDensity * 1000 + "kg/m²", skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[secMaterialsID].areaDensity * 1000 + "kg/m²", skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             if (GUILayout.Button("Choose material", skins.button))
             {
-                secMaterial = materials.materials.Keys.ToArray()[materialsID];
+                secMaterial = materials.materials.Keys.ToArray()[secMaterialsID];
                 this.secMaterialsVisible = false;
             }
             if (GUILayout.Button("Cancel", skins.button))
@@ -1719,6 +1771,7 @@ namespace RealChute
             GUILayout.EndVertical();
         }
 
+        //Failure notice
         private void ApplicationFailed(int id)
         {
             GUILayout.Label("Some parameters could not be applied", skins.label);
@@ -1733,6 +1786,7 @@ namespace RealChute
             }
         }
 
+        //Success notice
         private void ApplicationSucceeded(int id)
         {
             GUILayout.BeginHorizontal();

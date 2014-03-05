@@ -1320,7 +1320,7 @@ namespace RealChute
             GUILayout.Space(3);
             GUILayout.Label("Main chute:", boldLabel, GUILayout.Width(120));
             GUILayout.Label("Material: " + mat.name, skins.label);
-            GUILayout.Label("Drag coefficient: " + mat.dragCoefficient, skins.label);
+            GUILayout.Label("Drag coefficient: " + mat.dragCoefficient.ToString("0.00"), skins.label);
             GUILayout.Label("Predeployed diameter: " + preDeployedDiameter + "m    area:" + preDeployedArea.ToString("0.###") + "m²", skins.label);
             GUILayout.Label("Deployed diameter: " + deployedDiameter + "m    area:" + deployedArea.ToString("0.###") + "m²", skins.label);
             if (HighLogic.LoadedSceneIsFlight)
@@ -1395,7 +1395,7 @@ namespace RealChute
                 GUILayout.Space(3);
                 GUILayout.Label("Secondary chute:", boldLabel, GUILayout.Width(120));
                 GUILayout.Label("Material: " + secMat.name, skins.label);
-                GUILayout.Label("Drag coefficient: " + secMat.dragCoefficient, skins.label);
+                GUILayout.Label("Drag coefficient: " + secMat.dragCoefficient.ToString("0.00"), skins.label);
                 GUILayout.Label("Predeployed diameter: " + secPreDeployedDiameter + "m    area:" + secPreDeployedArea.ToString("0.###") + "m²", skins.label);
                 GUILayout.Label("Deployed diameter: " + secDeployedDiameter + "m    area:" + secDeployedArea.ToString("0.###") + "m²", skins.label);
                 if (HighLogic.LoadedSceneIsFlight)
