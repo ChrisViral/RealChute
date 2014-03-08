@@ -183,11 +183,7 @@ namespace RealChute
         /// <param name="parachuteCase">Case config searched for</param>
         public int GetCaseIndex(CaseConfig parachuteCase)
         {
-            for (int i = 0; i < caseNames.Length; i++)
-            {
-                if (caseNames[i] == parachuteCase.name) { return i; }
-            }
-            return 0;
+            return cases.IndexOf(parachuteCase);
         }
 
         /// <summary>
@@ -255,11 +251,7 @@ namespace RealChute
         /// <param name="canopy">Canopy config searched for</param>
         public int GetCanopyIndex(CanopyConfig canopy)
         {
-            for (int i = 0; i < canopyNames.Length; i++)
-            {
-                if (canopyNames[i] == canopy.name) { return i; }
-            }
-            return 0;
+            return canopies.IndexOf(canopy);
         }
 
         /// <summary>
@@ -331,11 +323,7 @@ namespace RealChute
         /// <param name="model">Model config searched for</param>
         public int GetModelIndex(ModelConfig model)
         {
-            for (int i = 0; i < modelNames.Length; i++)
-            {
-                if (modelNames[i] == model.name) { return i; }
-            }
-            return 0;
+            return models.IndexOf(model);
         }
         #endregion
     }

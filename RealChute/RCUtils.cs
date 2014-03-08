@@ -15,6 +15,11 @@ namespace RealChute
         /// Transforms from gees to m/s²
         /// </summary>
         public const double geeToAcc = 9.80665d;
+
+        /// <summary>
+        /// URL of the RealChute settings config from the GameData folder
+        /// </summary>
+        public const string localSettingsURL = "GameData/RealChute/RealChute_Settings.cfg";
         #endregion
 
         #region Arrays
@@ -30,9 +35,56 @@ namespace RealChute
         #endregion
 
         #region Propreties
+        /// <summary>
+        /// String URL to the RealChute settings config
+        /// </summary>
         public static string settingsURL
         {
-            get { return System.IO.Path.Combine(KSPUtil.ApplicationRootPath, "GameData/RealChute/RealChute_Settings.cfg"); }
+            get { return System.IO.Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
+        }
+
+        /// <summary>
+        /// A red KSP label for ProceduralChute
+        /// </summary>
+        public static GUIStyle redLabel
+        {
+            get
+            {
+                GUIStyle style = new GUIStyle(HighLogic.Skin.label);
+                style.normal.textColor = XKCDColors.Red;
+                style.hover.textColor = XKCDColors.Red;
+                return style;
+            }
+        }
+
+        /// <summary>
+        /// A bold KSP style label for RealChute GUI
+        /// </summary>
+        public static GUIStyle boldLabel
+        {
+            get
+            {
+                GUIStyle style = new GUIStyle(HighLogic.Skin.label);
+                style.fontStyle = FontStyle.Bold;
+                return style;
+            }
+        }
+
+        /// <summary>
+        /// Gets the current version of the assembly
+        /// </summary>
+        public static string assemblyVersion
+        {
+            get
+            {
+                System.Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                if (version.Revision == 0)
+                {
+                    if (version.Build == 0) { return version.ToString(2); }
+                    return version.ToString(3);
+                }
+                return "v" + version.ToString();
+            }
         }
         #endregion
 

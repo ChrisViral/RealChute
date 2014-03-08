@@ -78,7 +78,7 @@ namespace RealChute
             get { return this._name; }
         }
 
-        private float _diameter = 1;
+        private float _diameter = 10f;
         /// <summary>
         /// Diameter of the parachutes at 1, 1, 1
         /// </summary>

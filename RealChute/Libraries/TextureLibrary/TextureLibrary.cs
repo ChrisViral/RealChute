@@ -53,7 +53,7 @@ namespace RealChute
         /// Determines if the config of the given name exists in the library.
         /// </summary>
         /// <param name="name">Name of the searched config</param>
-        public bool ExistsConfig(string name)
+        public bool ConfigExists(string name)
         {
             return configs.Exists(config => config.name == name);
         }
@@ -74,7 +74,7 @@ namespace RealChute
         /// <param name="config">Variable to store the result in</param>
         public bool TryGetConfig(string name, ref TextureConfig config)
         {
-            if (ExistsConfig(name))
+            if (ConfigExists(name))
             {
                 config = GetConfig(name);
                 return true;

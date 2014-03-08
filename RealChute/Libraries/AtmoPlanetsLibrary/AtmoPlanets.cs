@@ -9,7 +9,7 @@ namespace RealChute
 {
     public class AtmoPlanets
     {
-        #region Instance
+        #region Fetch
         private static AtmoPlanets _fetch = null;
         /// <summary>
         /// Accesses the atmospheric planets library
@@ -76,11 +76,7 @@ namespace RealChute
         /// <returns></returns>
         public int GetPlanetIndex(string name)
         {
-            for (int i = 0; i < _bodies.Count; i++)
-            {
-                if (GetBody(i).name == name) { return i; }
-            }
-            return 0;
+            return bodies.Values.ToList().IndexOf(name);
         }
 
         /// <summary>

@@ -102,7 +102,6 @@ namespace RealChute
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
-        private GUIStyle redLabel = new GUIStyle(), boldLabel = new GUIStyle();
         private Rect window = new Rect(), failedWindow = new Rect(), successfulWindow = new Rect();
         private Rect materialsWindow = new Rect(), secMaterialsWindow = new Rect();
         private int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
@@ -153,7 +152,7 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (RCUtils.CanParse(value) && RCUtils.CheckRange(float.Parse(value), min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, redLabel); }
+            else { GUILayout.Label(label, RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
@@ -241,7 +240,7 @@ namespace RealChute
                 GUILayout.Label("General:", skins.label);
                 foreach(string error in GetErrors("general"))
                 {
-                    GUILayout.Label(error, redLabel);
+                    GUILayout.Label(error, RCUtils.redLabel);
                 }
                 GUILayout.Space(10);
             }
@@ -251,7 +250,7 @@ namespace RealChute
                 GUILayout.Label("Main chute:", skins.label);
                 foreach(string error in GetErrors("main"))
                 {
-                    GUILayout.Label(error, redLabel);
+                    GUILayout.Label(error, RCUtils.redLabel);
                 }
                 GUILayout.Space(10);
             }
@@ -261,7 +260,7 @@ namespace RealChute
                 GUILayout.Label("Secondary chute:", skins.label);
                 foreach (string error in GetErrors("secondary"))
                 {
-                    GUILayout.Label(error, redLabel);
+                    GUILayout.Label(error, RCUtils.redLabel);
                 }
                 GUILayout.Space(10);
             }
@@ -397,6 +396,7 @@ namespace RealChute
                 }
 
                 this.successfulVisible = true;
+                if (!warning) { successfulWindow.height = 50; }
             }
         }
 
@@ -1075,15 +1075,6 @@ namespace RealChute
                 }
                 lastTransform = originalTransform;
                 secLastTransform = secOriginalTransform;
-
-                //Creation of the red label
-                redLabel = new GUIStyle(skins.label);
-                redLabel.normal.textColor = XKCDColors.Red;
-                redLabel.hover.textColor = XKCDColors.Red;
-
-                //Creation of the large label
-                boldLabel = new GUIStyle(skins.label);
-                boldLabel.fontStyle = FontStyle.Bold;
             }
 
             if (parent == null) { parent = this.part.FindModelTransform(originalTransform).parent; }
@@ -1148,17 +1139,17 @@ namespace RealChute
                 
                 if (this.visible)
                 {
-                    this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor", skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
+                    this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
                 }
 
                 if (this.materialsVisible)
                 {
-                    this.materialsWindow = GUILayout.Window(this.matId, this.materialsWindow, Materials, "Choose a material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
+                    this.materialsWindow = GUILayout.Window(this.matId, this.materialsWindow, Materials, "Main parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
                 }
 
                 if (this.secMaterialsVisible)
                 {
-                    this.secMaterialsWindow = GUILayout.Window(this.secMatId, this.secMaterialsWindow, SecMaterials, "Choose a material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
+                    this.secMaterialsWindow = GUILayout.Window(this.secMatId, this.secMaterialsWindow, SecMaterials, "Secondary parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
                 }
 
                 if (this.failedVisible)
@@ -1318,7 +1309,7 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (RCUtils.CanParseTime(timer) && RCUtils.CheckRange(RCUtils.ParseTime(timer), 0, 3600)) { GUILayout.Label("Deployment timer:", skins.label); }
-            else { GUILayout.Label("Deployment timer:", redLabel); }
+            else { GUILayout.Label("Deployment timer:", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             timer = GUILayout.TextField(timer, 10, skins.textField, GUILayout.Width(150));
             GUILayout.EndHorizontal();
@@ -1327,7 +1318,7 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (RCUtils.CanParseWithEmpty(spares) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(spares), -1, 10) && RCUtils.IsWholeNumber(RCUtils.ParseWithEmpty(spares))) { GUILayout.Label("Spare chutes:", skins.label); }
-            else { GUILayout.Label("Spare chutes:", redLabel); }
+            else { GUILayout.Label("Spare chutes:", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             spares = GUILayout.TextField(spares, 10, skins.textField, GUILayout.Width(150));
             GUILayout.EndHorizontal();
@@ -1340,9 +1331,9 @@ namespace RealChute
             #region Calculations
             //Indicator label
             GUILayout.Space(10);
-            GUILayout.Label("________________________________________________", boldLabel);
-            GUILayout.Label("Main chute:", boldLabel, GUILayout.Width(150));
-            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", boldLabel);
+            GUILayout.Label("________________________________________________", RCUtils.boldLabel);
+            GUILayout.Label("Main chute:", RCUtils.boldLabel, GUILayout.Width(150));
+            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
 
             //Selection mode
             GUILayout.Space(5);
@@ -1381,17 +1372,17 @@ namespace RealChute
                 if (typeID == 0)
                 {
                     if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted touchdown speed (m/s):", skins.label); }
-                    else { GUILayout.Label("Wanted touchdown speed (m/s):", redLabel); }
+                    else { GUILayout.Label("Wanted touchdown speed (m/s):", RCUtils.redLabel); }
                 }
                 else if (typeID == 1)
                 {
                     if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
-                    else { GUILayout.Label("Wanted speed at full deployment (m/s):", redLabel); }
+                    else { GUILayout.Label("Wanted speed at full deployment (m/s):", RCUtils.redLabel); }
                 }
                 else
                 {
                     if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)) { GUILayout.Label("Planned landing speed (m/s):", skins.label); }
-                    else { GUILayout.Label("Planned landing speed (m/s):", redLabel); }
+                    else { GUILayout.Label("Planned landing speed (m/s):", RCUtils.redLabel); }
                 }
                 GUILayout.FlexibleSpace();
                 landingSpeed = GUILayout.TextField(landingSpeed, 10, skins.textField, GUILayout.Width(100));
@@ -1444,12 +1435,12 @@ namespace RealChute
             if (isPressure)
             {
                 if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, 5f)) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
-                else { GUILayout.Label("Predeployment pressure (atm):", redLabel); } 
+                else { GUILayout.Label("Predeployment pressure (atm):", RCUtils.redLabel); } 
             }
             else
             {
                 if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 25, 50000)) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
-                else { GUILayout.Label("Predeployment altitude (m):", redLabel); } 
+                else { GUILayout.Label("Predeployment altitude (m):", RCUtils.redLabel); } 
             }
             GUILayout.FlexibleSpace();
             predepClause = GUILayout.TextField(predepClause, 10, skins.textField, GUILayout.Width(150));
@@ -1462,7 +1453,7 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, 45000)) { GUILayout.Label("Autocut altitude (m):", skins.label); }
-            else { GUILayout.Label("Autocut altitude (m):", redLabel); }
+            else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             cutAlt = GUILayout.TextField(cutAlt, 10, skins.textField, GUILayout.Width(150));
             GUILayout.EndHorizontal();
@@ -1480,9 +1471,9 @@ namespace RealChute
             {
                 //Indicator label
                 GUILayout.Space(10);
-                GUILayout.Label("________________________________________________", boldLabel);
-                GUILayout.Label("Secondary chute:", boldLabel, GUILayout.Width(150));
-                GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", boldLabel);
+                GUILayout.Label("________________________________________________", RCUtils.boldLabel);
+                GUILayout.Label("Secondary chute:", RCUtils.boldLabel, GUILayout.Width(150));
+                GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
 
                 #region Texture selectors
                 GUILayout.Space(5);
@@ -1587,17 +1578,17 @@ namespace RealChute
                     if (secTypeID == 0)
                     {
                         if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted touchdown speed (m/s):", skins.label); }
-                        else { GUILayout.Label("Wanted touchdown speed (m/s):", redLabel); }
+                        else { GUILayout.Label("Wanted touchdown speed (m/s):", RCUtils.redLabel); }
                     }
                     else if (secTypeID == 1)
                     {
                         if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
-                        else { GUILayout.Label("Wanted speed at full deployment (m/s):", redLabel); }
+                        else { GUILayout.Label("Wanted speed at full deployment (m/s):", RCUtils.redLabel); }
                     }
                     else
                     {
                         if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)) { GUILayout.Label("Planned landing speed (m/s):", skins.label); }
-                        else { GUILayout.Label("Planned landing speed (m/s):", redLabel); }
+                        else { GUILayout.Label("Planned landing speed (m/s):", RCUtils.redLabel); }
                     }
                     GUILayout.FlexibleSpace();
                     secLandingSpeed = GUILayout.TextField(secLandingSpeed, 10, skins.textField, GUILayout.Width(100));
@@ -1650,12 +1641,12 @@ namespace RealChute
                 if (isPressure)
                 {
                     if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 0.0001f, 5f)) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
-                    else { GUILayout.Label("Predeployment pressure (atm):", redLabel); }
+                    else { GUILayout.Label("Predeployment pressure (atm):", RCUtils.redLabel); }
                 }
                 else
                 {
                     if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 25, 50000)) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
-                    else { GUILayout.Label("Predeployment altitude (m):", redLabel); }
+                    else { GUILayout.Label("Predeployment altitude (m):", RCUtils.redLabel); }
                 }
                 GUILayout.FlexibleSpace();
                 secPredepClause = GUILayout.TextField(secPredepClause, 10, skins.textField, GUILayout.MaxWidth(150));
@@ -1668,7 +1659,7 @@ namespace RealChute
                 GUILayout.Space(5);
                 GUILayout.BeginHorizontal();
                 if (RCUtils.CanParseWithEmpty(secCutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(secCutAlt), -1, 45000)) { GUILayout.Label("Autocut altitude (m):", skins.label); }
-                else { GUILayout.Label("Autocut altitude (m):", redLabel); }
+                else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
                 GUILayout.FlexibleSpace();
                 secCutAlt = GUILayout.TextField(secCutAlt, 10, skins.textField, GUILayout.MaxWidth(150));
                 GUILayout.EndHorizontal();
@@ -1797,7 +1788,7 @@ namespace RealChute
 
             if (warning)
             {
-                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", redLabel);
+                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", RCUtils.redLabel);
             }
 
             if (GUILayout.Button("Close", skins.button))

@@ -65,7 +65,7 @@ namespace RealChute
         /// Returns true if the MaterialLibrary contains a definition for the given material
         /// </summary>
         /// <param name="name">Name of the material</param>
-        public bool HasMaterial(string name)
+        public bool MaterialExists(string name)
         {
             return _materials.Values.Contains(name);
         }
@@ -86,7 +86,7 @@ namespace RealChute
         /// <param name="material">Value to store the result in</param>
         public bool TryGetMaterial(string name, ref MaterialDefinition material)
         {
-            if (HasMaterial(name))
+            if (MaterialExists(name))
             {
                 material = GetMaterial(name);
                 return true;
@@ -101,11 +101,7 @@ namespace RealChute
         /// <param name="name">Name of the material</param>
         public int GetMaterialIndex(string name)
         {
-            for (int i = 0; i < materials.Count; i++)
-            {
-                if (materials.Values.ToArray()[i] == name) { return i; }
-            }
-            return 0;
+            return materials.Values.ToList().IndexOf(name);
         }
         #endregion
     }

@@ -221,7 +221,6 @@ namespace RealChute
         protected bool visible = false, hid = false;
         private int ID = Guid.NewGuid().GetHashCode();
         private GUISkin skins = HighLogic.Skin;
-        private GUIStyle boldLabel = new GUIStyle();
         private Rect window = new Rect();
         private Vector2 scroll = new Vector2();
         #endregion
@@ -1217,8 +1216,6 @@ namespace RealChute
 
             //GUI
             window = new Rect(200, 100, 350, 400);
-            boldLabel = new GUIStyle(skins.label);
-            boldLabel.fontStyle = FontStyle.Bold;
         }
 
         public override void OnLoad(ConfigNode node)
@@ -1295,7 +1292,7 @@ namespace RealChute
                 //Info window visibility
                 if (this.visible)
                 {
-                    this.window = GUILayout.Window(this.ID, this.window, Window, "RealChute Info Window", skins.window);
+                    this.window = GUILayout.Window(this.ID, this.window, Window, "RealChute Info Window " + RCUtils.assemblyVersion, skins.window);
                 }
             }
         }
@@ -1310,15 +1307,15 @@ namespace RealChute
             GUILayout.Space(5);
             scroll = GUILayout.BeginScrollView(scroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box);
             GUILayout.Space(5);
-            GUILayout.Label("General:", boldLabel, GUILayout.Width(120));
+            GUILayout.Label("General:", RCUtils.boldLabel, GUILayout.Width(120));
             GUILayout.Label("Autocut speed: " + cutSpeed + "m/s", skins.label);
             if (timer >= 60) { GUILayout.Label("Deployment timer: " + RCUtils.ToMinutesSeconds(timer), skins.label); }
             else { GUILayout.Label("Deployment timer: " + timer.ToString("0.#") + "s", skins.label); }
             GUILayout.Label("Must go down to deploy: " + mustGoDown.ToString(), skins.label);
             GUILayout.Label("Spare chutes: " + chuteCount, skins.label);
-            GUILayout.Label("___________________________________________", boldLabel);
+            GUILayout.Label("___________________________________________", RCUtils.boldLabel);
             GUILayout.Space(3);
-            GUILayout.Label("Main chute:", boldLabel, GUILayout.Width(120));
+            GUILayout.Label("Main chute:", RCUtils.boldLabel, GUILayout.Width(120));
             GUILayout.Label("Material: " + mat.name, skins.label);
             GUILayout.Label("Drag coefficient: " + mat.dragCoefficient.ToString("0.00"), skins.label);
             GUILayout.Label("Predeployed diameter: " + preDeployedDiameter + "m    area:" + preDeployedArea.ToString("0.###") + "m²", skins.label);
@@ -1391,9 +1388,9 @@ namespace RealChute
             GUILayout.Label("Deployment speed: " + deploymentSpeed + "s", skins.label);
             if (secondaryChute)
             {
-                GUILayout.Label("___________________________________________", boldLabel);
+                GUILayout.Label("___________________________________________", RCUtils.boldLabel);
                 GUILayout.Space(3);
-                GUILayout.Label("Secondary chute:", boldLabel, GUILayout.Width(120));
+                GUILayout.Label("Secondary chute:", RCUtils.boldLabel, GUILayout.Width(120));
                 GUILayout.Label("Material: " + secMat.name, skins.label);
                 GUILayout.Label("Drag coefficient: " + secMat.dragCoefficient.ToString("0.00"), skins.label);
                 GUILayout.Label("Predeployed diameter: " + secPreDeployedDiameter + "m    area:" + secPreDeployedArea.ToString("0.###") + "m²", skins.label);
@@ -1457,7 +1454,7 @@ namespace RealChute
                 GUILayout.Label("Deployment speed: " + secDeploymentSpeed + "s", skins.label);
             }
             GUILayout.EndScrollView();
-            if (this.part.symmetryCounterparts.Count > 0)
+            if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
