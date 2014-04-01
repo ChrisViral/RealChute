@@ -182,7 +182,7 @@ namespace RealChute
                 if (calcSelect)
                 {
                     if (!getMass && !RCUtils.CanParse(mass) || !RCUtils.CheckRange(float.Parse(mass), 0.1f, 10000)) { main.Add("Craft mass"); }
-                    if (!RCUtils.CanParse(landingSpeed) || !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)) { main.Add("Landing speed"); }
+                    if (!RCUtils.CanParse(landingSpeed) || ((typeID == 2 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 2 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
                     if (typeID == 2 && !RCUtils.CanParse(deceleration)  || !RCUtils.CheckRange(float.Parse(deceleration), 0.1f, 100)) { main.Add("Wanted deceleration"); }
                     if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, 45000)) { main.Add("Mains planned deployment alt"); }
                     if (!RCUtils.CanParse(chuteCount) || !RCUtils.CheckRange(float.Parse(chuteCount), 1, 100)) { main.Add("Parachute count"); }
@@ -209,7 +209,7 @@ namespace RealChute
                 if (calcSelect)
                 {
                     if (!getMass && !RCUtils.CanParse(secMass) || !RCUtils.CheckRange(float.Parse(secMass), 0.1f, 10000)) { secondary.Add("Craft mass"); }
-                    if (!RCUtils.CanParse(secLandingSpeed) || !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)) { secondary.Add("Landing speed"); }
+                    if (!RCUtils.CanParse(secLandingSpeed) || ((secTypeID == 2 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) || (secTypeID != 2 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)))) { secondary.Add("Landing speed"); }
                     if (secTypeID == 2 && !RCUtils.CanParse(secDeceleration) || !RCUtils.CheckRange(float.Parse(secDeceleration), 0.1f, 100)) { secondary.Add("Wanted deceleration"); }
                     if (secTypeID == 1 && !RCUtils.CanParse(secRefDepAlt) || !RCUtils.CheckRange(float.Parse(secRefDepAlt), 10, 45000)) { secondary.Add("Mains planned deployment alt"); }
                     if (!RCUtils.CanParse(secChuteCount) || !RCUtils.CheckRange(float.Parse(secChuteCount), 1, 100)) { secondary.Add("Parachute count"); }
