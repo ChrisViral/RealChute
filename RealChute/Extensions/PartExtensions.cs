@@ -19,7 +19,7 @@ namespace RealChute.Extensions
             if (part.children.Count > 0)
             {
                 List<Part> children = new List<Part>(part.children);
-                part.children.ForEach(p => children.AddRange(p.GetAllChildren()));
+                children.ForEach(p => children.AddRange(p.GetAllChildren()));
                 return children;
             }
             return new List<Part>();

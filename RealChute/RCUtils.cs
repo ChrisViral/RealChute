@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System.Diagnostics;
+using System.Reflection;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -43,6 +45,7 @@ namespace RealChute
             get { return System.IO.Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
         }
 
+        private static GUIStyle _redLabel = null;
         /// <summary>
         /// A red KSP label for ProceduralChute
         /// </summary>
@@ -50,13 +53,18 @@ namespace RealChute
         {
             get
             {
-                GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                style.normal.textColor = XKCDColors.Red;
-                style.hover.textColor = XKCDColors.Red;
-                return style;
+                if (_redLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
+                    style.normal.textColor = XKCDColors.Red;
+                    style.hover.textColor = XKCDColors.Red;
+                    _redLabel = style;
+                }
+                return _redLabel;
             }
         }
 
+        private static GUIStyle _boldLabel = null;
         /// <summary>
         /// A bold KSP style label for RealChute GUI
         /// </summary>
@@ -64,9 +72,13 @@ namespace RealChute
         {
             get
             {
-                GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                style.fontStyle = FontStyle.Bold;
-                return style;
+                if (_boldLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
+                    style.fontStyle = FontStyle.Bold;
+                    _boldLabel = style;
+                }
+                return _boldLabel;
             }
         }
 
@@ -77,11 +89,11 @@ namespace RealChute
         {
             get
             {
-                System.Version version = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                System.Version version = new System.Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
                 if (version.Revision == 0)
                 {
-                    if (version.Build == 0) { return version.ToString(2); }
-                    return version.ToString(3);
+                    if (version.Build == 0) { return "v" + version.ToString(2); }
+                    return "v" + version.ToString(3);
                 }
                 return "v" + version.ToString();
             }
@@ -96,15 +108,11 @@ namespace RealChute
         public static bool CanParseTime(string text)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-
-            bool cutLast = false;
             char indicator = text[text.Length - 1];
-            float empty;
-            if (timeSuffixes.Contains(indicator)) { cutLast = true; }
+            float test;
+            if (timeSuffixes.Contains(indicator)) { text = text.Remove(text.Length - 1); }
 
-            if (cutLast) { text = text.Remove(text.Length - 1); }
-
-            return float.TryParse(text, out empty);
+            return float.TryParse(text, out test);
         }
 
         /// <summary>
@@ -114,17 +122,13 @@ namespace RealChute
         public static float ParseTime(string text)
         {
             if (string.IsNullOrEmpty(text)) { return 0; }
-
             float multiplier = 1, test = 0;
-            bool cutLast = false;
             char indicator = text[text.Length - 1];
             if (timeSuffixes.Contains(indicator))
             {
-                cutLast = true;
+                text = text.Remove(text.Length - 1);
                 if (indicator == 'm') { multiplier = 60; }
             }
-
-            if (cutLast) { text = text.Remove(text.Length - 1); }
 
             if (float.TryParse(text, out test))
             {
@@ -140,22 +144,9 @@ namespace RealChute
         /// <param name="result">Value to store the result in</param>
         public static bool TryParseTime(string text, ref float result)
         {
-            if (string.IsNullOrEmpty(text)) { return false; }
-
-            float multiplier = 1, test = 0;
-            bool cutLast = false;
-            char indicator = text[text.Length - 1];
-            if (timeSuffixes.Contains(indicator))
+            if (CanParseTime(text))
             {
-                cutLast = true;
-                if (indicator == 'm') { multiplier = 60; }
-            }
-
-            if (cutLast) { text = text.Remove(text.Length - 1); }
-
-            if (float.TryParse(text, out test))
-            {
-                result = test * multiplier;
+                result = ParseTime(text);
                 return true;
             }
             return false;
@@ -168,9 +159,8 @@ namespace RealChute
         public static bool CanParse(string text)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-
-            float empty;
-            return float.TryParse(text, out empty);
+            float test;
+            return float.TryParse(text, out test);
         }
 
         /// <summary>
@@ -195,9 +185,8 @@ namespace RealChute
         public static bool CanParseWithEmpty(string text)
         {
             if (string.IsNullOrEmpty(text)) { return true; }
-
-            float empty;
-            return float.TryParse(text, out empty);
+            float test;
+            return float.TryParse(text, out test);
         }
 
         /// <summary>
@@ -207,7 +196,6 @@ namespace RealChute
         public static float ParseWithEmpty(string text)
         {
             if (string.IsNullOrEmpty(text)) { return -1; }
-
             return float.Parse(text);
         }
 
@@ -223,8 +211,7 @@ namespace RealChute
                 result = -1;
                 return true;
             }
-
-            float test = 0;
+            float test;
             if (float.TryParse(text, out test))
             {
                 result = test;
@@ -236,10 +223,10 @@ namespace RealChute
         /// <summary>
         /// Returns the array of values contained within a string
         /// </summary>
-        /// <param name="array">Array to parse</param>
-        public static string[] ParseArray(string array)
+        /// <param name="text">Array to parse</param>
+        public static string[] ParseArray(string text)
         {
-            return array.Split(',').Select(s => s.Trim()).ToArray();
+            return text.Split(',').Select(s => s.Trim()).ToArray();
         }
 
         /// <summary>
@@ -296,7 +283,7 @@ namespace RealChute
             float round = 0, decimals = float.Parse("0." + splits[1].Trim());
             if (decimals >= 0.25f && decimals < 0.75) { round = 0.5f; }
             else if (decimals >= 0.75) { round = 1; }
-            return float.Parse(splits[0].Trim()) + round;
+            return Mathf.Max(float.Parse(splits[0].Trim()) + round, 0.5f);
         }
 
         /// <summary>

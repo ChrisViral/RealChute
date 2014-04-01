@@ -46,7 +46,7 @@ namespace RealChute
         /// </summary>
         public AtmoPlanets(bool load)
         {
-            if (load) { _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.bodyName != "Jool").ToDictionary(b => b, b => b.bodyName); }
+            if (load) { _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null).ToDictionary(b => b, b => b.bodyName); }
         }
         #endregion
 
@@ -57,7 +57,7 @@ namespace RealChute
         /// <param name="name">Name of the body</param>
         public CelestialBody GetBody(string name)
         {
-            return _bodies.Keys.First(key => key.bodyName == name);
+            return bodies.First(pair => pair.Value == name).Key;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace RealChute
         /// <param name="index">Index of the body</param>
         public CelestialBody GetBody(int index)
         {
-            return _bodies.Keys.ToArray()[index];
+            return bodies.Keys.ToArray()[index];
         }
 
         /// <summary>

@@ -77,6 +77,9 @@ namespace RealChute
 
         public void Start()
         {
+            //Small RealChute hijack
+            print("[RealChute]: Running " + RCUtils.assemblyVersion);
+
             // Checkers are identified by the type name and version field name.
             FieldInfo[] fields =
                 getAllTypes()

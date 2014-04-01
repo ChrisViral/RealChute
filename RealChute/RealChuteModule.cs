@@ -179,7 +179,7 @@ namespace RealChute
         //Mass of the secondary chute
         public float secChuteMass
         {
-            get { return secondaryChute ? secDeployedArea * secMat.areaDensity : 0; }
+            get { return secondaryChute ? secDeployedArea * secMat.areaDensity : 0f; }
         }
         #endregion
 
@@ -201,7 +201,14 @@ namespace RealChute
         private Stopwatch dragTimer = new Stopwatch(), secDragTimer = new Stopwatch(), failedTimer = new Stopwatch();
         private float currentTime, deploymentTime;
         public DeploymentStates deploymentState = DeploymentStates.STOWED, secDeploymentState = DeploymentStates.STOWED;
-        public Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>();
+        public Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
+        {
+            { DeploymentStates.STOWED, "STOWED" },
+            { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
+            { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
+            { DeploymentStates.DEPLOYED, "DEPLOYED" },
+            { DeploymentStates.CUT, "CUT" }
+        };
         public float random_x, random_y;
         public float secRandom_x, secRandom_y;
         public float randomTime, secRandomTime;
@@ -212,6 +219,7 @@ namespace RealChute
         private double terrainAlt, ASL, trueAlt;
         private double atmPressure, atmDensity;
         private float sqrSpeed;
+        private float huehue;
 
         //Materials
         public MaterialDefinition mat = new MaterialDefinition(), secMat = new MaterialDefinition();
@@ -286,7 +294,7 @@ namespace RealChute
                 Events["GUIArm"].active = true;
                 oneWasDeployed = false;
                 deploymentState = DeploymentStates.STOWED;
-                states.TryGetValue(deploymentState, out depState);
+                depState = GetStateString(deploymentState);
                 cap.gameObject.SetActive(true);
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
                 capOff = false;
@@ -295,7 +303,7 @@ namespace RealChute
                 if (secondaryChute)
                 {
                     secDeploymentState = DeploymentStates.STOWED;
-                    states.TryGetValue(secDeploymentState, out secDepState);
+                    secDepState = GetStateString(secDeploymentState);
                     secCap.gameObject.SetActive(true);
                 }
             }
@@ -307,20 +315,15 @@ namespace RealChute
         {
             if (!this.visible)
             {
-                List<Part> parachutes = HighLogic.LoadedSceneIsEditor ? EditorLogic.SortedShipList : vessel.Parts;
-                foreach (Part p in parachutes)
+                List<RealChuteModule> parachutes = new List<RealChuteModule>();
+                if (HighLogic.LoadedSceneIsEditor) { parachutes.AddRange(EditorLogic.SortedShipList.Where(p => p.Modules.Contains("RealChuteModule")).Select(p => (RealChuteModule)p.Modules["RealChuteModule"])); }
+                else if (HighLogic.LoadedSceneIsFlight) { parachutes.AddRange(this.vessel.FindPartModulesImplementing<RealChuteModule>()); }
+                if (parachutes.Count > 1 && parachutes.Any(p => p.visible))
                 {
-                    if (p.Modules.Contains("RealChuteModule"))
-                    {
-                        RealChuteModule module = p.Modules["RealChuteModule"] as RealChuteModule;
-                        if (module.visible)
-                        {
-                            module.visible = false;
-                            this.window.x = module.window.x;
-                            this.window.y = module.window.y;
-                            break;
-                        }
-                    }
+                    RealChuteModule module = parachutes.Find(p => p.visible);
+                    this.window.x = module.window.x;
+                    this.window.y = module.window.y;
+                    module.visible = false;
                 }
             }
             this.visible = !this.visible;
@@ -388,9 +391,7 @@ namespace RealChute
         //Returns the right value to check
         public bool MinDeployment(float minDeploy, float minPress, bool isPressure)
         {
-            if (isPressure && atmPressure >= minPress) { return true; }
-            else if (!isPressure && trueAlt <= minDeploy) { return true; }
-            return false;
+            return isPressure ? atmPressure >= minPress : trueAlt <= minDeploy;
         }
 
         //Checks if there is a timer and/or a mustGoDown clause active
@@ -492,11 +493,23 @@ namespace RealChute
             }
             return false;
         }
+        
+        //Gets the DeploymentState from the string value
+        public DeploymentStates GetState(string state)
+        {
+            return states.First(pair => pair.Value == state).Key;
+        }
+
+        //Gets the string state from a DeploymentState
+        public string GetStateString(DeploymentStates value)
+        {
+            return states.First(pair => pair.Key == value).Value;
+        }
 
         //Check if the chute is partially or completely deployed
         public bool IsDeployed(DeploymentStates deployState)
         {
-            return deployState.ToString().Contains("DEPLOYED");
+            return GetStateString(deployState).Contains("DEPLOYED");
         }
 
         //Gives a random noise to the parachute orientation
@@ -547,13 +560,13 @@ namespace RealChute
         {
             if (chute == parachute)
             {
-                if (phase.magnitude < (to.magnitude - 0.01f) || phase.magnitude > (to.magnitude + 0.01f)) { phase = Vector3.Lerp(phase, to, 0.1f); }
+                if (phase.magnitude < (to.magnitude - 0.01f) || phase.magnitude > (to.magnitude + 0.01f)) { phase = Vector3.Lerp(phase, to, 0.01f); }
                 else { phase = to; }
                 return phase;
             }
             else
             {
-                if (secPhase.magnitude < (to.magnitude - 0.01f) || secPhase.magnitude > (to.magnitude + 0.01f)) { secPhase = Vector3.Lerp(secPhase, to, 0.1f); }
+                if (secPhase.magnitude < (to.magnitude - 0.01f) || secPhase.magnitude > (to.magnitude + 0.01f)) { secPhase = Vector3.Lerp(secPhase, to, 0.01f); }
                 else { secPhase = to; }
                 return secPhase;
             }
@@ -628,7 +641,7 @@ namespace RealChute
             if (mainChute)
             {
                 deploymentState = DeploymentStates.LOWDEPLOYED;
-                states.TryGetValue(deploymentState, out depState);
+                depState = GetStateString(deploymentState);
                 parachute.gameObject.SetActive(true);
                 cap.gameObject.SetActive(false);
                 Events["GUICut"].active = true;
@@ -638,7 +651,7 @@ namespace RealChute
             else
             {
                 secDeploymentState = DeploymentStates.LOWDEPLOYED;
-                states.TryGetValue(secDeploymentState, out secDepState);
+                secDepState = GetStateString(secDeploymentState);
                 secParachute.gameObject.SetActive(true);
                 secCap.gameObject.SetActive(false);
                 Events["GUISecCut"].active = true;
@@ -658,7 +671,7 @@ namespace RealChute
             if (mainChute)
             {
                 deploymentState = DeploymentStates.PREDEPLOYED;
-                states.TryGetValue(deploymentState, out depState);
+                depState = GetStateString(deploymentState);
                 parachute.gameObject.SetActive(true);
                 cap.gameObject.SetActive(false);
                 Events["GUICut"].active = true;
@@ -668,7 +681,7 @@ namespace RealChute
             else
             {
                 secDeploymentState = DeploymentStates.PREDEPLOYED;
-                states.TryGetValue(secDeploymentState, out secDepState);
+                secDepState = GetStateString(secDeploymentState);
                 secParachute.gameObject.SetActive(true);
                 secCap.gameObject.SetActive(false);
                 Events["GUISecCut"].active = true;
@@ -686,7 +699,7 @@ namespace RealChute
             if (mainChute)
             {
                 deploymentState = DeploymentStates.DEPLOYED;
-                states.TryGetValue(deploymentState, out depState);
+                depState = GetStateString(deploymentState);
                 if (!this.part.CheckAnimationPlaying(preDeploymentAnimation))
                 {
                     dragTimer.Reset();
@@ -699,7 +712,7 @@ namespace RealChute
             else
             {
                 secDeploymentState = DeploymentStates.DEPLOYED;
-                states.TryGetValue(secDeploymentState, out secDepState);
+                secDepState = GetStateString(secDeploymentState);
                 if (!this.part.CheckAnimationPlaying(secPreDeploymentAnimation))
                 {
                     secDragTimer.Reset();
@@ -727,7 +740,7 @@ namespace RealChute
             if (mainChute)
             {
                 deploymentState = DeploymentStates.CUT;
-                states.TryGetValue(deploymentState, out depState);
+                depState = GetStateString(deploymentState);
                 parachute.gameObject.SetActive(false);
                 Events["GUICut"].active = false;
                 this.played = false;
@@ -738,7 +751,7 @@ namespace RealChute
             else
             {
                 secDeploymentState = DeploymentStates.CUT;
-                states.TryGetValue(secDeploymentState, out secDepState);
+                secDepState = GetStateString(secDeploymentState);
                 secParachute.gameObject.SetActive(false);
                 Events["GUISecCut"].active = false;
                 secPlayed = false;
@@ -824,7 +837,7 @@ namespace RealChute
                 }
 
                 //Hides the window if F2 is pressed
-                if(Input.GetKeyDown(KeyCode.F2))
+                if(HighLogic.LoadedSceneIsFlight && Input.GetKeyDown(KeyCode.F2))
                 {
                     if (this.visible || this.hid)
                     {
@@ -889,7 +902,7 @@ namespace RealChute
             currentTime = Time.fixedTime;
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
-            terrainAlt = this.vessel.pqsAltitude;
+            terrainAlt = this.vessel.mainBody.pqsController != null ? this.vessel.pqsAltitude : 0d;
             if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
             trueAlt = ASL - terrainAlt;
             atmPressure = FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
@@ -899,7 +912,7 @@ namespace RealChute
             dragVector = -(this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).normalized;
             forcePosition = this.parachute.transform.position;
             if (secondaryChute) { secForcePosition = this.secParachute.transform.position; }
-            if (GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel == FlightGlobals.ActiveVessel && this.part.inverseStage == Staging.CurrentStage && !this.staged) { ActivateRC(); }
+            if (GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && this.part.inverseStage == Staging.CurrentStage && !this.staged) { ActivateRC(); }
             
             if (this.staged)
             {
@@ -940,7 +953,7 @@ namespace RealChute
                                     {
                                         FollowDragDirection(parachute, GetForcedVector(parachute, forcedOrientation));
                                         ParachuteNoise(parachute);
-                                        this.part.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, mat.dragCoefficient, preDeploymentSpeed + deploymentSpeed, true), forcePosition, ForceMode.Force);
+                                        this.part.rigidbody.AddForceAtPosition(/*huehuehue*/-DragForce(0, deployedArea, mat.dragCoefficient, preDeploymentSpeed + deploymentSpeed, true), forcePosition, ForceMode.Force);
                                         if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
                                         {
                                             dragTimer.Reset();
@@ -955,7 +968,7 @@ namespace RealChute
                                     {
                                         FollowDragDirection(parachute, GetForcedVector(parachute, forcedOrientation));
                                         ParachuteNoise(parachute);
-                                        this.part.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, mat.dragCoefficient, deploymentSpeed, true), forcePosition, ForceMode.Force);
+                                        this.part.rigidbody.AddForceAtPosition(/*huehuehue*/-DragForce(preDeployedArea, deployedArea, mat.dragCoefficient, deploymentSpeed, true), forcePosition, ForceMode.Force);
                                         if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
                                         {
                                             dragTimer.Reset();
@@ -1019,7 +1032,6 @@ namespace RealChute
                                         FollowDragDirection(secParachute, GetForcedVector(secParachute, secForcedOrientation));
                                         ParachuteNoise(secParachute);
                                         this.part.rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, secMat.dragCoefficient, secDeploymentSpeed, false), secForcePosition, ForceMode.Force);
-                                        if (!this.part.CheckAnimationPlaying(secPreDeploymentAnimation) && !this.secPlayed)
                                         {
                                             secDragTimer.Reset();
                                             secDragTimer.Start();
@@ -1091,19 +1103,6 @@ namespace RealChute
             //Staging icon
             this.part.stagingIcon = "PARACHUTES";
 
-            //Deployment states dictionnary initialization
-            if (states.Count == 0)
-            {
-                states = new Dictionary<DeploymentStates, string>
-                {
-                    { DeploymentStates.STOWED, "STOWED" },
-                    { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
-                    { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
-                    { DeploymentStates.DEPLOYED, "DEPLOYED" },
-                    { DeploymentStates.CUT, "CUT" }
-                };
-            }
-
             //Gets the materials
             materials.TryGetMaterial(material, ref mat);
             if (secondaryChute && !materials.TryGetMaterial(secMaterial, ref secMat)) { secMat = mat; }
@@ -1160,7 +1159,7 @@ namespace RealChute
             }
 
             //Initiates animations
-            anim = part.FindModelAnimators(capName).FirstOrDefault();
+            anim = this.part.FindModelAnimators(capName).FirstOrDefault();
             this.cap = this.part.FindModelTransform(capName);
             this.parachute = this.part.FindModelTransform(parachuteName);
             this.parachute.gameObject.SetActive(false);
@@ -1182,8 +1181,8 @@ namespace RealChute
             {
                 deploymentState = DeploymentStates.STOWED;
                 secDeploymentState = DeploymentStates.STOWED;
-                states.TryGetValue(deploymentState, out depState);
-                states.TryGetValue(secDeploymentState, out secDepState);
+                depState = GetStateString(deploymentState);
+                secDepState = GetStateString(secDeploymentState);
                 initiated = true;
                 capOff = false;
                 played = false;
@@ -1198,8 +1197,8 @@ namespace RealChute
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
-                deploymentState = states.ToList().Find(pair => pair.Value == depState).Key;
-                secDeploymentState = states.ToList().Find(pair => pair.Value == secDepState).Key;
+                deploymentState = GetState(depState);
+                secDeploymentState = GetState(secDepState);
                 //If the part has been staged in the past
                 if (capOff)
                 {
@@ -1210,8 +1209,9 @@ namespace RealChute
                         secCap.gameObject.SetActive(false);
                     }
                 }
-                this.randomTime = UnityEngine.Random.value;
-                this.secRandomTime = UnityEngine.Random.value;
+                System.Random random = new System.Random();
+                this.randomTime = (float)random.NextDouble();
+                this.secRandomTime = (float)random.NextDouble();
             }
 
             //GUI
@@ -1221,7 +1221,7 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            //Gets the materials for GetInfo()
+            //Gets the materials
             materials.TryGetMaterial(material, ref mat);
             if (secondaryChute && !materials.TryGetMaterial(secMaterial, ref secMat)) { secMat = mat; }
             this.part.mass = caseMass + chuteMass + secChuteMass;
