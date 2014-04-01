@@ -199,7 +199,7 @@ namespace RealChute
         //Deployment
         private Stopwatch deploymentTimer = new Stopwatch(), randomTimer = new Stopwatch(), secRandomTimer = new Stopwatch();
         private Stopwatch dragTimer = new Stopwatch(), secDragTimer = new Stopwatch(), failedTimer = new Stopwatch();
-        private float currentTime, deploymentTime;
+        private float deploymentTime;
         public DeploymentStates deploymentState = DeploymentStates.STOWED, secDeploymentState = DeploymentStates.STOWED;
         public Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
         {
@@ -219,7 +219,6 @@ namespace RealChute
         private double terrainAlt, ASL, trueAlt;
         private double atmPressure, atmDensity;
         private float sqrSpeed;
-        private float huehue;
 
         //Materials
         public MaterialDefinition mat = new MaterialDefinition(), secMat = new MaterialDefinition();
@@ -541,9 +540,9 @@ namespace RealChute
                 x = secRandom_x;
                 y = secRandom_y;
             }
-
-            Vector3 rotationAngle = new Vector3(5 * (Mathf.PerlinNoise(currentTime, x + Mathf.Sin(currentTime)) - 0.5f), 5 * (Mathf.PerlinNoise(currentTime, y + Mathf.Sin(currentTime)) - 0.5f), 0);
-            chute.Rotate(rotationAngle);
+            float time = Time.time;
+            Vector3 rotation = new Vector3(5 * (Mathf.PerlinNoise(time, x + Mathf.Sin(time)) - 0.5f), 5 * (Mathf.PerlinNoise(time, y + Mathf.Sin(time)) - 0.5f), 0);
+            chute.Rotate(rotation);
         }
 
         //Creates a vector that will angle the chute in of a certain amount away of the center of the part
@@ -899,7 +898,6 @@ namespace RealChute
         {
             //Flight values
             if (!CompatibilityChecker.IsCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
-            currentTime = Time.fixedTime;
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
             terrainAlt = this.vessel.mainBody.pqsController != null ? this.vessel.pqsAltitude : 0d;
@@ -953,7 +951,7 @@ namespace RealChute
                                     {
                                         FollowDragDirection(parachute, GetForcedVector(parachute, forcedOrientation));
                                         ParachuteNoise(parachute);
-                                        this.part.rigidbody.AddForceAtPosition(/*huehuehue*/-DragForce(0, deployedArea, mat.dragCoefficient, preDeploymentSpeed + deploymentSpeed, true), forcePosition, ForceMode.Force);
+                                        this.part.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, mat.dragCoefficient, preDeploymentSpeed + deploymentSpeed, true), forcePosition, ForceMode.Force);
                                         if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
                                         {
                                             dragTimer.Reset();
@@ -968,7 +966,7 @@ namespace RealChute
                                     {
                                         FollowDragDirection(parachute, GetForcedVector(parachute, forcedOrientation));
                                         ParachuteNoise(parachute);
-                                        this.part.rigidbody.AddForceAtPosition(/*huehuehue*/-DragForce(preDeployedArea, deployedArea, mat.dragCoefficient, deploymentSpeed, true), forcePosition, ForceMode.Force);
+                                        this.part.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, mat.dragCoefficient, deploymentSpeed, true), forcePosition, ForceMode.Force);
                                         if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
                                         {
                                             dragTimer.Reset();

@@ -1269,8 +1269,8 @@ namespace RealChute
                 }
                 else if (typeID == 1)
                 {
-                    if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
-                    else { GUILayout.Label("Wanted speed at full deployment (m/s):", RCUtils.redLabel); }
+                    if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
+                    else { GUILayout.Label("Wanted speed at target alt (m/s):", RCUtils.redLabel); }
                 }
                 else
                 {
@@ -1288,7 +1288,7 @@ namespace RealChute
 
                 if (typeID == 1)
                 {
-                    CreateEntryArea("Mains planned deployment alt (m):", ref refDepAlt, 10, 45000, 100);
+                    CreateEntryArea("Target altitude (m):", ref refDepAlt, 10, 45000, 100);
                 }
 
                 CreateEntryArea("Parachutes used (parachutes):", ref chuteCount, 1, 100, 100);
@@ -1475,8 +1475,8 @@ namespace RealChute
                     }
                     else if (secTypeID == 1)
                     {
-                        if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
-                        else { GUILayout.Label("Wanted speed at full deployment (m/s):", RCUtils.redLabel); }
+                        if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
+                        else { GUILayout.Label("Wanted speed at target alt (m/s):", RCUtils.redLabel); }
                     }
                     else
                     {
@@ -1494,7 +1494,7 @@ namespace RealChute
 
                     if (secTypeID == 1)
                     {
-                        CreateEntryArea("Mains planned deployment alt (m):", ref secRefDepAlt, 10, 45000, 100);
+                        CreateEntryArea("Target altitude (m):", ref secRefDepAlt, 10, 45000, 100);
                     }
 
                     CreateEntryArea("Number of parachutes (parts):", ref secChuteCount, 1, 100, 100);
