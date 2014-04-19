@@ -18,6 +18,15 @@ namespace RealChute
             get { return this._name; }
         }
 
+        private string _description = "We don't know much about this, it might as well be made of fishnets";
+        /// <summary>
+        /// The description of this material
+        /// </summary>
+        public string description
+        {
+            get { return this._description; }
+        }
+
         private float _areaDensity = 0.00005f;
         /// <summary>
         /// Area density of this material
@@ -50,6 +59,7 @@ namespace RealChute
         public MaterialDefinition(ConfigNode node)
         {
             node.TryGetValue("name", ref _name);
+            node.TryGetValue("description", ref _description);
             node.TryGetValue("areaDensity", ref _areaDensity);
             node.TryGetValue("dragCoefficient", ref _dragCoefficient);
         }

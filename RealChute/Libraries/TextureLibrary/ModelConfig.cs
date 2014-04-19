@@ -50,11 +50,6 @@ namespace RealChute
 
             #region Constructor
             /// <summary>
-            /// Creates an empty ParachuteParameters
-            /// </summary>
-            public ParachuteParameters() { }
-
-            /// <summary>
             /// Creates a new ParachuteParameters
             /// </summary>
             /// <param name="node">ConfigNode to get the values from</param>
@@ -105,7 +100,7 @@ namespace RealChute
             get { return this._maxDiam; }
         }
 
-        private ParachuteParameters _main = new ParachuteParameters();
+        private ParachuteParameters _main = null;
         /// <summary>
         /// Info about the main parachute of this type
         /// </summary>
@@ -114,13 +109,29 @@ namespace RealChute
             get { return this._main; }
         }
 
-        private ParachuteParameters _secondary = new ParachuteParameters();
+        /// <summary>
+        /// If this can be used as a main
+        /// </summary>
+        public bool hasMain
+        {
+            get { return this.main != null; }
+        }
+
+        private ParachuteParameters _secondary = null;
         /// <summary>
         /// Info about the secondary parachute of this type
         /// </summary>
         public ParachuteParameters secondary
         {
             get { return this._secondary; }
+        }
+
+        /// <summary>
+        /// If this can be used as a secondary
+        /// </summary>
+        public bool hasSecondary
+        {
+            get { return this.secondary != null; }
         }
         #endregion
 

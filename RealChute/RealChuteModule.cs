@@ -36,8 +36,10 @@ namespace RealChute
         public float cutSpeed = 0.5f;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 30, stepIncrement = 1)]
         public float timer = 0;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Must down"), UI_Toggle(enabledText = "true", disabledText = "false")]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Must down"), UI_Toggle(enabledText = "True", disabledText = "False")]
         public bool mustGoDown = false;
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Ground deploy"), UI_Toggle(enabledText = "True", disabledText = "False")]
+        public bool deployOnGround = false;
         [KSPField]
         public bool reverseOrientation = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spares"), UI_FloatRange(minValue = -1, maxValue = 10, stepIncrement = 1)]
@@ -52,7 +54,7 @@ namespace RealChute
         public float preDeployedDiameter = 1;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float deployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep"), UI_Toggle(enabledText = "pressure", disabledText = "altitude")]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep"), UI_Toggle(enabledText = "Pressure", disabledText = "Altitude")]
         public bool minIsPressure = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
         public float minDeployment = 25000;
@@ -82,7 +84,7 @@ namespace RealChute
         public float secPreDeployedDiameter = 1;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float secDeployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2"), UI_Toggle(enabledText = "pressure", disabledText = "altitude")]
+        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2"), UI_Toggle(enabledText = "Pressure", disabledText = "Altitude")]
         public bool secMinIsPressure = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
         public float secMinDeployment = 25000;
@@ -114,7 +116,7 @@ namespace RealChute
         [KSPField(isPersistant = true)]
         public bool wait = true, armed = false, oneWasDeployed = false;
         [KSPField(isPersistant = true)]
-        public bool staged = false;
+        public bool staged = false, launched = false;
         [KSPField(isPersistant = true)]
         public string depState = "STOWED", secDepState = "STOWED";
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
@@ -212,6 +214,7 @@ namespace RealChute
         public float random_x, random_y;
         public float secRandom_x, secRandom_y;
         public float randomTime, secRandomTime;
+        private float joke = 1;
         private bool randomized = false, secRandomized = false;
         private bool displayed = false, autoArm = false;
 
@@ -550,7 +553,7 @@ namespace RealChute
         {
             if (angle >= 90 || angle <= 0) { return Vector3.zero; }
             Vector3 follow = chute.transform.position - pos;
-            float length = 1 / Mathf.Tan((90 - angle) * Mathf.Deg2Rad);
+            float length = Mathf.Tan(angle * Mathf.Deg2Rad);
             return follow.normalized * length;
         }
 
@@ -604,6 +607,7 @@ namespace RealChute
         public void DeactivateRC()
         {
             this.staged = false;
+            this.launched = false;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
         }
 
@@ -799,7 +803,7 @@ namespace RealChute
         //Calculates a part's drag
         private Vector3 DragForce(float startArea, float targetArea, float Cd, float time, bool mainChute)
         {
-            return DragCalculation(DragDeployment(time, startArea, targetArea, mainChute), Cd) * dragVector;
+            return DragCalculation(DragDeployment(time, startArea, targetArea, mainChute), Cd) * dragVector * joke;
         }
         #endregion
         #endregion
@@ -900,17 +904,24 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
-            terrainAlt = this.vessel.mainBody.pqsController != null ? this.vessel.pqsAltitude : 0d;
-            if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
-            trueAlt = ASL - terrainAlt;
+            if (this.vessel.mainBody.pqsController != null)
+            {
+                terrainAlt = this.vessel.pqsAltitude;
+                if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
+                trueAlt = ASL - terrainAlt;
+            }
+            else { terrainAlt = 0d; }
             atmPressure = FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
             if (atmPressure <= 1E-6) { atmPressure = 0; }
             atmDensity = FlightGlobals.getAtmDensity(atmPressure);
-            sqrSpeed = (this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).sqrMagnitude;
-            dragVector = -(this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f()).normalized;
+            Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
+            sqrSpeed = velocity.sqrMagnitude;
+            dragVector = -velocity.normalized;
             forcePosition = this.parachute.transform.position;
             if (secondaryChute) { secForcePosition = this.secParachute.transform.position; }
-            if (GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && this.part.inverseStage == Staging.CurrentStage && !this.staged) { ActivateRC(); }
+            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && this.part.inverseStage == Staging.CurrentStage) { ActivateRC(); }
+            if (!this.launched && !this.vessel.LandedOrSplashed) { this.launched = true; }
+            if (this.launched && !this.staged && deployOnGround && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
             
             if (this.staged)
             {
@@ -991,7 +1002,6 @@ namespace RealChute
                         oneWasDeployed = true;
                         if (!wait)
                         {
-
                             switch (secDeploymentState)
                             {
                                 case DeploymentStates.STOWED:
@@ -1030,6 +1040,7 @@ namespace RealChute
                                         FollowDragDirection(secParachute, GetForcedVector(secParachute, secForcedOrientation));
                                         ParachuteNoise(secParachute);
                                         this.part.rigidbody.AddForceAtPosition(DragForce(secPreDeployedArea, secDeployedArea, secMat.dragCoefficient, secDeploymentSpeed, false), secForcePosition, ForceMode.Force);
+                                        if (!this.part.CheckAnimationPlaying(secPreDeploymentAnimation) && !this.secPlayed)
                                         {
                                             secDragTimer.Reset();
                                             secDragTimer.Start();
@@ -1106,7 +1117,11 @@ namespace RealChute
             if (secondaryChute && !materials.TryGetMaterial(secMaterial, ref secMat)) { secMat = mat; }
 
             //Autoarming checkup
-            ConfigNode.Load(RCUtils.settingsURL).GetNode("REALCHUTE_SETTINGS").TryGetValue("autoArm", ref autoArm);
+            ConfigNode settings = ConfigNode.Load(RCUtils.settingsURL).GetNode("REALCHUTE_SETTINGS");
+            settings.TryGetValue("autoArm", ref autoArm);
+            bool jokeActivated = false;
+            settings.TryGetValue("jokeActivated", ref jokeActivated);
+            joke = jokeActivated ? -1 : 1;
 
             //Part GUI
             Events["GUIDeploy"].active = true;
@@ -1179,8 +1194,8 @@ namespace RealChute
             {
                 deploymentState = DeploymentStates.STOWED;
                 secDeploymentState = DeploymentStates.STOWED;
-                depState = GetStateString(deploymentState);
-                secDepState = GetStateString(secDeploymentState);
+                depState = "STOWED";
+                secDepState = "STOWED";
                 initiated = true;
                 capOff = false;
                 played = false;
@@ -1284,6 +1299,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
+            //Handles GUI rendering
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
             {
@@ -1310,6 +1326,7 @@ namespace RealChute
             if (timer >= 60) { GUILayout.Label("Deployment timer: " + RCUtils.ToMinutesSeconds(timer), skins.label); }
             else { GUILayout.Label("Deployment timer: " + timer.ToString("0.#") + "s", skins.label); }
             GUILayout.Label("Must go down to deploy: " + mustGoDown.ToString(), skins.label);
+            GUILayout.Label("Deploys on ground contact: " + deployOnGround.ToString(), skins.label);
             GUILayout.Label("Spare chutes: " + chuteCount, skins.label);
             GUILayout.Label("___________________________________________", RCUtils.boldLabel);
             GUILayout.Space(3);

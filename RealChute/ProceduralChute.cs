@@ -28,9 +28,9 @@ namespace RealChute
         [KSPField]
         public string secCurrentType = "Main";
         [KSPField]
-        public float modelDiameter = 10f;
+        public float modelDiameter = 0;
         [KSPField]
-        public float secModelDiameter = 10f;
+        public float secModelDiameter = 0;
         [KSPField]
         public int modelCount = 1;
         [KSPField]
@@ -68,11 +68,15 @@ namespace RealChute
         [KSPField(isPersistant = true)]
         public bool initiated = false;
         [KSPField(isPersistant = true)]
-        private bool mustGoDown = false, isPressure = false, secIsPressure = false;
+        private bool mustGoDown = false, deployOnGround = false;
+        [KSPField(isPersistant = true)]
+        public bool isPressure = false, secIsPressure = false;
         [KSPField(isPersistant = true)]
         private bool calcSelect = true, secCalcSelect = true;
         [KSPField(isPersistant = true)]
         private bool getMass = true, secGetMass = true;
+        [KSPField(isPersistant = true)]
+        public bool useDry = true, secUseDry = true;
         [KSPField(isPersistant = true)]
         private bool secondaryChute = false;
 
@@ -116,6 +120,7 @@ namespace RealChute
         private Vector2 mainScroll = new Vector2(), failedScroll = new Vector2();
         private Vector2 parachuteScroll = new Vector2(), secParachuteScroll = new Vector2();
         private Vector2 materialsScroll = new Vector2(), secMaterialsScroll = new Vector2();
+        private CelestialBody body = null;
 
         //Vectors from the module node
         [SerializeField]
@@ -141,15 +146,17 @@ namespace RealChute
 
             if (entries == "chute" && textures.canopyNames.Length > 1) { return textures.canopyNames; }
 
-            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames; }
+            if (entries == "modelMain" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m =>textures.GetModel(m).hasMain).ToArray(); }
+
+            if (entries == "modelSec" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m => textures.GetModel(m).hasSecondary).ToArray(); }
 
             return new string[] { };
         }
 
         //Gets the total mass of the craft
-        private float GetCraftMass()
+        private float GetCraftMass(bool dry)
         {
-            return EditorLogic.SortedShipList.Sum(part => part.TotalMass());
+            return EditorLogic.SortedShipList.Where(p => p.physicalSignificance != Part.PhysicalSignificance.NONE).Sum(p => dry ? p.mass : p.TotalMass());
         }
 
         //Creates a label + text field
@@ -182,9 +189,9 @@ namespace RealChute
                 if (calcSelect)
                 {
                     if (!getMass && !RCUtils.CanParse(mass) || !RCUtils.CheckRange(float.Parse(mass), 0.1f, 10000)) { main.Add("Craft mass"); }
-                    if (!RCUtils.CanParse(landingSpeed) || ((typeID == 2 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 2 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
+                    if (!RCUtils.CanParse(landingSpeed) || ((typeID == 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
                     if (typeID == 2 && !RCUtils.CanParse(deceleration)  || !RCUtils.CheckRange(float.Parse(deceleration), 0.1f, 100)) { main.Add("Wanted deceleration"); }
-                    if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, 45000)) { main.Add("Mains planned deployment alt"); }
+                    if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Mains planned deployment alt"); }
                     if (!RCUtils.CanParse(chuteCount) || !RCUtils.CheckRange(float.Parse(chuteCount), 1, 100)) { main.Add("Parachute count"); }
                 }
                 else
@@ -192,13 +199,13 @@ namespace RealChute
                     if (!RCUtils.CanParse(preDepDiam) || !RCUtils.CheckRange(float.Parse(preDepDiam), 0.5f, model.maxDiam / 2)) { main.Add("Predeployed diameter"); }
                     if (!RCUtils.CanParse(depDiam) || !RCUtils.CheckRange(float.Parse(depDiam), 1, model.maxDiam)) { main.Add("Deployed diameter"); }
                 }
-                if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, 5f)) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 25, 50000)))
+                if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))))
                 {
                     if (isPressure) { main.Add("Predeployment pressure"); }
                     else { main.Add("Predeployment altitude"); }
                 }
-                if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, 45000)) { main.Add("Deployment altitude"); }
-                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, 45000)) { main.Add("Autocut altitude"); }
+                if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Deployment altitude"); }
+                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Autocut altitude"); }
                 if (!RCUtils.CanParse(preDepSpeed) || !RCUtils.CheckRange(float.Parse(preDepSpeed), 0.5f, 5)) { main.Add("Predeployment speed"); }
                 if (!RCUtils.CanParse(depSpeed) || !RCUtils.CheckRange(float.Parse(depSpeed), 1, 10)) { main.Add("Deployment speed"); }
                 return main;
@@ -209,9 +216,9 @@ namespace RealChute
                 if (calcSelect)
                 {
                     if (!getMass && !RCUtils.CanParse(secMass) || !RCUtils.CheckRange(float.Parse(secMass), 0.1f, 10000)) { secondary.Add("Craft mass"); }
-                    if (!RCUtils.CanParse(secLandingSpeed) || ((secTypeID == 2 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) || (secTypeID != 2 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)))) { secondary.Add("Landing speed"); }
+                    if (!RCUtils.CanParse(secLandingSpeed) || ((secTypeID == 1 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) || (secTypeID != 1 && !RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 300)))) { secondary.Add("Landing speed"); }
                     if (secTypeID == 2 && !RCUtils.CanParse(secDeceleration) || !RCUtils.CheckRange(float.Parse(secDeceleration), 0.1f, 100)) { secondary.Add("Wanted deceleration"); }
-                    if (secTypeID == 1 && !RCUtils.CanParse(secRefDepAlt) || !RCUtils.CheckRange(float.Parse(secRefDepAlt), 10, 45000)) { secondary.Add("Mains planned deployment alt"); }
+                    if (secTypeID == 1 && !RCUtils.CanParse(secRefDepAlt) || !RCUtils.CheckRange(float.Parse(secRefDepAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { secondary.Add("Mains planned deployment alt"); }
                     if (!RCUtils.CanParse(secChuteCount) || !RCUtils.CheckRange(float.Parse(secChuteCount), 1, 100)) { secondary.Add("Parachute count"); }
                 }
                 else
@@ -219,13 +226,13 @@ namespace RealChute
                     if (!RCUtils.CanParse(secPreDepDiam) || !RCUtils.CheckRange(float.Parse(secPreDepDiam), 0.5f, secModel.maxDiam / 2)) { secondary.Add("Predeployed diameter"); }
                     if (!RCUtils.CanParse(secDepDiam) || !RCUtils.CheckRange(float.Parse(secDepDiam), 1, secModel.maxDiam)) { secondary.Add("Deployed diameter"); }
                 }
-                if (!RCUtils.CanParse(secPredepClause) || (secIsPressure && !RCUtils.CheckRange(float.Parse(secPredepClause), 0.0001f, 5f)) || (!secIsPressure && !RCUtils.CheckRange(float.Parse(secPredepClause), 25, 50000)))
+                if (!RCUtils.CanParse(secPredepClause) || (secIsPressure && !RCUtils.CheckRange(float.Parse(secPredepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) || (!secIsPressure && !RCUtils.CheckRange(float.Parse(secPredepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))))
                 {
                     if (secIsPressure) { secondary.Add("Predeployment pressure"); }
                     else { secondary.Add("Predeployment altitude"); }
                 }
-                if (!RCUtils.CanParse(secDeploymentAlt) || !RCUtils.CheckRange(float.Parse(secDeploymentAlt), 10, 45000)) { secondary.Add("Deployment altitude"); }
-                if (!RCUtils.CanParseWithEmpty(secCutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(secCutAlt), -1, 45000)) { secondary.Add("Autocut altitude"); }
+                if (!RCUtils.CanParse(secDeploymentAlt) || !RCUtils.CheckRange(float.Parse(secDeploymentAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { secondary.Add("Deployment altitude"); }
+                if (!RCUtils.CanParseWithEmpty(secCutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(secCutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { secondary.Add("Autocut altitude"); }
                 if (!RCUtils.CanParse(secPreDepSpeed) || !RCUtils.CheckRange(float.Parse(secPreDepSpeed), 0.5f, 5)) { secondary.Add("Predeployment speed"); }
                 if (!RCUtils.CanParse(secDepSpeed) || !RCUtils.CheckRange(float.Parse(secDepSpeed), 1, 10)) { secondary.Add("Deployment speed"); }
                 return secondary;
@@ -283,9 +290,11 @@ namespace RealChute
                 this.failedVisible = true;
                 return;
             }
+
             else
             {
                 rcModule.mustGoDown = mustGoDown;
+                rcModule.deployOnGround = deployOnGround;
                 rcModule.material = material.name;
                 rcModule.mat = material;
                 if (secondaryChute)
@@ -299,9 +308,8 @@ namespace RealChute
 
                 if (calcSelect)
                 {
-                    CelestialBody body = bodies.GetBody(planets);
                     float m = 0;
-                    if (getMass) { m = GetCraftMass(); }
+                    if (getMass) { m = GetCraftMass(useDry); }
                     else { m = float.Parse(mass); }
 
                     float density = 0;
@@ -352,7 +360,7 @@ namespace RealChute
                     {
                         CelestialBody body = bodies.GetBody(planets);
                         float m = 0;
-                        if (getMass) { m = GetCraftMass(); }
+                        if (getMass) { m = GetCraftMass(secUseDry); }
                         else { m = float.Parse(secMass); }
 
                         float density = 0;
@@ -448,15 +456,33 @@ namespace RealChute
                         }
 
                         ProceduralChute pChute = part.Modules["ProceduralChute"] as ProceduralChute;
-                        pChute.size = this.size;
-                        pChute.currentSize = this.currentSize;
+                        pChute.planets = this.planets;
+                        pChute.size = this.size; pChute.currentSize = this.currentSize;
                         pChute.caseID = this.caseID;
-                        pChute.chuteID = this.chuteID;
-                        pChute.secChuteID = this.secChuteID;
-                        pChute.typeID = this.typeID;
-                        pChute.secTypeID = this.secTypeID;
-                        pChute.modelID = this.modelID;
-                        pChute.secModelID = this.secModelID;
+                        pChute.chuteID = this.chuteID; pChute.secChuteID = this.secChuteID;
+                        pChute.typeID = this.typeID; pChute.secTypeID = this.secTypeID;
+                        pChute.modelID = this.modelID; pChute.secModelID = this.secModelID;
+                        pChute.materialsID = this.materialsID; pChute.secMaterialsID = this.secMaterialsID;
+                        pChute.mustGoDown = this.mustGoDown; pChute.deployOnGround = this.deployOnGround;
+                        pChute.isPressure = this.isPressure; pChute.secIsPressure = this.secIsPressure;
+                        pChute.calcSelect = this.calcSelect; pChute.secCalcSelect = this.secCalcSelect;
+                        pChute.getMass = this.getMass; pChute.secGetMass = this.secGetMass;
+                        pChute.useDry = this.useDry; pChute.secUseDry = this.secUseDry;
+                        pChute.timer = this.timer;
+                        pChute.cutSpeed = this.cutSpeed;
+                        pChute.spares = this.spares;
+                        pChute.preDepDiam = this.preDepDiam; pChute.secPreDepDiam = this.secPreDepDiam;
+                        pChute.depDiam = this.depDiam; pChute.secDepDiam = this.secDepDiam;
+                        pChute.predepClause = this.predepClause; pChute.secPredepClause = this.secPredepClause;
+                        pChute.mass = this.mass; pChute.secMass = this.secMass;
+                        pChute.landingSpeed = this.landingSpeed; pChute.secLandingSpeed = this.secLandingSpeed;
+                        pChute.deceleration = this.deceleration; pChute.secDeceleration = this.secDeceleration;
+                        pChute.refDepAlt = this.refDepAlt; pChute.secRefDepAlt = this.secRefDepAlt;
+                        pChute.chuteCount = this.chuteCount; pChute.secChuteCount = this.secChuteCount;
+                        pChute.deploymentAlt = this.deploymentAlt; pChute.secDeploymentAlt = this.secDeploymentAlt;
+                        pChute.cutAlt = this.cutAlt; pChute.secCutAlt = this.secCutAlt;
+                        pChute.preDepSpeed = this.preDepSpeed; pChute.secPreDepSpeed = this.secPreDepSpeed;
+                        pChute.depSpeed = this.depSpeed; pChute.secDepSpeed = this.secDepSpeed;
                     }
                 }
 
@@ -627,86 +653,76 @@ namespace RealChute
         //Changes the canopy model
         private void UpdateCanopy(Part part, RealChuteModule module, bool secondary)
         {
-            if (textureLibrary == "none") { return; }
-            int id = secondary ? secModelID : modelID;
-            ModelConfig model = new ModelConfig();
-            if (textures.TryGetModel(textures.modelNames[id], ref model))
+            if (textureLibrary != "none")
             {
-                ModelConfig.ParachuteParameters parameters = secondary ? model.secondary : model.main;
-                if (string.IsNullOrEmpty(parameters.modelURL))
+                int id = secondary ? secModelID : modelID;
+                ModelConfig model = new ModelConfig();
+                if (textures.TryGetModel(textures.modelNames[id], ref model))
                 {
-                    Debug.LogWarning("[RealChute]: The " + textures.modelNames[modelID] + (secondary ? "main" : "secondary") + "URL is empty");
-                    return;
-                }
-                GameObject test = GameDatabase.Instance.GetModel(parameters.modelURL);
-                if (test == null)
-                {
-                    Debug.LogWarning("[RealChute]: The " + textures.modelNames[modelID] + (secondary ? "main" : "secondary") + "GameObject is null");
-                    return;
-                }
-                test.SetActive(true);
-                if (!secondary)
-                {
-                    float scale = RCUtils.GetDiameter(module.deployedArea / model.count) / model.diameter;
-                    test.transform.localScale = new Vector3(scale, scale, scale);
-                }
-                else
-                {
-                    float scale = RCUtils.GetDiameter(module.secDeployedArea / model.count) / model.diameter;
-                    test.transform.localScale = new Vector3(scale, scale, scale);
-                }
-                    
-                GameObject obj = Instantiate(test) as GameObject;
-                Destroy(test);
-                Transform toDestroy;
-                if (!secondary)
-                {
-                    toDestroy = part.FindModelTransform(module.parachuteName);
-                    obj.transform.parent = toDestroy.parent;
-                    obj.transform.position = toDestroy.position;
-                    DestroyImmediate(toDestroy.gameObject);
-                    this.model = model;
-                    module.parachute = part.FindModelTransform(parameters.transformName);
-                    module.parachute.transform.localRotation = Quaternion.identity;
-                    module.parachuteName = parameters.transformName;
-                    module.deploymentAnimation = parameters.depAnim;
-                    module.preDeploymentAnimation = parameters.preDepAnim;
-                    part.InitiateAnimation(module.deploymentAnimation);
-                    part.InitiateAnimation(module.preDeploymentAnimation);
-                    module.parachute.gameObject.SetActive(false);
-                }
-                else
-                {
-                    toDestroy = part.FindModelTransform(module.secParachuteName);
-                    obj.transform.parent = toDestroy.parent;
-                    obj.transform.position = toDestroy.position;
-                    DestroyImmediate(toDestroy.gameObject);
-                    this.secModel = model;
-                    module.secParachute = part.FindModelTransform(parameters.transformName); ;
-                    module.secParachute.transform.localRotation = Quaternion.identity;
-                    module.secParachuteName = parameters.transformName;
-                    module.secDeploymentAnimation = parameters.depAnim;
-                    module.secPreDeploymentAnimation = parameters.preDepAnim;
-                    part.InitiateAnimation(module.secDeploymentAnimation);
-                    part.InitiateAnimation(module.secPreDeploymentAnimation);
-                    module.secParachute.gameObject.SetActive(false);
-                }
-            }
-            UpdateCanopyTexture(module, secondary);
-        }
+                    ModelConfig.ParachuteParameters parameters = secondary ? model.secondary : model.main;
+                    if (string.IsNullOrEmpty(parameters.modelURL))
+                    {
+                        Debug.LogWarning("[RealChute]: The " + textures.modelNames[modelID] + (secondary ? "main" : "secondary") + "URL is empty");
+                        return;
+                    }
+                    GameObject test = GameDatabase.Instance.GetModel(parameters.modelURL);
+                    if (test == null)
+                    {
+                        Debug.LogWarning("[RealChute]: The " + textures.modelNames[modelID] + (secondary ? "main" : "secondary") + "GameObject is null");
+                        return;
+                    }
+                    test.SetActive(true);
+                    if (!secondary)
+                    {
+                        float scale = RCUtils.GetDiameter(module.deployedArea / model.count) / model.diameter;
+                        test.transform.localScale = new Vector3(scale, scale, scale);
+                        print("[RealChute]: " + part.partInfo.title + " Scale: " + scale);
+                    }
+                    else
+                    {
+                        float scale = RCUtils.GetDiameter(module.secDeployedArea / model.count) / model.diameter;
+                        test.transform.localScale = new Vector3(scale, scale, scale);
+                        print("[RealChute]: " + part.partInfo.title + " Secondary scale: " + scale);
+                    }
 
-        //Updates the parachute scale
-        private void UpdateCanopyScale()
-        {
-            float scale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(rcModule.deployedArea / model.count) / model.diameter : RCUtils.GetDiameter(rcModule.deployedArea / modelCount) / modelDiameter;
-            rcModule.parachute.transform.localScale = new Vector3(scale, scale, scale);
-            if (secondaryChute)
-            {
-                float secScale = (textureLibrary != "none" || textures.modelNames.Length > 0) ? RCUtils.GetDiameter(rcModule.secDeployedArea / secModel.count) / secModel.diameter : RCUtils.GetDiameter(rcModule.secDeployedArea / secModelCount) / secModelDiameter;
-                rcModule.secParachute.transform.localScale = new Vector3(secScale, secScale, secScale);
-                print("[RealChute]: Part: " + this.part.partInfo.title + " Scale: " + scale + " SecScale: " + secScale);
+                    GameObject obj = Instantiate(test) as GameObject;
+                    Destroy(test);
+                    Transform toDestroy;
+                    if (!secondary)
+                    {
+                        toDestroy = part.FindModelTransform(module.parachuteName);
+                        obj.transform.parent = toDestroy.parent;
+                        obj.transform.position = toDestroy.position;
+                        DestroyImmediate(toDestroy.gameObject);
+                        this.model = model;
+                        module.parachute = part.FindModelTransform(parameters.transformName);
+                        module.parachute.transform.localRotation = Quaternion.identity;
+                        module.parachuteName = parameters.transformName;
+                        module.deploymentAnimation = parameters.depAnim;
+                        module.preDeploymentAnimation = parameters.preDepAnim;
+                        part.InitiateAnimation(module.deploymentAnimation);
+                        part.InitiateAnimation(module.preDeploymentAnimation);
+                        module.parachute.gameObject.SetActive(false);
+                    }
+                    else
+                    {
+                        toDestroy = part.FindModelTransform(module.secParachuteName);
+                        obj.transform.parent = toDestroy.parent;
+                        obj.transform.position = toDestroy.position;
+                        DestroyImmediate(toDestroy.gameObject);
+                        this.secModel = model;
+                        module.secParachute = part.FindModelTransform(parameters.transformName); ;
+                        module.secParachute.transform.localRotation = Quaternion.identity;
+                        module.secParachuteName = parameters.transformName;
+                        module.secDeploymentAnimation = parameters.depAnim;
+                        module.secPreDeploymentAnimation = parameters.preDepAnim;
+                        part.InitiateAnimation(module.secDeploymentAnimation);
+                        part.InitiateAnimation(module.secPreDeploymentAnimation);
+                        module.secParachute.gameObject.SetActive(false);
+                    }
+                }
+                UpdateCanopyTexture(module, secondary);
             }
-            else { print("[RealChute]: Part: " + this.part.partInfo.title + " Scale: " + scale); }
         }
         #endregion
 
@@ -784,8 +800,11 @@ namespace RealChute
                 {
                     case 0:
                         {
+                            deployOnGround = false;
+                            cutSpeed = "0.5";
                             landingSpeed = "6";
                             deploymentAlt = "700";
+                            predepClause = isPressure ? "0.01" : "25000";
                             preDepSpeed = "2";
                             depSpeed = "6";
                             break;
@@ -793,8 +812,11 @@ namespace RealChute
 
                     case 1:
                         {
+                            deployOnGround = false;
+                            cutSpeed = "0.5";
                             landingSpeed = "80";
                             deploymentAlt = "2500";
+                            predepClause = isPressure ? "0.007" : "30000";
                             preDepSpeed = "1";
                             depSpeed = "3";
                             break;
@@ -802,8 +824,11 @@ namespace RealChute
 
                     case 2:
                         {
+                            deployOnGround = true;
+                            cutSpeed = "5";
                             landingSpeed = "100";
-                            deploymentAlt = "100";
+                            deploymentAlt = "10";
+                            predepClause = isPressure ? "0.9" : "100";
                             preDepSpeed = "1";
                             depSpeed = "2";
                             break;
@@ -819,8 +844,11 @@ namespace RealChute
                 {
                     case 0:
                         {
+                            deployOnGround = false;
+                            cutSpeed = "0.5";
                             secLandingSpeed = "6";
                             secDeploymentAlt = "700";
+                            secPredepClause = secIsPressure ? "0.01" : "25000";
                             secPreDepSpeed = "2";
                             secDepSpeed = "6";
                             break;
@@ -828,8 +856,11 @@ namespace RealChute
 
                     case 1:
                         {
+                            deployOnGround = false;
+                            cutSpeed = "0.5";
                             secLandingSpeed = "80";
                             secDeploymentAlt = "2500";
+                            secPredepClause = secIsPressure ? "0.007" : "30000";
                             secPreDepSpeed = "1";
                             secDepSpeed = "3";
                             break;
@@ -837,8 +868,11 @@ namespace RealChute
 
                     case 2:
                         {
+                            deployOnGround = true;
+                            cutSpeed = "5";
                             secLandingSpeed = "100";
-                            secDeploymentAlt = "100";
+                            secDeploymentAlt = "10";
+                            secPredepClause = secIsPressure ? "0.9" : "100";
                             secPreDepSpeed = "1";
                             secDepSpeed = "2";
                             break;
@@ -912,8 +946,8 @@ namespace RealChute
             {
                 //Windows initiation
                 this.window = new Rect(5, 370, 420, Screen.height - 375);
-                this.materialsWindow = new Rect(matX, matY, 280, 265);
-                this.secMaterialsWindow = new Rect(matX, matY, 280, 265);
+                this.materialsWindow = new Rect(matX, matY, 375, 280);
+                this.secMaterialsWindow = new Rect(matX, matY, 375, 280);
                 this.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
 
@@ -932,6 +966,7 @@ namespace RealChute
 
                     //Identification of the values from the RealChuteModule
                     mustGoDown = rcModule.mustGoDown;
+                    deployOnGround = rcModule.deployOnGround;
                     timer = rcModule.timer + "s";
                     cutSpeed = rcModule.cutSpeed.ToString();
                     if (rcModule.spareChutes != -1) { spares = rcModule.spareChutes.ToString(); }
@@ -975,17 +1010,18 @@ namespace RealChute
             if (textureLibrary != "none")
             {
                 UpdateCaseTexture(this.part, rcModule);
-                if (HighLogic.LoadedSceneIsFlight)
+            }
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                UpdateCanopy(this.part, rcModule, false);
+                if (secondaryChute)
                 {
-                    UpdateCanopy(this.part, rcModule, false);
-                    if (secondaryChute)
-                    {
-                        UpdateCanopy(this.part, rcModule, true);
-                    }
+                    UpdateCanopy(this.part, rcModule, true);
                 }
             }
+
             UpdateScale(this.part, rcModule);
-            if (HighLogic.LoadedSceneIsFlight) { UpdateCanopyScale(); }
         }
 
         public override void OnLoad(ConfigNode node)
@@ -1078,6 +1114,7 @@ namespace RealChute
             GUILayout.EndVertical();
             planets = GUILayout.SelectionGrid(planets, bodies.GetNames(), 4, skins.button, GUILayout.Width(250));
             GUILayout.EndHorizontal();
+            body = bodies.GetBody(planets);
             #endregion
 
             #region Size cyclers
@@ -1089,15 +1126,15 @@ namespace RealChute
                 GUILayout.Label("Cycle part size", skins.label);
                 GUILayout.EndVertical();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Next size", skins.button, GUILayout.Width(125)))
-                {
-                    size++;
-                    if (size > sizes.Count - 1) { size = 0; }
-                }
                 if (GUILayout.Button("Previous size", skins.button, GUILayout.Width(125)))
                 {
                     size--;
                     if (size < 0) { size = sizes.Count - 1; }
+                }
+                if (GUILayout.Button("Next size", skins.button, GUILayout.Width(125)))
+                {
+                    size++;
+                    if (size > sizes.Count - 1) { size = 0; }
                 }
                 GUILayout.EndHorizontal();
             }
@@ -1110,12 +1147,12 @@ namespace RealChute
 
             #region Texture selectors
             GUILayout.Space(5);
-            if (TextureEntries("case").Length > 1 || TextureEntries("chute").Length > 1 || TextureEntries("model").Length > 1)
+            if (TextureEntries("case").Length > 1 || TextureEntries("chute").Length > 1 || TextureEntries("modelMain").Length > 1)
             {
                 int m = 0;
                 if (TextureEntries("case").Length > 1) { m++; }
                 if (TextureEntries("chute").Length > 1) { m++; }
-                if (TextureEntries("model").Length > 1) { m++; }
+                if (TextureEntries("modelMain").Length > 1) { m++; }
 
                 GUILayout.BeginHorizontal();
 
@@ -1133,7 +1170,7 @@ namespace RealChute
                     GUILayout.FlexibleSpace();
                     GUILayout.Label("Chute texture:", skins.label);
                 }
-                if (TextureEntries("model").Length > 1) 
+                if (TextureEntries("modelMain").Length > 1) 
                 {
                     GUILayout.FlexibleSpace();
                     GUILayout.Label("Chute model: ", skins.label);
@@ -1157,10 +1194,10 @@ namespace RealChute
                     chuteID = GUILayout.SelectionGrid(chuteID, TextureEntries("chute"), TextureEntries("chute").Length, skins.button);
                 }
 
-                if (TextureEntries("model").Length > 1)
+                if (TextureEntries("modelMain").Length > 1)
                 {
                     GUILayout.FlexibleSpace();
-                    modelID = GUILayout.SelectionGrid(modelID, TextureEntries("model"), TextureEntries("model").Length, skins.button);
+                    modelID = GUILayout.SelectionGrid(modelID, TextureEntries("modelMain"), TextureEntries("modelMain").Length, skins.button);
                 }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndVertical();
@@ -1195,6 +1232,16 @@ namespace RealChute
             if (GUILayout.Toggle(mustGoDown, "True", skins.toggle)) { mustGoDown = true; }
             GUILayout.FlexibleSpace();
             if (GUILayout.Toggle(!mustGoDown, "False", skins.toggle)) { mustGoDown = false; }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+
+            //DeployOnGround
+            GUILayout.Space(5);
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(window.width));
+            GUILayout.Label("Deploy on ground contact:", skins.label);
+            if (GUILayout.Toggle(deployOnGround, "True", skins.toggle)) { deployOnGround = true; }
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Toggle(!deployOnGround, "False", skins.toggle)) { deployOnGround = false; }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
@@ -1255,7 +1302,20 @@ namespace RealChute
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
-                if (!getMass)
+                if (getMass)
+                {
+                    GUILayout.Label("Currently using " + (useDry ? "dry mass" : "wet mass"), skins.label);
+                    if (useDry)
+                    {
+                        if (GUILayout.Button("Switch to wet mass", skins.button, GUILayout.Width(125))) { useDry = false; }
+                    }
+                    else
+                    {
+                        if (GUILayout.Button("Switch to dry mass", skins.button, GUILayout.Width(125))) { useDry = true; }
+                    }
+                }
+
+                else
                 {
                     CreateEntryArea("Mass to use (t):", ref mass, 0.1f, 10000, 100);
                 }
@@ -1269,7 +1329,7 @@ namespace RealChute
                 }
                 else if (typeID == 1)
                 {
-                    if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
+                    if (RCUtils.CanParse(landingSpeed) && RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at target alt (m/s):", skins.label); }
                     else { GUILayout.Label("Wanted speed at target alt (m/s):", RCUtils.redLabel); }
                 }
                 else
@@ -1288,10 +1348,10 @@ namespace RealChute
 
                 if (typeID == 1)
                 {
-                    CreateEntryArea("Target altitude (m):", ref refDepAlt, 10, 45000, 100);
+                    CreateEntryArea("Target altitude (m):", ref refDepAlt, 10, RCUtils.GetMaxAtmosphereAltitude(body), 100);
                 }
 
-                CreateEntryArea("Parachutes used (parachutes):", ref chuteCount, 1, 100, 100);
+                CreateEntryArea("Parachutes used (parts):", ref chuteCount, 1, 100, 100);
             }
             #endregion
 
@@ -1327,12 +1387,12 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             if (isPressure)
             {
-                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, 5f)) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
+                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
                 else { GUILayout.Label("Predeployment pressure (atm):", RCUtils.redLabel); } 
             }
             else
             {
-                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 25, 50000)) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
+                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
                 else { GUILayout.Label("Predeployment altitude (m):", RCUtils.redLabel); } 
             }
             GUILayout.FlexibleSpace();
@@ -1340,12 +1400,12 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Deployment altitude
-            CreateEntryArea("Deployment altitude", ref deploymentAlt, 10, 45000);
+            CreateEntryArea("Deployment altitude", ref deploymentAlt, 10, RCUtils.GetMaxAtmosphereAltitude(body));
 
             //Cut altitude
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, 45000)) { GUILayout.Label("Autocut altitude (m):", skins.label); }
+            if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Autocut altitude (m):", skins.label); }
             else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             cutAlt = GUILayout.TextField(cutAlt, 10, skins.textField, GUILayout.Width(150));
@@ -1370,11 +1430,11 @@ namespace RealChute
 
                 #region Texture selectors
                 GUILayout.Space(5);
-                if (TextureEntries("chute").Length > 1 || TextureEntries("model").Length > 1)
+                if (TextureEntries("chute").Length > 1 || TextureEntries("modelSec").Length > 1)
                 {
                     int m = 0;
                     if (TextureEntries("chute").Length > 1) { m++; }
-                    if (TextureEntries("model").Length > 1) { m++; }
+                    if (TextureEntries("modelSec").Length > 1) { m++; }
                     GUILayout.BeginHorizontal();
 
                     #region Labels
@@ -1386,7 +1446,7 @@ namespace RealChute
                         GUILayout.FlexibleSpace();
                         GUILayout.Label("Chute texture:", skins.label);
                     }
-                    if (TextureEntries("model").Length > 1)
+                    if (TextureEntries("modelSec").Length > 1)
                     {
                         GUILayout.FlexibleSpace();
                         GUILayout.Label("Chute model: ", skins.label);
@@ -1404,10 +1464,10 @@ namespace RealChute
                         secChuteID = GUILayout.SelectionGrid(secChuteID, TextureEntries("chute"), 2, skins.button);
                     }
 
-                    if (TextureEntries("model").Length > 1)
+                    if (TextureEntries("modelSec").Length > 1)
                     {
                         GUILayout.FlexibleSpace();
-                        secModelID = GUILayout.SelectionGrid(secModelID, TextureEntries("model"), 2, skins.button);
+                        secModelID = GUILayout.SelectionGrid(secModelID, TextureEntries("modelSec"), 2, skins.button);
                     }
                     GUILayout.FlexibleSpace();
                     GUILayout.EndVertical();
@@ -1461,7 +1521,20 @@ namespace RealChute
                     GUILayout.FlexibleSpace();
                     GUILayout.EndHorizontal();
 
-                    if (!getMass)
+                    if (secGetMass)
+                    {
+                        GUILayout.Label("Currently using " + (secUseDry ? "dry mass" : "wet mass"), skins.label);
+                        if (secUseDry)
+                        {
+                            if (GUILayout.Button("Switch to wet mass", skins.button, GUILayout.Width(125))) { secUseDry = false; }
+                        }
+                        else
+                        {
+                            if (GUILayout.Button("Switch to dry mass", skins.button, GUILayout.Width(125))) { secUseDry = true; }
+                        }
+                    }
+
+                    else
                     {
                         CreateEntryArea("Mass to use (t):", ref secMass, 0.1f, 10000, 100);
                     }
@@ -1475,7 +1548,7 @@ namespace RealChute
                     }
                     else if (secTypeID == 1)
                     {
-                        if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at full deployment (m/s):", skins.label); }
+                        if (RCUtils.CanParse(secLandingSpeed) && RCUtils.CheckRange(float.Parse(secLandingSpeed), 0.1f, 5000)) { GUILayout.Label("Wanted speed at target alt (m/s):", skins.label); }
                         else { GUILayout.Label("Wanted speed at target alt (m/s):", RCUtils.redLabel); }
                     }
                     else
@@ -1494,7 +1567,7 @@ namespace RealChute
 
                     if (secTypeID == 1)
                     {
-                        CreateEntryArea("Target altitude (m):", ref secRefDepAlt, 10, 45000, 100);
+                        CreateEntryArea("Target altitude (m):", ref secRefDepAlt, 10, RCUtils.GetMaxAtmosphereAltitude(body), 100);
                     }
 
                     CreateEntryArea("Number of parachutes (parts):", ref secChuteCount, 1, 100, 100);
@@ -1533,12 +1606,12 @@ namespace RealChute
                 GUILayout.BeginHorizontal();
                 if (secIsPressure)
                 {
-                    if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 0.0001f, 5f)) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
+                    if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
                     else { GUILayout.Label("Predeployment pressure (atm):", RCUtils.redLabel); }
                 }
                 else
                 {
-                    if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 25, 50000)) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
+                    if (RCUtils.CanParse(secPredepClause) && RCUtils.CheckRange(float.Parse(secPredepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
                     else { GUILayout.Label("Predeployment altitude (m):", RCUtils.redLabel); }
                 }
                 GUILayout.FlexibleSpace();
@@ -1546,12 +1619,12 @@ namespace RealChute
                 GUILayout.EndHorizontal();
 
                 //Deployment altitude
-                CreateEntryArea("Deployment altitude", ref secDeploymentAlt, 10, 45000);
+                CreateEntryArea("Deployment altitude", ref secDeploymentAlt, 10, RCUtils.GetMaxAtmosphereAltitude(body));
 
                 //Cut altitude
                 GUILayout.Space(5);
                 GUILayout.BeginHorizontal();
-                if (RCUtils.CanParseWithEmpty(secCutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(secCutAlt), -1, 45000)) { GUILayout.Label("Autocut altitude (m):", skins.label); }
+                if (RCUtils.CanParseWithEmpty(secCutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(secCutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Autocut altitude (m):", skins.label); }
                 else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
                 GUILayout.FlexibleSpace();
                 secCutAlt = GUILayout.TextField(secCutAlt, 10, skins.textField, GUILayout.MaxWidth(150));
@@ -1597,10 +1670,14 @@ namespace RealChute
             GUI.DragWindow(new Rect(0, 0, materialsWindow.width, 25));
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            materialsScroll = GUILayout.BeginScrollView(materialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(165));
+            materialsScroll = GUILayout.BeginScrollView(materialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(165), GUILayout.Width(140));
             materialsID = GUILayout.SelectionGrid(materialsID, materials.materials.Values.ToArray(), 1, skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Description:", skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].description, skins.label);
+            GUILayout.FlexibleSpace();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
             GUILayout.Label(materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
@@ -1629,11 +1706,15 @@ namespace RealChute
         {
             GUI.DragWindow(new Rect(0, 0, secMaterialsWindow.width, 25));
             GUILayout.BeginVertical();
-            GUILayout.BeginHorizontal();
-            secMaterialsScroll = GUILayout.BeginScrollView(secMaterialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(165));
+            GUILayout.BeginHorizontal(GUILayout.Width(175));
+            secMaterialsScroll = GUILayout.BeginScrollView(secMaterialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(165), GUILayout.Width(140));
             secMaterialsID = GUILayout.SelectionGrid(secMaterialsID, materials.materials.Values.ToArray(), 1, skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Description:", skins.label);
+            GUILayout.Label(materials.materials.Keys.ToArray()[secMaterialsID].description, skins.label);
+            GUILayout.FlexibleSpace();
             GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
             GUILayout.Label(materials.materials.Keys.ToArray()[secMaterialsID].dragCoefficient.ToString("0.00#"), skins.label);

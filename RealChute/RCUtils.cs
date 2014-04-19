@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
@@ -270,6 +271,16 @@ namespace RealChute
         public static float GetDensityAtAlt(CelestialBody body, float alt)
         {
             return (float)FlightGlobals.getAtmDensity(FlightGlobals.getStaticPressure(alt, body));
+        }
+
+        /// <summary>
+        /// Returns the altitude at which the atmosphere disappears
+        /// </summary>
+        /// <param name="body">Celestial body to check</param>
+        public static float GetMaxAtmosphereAltitude(CelestialBody body)
+        {
+            if (!body.atmosphere) { return 0; }
+            return -(float)(body.atmosphereScaleHeight * Math.Log(1e-6)) * 1000;
         }
 
         /// <summary>
