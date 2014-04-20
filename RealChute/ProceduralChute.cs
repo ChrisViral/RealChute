@@ -6,7 +6,7 @@ using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
- * For more informtion contact me on the forum. */
+ * For more information contact me on the forum. */
 
 namespace RealChute
 {
@@ -296,11 +296,11 @@ namespace RealChute
                 rcModule.mustGoDown = mustGoDown;
                 rcModule.deployOnGround = deployOnGround;
                 rcModule.material = material.name;
-                rcModule.mat = material;
+                rcModule.main.mat = material;
                 if (secondaryChute)
                 {
                     rcModule.secMaterial = secMaterial.name;
-                    rcModule.secMat = secMaterial;
+                    rcModule.secondary.mat = secMaterial;
                 }
                 rcModule.timer = RCUtils.ParseTime(timer);
                 rcModule.cutSpeed = float.Parse(cutSpeed);
@@ -420,11 +420,11 @@ namespace RealChute
 
                         module.mustGoDown = mustGoDown;
                         module.material = material.name;
-                        module.mat = material;
+                        module.main.mat = material;
                         if (module.secondaryChute)
                         {
                             module.secMaterial = secMaterial.name;
-                            module.secMat = secMaterial;
+                            module.secondary.mat = secMaterial;
                         }
                         module.timer = RCUtils.ParseTime(timer);
                         module.cutSpeed = float.Parse(cutSpeed);
@@ -627,7 +627,7 @@ namespace RealChute
                         Debug.LogWarning("[RealChute]: The " + textures.canopyNames[chuteID] + "texture is null");
                         return;
                     }
-                    module.parachute.GetComponents<Renderer>().ToList().ForEach(r => r.material.mainTexture = texture);
+                    module.main.parachute.GetComponents<Renderer>().ToList().ForEach(r => r.material.mainTexture = texture);
                 }
             }
             else
@@ -645,7 +645,7 @@ namespace RealChute
                         Debug.LogWarning("[RealChute]: The " + textures.canopyNames[secChuteID] + "texture is null");
                         return;
                     }
-                    module.secParachute.GetComponents<Renderer>().ToList().ForEach(r => r.material.mainTexture = texture);
+                    module.secondary.parachute.GetComponents<Renderer>().ToList().ForEach(r => r.material.mainTexture = texture);
                 }
             }
         }
@@ -674,13 +674,13 @@ namespace RealChute
                     test.SetActive(true);
                     if (!secondary)
                     {
-                        float scale = RCUtils.GetDiameter(module.deployedArea / model.count) / model.diameter;
+                        float scale = RCUtils.GetDiameter(module.main.deployedArea / model.count) / model.diameter;
                         test.transform.localScale = new Vector3(scale, scale, scale);
                         print("[RealChute]: " + part.partInfo.title + " Scale: " + scale);
                     }
                     else
                     {
-                        float scale = RCUtils.GetDiameter(module.secDeployedArea / model.count) / model.diameter;
+                        float scale = RCUtils.GetDiameter(module.secondary.deployedArea / model.count) / model.diameter;
                         test.transform.localScale = new Vector3(scale, scale, scale);
                         print("[RealChute]: " + part.partInfo.title + " Secondary scale: " + scale);
                     }
@@ -695,14 +695,14 @@ namespace RealChute
                         obj.transform.position = toDestroy.position;
                         DestroyImmediate(toDestroy.gameObject);
                         this.model = model;
-                        module.parachute = part.FindModelTransform(parameters.transformName);
-                        module.parachute.transform.localRotation = Quaternion.identity;
+                        module.main.parachute = part.FindModelTransform(parameters.transformName);
+                        module.main.parachute.transform.localRotation = Quaternion.identity;
                         module.parachuteName = parameters.transformName;
                         module.deploymentAnimation = parameters.depAnim;
                         module.preDeploymentAnimation = parameters.preDepAnim;
                         part.InitiateAnimation(module.deploymentAnimation);
                         part.InitiateAnimation(module.preDeploymentAnimation);
-                        module.parachute.gameObject.SetActive(false);
+                        module.main.parachute.gameObject.SetActive(false);
                     }
                     else
                     {
@@ -711,14 +711,14 @@ namespace RealChute
                         obj.transform.position = toDestroy.position;
                         DestroyImmediate(toDestroy.gameObject);
                         this.secModel = model;
-                        module.secParachute = part.FindModelTransform(parameters.transformName); ;
-                        module.secParachute.transform.localRotation = Quaternion.identity;
+                        module.secondary.parachute = part.FindModelTransform(parameters.transformName); ;
+                        module.secondary.parachute.transform.localRotation = Quaternion.identity;
                         module.secParachuteName = parameters.transformName;
                         module.secDeploymentAnimation = parameters.depAnim;
                         module.secPreDeploymentAnimation = parameters.preDepAnim;
                         part.InitiateAnimation(module.secDeploymentAnimation);
                         part.InitiateAnimation(module.secPreDeploymentAnimation);
-                        module.secParachute.gameObject.SetActive(false);
+                        module.secondary.parachute.gameObject.SetActive(false);
                     }
                 }
                 UpdateCanopyTexture(module, secondary);

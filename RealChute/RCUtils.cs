@@ -7,10 +7,19 @@ using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
- * For more informtion contact me on the forum. */
+ * For more information contact me on the forum. */
 
 namespace RealChute
 {
+    public enum DeploymentStates
+    {
+        STOWED,
+        LOWDEPLOYED,
+        PREDEPLOYED,
+        DEPLOYED,
+        CUT
+    }
+
     public static class RCUtils
     {
         #region Constants
@@ -23,6 +32,18 @@ namespace RealChute
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
         public const string localSettingsURL = "GameData/RealChute/RealChute_Settings.cfg";
+
+        /// <summary>
+        /// DeploymentStates with their string equivalent
+        /// </summary>
+        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
+        {
+            { DeploymentStates.STOWED, "STOWED" },
+            { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
+            { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
+            { DeploymentStates.DEPLOYED, "DEPLOYED" },
+            { DeploymentStates.CUT, "CUT" }
+        };
         #endregion
 
         #region Arrays

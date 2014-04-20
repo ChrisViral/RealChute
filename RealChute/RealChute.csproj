@@ -59,6 +59,7 @@
     <Compile Include="Libraries\MaterialsLibrary\MaterialsLibrary.cs" />
     <Compile Include="Libraries\AtmoPlanetsLibrary\AtmoPlanets.cs" />
     <Compile Include="Libraries\TextureLibrary\ModelConfig.cs" />
+    <Compile Include="Parachute.cs" />
     <Compile Include="ProceduralChute.cs" />
     <Compile Include="RCUtils.cs" />
     <Compile Include="RealChuteModule.cs" />

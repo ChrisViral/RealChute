@@ -4,7 +4,7 @@ using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
- * For more informtion contact me on the forum. */
+ * For more information contact me on the forum. */
 
 namespace RealChute.Extensions
 {
@@ -38,8 +38,8 @@ namespace RealChute.Extensions
                     p.transform.GetComponentsInChildren<Renderer>().Where(r => renderers.Contains(r)).ToList().ForEach(r => renderers.Remove(r));
                 }
             }
-            module.parachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r));
-            if (module.secondaryChute) { module.secParachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r)); }
+            module.main.parachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r));
+            if (module.secondaryChute) { module.secondary.parachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r)); }
             return renderers;
         }
 
