@@ -50,6 +50,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChuteTemplate.cs" />
     <Compile Include="CompatibilityChecker.cs" />
     <Compile Include="Libraries\TextureLibrary\CanopyConfig.cs" />
     <Compile Include="Libraries\TextureLibrary\CaseConfig.cs" />

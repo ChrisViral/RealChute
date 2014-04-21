@@ -282,33 +282,20 @@ namespace RealChute
         [KSPAction("Cut both chutes")]
         public void ActionCutBoth(KSPActionParam param)
         {
-            if (bothDeployed)
-            {
-                main.Cut();
-                secondary.Cut();
-                Events["GUICutBoth"].active = false;
-            }
+            if (bothDeployed) { GUICutBoth(); }
         }
 
         //Arms parachutes
         [KSPAction("Arm parachute")]
         public void ActionArm(KSPActionParam param)
         {
-            armed = true;
-            ActivateRC();
+            GUIArm();
         }
 
         [KSPAction("Disarm parachute")]
         public void ActionDisarm(KSPActionParam param)
         {
-            if(armed)
-            {
-                armed = false;
-                this.part.stackIcon.SetIconColor(XKCDColors.White);
-                Events["GUIDeploy"].active = true;
-                Events["GUIArm"].active = true;
-                DeactivateRC();
-            }
+            if (armed) { GUIDisarm(); }
         }
         #endregion
 
@@ -316,9 +303,7 @@ namespace RealChute
         //Checks if there is a timer and/or a mustGoDown clause active
         public void CheckForWait()
         {
-            bool timerSpent = true;
-            bool goesDown = true;
-
+            bool timerSpent = true, goesDown = true;
             //Timer
             if (timer > 0 && deploymentTimer.Elapsed.TotalSeconds < timer)
             {

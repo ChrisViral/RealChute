@@ -37,11 +37,6 @@ namespace RealChute
 
         #region Constructor
         /// <summary>
-        /// Creates an empty AtmoPlanets
-        /// </summary>
-        public AtmoPlanets() { }
-
-        /// <summary>
         /// Creates a new instance of PlanetInfo
         /// </summary>
         public AtmoPlanets(bool load)

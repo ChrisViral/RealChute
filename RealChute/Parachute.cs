@@ -21,7 +21,6 @@ namespace RealChute
                 else { this.module.material = value; }
             }
         }
-
         public float preDeployedDiameter
         {
             get { return this.secondary ? this.module.secPreDeployedDiameter : this.module.preDeployedDiameter; }
@@ -31,12 +30,10 @@ namespace RealChute
                 else { this.module.preDeployedDiameter = value; }
             }
         }
-
         public float preDeployedArea
         {
             get { return RCUtils.GetArea(this.preDeployedDiameter); }
         }
-
         public float deployedDiameter
         {
             get { return this.secondary ? this.module.secDeployedDiameter : this.module.deployedDiameter; }
@@ -46,17 +43,14 @@ namespace RealChute
                 else { this.module.deployedDiameter = value; }
             }
         }
-
         public float deployedArea
         {
             get { return RCUtils.GetArea(this.deployedDiameter); }
         }
-
         public float chuteMass
         {
             get { return this.deployedArea * this.mat.areaDensity; }
         }
-
         public bool minIsPressure
         {
             get { return this.secondary ? this.module.secMinIsPressure : this.module.minIsPressure; }
@@ -66,7 +60,6 @@ namespace RealChute
                 else { this.module.minIsPressure = value; }
             }
         }
-
         public float minDeployment
         {
             get { return this.secondary ? this.module.secMinDeployment : this.module.minDeployment; }
@@ -76,7 +69,6 @@ namespace RealChute
                 else { this.module.minDeployment = value; }
             }
         }
-
         public float minPressure
         {
             get { return this.secondary ? this.module.secMinPressure : this.module.minPressure; }
@@ -86,7 +78,6 @@ namespace RealChute
                 else { this.module.minPressure = value; }
             }
         }
-
         public float deploymentAlt
         {
             get { return this.secondary ? this.module.secDeploymentAlt : this.module.deploymentAlt; }
@@ -96,7 +87,6 @@ namespace RealChute
                 else { this.module.deploymentAlt = value; }
             }
         }
-
         public float cutAlt
         {
             get { return this.secondary ? this.module.secCutAlt : this.module.cutAlt; }
@@ -106,7 +96,6 @@ namespace RealChute
                 else { this.module.cutAlt = value; }
             }
         }
-
         public float preDeploymentSpeed
         {
             get { return this.secondary ? this.module.secPreDeploymentSpeed : this.module.preDeploymentSpeed; }
@@ -116,7 +105,6 @@ namespace RealChute
                 else { this.module.preDeploymentSpeed = value; }
             }
         }
-
         public float deploymentSpeed
         {
             get { return this.secondary ? this.module.secDeploymentSpeed : this.module.deploymentSpeed; }
@@ -126,7 +114,6 @@ namespace RealChute
                 else { this.module.deploymentSpeed = value; }
             }
         }
-
         public string preDeploymentAnimation
         {
             get { return this.secondary ? this.module.secPreDeploymentAnimation : this.module.preDeploymentAnimation; }
@@ -136,7 +123,6 @@ namespace RealChute
                 else { this.module.preDeploymentAnimation = value; }
             }
         }
-
         public string deploymentAnimation
         {
             get { return this.secondary ? this.module.secDeploymentAnimation : this.module.deploymentAnimation; }
@@ -146,7 +132,6 @@ namespace RealChute
                 else { this.module.deploymentAnimation = value; }
             }
         }
-
         public string parachuteName
         {
             get { return this.secondary ? this.module.secParachuteName : this.module.parachuteName; }
@@ -156,17 +141,14 @@ namespace RealChute
                 else { this.module.parachuteName = value; }
             }
         }
-
         public string capName
         {
             get { return this.secondary ? this.module.secCapName : this.module.capName; }
         }
-
         public float forcedOrientation
         {
             get { return this.secondary ? this.module.secForcedOrientation : this.module.forcedOrientation; }
         }
-
         public string depState
         {
             get { return this.secondary ? this.module.secDepState : this.module.depState; }
@@ -176,22 +158,18 @@ namespace RealChute
                 else { this.module.depState = value; }
             }
         }
-
         private Part part
         {
             get { return this.module.part; }
         }
-
         private Parachute sec
         {
             get { return this.secondary ? this.module.main : this.module.secondary; }
         }
-
         public Vector3 forcePosition
         {
             get { return this.parachute.position; }
         }
-
         public bool randomDeployment
         {
             get
@@ -206,12 +184,10 @@ namespace RealChute
                 return false;
             }
         }
-
         public bool deploymentClause
         {
             get { return this.minIsPressure ? this.module.atmPressure >= this.minPressure : this.module.trueAlt <= this.minDeployment; }
         }
-
         public bool canDeploy
         {
             get
@@ -225,22 +201,18 @@ namespace RealChute
                 return false;
             }
         }
-
         public DeploymentStates getState
         {
             get { return RCUtils.states.First(pair => pair.Value == depState).Key; }
         }
-
         public string stateString
         {
             get { return RCUtils.states.First(pair => pair.Key == deploymentState).Value; }
         }
-
         public bool isDeployed
         {
             get { return this.stateString.Contains("DEPLOYED"); }
         }
-
         private Vector3 forcedVector
         {
             get
@@ -334,7 +306,6 @@ namespace RealChute
             this.module.Events["GUICut"].active = true;
             this.part.PlayAnimation(preDeploymentAnimation, 1 / preDeploymentSpeed);
             dragTimer.Start();
-
         }
 
         public void Deploy()
@@ -527,6 +498,7 @@ namespace RealChute
         {
             this.module = module;
             this.secondary = secondary;
+            if (this.secondary && this.material == "empty") { this.material = sec.material; }
             this.module.materials.TryGetMaterial(material, ref mat);
             this.parachute = this.part.FindModelTransform(parachuteName);
             this.cap = this.part.FindModelTransform(capName);
