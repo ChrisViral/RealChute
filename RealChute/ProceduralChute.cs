@@ -101,7 +101,7 @@ namespace RealChute
         //Libraries
         private EditorActionGroups actionPanel = EditorActionGroups.Instance;
         internal RealChuteModule rcModule = null;
-        private AtmoPlanets bodies = AtmoPlanets.fetch;
+        private AtmoPlanets bodies = null;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private TextureLibrary textureLib = TextureLibrary.instance;
         internal TextureConfig textures = new TextureConfig();
@@ -174,8 +174,8 @@ namespace RealChute
                 if (!RCUtils.CanParse(cutSpeed) || !RCUtils.CheckRange(float.Parse(cutSpeed), 0.01f, 100)) { general.Add("Autocut speed"); }
                 return general;
             }
-            else if (type == "main") { return main.GetErrors(); }
-            else if (type == "secondary") { return secondary.GetErrors(); }
+            else if (type == "main") { return main.errors; }
+            else if (type == "secondary") { return secondary.errors; }
             return new List<string>();
         }
 
@@ -448,6 +448,7 @@ namespace RealChute
             if (!rcModule.isTweakable) { return; }
             secondaryChute = rcModule.secondaryChute;
             if (textureLibrary != "none") { textureLib.TryGetConfig(textureLibrary, ref textures); }
+            bodies = AtmoPlanets.fetch;
             main = new ChuteTemplate(this, false);
             if (secondaryChute) { secondary = new ChuteTemplate(this, true); }
 
@@ -512,10 +513,10 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
+            if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && this.part.Modules.Contains("RealChuteModule") && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable) { return; }
             
             //Size vectors
-            if (vectors.Count == 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
+            if (node.GetValues("size").Length > 0 && vectors.Count <= 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
 
             //Top node original location
             if (this.part.findAttachNode("top") != null)

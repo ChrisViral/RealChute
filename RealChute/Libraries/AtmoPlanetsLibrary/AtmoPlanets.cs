@@ -18,7 +18,7 @@ namespace RealChute
         {
             get
             {
-                if (_fetch == null) { _fetch = new AtmoPlanets(true); }
+                if (_fetch == null) { _fetch = new AtmoPlanets(); }
                 return _fetch;
             }
         }
@@ -39,9 +39,9 @@ namespace RealChute
         /// <summary>
         /// Creates a new instance of PlanetInfo
         /// </summary>
-        public AtmoPlanets(bool load)
+        public AtmoPlanets()
         {
-            if (load) { _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null).ToDictionary(b => b, b => b.bodyName); }
+            if (FlightGlobals.Bodies.Count > 0) { _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null).ToDictionary(b => b, b => b.bodyName); }
         }
         #endregion
 

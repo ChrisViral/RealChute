@@ -13,13 +13,9 @@ namespace RealChute
     public class ChuteTemplate
     {
         #region Propreties
-        private RealChuteModule module
-        {
-            get { return this.pChute.rcModule; }
-        }
         private Parachute chute
         {
-            get { return this.secondary ? this.module.secondary : this.module.main; }
+            get { return this.secondary ? this.pChute.rcModule.secondary : this.pChute.rcModule.main; }
         }
         private Part part
         {
@@ -269,6 +265,36 @@ namespace RealChute
                 else { this.pChute.materialsWindow = value; }
             }
         }
+        public List<string> errors
+        {
+            get
+            {
+                List<string> main = new List<string>();
+                if (calcSelect)
+                {
+                    if (!getMass && !RCUtils.CanParse(mass) || !RCUtils.CheckRange(float.Parse(mass), 0.1f, 10000)) { main.Add("Craft mass"); }
+                    if (!RCUtils.CanParse(landingSpeed) || ((typeID == 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
+                    if (typeID == 2 && !RCUtils.CanParse(deceleration) || !RCUtils.CheckRange(float.Parse(deceleration), 0.1f, 100)) { main.Add("Wanted deceleration"); }
+                    if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Mains planned deployment alt"); }
+                    if (!RCUtils.CanParse(chuteCount) || !RCUtils.CheckRange(float.Parse(chuteCount), 1, 100)) { main.Add("Parachute count"); }
+                }
+                else
+                {
+                    if (!RCUtils.CanParse(preDepDiam) || !RCUtils.CheckRange(float.Parse(preDepDiam), 0.5f, model.maxDiam / 2)) { main.Add("Predeployed diameter"); }
+                    if (!RCUtils.CanParse(depDiam) || !RCUtils.CheckRange(float.Parse(depDiam), 1, model.maxDiam)) { main.Add("Deployed diameter"); }
+                }
+                if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))))
+                {
+                    if (isPressure) { main.Add("Predeployment pressure"); }
+                    else { main.Add("Predeployment altitude"); }
+                }
+                if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Deployment altitude"); }
+                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Autocut altitude"); }
+                if (!RCUtils.CanParse(preDepSpeed) || !RCUtils.CheckRange(float.Parse(preDepSpeed), 0.5f, 5)) { main.Add("Predeployment speed"); }
+                if (!RCUtils.CanParse(depSpeed) || !RCUtils.CheckRange(float.Parse(depSpeed), 1, 10)) { main.Add("Deployment speed"); }
+                return main;
+            }
+        }
         #endregion
 
         #region Fields
@@ -376,34 +402,6 @@ namespace RealChute
                     template.depSpeed = this.depSpeed;
                 }
             }
-        }
-
-        internal List<string> GetErrors()
-        {
-            List<string> main = new List<string>();
-            if (calcSelect)
-            {
-                if (!getMass && !RCUtils.CanParse(mass) || !RCUtils.CheckRange(float.Parse(mass), 0.1f, 10000)) { main.Add("Craft mass"); }
-                if (!RCUtils.CanParse(landingSpeed) || ((typeID == 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
-                if (typeID == 2 && !RCUtils.CanParse(deceleration) || !RCUtils.CheckRange(float.Parse(deceleration), 0.1f, 100)) { main.Add("Wanted deceleration"); }
-                if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Mains planned deployment alt"); }
-                if (!RCUtils.CanParse(chuteCount) || !RCUtils.CheckRange(float.Parse(chuteCount), 1, 100)) { main.Add("Parachute count"); }
-            }
-            else
-            {
-                if (!RCUtils.CanParse(preDepDiam) || !RCUtils.CheckRange(float.Parse(preDepDiam), 0.5f, model.maxDiam / 2)) { main.Add("Predeployed diameter"); }
-                if (!RCUtils.CanParse(depDiam) || !RCUtils.CheckRange(float.Parse(depDiam), 1, model.maxDiam)) { main.Add("Deployed diameter"); }
-            }
-            if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))))
-            {
-                if (isPressure) { main.Add("Predeployment pressure"); }
-                else { main.Add("Predeployment altitude"); }
-            }
-            if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Deployment altitude"); }
-            if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Autocut altitude"); }
-            if (!RCUtils.CanParse(preDepSpeed) || !RCUtils.CheckRange(float.Parse(preDepSpeed), 0.5f, 5)) { main.Add("Predeployment speed"); }
-            if (!RCUtils.CanParse(depSpeed) || !RCUtils.CheckRange(float.Parse(depSpeed), 1, 10)) { main.Add("Deployment speed"); }
-            return main;
         }
 
         internal void UpdateCanopyTexture()
