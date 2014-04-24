@@ -7,7 +7,7 @@ using UnityEngine;
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
  * For more information contact me on the forum. */
 
-namespace RealChute
+namespace RealChute.Libraries
 {
     public class TextureConfig
     {
@@ -124,7 +124,7 @@ namespace RealChute
         /// <param name="name">Name of the config searched for</param>
         public bool CaseExists(string name)
         {
-            return cases.Exists(_case => _case.name == name);
+            return cases.Any(_case => _case.name == name);
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace RealChute
         /// <param name="parachuteCase">Value to store the result in</param>
         public bool TryGetCase(int index, string type, ref CaseConfig parachuteCase)
         {
-            if (CaseExists(caseNames[index]))
+            if (caseNames.Length > 0 && CaseExists(caseNames[index]))
             {
                 parachuteCase = GetCase(index, type);
                 return true;
@@ -192,7 +192,7 @@ namespace RealChute
         /// <param name="name">Name of the config searched for</param>
         public bool CanopyExists(string name)
         {
-            return canopies.Exists(canopy => canopy.name == name);
+            return canopies.Any(canopy => canopy.name == name);
         }
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace RealChute
         /// <param name="canopy">Value to store the result in</param>
         public bool TryGetCanopy(int index, ref CanopyConfig canopy)
         {
-            if (CanopyExists(canopyNames[index]))
+            if (canopyNames.Length > 0 && CanopyExists(canopyNames[index]))
             {
                 canopy = GetCanopy(index);
                 return true;
@@ -261,8 +261,8 @@ namespace RealChute
         /// <param name="isTransformName">If the name is transform or config name</param>
         public bool ModelExists(string name, bool isTransformName = false)
         {
-            if (!isTransformName) { return models.Exists(model => model.name == name); }
-            else { return models.Exists(model => model.main.transformName == name || model.secondary.transformName == name); }
+            if (!isTransformName) { return models.Any(model => model.name == name); }
+            else { return models.Any(model => (model.hasMain && model.main.transformName == name) || (model.hasSecondary && model.secondary.transformName == name)); }
         }
 
         /// <summary>
@@ -308,7 +308,7 @@ namespace RealChute
         /// <param name="model">Value to store the result in</param>
         public bool TryGetModel(int index, ref ModelConfig model)
         {
-            if (ModelExists(modelNames[index]))
+            if (modelNames.Length > 0 && ModelExists(modelNames[index]))
             {
                 model = GetModel(index);
                 return true;

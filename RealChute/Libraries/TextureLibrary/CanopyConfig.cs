@@ -4,7 +4,7 @@
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
  * For more information contact me on the forum. */
 
-namespace RealChute
+namespace RealChute.Libraries
 {
     public class CanopyConfig
     {

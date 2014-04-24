@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Diagnostics;
-using RealChute.Extensions;
 using UnityEngine;
+using RealChute.Extensions;
+using RealChute.Libraries;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -11,16 +12,22 @@ using UnityEngine;
 
 namespace RealChute
 {
+
+    public enum DeploymentStates
+    {
+        STOWED,
+        LOWDEPLOYED,
+        PREDEPLOYED,
+        DEPLOYED,
+        CUT
+    }
+
     public class RealChuteModule : PartModule
     {
         #region Config values
         // Values from the .cfg file
         [KSPField(isPersistant = true)]
         public float caseMass = 0.1f;
-        [KSPField(isPersistant = true)]
-        public string material = "Nylon";
-        [KSPField(isPersistant = true)]
-        public string secMaterial = "empty";
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut speed", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 10, stepIncrement = 0.5f)]
         public float cutSpeed = 0.5f;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 30, stepIncrement = 1)]
@@ -29,16 +36,18 @@ namespace RealChute
         public bool mustGoDown = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Ground deploy"), UI_Toggle(enabledText = "True", disabledText = "False")]
         public bool deployOnGround = false;
-        [KSPField]
-        public bool reverseOrientation = false;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spares"), UI_FloatRange(minValue = -1, maxValue = 10, stepIncrement = 1)]
         public float spareChutes = 5;
         [KSPField]
         public bool secondaryChute = false;
         [KSPField]
+        public bool reverseOrientation = false;
+        [KSPField]
         public bool isTweakable = true;
 
         //Main parachute
+        [KSPField(isPersistant = true)]
+        public string material = "Nylon";
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float preDeployedDiameter = 1;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
@@ -69,6 +78,8 @@ namespace RealChute
         public float forcedOrientation = 0;
 
         //Second parachute
+        [KSPField(isPersistant = true)]
+        public string secMaterial = "empty";
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
         public float secPreDeployedDiameter = 1;
         [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]

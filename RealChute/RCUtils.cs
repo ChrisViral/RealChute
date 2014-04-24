@@ -11,15 +11,6 @@ using UnityEngine;
 
 namespace RealChute
 {
-    public enum DeploymentStates
-    {
-        STOWED,
-        LOWDEPLOYED,
-        PREDEPLOYED,
-        DEPLOYED,
-        CUT
-    }
-
     public static class RCUtils
     {
         #region Constants

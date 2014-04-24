@@ -6,7 +6,7 @@ using RealChute.Extensions;
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
  * For more information contact me on the forum. */
 
-namespace RealChute
+namespace RealChute.Libraries
 {
     public class MaterialsLibrary
     {
@@ -67,7 +67,7 @@ namespace RealChute
         /// <param name="name">Name of the material</param>
         public bool MaterialExists(string name)
         {
-            return _materials.Values.Contains(name);
+            return materials.Values.Contains(name);
         }
 
         /// <summary>
@@ -76,7 +76,16 @@ namespace RealChute
         /// <param name="name">Name of the material</param>
         public MaterialDefinition GetMaterial(string name)
         {
-            return _materials.Keys.First(key => key.name == name);
+            return materials.Keys.First(key => key.name == name);
+        }
+
+        /// <summary>
+        /// Returns the MaterialDefinition at the given index
+        /// </summary>
+        /// <param name="index">Index of the material</param>
+        public MaterialDefinition GetMaterial(int index)
+        {
+            return materials.Keys.ToArray()[index];
         }
 
         /// <summary>

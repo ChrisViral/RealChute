@@ -2,6 +2,7 @@
 using System.Linq;
 using UnityEngine;
 using RealChute.Extensions;
+using RealChute.Libraries;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -238,7 +239,46 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         #endregion
 
+        #region Constructor
+        /// <summary>
+        /// Creates a parachute object from the given RealChuteModule
+        /// </summary>
+        /// <param name="module">RealChuteModule to create the Parachute from</param>
+        /// <param name="secondary">Wether this Parachute is the main or secondary parachute</param>
+        public Parachute(RealChuteModule module, bool secondary)
+        {
+            this.module = module;
+            this.secondary = secondary;
+            if (this.secondary && this.material == "empty") { this.material = sec.material; }
+            this.module.materials.TryGetMaterial(material, ref mat);
+            this.parachute = this.part.FindModelTransform(parachuteName);
+            this.cap = this.part.FindModelTransform(capName);
+            this.parachute.gameObject.SetActive(false);
+            this.part.InitiateAnimation(preDeploymentAnimation);
+            this.part.InitiateAnimation(deploymentAnimation);
+
+            if (!this.module.initiated)
+            {
+                deploymentState = DeploymentStates.STOWED;
+                depState = "STOWED";
+                played = false;
+                this.cap.gameObject.SetActive(true);
+            }
+
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                deploymentState = getState;
+                if (this.module.capOff)
+                {
+                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
+                    this.cap.gameObject.SetActive(false);
+                }
+            }
+        }
+        #endregion
+
         #region Methods
+        //Adds a random noise to the parachute movement
         private void ParachuteNoise()
         {
             if (!this.randomized)
@@ -253,6 +293,7 @@ namespace RealChute
             parachute.Rotate(rotation);
         }
 
+        //Lerps the drag vector between upright and the forced angle
         private Vector3 LerpDrag(Vector3 to)
         {
             if (phase.magnitude < (to.magnitude - 0.01f) || phase.magnitude > (to.magnitude + 0.01f)) { phase = Vector3.Lerp(phase, to, 0.01f); }
@@ -260,6 +301,7 @@ namespace RealChute
             return phase;
         }
 
+        //Makes the canopy follow drag direction
         private void FollowDragDirection()
         {
             //Smoothes the forced vector
@@ -276,6 +318,7 @@ namespace RealChute
             ParachuteNoise();
         }
 
+        //Parachute low deployment
         public void LowDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
@@ -292,6 +335,7 @@ namespace RealChute
             dragTimer.Start();
         }
 
+        //Parachute predeployment
         public void PreDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
@@ -308,6 +352,7 @@ namespace RealChute
             dragTimer.Start();
         }
 
+        //Parachute deployment
         public void Deploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
@@ -324,6 +369,7 @@ namespace RealChute
             else { this.played = false; }
         }
 
+        //Parachute cutting
         public void Cut()
         {
             this.part.Effect("rccut");
@@ -337,6 +383,7 @@ namespace RealChute
             dragTimer.Reset();
         }
 
+        //Calculates parachute deployed area
         private float DragDeployment(float time, float debutArea, float endArea)
         {
             if (!dragTimer.IsRunning) { dragTimer.Start(); }
@@ -349,11 +396,13 @@ namespace RealChute
             else { return endArea; }
         }
 
+        //Drag force vector
         private Vector3 DragForce(float startArea, float targetArea, float time)
         {
             return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), mat.dragCoefficient) * this.module.dragVector * this.module.joke;
         }
 
+        //Parachute function
         internal void UpdateParachute()
         {
             if (canDeploy)
@@ -413,6 +462,7 @@ namespace RealChute
             else if (!canDeploy && isDeployed) { Cut(); }
         }
 
+        //Info window GUI
         internal void UpdateGUI()
         {
             GUILayout.Label("Material: " + mat.name, skins.label);
@@ -487,43 +537,5 @@ namespace RealChute
             GUILayout.Label("Deployment speed: " + deploymentSpeed + "s", skins.label);
         }
         #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a parachute object from the given RealChuteModule
-        /// </summary>
-        /// <param name="module">RealChuteModule to create the Parachute from</param>
-        /// <param name="secondary">Wether this Parachute is the main or secondary parachute</param>
-        public Parachute(RealChuteModule module, bool secondary)
-        {
-            this.module = module;
-            this.secondary = secondary;
-            if (this.secondary && this.material == "empty") { this.material = sec.material; }
-            this.module.materials.TryGetMaterial(material, ref mat);
-            this.parachute = this.part.FindModelTransform(parachuteName);
-            this.cap = this.part.FindModelTransform(capName);
-            this.parachute.gameObject.SetActive(false);
-            this.part.InitiateAnimation(preDeploymentAnimation);
-            this.part.InitiateAnimation(deploymentAnimation);
-
-            if (!this.module.initiated)
-            {
-                deploymentState = DeploymentStates.STOWED;
-                depState = "STOWED";
-                played = false;
-                this.cap.gameObject.SetActive(true);
-            }
-
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                deploymentState = getState;
-                if (this.module.capOff)
-                {
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
-                    this.cap.gameObject.SetActive(false);
-                }
-            }
-        }
-        #endregion 
     }
 }

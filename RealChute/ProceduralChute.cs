@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RealChute.Extensions;
 using UnityEngine;
+using RealChute.Libraries;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -27,14 +28,6 @@ namespace RealChute
         public string currentType = "Main";
         [KSPField]
         public string secCurrentType = "Main";
-        [KSPField]
-        public float modelDiameter = 0;
-        [KSPField]
-        public float secModelDiameter = 0;
-        [KSPField]
-        public int modelCount = 1;
-        [KSPField]
-        public int secModelCount = 1;
         #endregion
 
         #region Persistent values
@@ -44,7 +37,7 @@ namespace RealChute
         [KSPField(isPersistant = true)]
         public int secChuteID = 0, secModelID = 0;
         [KSPField(isPersistant = true)]
-        public int size = 0, planets = 0;
+        public int size = 0, lastSize = 0, planets = 0;
         [KSPField(isPersistant = true)]
         public int lastCaseID = 0;
         [KSPField(isPersistant = true)]
@@ -53,10 +46,12 @@ namespace RealChute
         public int typeID = 0, secTypeID = 0;
         [KSPField(isPersistant = true)]
         public int lastTypeID = 0, lastSecTypeID = 0;
+        [KSPField(isPersistant = true)]
+        public int presetID = 0;
 
         //Size vectors
         [KSPField(isPersistant = true)]
-        public Vector3 currentSize = new Vector3(), lastSize = new Vector3(), originalSize = new Vector3();
+        public Vector3 originalSize = new Vector3();
         [KSPField(isPersistant = true)]
         public Vector3 position = Vector3.zero, secPosition = Vector3.zero;
 
@@ -105,23 +100,27 @@ namespace RealChute
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private TextureLibrary textureLib = TextureLibrary.instance;
         internal TextureConfig textures = new TextureConfig();
-        private CaseConfig parachuteCase = new CaseConfig();
+        internal CaseConfig parachuteCase = new CaseConfig();
         internal ChuteTemplate main = new ChuteTemplate(), secondary = new ChuteTemplate();
+        private PresetsLibrary presets = PresetsLibrary.instance;
+        public static Dictionary<string, List<SizeNode>> moduleNodes = new Dictionary<string, List<SizeNode>>();
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
         private Rect window = new Rect(), failedWindow = new Rect(), successfulWindow = new Rect();
         internal Rect materialsWindow = new Rect(), secMaterialsWindow = new Rect();
+        private Rect presetsWindow = new Rect(), presetsSaveWindow = new Rect(), presetsWarningWindow = new Rect();
         private int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
         private int matId = Guid.NewGuid().GetHashCode(), secMatId = Guid.NewGuid().GetHashCode();
+        private int presetId = Guid.NewGuid().GetHashCode(), presetSaveId = Guid.NewGuid().GetHashCode(), presetWarningId = Guid.NewGuid().GetHashCode();
         internal int matX = 500, matY = 370;
         private Vector2 mainScroll = new Vector2(), failedScroll = new Vector2();
+        private Vector2 presetScroll = new Vector2();
+        internal string presetName = string.Empty, presetDescription = string.Empty;
         internal CelestialBody body = null;
 
         //Vectors from the module node
-        [SerializeField]
-        private List<Vector4> vectors = new List<Vector4>();
-        private Dictionary<Vector3, float> sizes = new Dictionary<Vector3, float>();
+        public List<SizeNode> sizes = new List<SizeNode>();
         [SerializeField]
         private Transform parent = null;
 
@@ -129,6 +128,7 @@ namespace RealChute
         internal bool warning = false;
         private bool visible = false, failedVisible = false, successfulVisible = false;
         internal bool materialsVisible = false, secMaterialsVisible = false;
+        private bool presetVisible = false, presetSaveVisible = false, presetWarningVisible = false;
         private string[] cases = new string[] { }, canopies = new string[] { }, models = new string[] { };
         #endregion
 
@@ -182,11 +182,6 @@ namespace RealChute
         //Creates labels for errors.
         private void CreateErrors()
         {
-            GUILayout.BeginVertical();
-            GUILayout.Label("Invalid parameters:", skins.label);
-            GUILayout.Space(10);
-
-            GUILayout.BeginVertical(skins.box);
             if (GetErrors("general").Count != 0)
             {
                 GUILayout.Label("General:", skins.label);
@@ -216,9 +211,6 @@ namespace RealChute
                 }
                 GUILayout.Space(10);
             }
-
-            GUILayout.EndVertical();
-            GUILayout.EndVertical();
         }
 
         //Applies the parameters to the parachute
@@ -249,9 +241,9 @@ namespace RealChute
                     module.spareChutes = RCUtils.ParseWithEmpty(spares);
 
                     ProceduralChute pChute = part.Modules["ProceduralChute"] as ProceduralChute;
+                    pChute.presetID = this.presetID;
                     pChute.planets = this.planets;
                     pChute.size = this.size;
-                    pChute.currentSize = this.currentSize;
                     pChute.caseID = this.caseID;
                     pChute.mustGoDown = this.mustGoDown;
                     pChute.deployOnGround = this.deployOnGround;
@@ -269,18 +261,19 @@ namespace RealChute
         private void UpdateScale(Part part, RealChuteModule module)
         {
             if (sizes.Count <= 1) { return; }
-            part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, currentSize);
-            sizes.TryGetValue(currentSize, out module.caseMass);
+            SizeNode size = sizes[this.size], lastSize = sizes[this.lastSize];
+            part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, size.size);
+            module.caseMass = size.caseMass;
             if ((HighLogic.LoadedSceneIsEditor && part == EditorLogic.SortedShipList[0]) || (HighLogic.LoadedSceneIsFlight  && this.vessel.rootPart == part))
             {
                 if (part.findAttachNode("top") != null)
                 {
                     AttachNode topNode = part.findAttachNode("top");
-                    float scale = part.transform.GetChild(0).localScale.y / debut;
-                    topNode.position.y = top * scale;
+                    topNode.position = size.topNode;
+                    topNode.size = size.topNodeSize;
                     if (topNode.attachedPart != null)
                     {
-                        float topDifference = topNode.position.y - (top * (Vector3.Scale(originalSize, lastSize).y / debut));
+                        float topDifference = size.topNode.y - lastSize.topNode.y;
                         topNode.attachedPart.transform.Translate(0, topDifference, 0, part.transform);
                         if (part.findAttachNode("top").attachedPart.GetAllChildren().Count > 0)
                         {
@@ -288,14 +281,14 @@ namespace RealChute
                         }
                     }
                 }
-                if (part.findAttachNode("bottom") != null && part.findAttachNode("bottom").attachedPart != null)
+                if (part.findAttachNode("bottom") != null)
                 {
                     AttachNode bottomNode = part.findAttachNode("bottom");
-                    float scale = part.transform.GetChild(0).localScale.y / debut;
-                    bottomNode.position.y = bottom * scale;
+                    bottomNode.position = size.bottomNode;
+                    bottomNode.size = size.bottomNodeSize;
                     if (bottomNode.attachedPart != null)
                     {
-                        float bottomDifference = bottomNode.position.y - (bottom * (Vector3.Scale(originalSize, lastSize).y / debut));
+                        float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                         bottomNode.attachedPart.transform.Translate(0, bottomDifference, 0, part.transform);
                         if (part.findAttachNode("bottom").attachedPart.GetAllChildren().Count > 0)
                         {
@@ -307,42 +300,44 @@ namespace RealChute
             else if (part.findAttachNode("bottom") != null && part.findAttachNode("bottom").attachedPart != null && part.parent != null &&  part.findAttachNode("bottom").attachedPart == part.parent)
             {
                 AttachNode bottomNode = part.findAttachNode("bottom");
-                float scale = part.transform.GetChild(0).localScale.y / debut;
-                bottomNode.position.y = bottom * scale;
-                float bottomDifference = bottomNode.position.y - (bottom * (Vector3.Scale(originalSize, lastSize).y / debut));
+                bottomNode.position = size.bottomNode;
+                bottomNode.size = size.bottomNodeSize;
+                float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                 part.transform.Translate(0, -bottomDifference, 0, part.transform);
                 if (part.findAttachNode("top") != null)
                 {
                     AttachNode topNode = part.findAttachNode("top");
-                    topNode.position.y = top * scale;
-                    float topDifference = topNode.position.y - (top * (Vector3.Scale(originalSize, lastSize).y / debut));
+                    topNode.position = size.topNode;
+                    topNode.size = size.topNodeSize;
+                    float topDifference = size.topNode.y - lastSize.topNode.y;
                     if (part.GetAllChildren().Count > 0) { part.GetAllChildren().ForEach(p => p.transform.Translate(0, -(bottomDifference - topDifference), 0, part.transform)); }
                 }
             }
             else if (part.findAttachNode("top") != null && part.findAttachNode("top").attachedPart != null && part.parent != null && part.findAttachNode("top").attachedPart == part.parent)
             {
                 AttachNode topNode = part.findAttachNode("top");
-                float scale = part.transform.GetChild(0).localScale.y / debut;
-                topNode.position.y = top * scale;
-                float topDifference = topNode.position.y - (top * (Vector3.Scale(originalSize, lastSize).y / debut));
+                topNode.position = size.topNode;
+                topNode.size = size.topNodeSize;
+                float topDifference = size.topNode.y - lastSize.topNode.y;
                 part.transform.Translate(0, -topDifference, 0, part.transform);
                 if (part.findAttachNode("bottom") != null)
                 {
                     AttachNode bottomNode = part.findAttachNode("bottom");
-                    bottomNode.position.y = bottom * scale;
-                    float bottomDifference = bottomNode.position.y - (bottom * (Vector3.Scale(originalSize, lastSize).y / debut));
+                    bottomNode.position = size.bottomNode;
+                    bottomNode.size = size.bottomNodeSize;
+                    float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                     if (part.GetAllChildren().Count > 0) { part.GetAllChildren().ForEach(p => p.transform.Translate(0, -(topDifference - bottomDifference), 0, part.transform)); }
                 }
             }
 
-            float scaleX = (part.transform.GetChild(0).localScale.x / debut) / (Vector3.Scale(originalSize, lastSize).x / debut);
-            float scaleZ = (part.transform.GetChild(0).localScale.z / debut) / (Vector3.Scale(originalSize, lastSize).z / debut);
-            Vector3 chute = part.FindModelTransform(module.parachuteName).transform.position - part.transform.position;
-            part.FindModelTransform(module.parachuteName).transform.Translate(chute.x * (scaleX - 1), 0, chute.z * (scaleZ - 1), part.transform);
+            float scaleX = part.transform.GetChild(0).localScale.x / Vector3.Scale(originalSize, lastSize.size).x;
+            float scaleZ = part.transform.GetChild(0).localScale.z / Vector3.Scale(originalSize, lastSize.size).z;
+            Vector3 chute = main.chute.forcePosition - part.transform.position;
+            main.chute.parachute.transform.Translate(chute.x * (scaleX - 1), 0, chute.z * (scaleZ - 1), part.transform);
             if (secondaryChute)
             {
-                Vector3 secChute = part.FindModelTransform(module.secParachuteName).transform.position - part.transform.position;
-                part.FindModelTransform(module.secParachuteName).transform.Translate(secChute.x * (scaleX - 1), 0, secChute.z * (scaleZ - 1), part.transform);
+                Vector3 secChute = secondary.chute.forcePosition - part.transform.position;
+                secondary.chute.parachute.transform.Translate(secChute.x * (scaleX - 1), 0, secChute.z * (scaleZ - 1), part.transform);
             }
 
             if (part.children.Count(p => p.attachMode == AttachModes.SRF_ATTACH) > 0)
@@ -355,7 +350,7 @@ namespace RealChute
                     p.transform.Translate(v.x * (scaleX - 1), 0, v.z * (scaleZ - 1), part.transform);
                 }
             }
-            lastSize = currentSize;
+            this.lastSize = this.size;
         }
 
         //Modifies the case texture of a part
@@ -381,6 +376,33 @@ namespace RealChute
             }
             lastCaseID = caseID;
         }
+
+        //Applies the selected preset
+        private void ApplyPreset()
+        {
+            Preset preset = presets.GetPreset(presets.GetRelevantPresets(this)[presetID]);
+            if (sizes.Any(s => s.sizeID == preset.sizeID)) { this.size = sizes.IndexOf(sizes.First(s => s.sizeID == preset.sizeID)); }
+            this.cutSpeed = preset.cutSpeed;
+            this.timer = preset.timer;
+            this.mustGoDown = preset.mustGoDown;
+            this.deployOnGround = preset.deployOnGround;
+            this.spares = preset.spares;
+            if (this.textureLibrary == preset.textureLibrary && this.textures.cases.Count > 0) { this.caseID = textures.GetCaseIndex(textures.GetCase(preset.caseName)); }
+            if (bodies.bodies.Values.Contains(preset.bodyName)) { this.planets = bodies.GetPlanetIndex(preset.bodyName); }
+            main.ApplyPreset(preset);
+            if (secondaryChute) { secondary.ApplyPreset(preset); }
+            Apply(false);
+            print("[RealChute]: Applied " + preset.name + "preset on " + this.part.partInfo.title);
+        }
+
+        //Creates and save a preset from the current stats
+        private void CreatePreset()
+        {
+            Preset preset = new Preset(this);
+            presets.AddPreset(preset);
+            presets.SaveAllPresets();
+            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + presetName + "\" was succesfully saved!", "Close", false, skins);
+        }
         #endregion
 
         #region Functions
@@ -390,7 +412,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
-            if (this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, currentSize))
+            if (this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
             {
                 UpdateScale(this.part, rcModule);
             }
@@ -406,10 +428,6 @@ namespace RealChute
             if (actionPanel.GetSelectedParts().Contains(this.part))
             {
                 this.visible = true;
-                if (sizes.Count > 0)
-                {
-                    currentSize = sizes.Keys.ToArray()[size];
-                }
             }
             else
             {
@@ -421,7 +439,7 @@ namespace RealChute
             }
 
             //Checks if size must update
-            if (lastSize != currentSize)
+            if (lastSize != size)
             {
                 UpdateScale(this.part, rcModule);
             }
@@ -452,12 +470,11 @@ namespace RealChute
             main = new ChuteTemplate(this, false);
             if (secondaryChute) { secondary = new ChuteTemplate(this, true); }
 
-            //Creation of the sizes dictionary
-            if (vectors.Count > 1)
+            //Initialization of sizes
+            if (sizes.Count <= 0)
             {
-                sizes = vectors.ToDictionary(v => new Vector3(v.x, v.y, v.z), v => v.w);
-                currentSize = sizes.Keys.ToArray()[size];
-                originalSize = this.part.transform.localScale;
+                print("[RealChute]: Reloading size nodes");
+                moduleNodes.TryGetValue(this.part.partInfo.name, out sizes);
             }
 
             //Creates an instance of the texture library
@@ -478,6 +495,9 @@ namespace RealChute
                 this.secMaterialsWindow = new Rect(matX, matY, 375, 280);
                 this.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
+                this.presetsWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 125, 350, 250);
+                this.presetsSaveWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 110, 350, 220);
+                this.presetsWarningWindow = new Rect(Screen.width / 2 - 75, Screen.height / 2 - 40, 150, 80);
 
                 if (!initiated)
                 {
@@ -495,7 +515,7 @@ namespace RealChute
                     timer = rcModule.timer + "s";
                     cutSpeed = rcModule.cutSpeed.ToString();
                     if (rcModule.spareChutes != -1) { spares = rcModule.spareChutes.ToString(); }
-                    originalSize = this.part.transform.localScale;
+                    originalSize = this.part.transform.GetChild(0).localScale;
                     initiated = true;
                 }
             }
@@ -516,7 +536,11 @@ namespace RealChute
             if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && this.part.Modules.Contains("RealChuteModule") && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable) { return; }
             
             //Size vectors
-            if (node.GetValues("size").Length > 0 && vectors.Count <= 0) { vectors = node.GetValues("size").Select(v => KSPUtil.ParseVector4(v)).ToList(); }
+            if (node.GetNodes("SIZE").Length > 0 && sizes.Count <= 0)
+            {
+                sizes = node.GetNodes("SIZE").Select(n => new SizeNode(n)).ToList();
+                moduleNodes.Add(this.part.name, sizes);
+            }
 
             //Top node original location
             if (this.part.findAttachNode("top") != null)
@@ -575,6 +599,20 @@ namespace RealChute
                 {
                     this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200), GUILayout.ExpandHeight(true));
                 }
+                if (this.presetVisible)
+                {
+                    this.presetsWindow = GUILayout.Window(this.presetID, this.presetsWindow, Presets, "Presets", skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
+                }
+
+                if (this.presetSaveVisible)
+                {
+                    this.presetsSaveWindow = GUILayout.Window(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
+                }
+
+                if (this.presetWarningVisible)
+                {
+                    this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", skins.window);
+                }
             }
         }
 
@@ -587,6 +625,14 @@ namespace RealChute
             GUILayout.Label("Selected part: " + this.part.partInfo.title, skins.label);
             GUILayout.Label("Symmetry counterparts: " + (this.part.symmetryCounterparts.Count), skins.label);
             GUILayout.Label("Part mass: " + this.part.TotalMass().ToString("0.###"), skins.label);
+            #endregion
+
+            #region Presets
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Select a preset", skins.button)) { this.presetVisible = !this.presetVisible; }
+
+            if (GUILayout.Button("Save as preset...", skins.button)) { this.presetSaveVisible = !this.presetSaveVisible; }
+            GUILayout.EndHorizontal();
             #endregion
 
             #region Planet selector
@@ -755,11 +801,11 @@ namespace RealChute
         private void ApplicationFailed(int id)
         {
             GUILayout.Label("Some parameters could not be applied", skins.label);
-
-            failedScroll = GUILayout.BeginScrollView(failedScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, GUILayout.MaxHeight(200));
+            GUILayout.Label("Invalid parameters:", skins.label);
+            GUILayout.Space(10);
+            failedScroll = GUILayout.BeginScrollView(failedScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(200));
             CreateErrors();
             GUILayout.EndScrollView();
-
             if (GUILayout.Button("Close", skins.button))
             {
                 this.failedVisible = false;
@@ -784,6 +830,79 @@ namespace RealChute
             {
                 this.successfulVisible = false;
             }
+        }
+
+        //Presets selection window
+        private void Presets(int id)
+        {
+            GUILayout.BeginVertical();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical();
+            presetScroll = GUILayout.BeginScrollView(presetScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.Width(150));
+            if (presets.GetRelevantPresets(this).Length > 0) { presetID = GUILayout.SelectionGrid(presetID, presets.GetRelevantPresets(this), 1, skins.button); }
+            else { GUILayout.Label("No saved presets", skins.label); }
+            GUILayout.EndScrollView();
+            GUILayout.EndVertical();
+
+            GUILayout.BeginVertical(GUILayout.Width(200));
+            if (presets.presets.Count > 0) { GUILayout.Label("Description: " + presets.GetPreset(presetID).description, skins.label); }
+            else { GUILayout.Label("---", skins.label); }
+            GUILayout.EndVertical();
+            GUILayout.EndHorizontal();
+
+            if (presets.presets.Count > 0)
+            {
+                if (GUILayout.Button("Select preset", skins.button))
+                {
+                    ApplyPreset();
+                    this.presetVisible = false;
+                }
+            }
+            if (GUILayout.Button("Cancel", skins.button)) { this.presetVisible = false; }
+            GUILayout.EndVertical();
+        }
+
+        //Presets saving window
+        private void SavePreset(int id)
+        {
+            GUILayout.BeginVertical();
+            GUILayout.Label("Preset name:", skins.label);
+            presetName = GUILayout.TextField(presetName, skins.textField);
+            GUILayout.Label("Preset description", skins.label);
+            presetDescription = GUILayout.TextArea(presetDescription, skins.textArea, GUILayout.Height(100));
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Save...", skins.button))
+            {
+                if (presetName == string.Empty) { PopupDialog.SpawnPopupDialog("Error!", "Preset name cannot be empty!", "Close", false, skins); }
+                else if (presets.presetNames.Any(n => n == presetName)) { this.presetWarningVisible = true; }
+                else if ((GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0))) { this.failedVisible = true; }
+                else
+                {
+                    CreatePreset();
+                    this.presetSaveVisible = false;
+                }
+            }
+            if (GUILayout.Button("Cancel", skins.button)) { this.presetSaveVisible = false; }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
+        }
+
+        //Preset saving confirmation window
+        private void PresetWarning(int id)
+        {
+            GUILayout.BeginVertical();
+            GUILayout.Label("Warning: there is already a preset saved under this name. Are you sure you wish to proceed?", RCUtils.redLabel);
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("Yes", skins.button))
+            {
+                CreatePreset();
+                this.presetWarningVisible = false;
+                this.presetSaveVisible = false;
+            }
+            if (GUILayout.Button("No", skins.button)) { this.presetWarningVisible = false; }
+            GUILayout.EndHorizontal();
+            GUILayout.EndVertical();
         }
         #endregion
     }

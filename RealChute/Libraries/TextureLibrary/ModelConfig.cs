@@ -4,11 +4,11 @@
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
  * For more information contact me on the forum. */
 
-namespace RealChute
+namespace RealChute.Libraries
 {
     public class ModelConfig
     {
-        public class ParachuteParameters
+        public class ModelParameters
         {
             #region Propreties
             private string _modelURL = string.Empty;
@@ -50,10 +50,10 @@ namespace RealChute
 
             #region Constructor
             /// <summary>
-            /// Creates a new ParachuteParameters
+            /// Creates a new ModelParameters
             /// </summary>
             /// <param name="node">ConfigNode to get the values from</param>
-            public ParachuteParameters(ConfigNode node)
+            public ModelParameters(ConfigNode node)
             {
                 node.TryGetValue("modelURL", ref _modelURL);
                 node.TryGetValue("transformName", ref _transformName);
@@ -100,11 +100,11 @@ namespace RealChute
             get { return this._maxDiam; }
         }
 
-        private ParachuteParameters _main = null;
+        private ModelParameters _main = null;
         /// <summary>
         /// Info about the main parachute of this type
         /// </summary>
-        public ParachuteParameters main
+        public ModelParameters main
         {
             get { return this._main; }
         }
@@ -117,11 +117,11 @@ namespace RealChute
             get { return this.main != null; }
         }
 
-        private ParachuteParameters _secondary = null;
+        private ModelParameters _secondary = null;
         /// <summary>
         /// Info about the secondary parachute of this type
         /// </summary>
-        public ParachuteParameters secondary
+        public ModelParameters secondary
         {
             get { return this._secondary; }
         }
@@ -152,8 +152,8 @@ namespace RealChute
             node.TryGetValue("count", ref _count);
             node.TryGetValue("maxDiam", ref _maxDiam);
             ConfigNode chute = new ConfigNode();
-            if (node.TryGetNode("MAIN", ref chute)) { _main = new ParachuteParameters(chute); }
-            if (node.TryGetNode("SECONDARY", ref chute)) { _secondary = new ParachuteParameters(chute); }
+            if (node.TryGetNode("MAIN", ref chute)) { _main = new ModelParameters(chute); }
+            if (node.TryGetNode("SECONDARY", ref chute)) { _secondary = new ModelParameters(chute); }
         }
         #endregion
     }
