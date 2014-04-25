@@ -128,7 +128,7 @@ namespace RealChute
         internal bool warning = false;
         private bool visible = false, failedVisible = false, successfulVisible = false;
         internal bool materialsVisible = false, secMaterialsVisible = false;
-        private bool presetVisible = false, presetSaveVisible = false, presetWarningVisible = false;
+        private bool presetVisible = false, presetSaveVisible = false, presetWarningVisible = false, saveWarning = false;
         private string[] cases = new string[] { }, canopies = new string[] { }, models = new string[] { };
         #endregion
 
@@ -250,11 +250,17 @@ namespace RealChute
                     pChute.timer = this.timer;
                     pChute.cutSpeed = this.cutSpeed;
                     pChute.spares = this.spares;
+                    //if (RCUtils.FARLoaded) { part.maximum_drag = module.areaToStock; }
                 }
             }
 
             this.successfulVisible = true;
             if (!warning) { successfulWindow.height = 50; }
+            if (RCUtils.FARLoaded)
+            {
+                //this.part.maximum_drag = rcModule.areaToStock;
+                print(this.part.maximum_drag);
+            }
         }
 
         //Modifies the size of a part
@@ -392,16 +398,16 @@ namespace RealChute
             main.ApplyPreset(preset);
             if (secondaryChute) { secondary.ApplyPreset(preset); }
             Apply(false);
-            print("[RealChute]: Applied " + preset.name + "preset on " + this.part.partInfo.title);
+            print("[RealChute]: Applied the " + preset.name + " preset on " + this.part.partInfo.title);
         }
 
         //Creates and save a preset from the current stats
         private void CreatePreset()
         {
-            Preset preset = new Preset(this);
-            presets.AddPreset(preset);
-            presets.SaveAllPresets();
-            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + presetName + "\" was succesfully saved!", "Close", false, skins);
+            presets.AddPreset(new Preset(this));
+            RealChuteSettings.SaveSettings();
+            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + presetName + "\" preset was succesfully saved!", "Close", false, skins);
+            print("[RealChute]: Saved the " + presetName + " preset to the settings file.");
         }
         #endregion
 
@@ -473,7 +479,7 @@ namespace RealChute
             //Initialization of sizes
             if (sizes.Count <= 0)
             {
-                print("[RealChute]: Reloading size nodes");
+                print("[RealChute]: Reloading size nodes for " + this.part.partInfo.name);
                 moduleNodes.TryGetValue(this.part.partInfo.name, out sizes);
             }
 
@@ -497,7 +503,7 @@ namespace RealChute
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.presetsWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 125, 350, 250);
                 this.presetsSaveWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 110, 350, 220);
-                this.presetsWarningWindow = new Rect(Screen.width / 2 - 75, Screen.height / 2 - 40, 150, 80);
+                this.presetsWarningWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 50, 200, 100);
 
                 if (!initiated)
                 {
@@ -611,7 +617,7 @@ namespace RealChute
 
                 if (this.presetWarningVisible)
                 {
-                    this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", skins.window);
+                    this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", skins.window, GUILayout.Width(200), GUILayout.Height(100));
                 }
             }
         }
@@ -624,7 +630,8 @@ namespace RealChute
             #region Info labels
             GUILayout.Label("Selected part: " + this.part.partInfo.title, skins.label);
             GUILayout.Label("Symmetry counterparts: " + (this.part.symmetryCounterparts.Count), skins.label);
-            GUILayout.Label("Part mass: " + this.part.TotalMass().ToString("0.###"), skins.label);
+            GUILayout.Label("Case mass: " + rcModule.caseMass + "t", skins.label);
+            GUILayout.Label("Total part mass: " + this.part.TotalMass().ToString("0.###") + "t", skins.label);
             #endregion
 
             #region Presets
@@ -636,7 +643,7 @@ namespace RealChute
             #endregion
 
             #region Planet selector
-            GUILayout.Space(5);
+            GUILayout.Space(10);
             GUILayout.BeginHorizontal(GUILayout.Height(30));
             GUILayout.BeginVertical();
             GUILayout.FlexibleSpace();
@@ -853,11 +860,19 @@ namespace RealChute
 
             if (presets.presets.Count > 0)
             {
+                GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Select preset", skins.button))
                 {
                     ApplyPreset();
                     this.presetVisible = false;
                 }
+
+                if (GUILayout.Button("Delete preset", skins.button))
+                {
+                    saveWarning = false;
+                    this.presetWarningVisible = true;
+                }
+                GUILayout.EndHorizontal();
             }
             if (GUILayout.Button("Cancel", skins.button)) { this.presetVisible = false; }
             GUILayout.EndVertical();
@@ -875,7 +890,7 @@ namespace RealChute
             if (GUILayout.Button("Save...", skins.button))
             {
                 if (presetName == string.Empty) { PopupDialog.SpawnPopupDialog("Error!", "Preset name cannot be empty!", "Close", false, skins); }
-                else if (presets.presetNames.Any(n => n == presetName)) { this.presetWarningVisible = true; }
+                else if (presets.presetNames.Any(n => n == presetName)) { this.presetWarningVisible = true; saveWarning = true; }
                 else if ((GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0))) { this.failedVisible = true; }
                 else
                 {
@@ -892,13 +907,13 @@ namespace RealChute
         private void PresetWarning(int id)
         {
             GUILayout.BeginVertical();
-            GUILayout.Label("Warning: there is already a preset saved under this name. Are you sure you wish to proceed?", RCUtils.redLabel);
+            GUILayout.Label(saveWarning ? "Warning: there is already a preset saved under this name. Are you sure you wish to proceed?" : "Are you sure you wish to delete this preset?", RCUtils.redLabel);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes", skins.button))
             {
-                CreatePreset();
+                presets.DeletePreset(saveWarning ? presetName : presets.GetPreset(presetID).name);
+                if (saveWarning) { CreatePreset(); this.presetSaveVisible = false; }
                 this.presetWarningVisible = false;
-                this.presetSaveVisible = false;
             }
             if (GUILayout.Button("No", skins.button)) { this.presetWarningVisible = false; }
             GUILayout.EndHorizontal();

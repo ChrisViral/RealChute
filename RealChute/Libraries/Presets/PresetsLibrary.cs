@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+/* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
+ * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
+ * For more information contact me on the forum. */
+
 namespace RealChute.Libraries
 {
     public class PresetsLibrary
@@ -30,13 +34,12 @@ namespace RealChute.Libraries
             get { return this._presets; }
         }
 
-        private string[] _presetNames = new string[] { };
         /// <summary>
         /// Names of the presets
         /// </summary>
         public string[] presetNames
         {
-            get { return this._presetNames; }
+            get { return this.presets.Select(p => p.name).ToArray(); }
         }
         #endregion
 
@@ -46,8 +49,7 @@ namespace RealChute.Libraries
         /// </summary>
         public PresetsLibrary()
         {
-            _presets.AddRange(ConfigNode.Load(RCUtils.settingsURL).GetNodes("PRESET").Select(n => new Preset(n)));
-            _presetNames = presets.Select(p => p.name).ToArray();
+            _presets.AddRange(RealChuteSettings.settings.GetNodes("PRESET").Select(n => new Preset(n)));
         }
         #endregion
 
@@ -119,25 +121,21 @@ namespace RealChute.Libraries
         }
 
         /// <summary>
-        /// Saves all presets to a ConfigNode
-        /// </summary>
-        public void SaveAllPresets()
-        {
-            ConfigNode settings = ConfigNode.Load(RCUtils.settingsURL);
-            settings.ClearNodes();
-            presets.ForEach(p => settings.AddNode(p.Save()));
-            ConfigNode save = new ConfigNode();
-            save.AddNode(settings);
-            save.Save(RCUtils.settingsURL);
-        }
-
-        /// <summary>
         /// Adds the given preset to the library
         /// </summary>
         /// <param name="preset">Preset to add</param>
         public void AddPreset(Preset preset)
         {
             this._presets.Add(preset);
+        }
+
+        /// <summary>
+        /// Removes the preset of the given name from the library
+        /// </summary>
+        /// <param name="name">Name of the preset to delete</param>
+        public void DeletePreset(string name)
+        {
+            this._presets.Remove(GetPreset(name));
         }
         #endregion
     }

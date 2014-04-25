@@ -69,6 +69,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Libraries\TextureLibrary\TextureConfig.cs" />
     <Compile Include="Libraries\TextureLibrary\TextureLibrary.cs" />
+    <Compile Include="RealChuteSettings.cs" />
     <Compile Include="SizeNode.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

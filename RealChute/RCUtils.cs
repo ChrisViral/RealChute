@@ -111,6 +111,14 @@ namespace RealChute
                 return "v" + version.ToString();
             }
         }
+
+        /// <summary>
+        /// Returns if FAR is currently loaded in the game
+        /// </summary>
+        public static bool FARLoaded
+        {
+            get { return AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
+        }
         #endregion
 
         #region Methods
@@ -280,9 +288,26 @@ namespace RealChute
         /// </summary>
         /// <param name="body">Name of the body</param>
         /// <param name="alt">Altitude the fetch the density at</param>
-        public static float GetDensityAtAlt(CelestialBody body, float alt)
+        public static double GetDensityAtAlt(CelestialBody body, double alt)
         {
-            return (float)FlightGlobals.getAtmDensity(FlightGlobals.getStaticPressure(alt, body));
+            if (alt > GetMaxAtmosphereAltitude(body)) { return 0; }
+            if (FARLoaded)
+            {
+                try
+                {
+                    return (double)AssemblyLoader.loadedAssemblies.First(a => a.dllName == "FerramAerospaceResearch").assembly
+                        .GetTypes().First(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
+                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
+                        .First(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double))
+                        .Invoke(null, new object[] { body, alt });
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                    UnityEngine.Debug.LogException(e);
+                }
+            }
+            return FlightGlobals.getAtmDensity(FlightGlobals.getStaticPressure(alt, body));
         }
 
         /// <summary>
@@ -292,7 +317,7 @@ namespace RealChute
         public static float GetMaxAtmosphereAltitude(CelestialBody body)
         {
             if (!body.atmosphere) { return 0; }
-            return -(float)(body.atmosphereScaleHeight * Math.Log(1e-6)) * 1000;
+            return -(float)(body.atmosphereScaleHeight * Math.Log(1E-6)) * 1000;
         }
 
         /// <summary>

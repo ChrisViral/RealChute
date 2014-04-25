@@ -1,5 +1,9 @@
 ﻿using RealChute.Extensions;
 
+/* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
+ * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
+ * For more information contact me on the forum. */
+
 namespace RealChute.Libraries
 {
     public class Preset
@@ -419,7 +423,7 @@ namespace RealChute.Libraries
         /// </summary>
         public bool hasSecondary
         {
-            get { return this.secondary == null; }
+            get { return this.secondary != null; }
         }
         #endregion
 
@@ -454,7 +458,7 @@ namespace RealChute.Libraries
             this._name = pChute.presetName;
             this._description = pChute.presetDescription;
             this._textureLibrary = pChute.textureLibrary;
-            this._sizeID = pChute.sizes[pChute.size].sizeID;
+            if (pChute.sizes.Count > 0) { this._sizeID = pChute.sizes[pChute.size].sizeID; }
             this._cutSpeed = pChute.cutSpeed;
             this._timer = pChute.timer;
             this._mustGoDown = pChute.mustGoDown;
@@ -463,8 +467,8 @@ namespace RealChute.Libraries
             if (textureLibrary != "none")
             {
                 if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
-                this._bodyName = pChute.body.bodyName;
             }
+            this._bodyName = pChute.body.bodyName;
             this._main = new ChuteParameters(pChute, false);
             if (pChute.secondaryChute) { this._secondary = new ChuteParameters(pChute, true); }
         }
@@ -490,7 +494,6 @@ namespace RealChute.Libraries
             node.AddValue("bodyName", bodyName);
             node.AddNode(main.Save(false));
             if (hasSecondary) { node.AddNode(secondary.Save(true)); }
-
             return node;
         }
         #endregion

@@ -367,8 +367,8 @@ namespace RealChute
                 else { m = float.Parse(mass); }
 
                 float density = 0;
-                if (typeID == 1) { density = RCUtils.GetDensityAtAlt(body, float.Parse(refDepAlt)); }
-                else { density = RCUtils.GetDensityAtAlt(body, 0f); }
+                if (typeID == 1) { density = (float)RCUtils.GetDensityAtAlt(body, double.Parse(refDepAlt)); }
+                else { density = (float)RCUtils.GetDensityAtAlt(body, 0d); }
 
                 float speed2 = Mathf.Pow(float.Parse(landingSpeed), 2f);
 

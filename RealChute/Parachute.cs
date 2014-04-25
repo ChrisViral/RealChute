@@ -399,7 +399,7 @@ namespace RealChute
         //Drag force vector
         private Vector3 DragForce(float startArea, float targetArea, float time)
         {
-            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), mat.dragCoefficient) * this.module.dragVector * this.module.joke;
+            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), mat.dragCoefficient) * this.module.dragVector * (RealChuteSettings.fetch.jokeActivated ? -1 : 1);
         }
 
         //Parachute function

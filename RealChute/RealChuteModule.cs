@@ -119,6 +119,8 @@ namespace RealChute
         public bool staged = false, launched = false;
         [KSPField(isPersistant = true)]
         public string depState = "STOWED", secDepState = "STOWED";
+        [KSPField(isPersistant = true)]
+        public float baseDrag = 0.2f;
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
         public int chuteCount = 5;
         #endregion
@@ -147,6 +149,12 @@ namespace RealChute
         {
             get { return main.isDeployed && secondary.isDeployed; }
         }
+
+        //Converts The canopy diameter to an equivalent in stock drag
+        public float areaToStock
+        {
+            get { return ((this.secondaryChute ? secondary.mat.dragCoefficient * secondary.deployedArea : 0) + (main.mat.dragCoefficient * main.deployedArea)) / (8 * this.part.TotalMass()); }
+        }
         #endregion
 
         #region Fields
@@ -154,13 +162,13 @@ namespace RealChute
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
         private Animation anim = null;
         private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch();
-        internal float joke = 1;
-        private bool displayed = false, autoArm = false;
+        private bool displayed = false;
         internal double terrainAlt, ASL, trueAlt;
         internal double atmPressure, atmDensity;
         internal float sqrSpeed;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         internal Parachute main = null, secondary = null;
+        private RealChuteSettings settings = null;
 
         //GUI
         protected bool visible = false, hid = false;
@@ -357,7 +365,7 @@ namespace RealChute
         public void ActivateRC()
         {
             this.staged = true;
-            if (autoArm) { this.armed = true; }
+            if (settings.autoArm) { this.armed = true; }
             Events["GUIDeploy"].active = false;
             Events["GUIArm"].active = false;
             print("[RealChute]: " + this.part.partInfo.name + " was activated in stage " + this.part.inverseStage);
@@ -459,7 +467,7 @@ namespace RealChute
                     }
                 }
 
-                if (autoArm) { Events["GUIArm"].guiActive = false; }
+                if (settings.autoArm) { Events["GUIArm"].guiActive = false; }
                 if (armed) { Events["GUIDisarm"].guiActive = true; }
                 else { Events["GUIDisarm"].guiActive = false; }
             }
@@ -504,7 +512,7 @@ namespace RealChute
                 //Calculates parachute mass
                 this.part.mass = caseMass + (secondaryChute ? main.chuteMass + secondary.chuteMass : main.chuteMass);
 
-                if (autoArm) { Actions["ActionArm"].active = false; }
+                if (settings.autoArm) { Actions["ActionArm"].active = false; }
             }
         }
 
@@ -521,9 +529,9 @@ namespace RealChute
                 trueAlt = ASL - terrainAlt;
             }
             else { terrainAlt = 0d; }
-            atmPressure = FlightGlobals.getStaticPressure(ASL, this.vessel.mainBody);
-            if (atmPressure <= 1E-6) { atmPressure = 0; }
-            atmDensity = FlightGlobals.getAtmDensity(atmPressure);
+            atmPressure = FlightGlobals.getStaticPressure(pos);
+            if (atmPressure <= 1E-6) { atmPressure = 0; atmDensity = 0; }
+            else { atmDensity = RCUtils.GetDensityAtAlt(this.vessel.mainBody, ASL); }
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             sqrSpeed = velocity.sqrMagnitude;
             dragVector = -velocity.normalized;
@@ -561,7 +569,7 @@ namespace RealChute
                     else { Events["GUICutBoth"].active = false; }
 
                     //If the parachute can't be deployed
-                    if (!oneWasDeployed && !autoArm)
+                    if (!oneWasDeployed && !settings.autoArm)
                     {
                         failedTimer.Start();
                         StagingReset();
@@ -600,11 +608,7 @@ namespace RealChute
             this.part.stagingIcon = "PARACHUTES";
 
             //Autoarming checkup
-            ConfigNode settings = ConfigNode.Load(RCUtils.settingsURL).GetNode("REALCHUTE_SETTINGS");
-            settings.TryGetValue("autoArm", ref autoArm);
-            bool jokeActivated = false;
-            settings.TryGetValue("jokeActivated", ref jokeActivated);
-            joke = jokeActivated ? -1 : 1;
+            settings = RealChuteSettings.fetch;
 
             //Part GUI
             Events["GUIDeploy"].active = true;
@@ -622,7 +626,7 @@ namespace RealChute
                 Events["GUICut"].guiName = "Cut chute";
             }
 
-            if (autoArm)
+            if (settings.autoArm)
             {
                 Events["GUIArm"].active = false;
                 Actions["ActionArm"].active = false;
@@ -667,12 +671,14 @@ namespace RealChute
                 initiated = true;
                 capOff = false;
                 armed = false;
+                this.baseDrag = this.part.maximum_drag;
                 if (spareChutes >= 0) { chuteCount = (int)spareChutes; }
             }
 
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
+                this.part.maximum_drag = this.baseDrag;
                 //If the part has been staged in the past
                 if (capOff)
                 {
@@ -682,6 +688,9 @@ namespace RealChute
                 main.randomTime = (float)random.NextDouble();
                 if (secondaryChute) { secondary.randomTime = (float)random.NextDouble(); }
             }
+
+            //else if (HighLogic.LoadedSceneIsEditor && RCUtils.FARLoaded) { this.part.maximum_drag = areaToStock; }
+            print(this.part.maximum_drag);
 
             //GUI
             window = new Rect(200, 100, 350, 400);
@@ -718,6 +727,7 @@ namespace RealChute
             string infoList = string.Empty;
             infoList = String.Format("Parachute material: {0}\n", material);
             if (secondaryChute && secMaterial != material && secMaterial != "empty") { infoList += String.Format("Secondary parachute material: {0}\n", secMaterial); }
+            infoList += String.Format("Case mass: {0}\n", caseMass);
             if (material == secMaterial) { infoList += String.Format("Drag coefficient: {0:0.00}\n", mat.dragCoefficient); }
             else { infoList += String.Format("Drag coefficients: {0:0.00}, {1:0.00}\n", mat.dragCoefficient, secMat.dragCoefficient); }
             if (timer > 0) { infoList += String.Format("Deployment timer: {0}s\n", timer); }
