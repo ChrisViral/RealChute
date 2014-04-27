@@ -272,7 +272,7 @@ namespace RealChute
                     if (!getMass && !RCUtils.CanParse(mass) || !RCUtils.CheckRange(float.Parse(mass), 0.1f, 10000)) { main.Add("Craft mass"); }
                     if (!RCUtils.CanParse(landingSpeed) || ((typeID == 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 5000)) || (typeID != 1 && !RCUtils.CheckRange(float.Parse(landingSpeed), 0.1f, 300)))) { main.Add("Landing speed"); }
                     if (typeID == 2 && !RCUtils.CanParse(deceleration) || !RCUtils.CheckRange(float.Parse(deceleration), 0.1f, 100)) { main.Add("Wanted deceleration"); }
-                    if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Mains planned deployment alt"); }
+                    if (typeID == 1 && !RCUtils.CanParse(refDepAlt) || !RCUtils.CheckRange(float.Parse(refDepAlt), 10, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Mains planned deployment alt"); }
                     if (!RCUtils.CanParse(chuteCount) || !RCUtils.CheckRange(float.Parse(chuteCount), 1, 100)) { main.Add("Parachute count"); }
                 }
                 else
@@ -280,13 +280,13 @@ namespace RealChute
                     if (!RCUtils.CanParse(preDepDiam) || !RCUtils.CheckRange(float.Parse(preDepDiam), 0.5f, model.maxDiam / 2)) { main.Add("Predeployed diameter"); }
                     if (!RCUtils.CanParse(depDiam) || !RCUtils.CheckRange(float.Parse(depDiam), 1, model.maxDiam)) { main.Add("Deployed diameter"); }
                 }
-                if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))))
+                if (!RCUtils.CanParse(predepClause) || (isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)body.GetPressureASL())) || (!isPressure && !RCUtils.CheckRange(float.Parse(predepClause), 10, (float)body.GetMaxAtmosphereAltitude())))
                 {
                     if (isPressure) { main.Add("Predeployment pressure"); }
                     else { main.Add("Predeployment altitude"); }
                 }
-                if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Deployment altitude"); }
-                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { main.Add("Autocut altitude"); }
+                if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Deployment altitude"); }
+                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Autocut altitude"); }
                 if (!RCUtils.CanParse(preDepSpeed) || !RCUtils.CheckRange(float.Parse(preDepSpeed), 0.5f, 5)) { main.Add("Predeployment speed"); }
                 if (!RCUtils.CanParse(depSpeed) || !RCUtils.CheckRange(float.Parse(depSpeed), 1, 10)) { main.Add("Deployment speed"); }
                 return main;
@@ -367,8 +367,8 @@ namespace RealChute
                 else { m = float.Parse(mass); }
 
                 float density = 0;
-                if (typeID == 1) { density = (float)RCUtils.GetDensityAtAlt(body, double.Parse(refDepAlt)); }
-                else { density = (float)RCUtils.GetDensityAtAlt(body, 0d); }
+                if (typeID == 1) { density = (float)body.GetDensityAtAlt(double.Parse(refDepAlt)); }
+                else { density = (float)body.GetDensityASL(); }
 
                 float speed2 = Mathf.Pow(float.Parse(landingSpeed), 2f);
 
@@ -568,7 +568,7 @@ namespace RealChute
                         {
                             landingSpeed = "100";
                             deploymentAlt = "10";
-                            predepClause = isPressure ? "0.9" : "100";
+                            predepClause = isPressure ? "0.5" : "50";
                             preDepSpeed = "1";
                             depSpeed = "2";
                             break;
@@ -739,7 +739,7 @@ namespace RealChute
                 if (typeID == 1)
                 {
                     string depAlt = refDepAlt;
-                    this.pChute.CreateEntryArea("Target altitude (m):", ref depAlt, 10, RCUtils.GetMaxAtmosphereAltitude(body), 100);
+                    this.pChute.CreateEntryArea("Target altitude (m):", ref depAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
                     refDepAlt = depAlt;
                 }
 
@@ -774,9 +774,23 @@ namespace RealChute
             //Pressure/alt toggle
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Toggle(isPressure, "Pressure predeployment", skins.toggle)) { isPressure = true; }
+            if (GUILayout.Toggle(isPressure, "Pressure predeployment", skins.toggle))
+            {
+                if (!isPressure)
+                {
+                    isPressure = true;
+                    this.predepClause = this.chute.minPressure.ToString();
+                }
+            }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!isPressure, "Altitude predeployment", skins.toggle)) { isPressure = false; }
+            if (GUILayout.Toggle(!isPressure, "Altitude predeployment", skins.toggle))
+            {
+                if(isPressure)
+                {
+                    isPressure = false;
+                    this.predepClause = this.chute.minDeployment.ToString();
+                }
+            }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
@@ -784,12 +798,12 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             if (isPressure)
             {
-                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)FlightGlobals.getStaticPressure(0, body))) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
+                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 0.0001f, (float)body.GetPressureASL())) { GUILayout.Label("Predeployment pressure (atm):", skins.label); }
                 else { GUILayout.Label("Predeployment pressure (atm):", RCUtils.redLabel); }
             }
             else
             {
-                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 10, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
+                if (RCUtils.CanParse(predepClause) && RCUtils.CheckRange(float.Parse(predepClause), 10, (float)body.GetMaxAtmosphereAltitude())) { GUILayout.Label("Predeployment altitude (m):", skins.label); }
                 else { GUILayout.Label("Predeployment altitude (m):", RCUtils.redLabel); }
             }
             GUILayout.FlexibleSpace();
@@ -797,15 +811,14 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Deployment altitude
-
             string alt = deploymentAlt;
-            this.pChute.CreateEntryArea("Deployment altitude", ref alt, 10, RCUtils.GetMaxAtmosphereAltitude(body));
+            this.pChute.CreateEntryArea("Deployment altitude", ref alt, 10, (float)body.GetMaxAtmosphereAltitude());
             deploymentAlt = alt;
 
             //Cut altitude
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, RCUtils.GetMaxAtmosphereAltitude(body))) { GUILayout.Label("Autocut altitude (m):", skins.label); }
+            if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { GUILayout.Label("Autocut altitude (m):", skins.label); }
             else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             cutAlt = GUILayout.TextField(cutAlt, 10, skins.textField, GUILayout.Width(150));
@@ -824,12 +837,12 @@ namespace RealChute
         }
 
         //Materials window GUI code
-        internal void MaterialsWindow()
+        internal void MaterialsWindow(int id)
         {
             GUI.DragWindow(new Rect(0, 0, materialsWindow.width, 25));
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            materialsScroll = GUILayout.BeginScrollView(materialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(165), GUILayout.Width(140));
+            materialsScroll = GUILayout.BeginScrollView(materialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(200), GUILayout.Width(140));
             materialsID = GUILayout.SelectionGrid(materialsID, this.pChute.materials.materials.Values.ToArray(), 1, skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
@@ -846,6 +859,7 @@ namespace RealChute
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
             if (GUILayout.Button("Choose material", skins.button))
             {
                 material = this.pChute.materials.materials.Keys.ToArray()[materialsID];
@@ -855,6 +869,7 @@ namespace RealChute
             {
                 this.materialsVisible = false;
             }
+            GUILayout.EndHorizontal();
             GUILayout.EndVertical();
         }
 
@@ -862,6 +877,7 @@ namespace RealChute
         internal void ApplyPreset(Preset preset)
         {
             Preset.ChuteParameters parameters = this.secondary ? preset.secondary : preset.main;
+            this.material = pChute.materials.GetMaterial(parameters.material);
             this.materialsID = pChute.materials.GetMaterialIndex(parameters.material);
             this.preDepDiam = parameters.preDeployedDiameter;
             this.depDiam = parameters.deployedDiameter;
@@ -873,10 +889,10 @@ namespace RealChute
             this.cutAlt = parameters.cutAlt;
             this.preDepSpeed = parameters.preDeploymentSpeed;
             this.depSpeed = parameters.deploymentSpeed;
-            if (pChute.textureLibrary == preset.textureLibrary)
+            if (pChute.textureLibrary == preset.textureLibrary || pChute.textureLibrary != "none")
             {
-                if (this.textures.canopies.Count > 0) { this.chuteID = pChute.textures.GetCanopyIndex(pChute.textures.GetCanopy(parameters.chuteTexture)); }
-                if (this.textures.models.Count > 0) { this.modelID = pChute.textures.GetModelIndex(pChute.textures.GetModel(parameters.modelName)); }
+                if (textures.canopyNames.Contains(parameters.chuteTexture) && textures.canopies.Count > 0 && !string.IsNullOrEmpty(parameters.chuteTexture)) { this.chuteID = textures.GetCanopyIndex(textures.GetCanopy(parameters.chuteTexture)); }
+                if (textures.modelNames.Contains(parameters.modelName) && textures.models.Count > 0 && !string.IsNullOrEmpty(parameters.modelName)) { this.modelID = textures.GetModelIndex(textures.GetModel(parameters.modelName)); }
             }
             this.typeID = RCUtils.types.ToList().IndexOf(parameters.type);
             this.calcSelect = parameters.calcSelect;

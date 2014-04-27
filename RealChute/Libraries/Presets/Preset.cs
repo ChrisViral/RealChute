@@ -218,7 +218,7 @@ namespace RealChute.Libraries
                 node.TryGetValue("cutAlt", ref _cutAlt);
                 node.TryGetValue("preDeploymentSpeed", ref _preDeploymentSpeed);
                 node.TryGetValue("deploymentSpeed", ref _deploymentSpeed);
-                node.TryGetValue("cuteTexture", ref _chuteTexture);
+                node.TryGetValue("chuteTexture", ref _chuteTexture);
                 node.TryGetValue("modelName", ref _modelName);
                 node.TryGetValue("type", ref _type);
                 node.TryGetValue("calcSelect", ref _calcSelect);

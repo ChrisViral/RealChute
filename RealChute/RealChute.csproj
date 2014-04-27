@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="CompatibilityChecker.cs" />
+    <Compile Include="Extensions\CelestialBodyExtensions.cs" />
     <Compile Include="Libraries\Presets\Preset.cs" />
     <Compile Include="Libraries\Presets\PresetsLibrary.cs" />
     <Compile Include="Libraries\TextureLibrary\CanopyConfig.cs" />

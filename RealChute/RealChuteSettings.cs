@@ -43,15 +43,6 @@ namespace RealChute
         {
             get { return this._jokeActivated; }
         }
-
-        private ConfigNode _settings = new ConfigNode();
-        /// <summary>
-        /// Returns the current settings node
-        /// </summary>
-        public static ConfigNode settings
-        {
-            get { return fetch._settings; }
-        }
         #endregion
 
         #region Constructor
@@ -60,15 +51,19 @@ namespace RealChute
         /// </summary>
         public RealChuteSettings()
         {
+            ConfigNode node = new ConfigNode(), settings = new ConfigNode("REALCHUTE_SETTINGS");
             Debug.Log("[RealChute]: Loading settings file.");
             if (!System.IO.File.Exists(RCUtils.settingsURL))
             {
-                Debug.LogWarning("[RealChute]: RealChute_Settings.cfg doesn't exist. Creating new settings file.");
-                SaveSettings();
+                Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Creating new version.");
+                settings.AddValue("autoArm", autoArm);
+                settings.AddValue("jokeActivated", jokeActivated);
+                node.AddNode(settings);
+                node.Save(RCUtils.settingsURL);
             }
             else
             {
-                ConfigNode node = ConfigNode.Load(RCUtils.settingsURL), settings = new ConfigNode("REALCHUTE_SETTINGS");
+                node = ConfigNode.Load(RCUtils.settingsURL);
                 node.TryGetNode("REALCHUTE_SETTINGS", ref settings);
                 bool missing = false;
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { missing = true; }
@@ -76,9 +71,13 @@ namespace RealChute
                 if (missing)
                 {
                     Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
-                    SaveSettings();
+                    settings.ClearValues();
+                    settings.AddValue("autoArm", autoArm);
+                    settings.AddValue("jokeActivated", jokeActivated);
+                    node.ClearData();
+                    node.AddNode(settings);
+                    node.Save(RCUtils.settingsURL);
                 }
-                else { this._settings = settings; }
             }
         }
         #endregion
@@ -89,16 +88,15 @@ namespace RealChute
         /// </summary>
         public static void SaveSettings()
         {
-            ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), root = new ConfigNode();
+            ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
                 PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));
             }
-            root.AddNode(settings);
-            root.Save(RCUtils.settingsURL);
-            fetch._settings = settings;
+            node.AddNode(settings);
+            node.Save(RCUtils.settingsURL);
         }
         #endregion
     }

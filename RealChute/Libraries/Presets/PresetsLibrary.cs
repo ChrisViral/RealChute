@@ -49,7 +49,14 @@ namespace RealChute.Libraries
         /// </summary>
         public PresetsLibrary()
         {
-            _presets.AddRange(RealChuteSettings.settings.GetNodes("PRESET").Select(n => new Preset(n)));
+            if (System.IO.File.Exists(RCUtils.settingsURL))
+            {
+                ConfigNode settings = ConfigNode.Load(RCUtils.settingsURL);
+                if (settings.HasNode("REALCHUTE_SETTINGS"))
+                {
+                    _presets.AddRange(settings.GetNode("REALCHUTE_SETTINGS").GetNodes("PRESET").Select(n => new Preset(n)));
+                }
+            }
         }
         #endregion
 
@@ -127,15 +134,17 @@ namespace RealChute.Libraries
         public void AddPreset(Preset preset)
         {
             this._presets.Add(preset);
+            RealChuteSettings.SaveSettings();
         }
 
         /// <summary>
         /// Removes the preset of the given name from the library
         /// </summary>
         /// <param name="name">Name of the preset to delete</param>
-        public void DeletePreset(string name)
+        public void DeletePreset(Preset preset)
         {
-            this._presets.Remove(GetPreset(name));
+            this._presets.Remove(preset);
+            RealChuteSettings.SaveSettings();
         }
         #endregion
     }

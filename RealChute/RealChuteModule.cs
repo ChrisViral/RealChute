@@ -12,7 +12,6 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
-
     public enum DeploymentStates
     {
         STOWED,
@@ -148,12 +147,6 @@ namespace RealChute
         public bool bothDeployed
         {
             get { return main.isDeployed && secondary.isDeployed; }
-        }
-
-        //Converts The canopy diameter to an equivalent in stock drag
-        public float areaToStock
-        {
-            get { return ((this.secondaryChute ? secondary.mat.dragCoefficient * secondary.deployedArea : 0) + (main.mat.dragCoefficient * main.deployedArea)) / (8 * this.part.TotalMass()); }
         }
         #endregion
 
@@ -522,16 +515,16 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
+
             if (this.vessel.mainBody.pqsController != null)
             {
                 terrainAlt = this.vessel.pqsAltitude;
                 if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
                 trueAlt = ASL - terrainAlt;
             }
-            else { terrainAlt = 0d; }
-            atmPressure = FlightGlobals.getStaticPressure(pos);
-            if (atmPressure <= 1E-6) { atmPressure = 0; atmDensity = 0; }
-            else { atmDensity = RCUtils.GetDensityAtAlt(this.vessel.mainBody, ASL); }
+            else { trueAlt = ASL; }
+            atmPressure = this.vessel.mainBody.GetPressureAtAlt(ASL);
+            atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             sqrSpeed = velocity.sqrMagnitude;
             dragVector = -velocity.normalized;
@@ -678,7 +671,6 @@ namespace RealChute
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
-                this.part.maximum_drag = this.baseDrag;
                 //If the part has been staged in the past
                 if (capOff)
                 {
@@ -688,9 +680,6 @@ namespace RealChute
                 main.randomTime = (float)random.NextDouble();
                 if (secondaryChute) { secondary.randomTime = (float)random.NextDouble(); }
             }
-
-            //else if (HighLogic.LoadedSceneIsEditor && RCUtils.FARLoaded) { this.part.maximum_drag = areaToStock; }
-            print(this.part.maximum_drag);
 
             //GUI
             window = new Rect(200, 100, 350, 400);

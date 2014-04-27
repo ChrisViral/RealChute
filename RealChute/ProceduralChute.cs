@@ -250,17 +250,11 @@ namespace RealChute
                     pChute.timer = this.timer;
                     pChute.cutSpeed = this.cutSpeed;
                     pChute.spares = this.spares;
-                    //if (RCUtils.FARLoaded) { part.maximum_drag = module.areaToStock; }
                 }
             }
 
             this.successfulVisible = true;
             if (!warning) { successfulWindow.height = 50; }
-            if (RCUtils.FARLoaded)
-            {
-                //this.part.maximum_drag = rcModule.areaToStock;
-                print(this.part.maximum_drag);
-            }
         }
 
         //Modifies the size of a part
@@ -393,7 +387,7 @@ namespace RealChute
             this.mustGoDown = preset.mustGoDown;
             this.deployOnGround = preset.deployOnGround;
             this.spares = preset.spares;
-            if (this.textureLibrary == preset.textureLibrary && this.textures.cases.Count > 0) { this.caseID = textures.GetCaseIndex(textures.GetCase(preset.caseName)); }
+            if ((this.textureLibrary == preset.textureLibrary || (this.textureLibrary != "none" && this.textures.caseNames.Contains(preset.caseName))) && this.textures.cases.Count > 0 && !string.IsNullOrEmpty(preset.caseName)) { this.caseID = textures.GetCaseIndex(textures.GetCase(preset.caseName)); }
             if (bodies.bodies.Values.Contains(preset.bodyName)) { this.planets = bodies.GetPlanetIndex(preset.bodyName); }
             main.ApplyPreset(preset);
             if (secondaryChute) { secondary.ApplyPreset(preset); }
@@ -501,7 +495,7 @@ namespace RealChute
                 this.secMaterialsWindow = new Rect(matX, matY, 375, 280);
                 this.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
-                this.presetsWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 125, 350, 250);
+                this.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
                 this.presetsSaveWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 110, 350, 220);
                 this.presetsWarningWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 50, 200, 100);
 
@@ -579,42 +573,35 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsEditor)
             {
-                if ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable)) { return; }
-                
+                if ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable)) { return; }              
                 if (this.visible)
                 {
                     this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
                 }
-
                 if (this.materialsVisible)
                 {
-                    this.materialsWindow = GUILayout.Window(this.matId, this.materialsWindow, Materials, "Main parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
+                    this.materialsWindow = GUILayout.Window(this.matId, this.materialsWindow, main.MaterialsWindow, "Main parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
                 }
-
                 if (this.secMaterialsVisible)
                 {
-                    this.secMaterialsWindow = GUILayout.Window(this.secMatId, this.secMaterialsWindow, SecMaterials, "Secondary parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
+                    this.secMaterialsWindow = GUILayout.Window(this.secMatId, this.secMaterialsWindow, secondary.MaterialsWindow, "Secondary parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
                 }
-
                 if (this.failedVisible)
                 {
                     this.failedWindow = GUILayout.Window(this.failedId, this.failedWindow, ApplicationFailed, "Error", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(300));
                 }
-
                 if (this.successfulVisible)
                 {
                     this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200), GUILayout.ExpandHeight(true));
                 }
                 if (this.presetVisible)
                 {
-                    this.presetsWindow = GUILayout.Window(this.presetID, this.presetsWindow, Presets, "Presets", skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
+                    this.presetsWindow = GUILayout.Window(this.presetID, this.presetsWindow, Presets, "Presets", skins.window, GUILayout.MaxWidth(400), GUILayout.MaxHeight(500));
                 }
-
                 if (this.presetSaveVisible)
                 {
                     this.presetsSaveWindow = GUILayout.Window(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
                 }
-
                 if (this.presetWarningVisible)
                 {
                     this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", skins.window, GUILayout.Width(200), GUILayout.Height(100));
@@ -792,18 +779,6 @@ namespace RealChute
             GUILayout.EndVertical();
         }
 
-        //Materials window of themain parachute
-        private void Materials(int id)
-        {
-            main.MaterialsWindow();
-        }
-
-        //Materials window of the second parachute
-        private void SecMaterials(int id)
-        {
-            secondary.MaterialsWindow();
-        }
-
         //Failure notice
         private void ApplicationFailed(int id)
         {
@@ -846,14 +821,14 @@ namespace RealChute
 
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
-            presetScroll = GUILayout.BeginScrollView(presetScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.Width(150));
+            presetScroll = GUILayout.BeginScrollView(presetScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.Width(200));
             if (presets.GetRelevantPresets(this).Length > 0) { presetID = GUILayout.SelectionGrid(presetID, presets.GetRelevantPresets(this), 1, skins.button); }
             else { GUILayout.Label("No saved presets", skins.label); }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical(GUILayout.Width(200));
-            if (presets.presets.Count > 0) { GUILayout.Label("Description: " + presets.GetPreset(presetID).description, skins.label); }
+            if (presets.GetRelevantPresets(this).Length > 0) { GUILayout.Label("Description: " + presets.GetPreset(presets.GetRelevantPresets(this)[presetID]).description, skins.label); }
             else { GUILayout.Label("---", skins.label); }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
@@ -911,8 +886,11 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes", skins.button))
             {
-                presets.DeletePreset(saveWarning ? presetName : presets.GetPreset(presetID).name);
+                Preset preset = saveWarning ? presets.GetPreset(presetName) : presets.GetPreset(presets.GetRelevantPresets(this)[presetID]);
+                print("[RealChute]: Deleting the \"" + preset.name + "\" preset from the database.");
+                presets.DeletePreset(preset);
                 if (saveWarning) { CreatePreset(); this.presetSaveVisible = false; }
+                else { presetID = 0; }
                 this.presetWarningVisible = false;
             }
             if (GUILayout.Button("No", skins.button)) { this.presetWarningVisible = false; }
