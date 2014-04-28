@@ -449,7 +449,6 @@ namespace RealChute
             {
                 UpdateCaseTexture(this.part, rcModule);
             }
-
             main.SwitchType();
             if (secondaryChute) { secondary.SwitchType(); }
         }
