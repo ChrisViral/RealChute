@@ -260,7 +260,7 @@ namespace RealChute
         //Modifies the size of a part
         private void UpdateScale(Part part, RealChuteModule module)
         {
-            if (sizes.Count <= 1) { return; }
+            if (sizes.Count <= 1 || !moduleNodes.Keys.Contains(this.part.partInfo.name)) { return; }
             SizeNode size = sizes[this.size], lastSize = sizes[this.lastSize];
             part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, size.size);
             module.caseMass = size.caseMass;
@@ -412,7 +412,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
-            if (this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
+            if (moduleNodes.Keys.Contains(this.part.partInfo.name) && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
             {
                 UpdateScale(this.part, rcModule);
             }
@@ -439,13 +439,13 @@ namespace RealChute
             }
 
             //Checks if size must update
-            if (lastSize != size)
+            if (moduleNodes.Keys.Contains(this.part.partInfo.name) && lastSize != size)
             {
                 UpdateScale(this.part, rcModule);
             }
 
             //Checks if case texture must update
-            if (lastCaseID != caseID)
+            if (this.textures.caseNames.Length > 0 && lastCaseID != caseID)
             {
                 UpdateCaseTexture(this.part, rcModule);
             }
@@ -471,7 +471,7 @@ namespace RealChute
             if (secondaryChute) { secondary = new ChuteTemplate(this, true); }
 
             //Initialization of sizes
-            if (sizes.Count <= 0)
+            if (sizes.Count <= 0 && moduleNodes.Keys.Contains(this.part.partInfo.name))
             {
                 print("[RealChute]: Reloading size nodes for " + this.part.partInfo.name);
                 moduleNodes.TryGetValue(this.part.partInfo.name, out sizes);
