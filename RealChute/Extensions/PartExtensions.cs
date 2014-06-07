@@ -26,6 +26,20 @@ namespace RealChute.Extensions
             return result;
         }
 
+        //To understand
+        public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node)
+        {
+            node = part.findAttachNode(nodeId);
+            if (node != null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Gets the children transforms of this specific part
         /// </summary>
