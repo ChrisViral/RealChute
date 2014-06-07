@@ -258,78 +258,119 @@ namespace RealChute
         }
 
         //Modifies the size of a part
-        private void UpdateScale(Part part, RealChuteModule module)
+		private void UpdateScale(Part part, RealChuteModule module)
         {
             if (sizes.Count <= 1) { return; }
             SizeNode size = sizes[this.size], lastSize = sizes[this.lastSize];
             part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, size.size);
             module.caseMass = size.caseMass;
+
+			AttachNode topNode;
+			bool hasTopNode = part.TryGetAttachNodeById("top", out topNode);
+
+			AttachNode bottomNode;
+			bool hasBottomNode = part.TryGetAttachNodeById("bottom", out bottomNode);
+
+			List<Part> allChildParts = null;
+			List<Part> allTopChildParts = null;
+			List<Part> allBottomChildParts = null;
+
+			// If this is the root part, move things for the top and the bottom.
             if ((HighLogic.LoadedSceneIsEditor && part == EditorLogic.SortedShipList[0]) || (HighLogic.LoadedSceneIsFlight  && this.vessel.rootPart == part))
             {
-                if (part.findAttachNode("top") != null)
+				if (hasTopNode)
                 {
-                    AttachNode topNode = part.findAttachNode("top");
                     topNode.position = size.topNode;
                     topNode.size = size.topNodeSize;
                     if (topNode.attachedPart != null)
                     {
                         float topDifference = size.topNode.y - lastSize.topNode.y;
                         topNode.attachedPart.transform.Translate(0, topDifference, 0, part.transform);
-                        if (part.findAttachNode("top").attachedPart.GetAllChildren().Count > 0)
-                        {
-                            topNode.attachedPart.GetAllChildren().ForEach(p => p.transform.Translate(0, topDifference, 0, part.transform));
-                        }
+
+						if (allTopChildParts == null)
+						{
+							allTopChildParts = topNode.attachedPart.GetAllChildren();
+						}
+
+						foreach (Part child in allTopChildParts)
+						{
+							child.transform.Translate(0, topDifference, 0, part.transform);
+						}
                     }
                 }
-                if (part.findAttachNode("bottom") != null)
+				if (hasBottomNode)
                 {
-                    AttachNode bottomNode = part.findAttachNode("bottom");
                     bottomNode.position = size.bottomNode;
                     bottomNode.size = size.bottomNodeSize;
                     if (bottomNode.attachedPart != null)
                     {
                         float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                         bottomNode.attachedPart.transform.Translate(0, bottomDifference, 0, part.transform);
-                        if (part.findAttachNode("bottom").attachedPart.GetAllChildren().Count > 0)
-                        {
-                            bottomNode.attachedPart.GetAllChildren().ForEach(p => p.transform.Translate(0, bottomDifference, 0, part.transform));
-                        }
+
+						if (allBottomChildParts == null)
+						{
+							allBottomChildParts = bottomNode.attachedPart.GetAllChildren();
+						}
+
+						foreach (Part child in allBottomChildParts)
+						{
+							child.transform.Translate(0, bottomDifference, 0, part.transform);
+						}
                     }
                 }
             }
-            else if (part.findAttachNode("bottom") != null && part.findAttachNode("bottom").attachedPart != null && part.parent != null &&  part.findAttachNode("bottom").attachedPart == part.parent)
+			// If not the root part but the bottom node exists and is attached to the parent part, move things for the
+			// top.
+			else if (hasBottomNode && bottomNode.attachedPart != null && part.parent != null &&  bottomNode.attachedPart == part.parent)
             {
-                AttachNode bottomNode = part.findAttachNode("bottom");
                 bottomNode.position = size.bottomNode;
                 bottomNode.size = size.bottomNodeSize;
                 float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                 part.transform.Translate(0, -bottomDifference, 0, part.transform);
-                if (part.findAttachNode("top") != null)
+				if (hasTopNode)
                 {
-                    AttachNode topNode = part.findAttachNode("top");
                     topNode.position = size.topNode;
                     topNode.size = size.topNodeSize;
                     float topDifference = size.topNode.y - lastSize.topNode.y;
-                    if (part.GetAllChildren().Count > 0) { part.GetAllChildren().ForEach(p => p.transform.Translate(0, -(bottomDifference - topDifference), 0, part.transform)); }
-                }
+
+					if (allChildParts == null)
+					{
+						allChildParts = part.GetAllChildren();
+					}
+
+					foreach (Part child in allChildParts)
+					{
+						child.transform.Translate(0, -(bottomDifference - topDifference), 0, part.transform);
+					}
+				}
             }
-            else if (part.findAttachNode("top") != null && part.findAttachNode("top").attachedPart != null && part.parent != null && part.findAttachNode("top").attachedPart == part.parent)
+			// If neither the root part nor attached to the parent part by the bottom, but the top node exists and is
+			// attached to the parent part, move things for the bottom
+			else if (hasTopNode && topNode.attachedPart != null && part.parent != null && topNode.attachedPart == part.parent)
             {
-                AttachNode topNode = part.findAttachNode("top");
                 topNode.position = size.topNode;
                 topNode.size = size.topNodeSize;
                 float topDifference = size.topNode.y - lastSize.topNode.y;
                 part.transform.Translate(0, -topDifference, 0, part.transform);
-                if (part.findAttachNode("bottom") != null)
+				if (hasBottomNode)
                 {
-                    AttachNode bottomNode = part.findAttachNode("bottom");
                     bottomNode.position = size.bottomNode;
                     bottomNode.size = size.bottomNodeSize;
                     float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
-                    if (part.GetAllChildren().Count > 0) { part.GetAllChildren().ForEach(p => p.transform.Translate(0, -(topDifference - bottomDifference), 0, part.transform)); }
+
+					if (allChildParts == null)
+					{
+						allChildParts = part.GetAllChildren();
+					}
+
+					foreach (Part child in allChildParts)
+					{
+						child.transform.Translate(0, -(topDifference - bottomDifference), 0, part.transform);
+					}
                 }
             }
 
+			// Move the chutes around based on the new size.
             float scaleX = part.transform.GetChild(0).localScale.x / Vector3.Scale(originalSize, lastSize.size).x;
             float scaleZ = part.transform.GetChild(0).localScale.z / Vector3.Scale(originalSize, lastSize.size).z;
             Vector3 chute = main.chute.forcePosition - part.transform.position;
@@ -340,16 +381,25 @@ namespace RealChute
                 secondary.chute.parachute.transform.Translate(secChute.x * (scaleX - 1), 0, secChute.z * (scaleZ - 1), part.transform);
             }
 
-            if (part.children.Count(p => p.attachMode == AttachModes.SRF_ATTACH) > 0)
-            {
-                List<Part> surfaceAttached = new List<Part>(part.children.Where(p => p.attachMode == AttachModes.SRF_ATTACH));
-                surfaceAttached.Where(p => p.GetAllChildren().Count > 0).ToList().ForEach(p => surfaceAttached.AddRange(p.GetAllChildren()));
-                foreach (Part p in surfaceAttached)
-                {
-                    Vector3 v = p.transform.position - part.transform.position;
-                    p.transform.Translate(v.x * (scaleX - 1), 0, v.z * (scaleZ - 1), part.transform);
-                }
-            }
+			// If there are parts surface attached to this part, move them and their children
+			foreach (Part child in part.children)
+			{
+				if (child.attachMode == AttachModes.SRF_ATTACH)
+				{
+					Vector3 v;
+
+					foreach (Part srfAttchdChild in child.GetAllChildren())
+					{
+						v = srfAttchdChild.transform.position - part.transform.position;
+						srfAttchdChild.transform.Translate(v.x * (scaleX - 1), 0, v.z * (scaleZ - 1), part.transform);
+					}
+
+					v = child.transform.position - part.transform.position;
+					child.transform.Translate(v.x * (scaleX - 1), 0, v.z * (scaleZ - 1), part.transform);
+				}
+			}
+
+			// Re-seed lastSize
             this.lastSize = this.size;
         }
 
