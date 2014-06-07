@@ -16,14 +16,24 @@ namespace RealChute.Extensions
         /// </summary>
         public static List<Part> GetAllChildren(this Part part)
         {
-            if (part.children.Count > 0)
-            {
-                List<Part> children = new List<Part>(part.children);
-                children.ForEach(p => children.AddRange(p.GetAllChildren()));
-                return children;
-            }
-            return new List<Part>();
+			List<Part> childList = new List<Part>();
+
+			part.GetAllChildren(ref childList);
+
+			return childList;
         }
+
+		/// <summary>
+		/// Gets all the children of a part and their children, placing them in the referenced list.
+		/// </summary>
+		public static void GetAllChildren(this Part part, ref List<Part> childList)
+		{
+			foreach (Part child in part.children)
+			{
+				childList.Add(child);
+				child.GetAllChildren(ref childList);
+			}
+		}
 
         /// <summary>
         /// Gets the children transforms of this specific part
