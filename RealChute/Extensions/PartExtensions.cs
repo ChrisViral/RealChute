@@ -16,38 +16,15 @@ namespace RealChute.Extensions
         /// </summary>
         public static List<Part> GetAllChildren(this Part part)
         {
-			List<Part> childList = new List<Part>();
-
-			part.GetAllChildren(ref childList);
-
-			return childList;
+            if (part.children.Count <= 0) { return new List<Part>(); }
+            //Thanks to Padishar here
+            List<Part> result = new List<Part>(part.children);
+            for (int i = 0; i < result.Count; i++ )
+            {
+                if (result[i].children.Count > 0) { result.AddRange(result[i].children); }
+            }
+            return result;
         }
-
-		/// <summary>
-		/// Gets all the children of a part and their children, placing them in the referenced list.
-	    /// </summary>
-		public static void GetAllChildren(this Part part, ref List<Part> childList)
-		{
-			foreach (Part child in part.children)
-			{
-				childList.Add(child);
-				child.GetAllChildren(ref childList);
-			}
-		}
-
-		public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node)
-		{
-			node = part.findAttachNode(nodeId);
-
-			if (node != null)
-			{
-				return true;
-			}
-			else
-			{
-				return false;
-			}
-		}
 
         /// <summary>
         /// Gets the children transforms of this specific part
