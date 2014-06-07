@@ -140,26 +140,6 @@ namespace RealChute.Extensions
             if (node.HasValue(name) && RCUtils.TryParseVector3(node.GetValue(name), ref value)) { return true; }
             return false;
         }
-
-        /// <summary>
-        /// Sees if the ConfigNode has the given value and sets it, else it creates a new value for it.
-        /// </summary>
-        /// <param name="name">Name of the value to look for</param>
-        /// <param name="value">Value to set</param>
-        public static void SetAddValue(this ConfigNode node, string name, string value)
-        {
-            if (node.HasValue(name)) { node.SetValue(name, value); }
-            else { node.AddValue(name, value); }
-        }
-
-        /// <summary>
-        /// Returns an array of values that correspond to the values present in each node
-        /// </summary>
-        /// <param name="name">Value to search for</param>
-        public static string[] GetValues(this ConfigNode[] nodes, string name)
-        {
-            return nodes.Where(node => node.HasValue(name)).Select(node => node.GetValue("name")).ToArray();
-        }
         #endregion
     }
 }

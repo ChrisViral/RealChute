@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -23,6 +24,11 @@ namespace RealChute
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
         public const string localSettingsURL = "GameData/RealChute/RealChute_Settings.cfg";
+
+        /// <summary>
+        /// URL of the RealChute PluginData folder from the GameData folder
+        /// </summary>
+        public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
 
         /// <summary>
         /// DeploymentStates with their string equivalent
@@ -55,7 +61,15 @@ namespace RealChute
         /// </summary>
         public static string settingsURL
         {
-            get { return System.IO.Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
+            get { return Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
+        }
+
+        /// <summary>
+        /// Returns the RealChute PluginData folder
+        /// </summary>
+        public static string pluginDataURL
+        {
+            get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
         }
 
         private static GUIStyle _redLabel = null;
@@ -128,12 +142,8 @@ namespace RealChute
         /// <param name="text">Time value to parse</param>
         public static bool CanParseTime(string text)
         {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            char indicator = text[text.Length - 1];
-            float test;
-            if (timeSuffixes.Contains(indicator)) { text = text.Remove(text.Length - 1); }
-
-            return float.TryParse(text, out test);
+            float f = 0;
+            return TryParseTime(text, ref f);
         }
 
         /// <summary>
@@ -142,20 +152,9 @@ namespace RealChute
         /// <param name="text">String to parse</param>
         public static float ParseTime(string text)
         {
-            if (string.IsNullOrEmpty(text)) { return 0; }
-            float multiplier = 1, test = 0;
-            char indicator = text[text.Length - 1];
-            if (timeSuffixes.Contains(indicator))
-            {
-                text = text.Remove(text.Length - 1);
-                if (indicator == 'm') { multiplier = 60; }
-            }
-
-            if (float.TryParse(text, out test))
-            {
-                return test * multiplier;       
-            }
-            return 0;
+            float result = 0;
+            TryParseTime(text, ref result);
+            return result;
         }
 
         /// <summary>
@@ -165,9 +164,17 @@ namespace RealChute
         /// <param name="result">Value to store the result in</param>
         public static bool TryParseTime(string text, ref float result)
         {
-            if (CanParseTime(text))
+            if (string.IsNullOrEmpty(text)) { return false; }
+            float multiplier = 1, test = 0;
+            char indicator = text[text.Length - 1];
+            if (timeSuffixes.Contains(indicator))
             {
-                result = ParseTime(text);
+                text = text.Remove(text.Length - 1);
+                if (indicator == 'm') { multiplier = 60; }
+            }
+            if (float.TryParse(text, out test))
+            {
+                result = test * multiplier;
                 return true;
             }
             return false;
@@ -179,9 +186,8 @@ namespace RealChute
         /// <param name="text">String to parse</param>
         public static bool CanParse(string text)
         {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            float test;
-            return float.TryParse(text, out test);
+            float f = 0;
+            return TryParse(text, ref f);
         }
 
         /// <summary>
@@ -191,9 +197,11 @@ namespace RealChute
         /// <param name="result">Value to store the result in</param>
         public static bool TryParse(string text, ref float result)
         {
-            if (CanParse(text))
+            if (string.IsNullOrEmpty(text)) { return false; }
+            float f = 0;
+            if (float.TryParse(text, out f))
             {
-                result = float.Parse(text);
+                result = f;
                 return true;
             }
             return false;
@@ -257,12 +265,15 @@ namespace RealChute
         /// <param name="result">Value to store the result in</param>
         public static bool TryParseVector3(string text, ref Vector3 result)
         {
-            if (KSPUtil.ParseVector3(text) != null)
-            {
-                result = KSPUtil.ParseVector3(text);
-                return true;
-            }
-            return false;
+            if (string.IsNullOrEmpty(text)) { return false; }
+            string[] splits = ParseArray(text);
+            if (splits.Length != 3) { return false; }
+            float x, y, z;
+            if (!float.TryParse(splits[0], out x)) { return false; }
+            if (!float.TryParse(splits[1], out y)) { return false; }
+            if (!float.TryParse(splits[2], out z)) { return false; }
+            result = new Vector3(x, y, z);
+            return true;
         }
 
         /// <summary>
@@ -289,12 +300,12 @@ namespace RealChute
         /// <param name="f">Number to round</param>
         public static float Round(float f)
         {
-            string[] splits = f.ToString().Split('.');
+            string[] splits = f.ToString().Split('.').Select(s => s.Trim()).ToArray();
             if (splits.Length != 2) { return f; }
-            float round = 0, decimals = float.Parse("0." + splits[1].Trim());
+            float round = 0, decimals = float.Parse("0." + splits[1]);
             if (decimals >= 0.25f && decimals < 0.75) { round = 0.5f; }
             else if (decimals >= 0.75) { round = 1; }
-            return Mathf.Max(float.Parse(splits[0].Trim()) + round, 0.5f);
+            return Mathf.Max(float.Parse(splits[0]) + round, 0.5f);
         }
 
         /// <summary>
@@ -305,7 +316,7 @@ namespace RealChute
         /// <param name="max">Top of the range to check</param>
         public static bool CheckRange(float f, float min, float max)
         {
-            return f <= max && f >= min;
+            return f <= max && f > min;
         }
 
         /// <summary>

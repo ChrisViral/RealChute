@@ -13,164 +13,36 @@ namespace RealChute
     public class Parachute
     {
         #region Propreties
-        public string material
-        {
-            get { return this.secondary ? this.module.secMaterial : this.module.material; }
-            set
-            {
-                if (secondary) { this.module.secMaterial = value; }
-                else { this.module.material = value; }
-            }
-        }
-        public float preDeployedDiameter
-        {
-            get { return this.secondary ? this.module.secPreDeployedDiameter : this.module.preDeployedDiameter; }
-            set
-            {
-                if (secondary) { this.module.secPreDeployedDiameter = value; }
-                else { this.module.preDeployedDiameter = value; }
-            }
-        }
         public float preDeployedArea
         {
             get { return RCUtils.GetArea(this.preDeployedDiameter); }
         }
-        public float deployedDiameter
-        {
-            get { return this.secondary ? this.module.secDeployedDiameter : this.module.deployedDiameter; }
-            set
-            {
-                if (secondary) { this.module.secDeployedDiameter = value; }
-                else { this.module.deployedDiameter = value; }
-            }
-        }
+
         public float deployedArea
         {
             get { return RCUtils.GetArea(this.deployedDiameter); }
         }
+
         public float chuteMass
         {
             get { return this.deployedArea * this.mat.areaDensity; }
         }
-        public bool minIsPressure
-        {
-            get { return this.secondary ? this.module.secMinIsPressure : this.module.minIsPressure; }
-            set
-            {
-                if (secondary) { this.module.secMinIsPressure = value; }
-                else { this.module.minIsPressure = value; }
-            }
-        }
-        public float minDeployment
-        {
-            get { return this.secondary ? this.module.secMinDeployment : this.module.minDeployment; }
-            set
-            {
-                if (secondary) { this.module.secMinDeployment = value; }
-                else { this.module.minDeployment = value; }
-            }
-        }
-        public float minPressure
-        {
-            get { return this.secondary ? this.module.secMinPressure : this.module.minPressure; }
-            set
-            {
-                if (secondary) { this.module.secMinPressure = value; }
-                else { this.module.minPressure = value; }
-            }
-        }
-        public float deploymentAlt
-        {
-            get { return this.secondary ? this.module.secDeploymentAlt : this.module.deploymentAlt; }
-            set
-            {
-                if (secondary) { this.module.secDeploymentAlt = value; }
-                else { this.module.deploymentAlt = value; }
-            }
-        }
-        public float cutAlt
-        {
-            get { return this.secondary ? this.module.secCutAlt : this.module.cutAlt; }
-            set
-            {
-                if (secondary) { this.module.secCutAlt = value; }
-                else { this.module.cutAlt = value; }
-            }
-        }
-        public float preDeploymentSpeed
-        {
-            get { return this.secondary ? this.module.secPreDeploymentSpeed : this.module.preDeploymentSpeed; }
-            set
-            {
-                if (secondary) { this.module.secPreDeploymentSpeed = value; }
-                else { this.module.preDeploymentSpeed = value; }
-            }
-        }
-        public float deploymentSpeed
-        {
-            get { return this.secondary ? this.module.secDeploymentSpeed : this.module.deploymentSpeed; }
-            set
-            {
-                if (secondary) { this.module.secDeploymentSpeed = value; }
-                else { this.module.deploymentSpeed = value; }
-            }
-        }
-        public string preDeploymentAnimation
-        {
-            get { return this.secondary ? this.module.secPreDeploymentAnimation : this.module.preDeploymentAnimation; }
-            set
-            {
-                if (secondary) { this.module.secPreDeploymentAnimation = value; }
-                else { this.module.preDeploymentAnimation = value; }
-            }
-        }
-        public string deploymentAnimation
-        {
-            get { return this.secondary ? this.module.secDeploymentAnimation : this.module.deploymentAnimation; }
-            set
-            {
-                if (secondary) { this.module.secDeploymentAnimation = value; }
-                else { this.module.deploymentAnimation = value; }
-            }
-        }
-        public string parachuteName
-        {
-            get { return this.secondary ? this.module.secParachuteName : this.module.parachuteName; }
-            set
-            {
-                if (secondary) { this.module.secParachuteName = value; }
-                else { this.module.parachuteName = value; }
-            }
-        }
-        public string capName
-        {
-            get { return this.secondary ? this.module.secCapName : this.module.capName; }
-        }
-        public float forcedOrientation
-        {
-            get { return this.secondary ? this.module.secForcedOrientation : this.module.forcedOrientation; }
-        }
-        public string depState
-        {
-            get { return this.secondary ? this.module.secDepState : this.module.depState; }
-            set
-            {
-                if (secondary) { this.module.secDepState = value; }
-                else { this.module.depState = value; }
-            }
-        }
+
         private Part part
         {
             get { return this.module.part; }
         }
+
         private Parachute sec
         {
             get { return this.secondary ? this.module.main : this.module.secondary; }
         }
+
         public Vector3 forcePosition
         {
             get { return this.parachute.position; }
         }
+
         public bool randomDeployment
         {
             get
@@ -185,10 +57,12 @@ namespace RealChute
                 return false;
             }
         }
+
         public bool deploymentClause
         {
             get { return this.minIsPressure ? this.module.atmPressure >= this.minPressure : this.module.trueAlt <= this.minDeployment; }
         }
+
         public bool canDeploy
         {
             get
@@ -202,18 +76,22 @@ namespace RealChute
                 return false;
             }
         }
+
         public DeploymentStates getState
         {
             get { return RCUtils.states.First(pair => pair.Value == depState).Key; }
         }
+
         public string stateString
         {
             get { return RCUtils.states.First(pair => pair.Key == deploymentState).Value; }
         }
+
         public bool isDeployed
         {
             get { return this.stateString.Contains("DEPLOYED"); }
         }
+
         private Vector3 forcedVector
         {
             get
@@ -227,6 +105,16 @@ namespace RealChute
         #endregion
 
         #region Fields
+        public string material = "Nylon";
+        public float preDeployedDiameter = 1, deployedDiameter = 25;
+        public bool minIsPressure = false;
+        public float minDeployment = 25000, minPressure = 0.01f;
+        public float deploymentAlt = 700, cutAlt = -1;
+        public float preDeploymentSpeed = 2, deploymentSpeed = 6;
+        public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
+        public string parachuteName = "parachute", capName = "cap";
+        public float forcedOrientation = 0;
+        public string depState = "STOWED";
         internal RealChuteModule module = null;
         internal bool secondary = false;
         internal Transform parachute = null, cap = null;
@@ -274,6 +162,24 @@ namespace RealChute
                     this.cap.gameObject.SetActive(false);
                 }
             }
+        }
+
+        public Parachute(ConfigNode node)
+        {
+            node.TryGetValue("material", ref material);
+            node.TryGetValue("preDeployedDiameter", ref preDeployedDiameter);
+            node.TryGetValue("deployedDiameter", ref deployedDiameter);
+            node.TryGetValue("minIsPressure", ref minIsPressure);
+            node.TryGetValue("minDeployment", ref minDeployment);
+            node.TryGetValue("minPressure", ref minIsPressure);
+            node.TryGetValue("deploymentAlt", ref deploymentAlt);
+            node.TryGetValue("cutAlt", ref cutAlt);
+            node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
+            node.TryGetValue("deploymentSpeed", ref deploymentSpeed);
+            node.TryGetValue("parachuteName", ref parachuteName);
+            node.TryGetValue("capName", ref capName);
+            node.TryGetValue("forcedOrientation", ref forcedOrientation);
+            node.TryGetValue("depState", ref depState);
         }
         #endregion
 
@@ -535,6 +441,53 @@ namespace RealChute
             if (cutAlt > 0) { GUILayout.Label("Autocut altitude: " + cutAlt + "m", skins.label); }
             GUILayout.Label("Predeployment speed: " + preDeploymentSpeed + "s", skins.label);
             GUILayout.Label("Deployment speed: " + deploymentSpeed + "s", skins.label);
+        }
+        #endregion
+
+        #region Load/Save
+        /// <summary>
+        /// Loads the Parachute from a ConfigNode.
+        /// </summary>
+        /// <param name="node">Node to load the Parachute from</param>
+        private void Load(ConfigNode node)
+        {
+            node.TryGetValue("material", ref material);
+            node.TryGetValue("preDeployedDiameter", ref preDeployedDiameter);
+            node.TryGetValue("deployedDiameter", ref deployedDiameter);
+            node.TryGetValue("minIsPressure", ref minIsPressure);
+            node.TryGetValue("minDeployment", ref minDeployment);
+            node.TryGetValue("minPressure", ref minIsPressure);
+            node.TryGetValue("deploymentAlt", ref deploymentAlt);
+            node.TryGetValue("cutAlt", ref cutAlt);
+            node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
+            node.TryGetValue("deploymentSpeed", ref deploymentSpeed);
+            node.TryGetValue("parachuteName", ref parachuteName);
+            node.TryGetValue("capName", ref capName);
+            node.TryGetValue("forcedOrientation", ref forcedOrientation);
+            node.TryGetValue("depState", ref depState);
+        }
+
+        /// <summary>
+        /// Saves the Parachute to a ConfigNode and returns this node.
+        /// </summary>
+        public ConfigNode Save()
+        {
+            ConfigNode node = new ConfigNode("PARACHUTE");
+            node.AddValue("material", material);
+            node.AddValue("preDeployedDiameter", preDeployedDiameter);
+            node.AddValue("deployedDiameter", deployedDiameter);
+            node.AddValue("minIsPressure", minIsPressure);
+            node.AddValue("minDeployment", minDeployment);
+            node.AddValue("minPressure", minIsPressure);
+            node.AddValue("deploymentAlt", deploymentAlt);
+            node.AddValue("cutAlt", cutAlt);
+            node.AddValue("preDeploymentSpeed", preDeploymentSpeed);
+            node.AddValue("deploymentSpeed", deploymentSpeed);
+            node.AddValue("parachuteName", parachuteName);
+            node.AddValue("capName", capName);
+            node.AddValue("forcedOrientation", forcedOrientation);
+            node.AddValue("depState", depState);
+            return node;
         }
         #endregion
     }

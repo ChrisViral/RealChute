@@ -103,7 +103,6 @@ namespace RealChute
         internal CaseConfig parachuteCase = new CaseConfig();
         internal ChuteTemplate main = new ChuteTemplate(), secondary = new ChuteTemplate();
         private PresetsLibrary presets = PresetsLibrary.instance;
-        public static Dictionary<string, List<SizeNode>> moduleNodes = new Dictionary<string, List<SizeNode>>();
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
@@ -123,6 +122,7 @@ namespace RealChute
         public List<SizeNode> sizes = new List<SizeNode>();
         [SerializeField]
         private Transform parent = null;
+        public ConfigNode node = null;
 
         //GUI fields
         internal bool warning = false;
@@ -260,7 +260,7 @@ namespace RealChute
         //Modifies the size of a part
         private void UpdateScale(Part part, RealChuteModule module)
         {
-            if (sizes.Count <= 1 || !moduleNodes.Keys.Contains(this.part.partInfo.name)) { return; }
+            if (sizes.Count <= 1) { return; }
             SizeNode size = sizes[this.size], lastSize = sizes[this.lastSize];
             part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, size.size);
             module.caseMass = size.caseMass;
@@ -403,6 +403,16 @@ namespace RealChute
             PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + presetName + "\" preset was succesfully saved!", "Close", false, skins);
             print("[RealChute]: Saved the " + presetName + " preset to the settings file.");
         }
+
+        //Reloads the size nodes
+        private void LoadConfig()
+        {
+            if (node.GetNodes("SIZE").Length > 0 && sizes.Count <= 0)
+            {
+                sizes.Clear();
+                sizes = node.GetNodes("SIZE").Select(n => new SizeNode(n)).ToList();
+            }
+        }
         #endregion
 
         #region Functions
@@ -412,7 +422,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
             
-            if (moduleNodes.Keys.Contains(this.part.partInfo.name) && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
+            if (sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
             {
                 UpdateScale(this.part, rcModule);
             }
@@ -439,7 +449,7 @@ namespace RealChute
             }
 
             //Checks if size must update
-            if (moduleNodes.Keys.Contains(this.part.partInfo.name) && lastSize != size)
+            if (sizes.Count > 0 && lastSize != size)
             {
                 UpdateScale(this.part, rcModule);
             }
@@ -470,10 +480,11 @@ namespace RealChute
             if (secondaryChute) { secondary = new ChuteTemplate(this, true); }
 
             //Initialization of sizes
-            if (sizes.Count <= 0 && moduleNodes.Keys.Contains(this.part.partInfo.name))
+            if (sizes.Count <= 0)
             {
                 print("[RealChute]: Reloading size nodes for " + this.part.partInfo.name);
-                moduleNodes.TryGetValue(this.part.partInfo.name, out sizes);
+                LoadConfig();
+
             }
 
             //Creates an instance of the texture library
@@ -533,13 +544,9 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && this.part.Modules.Contains("RealChuteModule") && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable) { return; }
-            
-            //Size vectors
-            if (node.GetNodes("SIZE").Length > 0 && sizes.Count <= 0)
-            {
-                sizes = node.GetNodes("SIZE").Select(n => new SizeNode(n)).ToList();
-                moduleNodes.Add(this.part.name, sizes);
-            }
+
+            this.node = node;
+            LoadConfig();
 
             //Top node original location
             if (this.part.findAttachNode("top") != null)
@@ -628,6 +635,8 @@ namespace RealChute
             GUILayout.EndHorizontal();
             #endregion
 
+            mainScroll = GUILayout.BeginScrollView(mainScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar);
+
             #region Planet selector
             GUILayout.Space(10);
             GUILayout.BeginHorizontal(GUILayout.Height(30));
@@ -665,7 +674,6 @@ namespace RealChute
             #endregion
 
             GUILayout.Space(5);
-            mainScroll = GUILayout.BeginScrollView(mainScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar);
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
 

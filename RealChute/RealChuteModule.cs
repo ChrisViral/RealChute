@@ -27,15 +27,15 @@ namespace RealChute
         // Values from the .cfg file
         [KSPField(isPersistant = true)]
         public float caseMass = 0.1f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut speed", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 10, stepIncrement = 0.5f)]
+        [KSPField(isPersistant = true)]
         public float cutSpeed = 0.5f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Timer", guiFormat = "0.#"), UI_FloatRange(minValue = 0, maxValue = 30, stepIncrement = 1)]
+        [KSPField(isPersistant = true)]
         public float timer = 0;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Must down"), UI_Toggle(enabledText = "True", disabledText = "False")]
+        [KSPField(isPersistant = true)]
         public bool mustGoDown = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Ground deploy"), UI_Toggle(enabledText = "True", disabledText = "False")]
+        [KSPField(isPersistant = true)]
         public bool deployOnGround = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Spares"), UI_FloatRange(minValue = -1, maxValue = 10, stepIncrement = 1)]
+        [KSPField(isPersistant = true)]
         public float spareChutes = 5;
         [KSPField]
         public bool secondaryChute = false;
@@ -43,70 +43,6 @@ namespace RealChute
         public bool reverseOrientation = false;
         [KSPField]
         public bool isTweakable = true;
-
-        //Main parachute
-        [KSPField(isPersistant = true)]
-        public string material = "Nylon";
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
-        public float preDeployedDiameter = 1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
-        public float deployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep"), UI_Toggle(enabledText = "Pressure", disabledText = "Altitude")]
-        public bool minIsPressure = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
-        public float minDeployment = 25000;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep press", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
-        public float minPressure = 0.01f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep alt"), UI_FloatRange(minValue = 0, maxValue = 10000, stepIncrement = 50)]
-        public float deploymentAlt = 700;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut alt"), UI_FloatRange(minValue = -50, maxValue = 10000, stepIncrement = 50)]
-        public float cutAlt = -1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
-        public float preDeploymentSpeed = 2;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
-        public float deploymentSpeed = 6;
-        [KSPField]
-        public string preDeploymentAnimation = "semiDeploy";
-        [KSPField]
-        public string deploymentAnimation = "fullyDeploy";
-        [KSPField]
-        public string parachuteName = "parachute";
-        [KSPField]
-        public string capName = "cap";
-        [KSPField]
-        public float forcedOrientation = 0;
-
-        //Second parachute
-        [KSPField(isPersistant = true)]
-        public string secMaterial = "empty";
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
-        public float secPreDeployedDiameter = 1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 diam", guiFormat = "0.#"), UI_FloatRange(minValue = 0.5f, maxValue = 70, stepIncrement = 0.5f)]
-        public float secDeployedDiameter = 25;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2"), UI_Toggle(enabledText = "Pressure", disabledText = "Altitude")]
-        public bool secMinIsPressure = false;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 alt"), UI_FloatRange(minValue = 50, maxValue = 50000, stepIncrement = 100)]
-        public float secMinDeployment = 25000;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 press", guiFormat = "0.###"), UI_FloatRange(minValue = 0.005f, maxValue = 1, stepIncrement = 0.005f)]
-        public float secMinPressure = 0.01f;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 alt"), UI_FloatRange(minValue = 0, maxValue = 10000, stepIncrement = 50)]
-        public float secDeploymentAlt = 700;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Autocut2 alt"), UI_FloatRange(minValue = -50, maxValue = 10000, stepIncrement = 50)]
-        public float secCutAlt = -1;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Predep2 time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
-        public float secPreDeploymentSpeed = 2;
-        [KSPField(isPersistant = true, guiActive = false, guiActiveEditor = true, guiName = "Dep2 time"), UI_FloatRange(minValue = 1, maxValue = 10, stepIncrement = 1)]
-        public float secDeploymentSpeed = 6;
-        [KSPField]
-        public string secPreDeploymentAnimation = "secSemiDeploy";
-        [KSPField]
-        public string secDeploymentAnimation = "secFullDeploy";
-        [KSPField]
-        public string secParachuteName = "secParachute";
-        [KSPField]
-        public string secCapName = "secCap";
-        [KSPField]
-        public float secForcedOrientation = 0;
         #endregion
 
         #region Persistant values
@@ -369,6 +305,7 @@ namespace RealChute
         {
             this.staged = false;
             this.launched = false;
+            this.wait = true;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
         }
 
@@ -461,7 +398,7 @@ namespace RealChute
                 }
 
                 if (settings.autoArm) { Events["GUIArm"].guiActive = false; }
-                if (armed) { Events["GUIDisarm"].guiActive = true; }
+                if (armed || wait) { Events["GUIDisarm"].guiActive = true; }
                 else { Events["GUIDisarm"].guiActive = false; }
             }
 
@@ -543,7 +480,13 @@ namespace RealChute
                 //Parachute deployments
                 if (!armed)
                 {
-                    CheckForWait();
+                    if (wait)
+                    {
+                        CheckForWait();
+                        if (wait) { return; }
+                    }
+
+                    //Parachutes
                     main.UpdateParachute();
                     if (secondaryChute) { secondary.UpdateParachute(); }
 
@@ -551,9 +494,7 @@ namespace RealChute
                     if (bothMustStop)
                     {
                         if (main.isDeployed) { main.Cut(); }
-
                         if (secondary.isDeployed) { secondary.Cut(); }
-
                         SetRepack();
                     }
 

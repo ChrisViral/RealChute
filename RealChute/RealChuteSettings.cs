@@ -33,6 +33,7 @@ namespace RealChute
         public bool autoArm
         {
             get { return this._autoArm; }
+            set { this._autoArm = value; }
         }
 
         private bool _jokeActivated = false;
@@ -42,6 +43,27 @@ namespace RealChute
         public bool jokeActivated
         {
             get { return this._jokeActivated; }
+            set { this._jokeActivated = value; }
+        }
+
+        private bool _useStaging = true;
+        /// <summary>
+        /// If parachutes can be activated through staging
+        /// </summary>
+        public bool useStaging
+        {
+            get { return this._useStaging; }
+            set { this._useStaging = value; }
+        }
+
+        private Vector2 _position = new Vector2(100, 100);
+        /// <summary>
+        /// Position vector of the window
+        /// </summary>
+        public Vector2 position
+        {
+            get { return this._position; }
+            set { this._position = value; }
         }
         #endregion
 
@@ -58,6 +80,7 @@ namespace RealChute
                 Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Creating new version.");
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
+                settings.AddValue("useStaging", useStaging);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
@@ -68,12 +91,14 @@ namespace RealChute
                 bool missing = false;
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { missing = true; }
                 if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { missing = true; }
+                if (settings.TryGetValue("useStaging", ref _useStaging)) { missing = true; }
                 if (missing)
                 {
                     Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
                     settings.ClearValues();
                     settings.AddValue("autoArm", autoArm);
                     settings.AddValue("jokeActivated", jokeActivated);
+                    settings.AddValue("useStaging", useStaging);
                     node.ClearData();
                     node.AddNode(settings);
                     node.Save(RCUtils.settingsURL);
@@ -91,12 +116,14 @@ namespace RealChute
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
+            settings.AddValue("useStaging", fetch.useStaging);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
                 PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));
             }
             node.AddNode(settings);
             node.Save(RCUtils.settingsURL);
+            Debug.Log("[RealChute]: Saved settings file.");
         }
         #endregion
     }

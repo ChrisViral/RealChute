@@ -16,13 +16,14 @@ namespace RealChute.Extensions
         /// </summary>
         public static List<Part> GetAllChildren(this Part part)
         {
-            if (part.children.Count > 0)
+            if (part.children.Count <= 0) { return new List<Part>(); }
+            //Thanks to Padishar here
+            List<Part> result = new List<Part>(part.children);
+            for (int i = 0; i < result.Count; i++ )
             {
-                List<Part> children = new List<Part>(part.children);
-                children.ForEach(p => children.AddRange(p.GetAllChildren()));
-                return children;
+                if (result[i].children.Count > 0) { result.AddRange(result[i].children); }
             }
-            return new List<Part>();
+            return result;
         }
 
         /// <summary>
@@ -30,16 +31,10 @@ namespace RealChute.Extensions
         /// </summary>
         public static List<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
         {
-            List<Renderer> renderers = new List<Renderer>(part.transform.GetComponentsInChildren<Renderer>());
-            if (part.children.Count > 0)
-            {
-                foreach (Part p in part.children)
-                {
-                    p.transform.GetComponentsInChildren<Renderer>().Where(r => renderers.Contains(r)).ToList().ForEach(r => renderers.Remove(r));
-                }
-            }
-            module.main.parachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r));
-            if (module.secondaryChute) { module.secondary.parachute.GetComponents<Renderer>().ToList().ForEach(r => renderers.Remove(r)); }
+            List<Renderer> toRemove = new List<Renderer>(part.children.Select(p => p.transform).SelectMany(t => t.GetComponentsInChildren<Renderer>()));
+            toRemove.AddRange(module.main.parachute.GetComponents<Renderer>());
+            if (module.secondaryChute) { module.secondary.parachute.GetComponents<Renderer>(); }
+            List<Renderer> renderers = part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
             return renderers;
         }
 
