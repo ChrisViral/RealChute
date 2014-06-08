@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using RealChute.Extensions;
@@ -13,36 +14,37 @@ namespace RealChute
     public class Parachute
     {
         #region Propreties
+        //Predeployed area of the chute
         public float preDeployedArea
         {
             get { return RCUtils.GetArea(this.preDeployedDiameter); }
         }
 
+        //Deployed area of the chute
         public float deployedArea
         {
             get { return RCUtils.GetArea(this.deployedDiameter); }
         }
 
+        //Mass of the chute
         public float chuteMass
         {
             get { return this.deployedArea * this.mat.areaDensity; }
         }
 
+        //Part this chute is associated with
         private Part part
         {
             get { return this.module.part; }
         }
 
-        private Parachute sec
-        {
-            get { return this.secondary ? this.module.main : this.module.secondary; }
-        }
-
+        //Position to apply the force to
         public Vector3 forcePosition
         {
             get { return this.parachute.position; }
         }
 
+        //If the random deployment timer has been spent
         public bool randomDeployment
         {
             get
@@ -58,11 +60,13 @@ namespace RealChute
             }
         }
 
+        //If the parachute has passed the minimum deployment clause
         public bool deploymentClause
         {
             get { return this.minIsPressure ? this.module.atmPressure >= this.minPressure : this.module.trueAlt <= this.minDeployment; }
         }
 
+        //If the parachute can deploy
         public bool canDeploy
         {
             get
@@ -71,27 +75,31 @@ namespace RealChute
                 else if (deploymentState == DeploymentStates.CUT) { return false; }
                 else if (deploymentClause && cutAlt == -1) { return true; }
                 else if (deploymentClause && this.module.trueAlt > cutAlt) { return true; }
-                else if (this.module.secondaryChute && !deploymentClause && this.module.trueAlt <= sec.cutAlt) { return true; }
+                else if (this.module.secondaryChute && !deploymentClause && this.parachutes.Any(p => this.module.trueAlt <= p.cutAlt)) { return true; }
                 else if (!deploymentClause && isDeployed) { return true; }
                 return false;
             }
         }
 
+        //Returns the current DeploymentState
         public DeploymentStates getState
         {
             get { return RCUtils.states.First(pair => pair.Value == depState).Key; }
         }
 
+        //Returns the current DeploymentState string
         public string stateString
         {
             get { return RCUtils.states.First(pair => pair.Key == deploymentState).Value; }
         }
 
+        //If the parachute is deployed
         public bool isDeployed
         {
             get { return this.stateString.Contains("DEPLOYED"); }
         }
 
+        //The added vector to drag to angle the parachute
         private Vector3 forcedVector
         {
             get
@@ -102,9 +110,16 @@ namespace RealChute
                 return follow.normalized * length;
             }
         }
+
+        //The parachutes of the associated module
+        public List<Parachute> parachutes
+        {
+            get { return this.module.parachutes; }
+        }
         #endregion
 
         #region Fields
+        //Parachute
         public string material = "Nylon";
         public float preDeployedDiameter = 1, deployedDiameter = 25;
         public bool minIsPressure = false;
@@ -115,6 +130,8 @@ namespace RealChute
         public string parachuteName = "parachute", capName = "cap";
         public float forcedOrientation = 0;
         public string depState = "STOWED";
+
+        //Flight
         internal RealChuteModule module = null;
         internal bool secondary = false;
         internal Transform parachute = null, cap = null;
@@ -132,19 +149,17 @@ namespace RealChute
         /// Creates a parachute object from the given RealChuteModule
         /// </summary>
         /// <param name="module">RealChuteModule to create the Parachute from</param>
-        /// <param name="secondary">Wether this Parachute is the main or secondary parachute</param>
-        public Parachute(RealChuteModule module, bool secondary)
+        /// <param name="node">ConfigNode to create the parachute from</param>
+        public Parachute(RealChuteModule module, ConfigNode node)
         {
+            Load(node);
             this.module = module;
-            this.secondary = secondary;
-            if (this.secondary && this.material == "empty") { this.material = sec.material; }
             this.module.materials.TryGetMaterial(material, ref mat);
             this.parachute = this.part.FindModelTransform(parachuteName);
             this.cap = this.part.FindModelTransform(capName);
             this.parachute.gameObject.SetActive(false);
             this.part.InitiateAnimation(preDeploymentAnimation);
             this.part.InitiateAnimation(deploymentAnimation);
-
             if (!this.module.initiated)
             {
                 deploymentState = DeploymentStates.STOWED;
@@ -152,7 +167,6 @@ namespace RealChute
                 played = false;
                 this.cap.gameObject.SetActive(true);
             }
-
             if (HighLogic.LoadedSceneIsFlight)
             {
                 deploymentState = getState;
@@ -162,24 +176,6 @@ namespace RealChute
                     this.cap.gameObject.SetActive(false);
                 }
             }
-        }
-
-        public Parachute(ConfigNode node)
-        {
-            node.TryGetValue("material", ref material);
-            node.TryGetValue("preDeployedDiameter", ref preDeployedDiameter);
-            node.TryGetValue("deployedDiameter", ref deployedDiameter);
-            node.TryGetValue("minIsPressure", ref minIsPressure);
-            node.TryGetValue("minDeployment", ref minDeployment);
-            node.TryGetValue("minPressure", ref minIsPressure);
-            node.TryGetValue("deploymentAlt", ref deploymentAlt);
-            node.TryGetValue("cutAlt", ref cutAlt);
-            node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
-            node.TryGetValue("deploymentSpeed", ref deploymentSpeed);
-            node.TryGetValue("parachuteName", ref parachuteName);
-            node.TryGetValue("capName", ref capName);
-            node.TryGetValue("forcedOrientation", ref forcedOrientation);
-            node.TryGetValue("depState", ref depState);
         }
         #endregion
 
@@ -212,7 +208,7 @@ namespace RealChute
         {
             //Smoothes the forced vector
             Vector3 orient = Vector3.zero;
-            if (this.module.secondaryChute) { orient = LerpDrag(this.module.bothDeployed ? forcedVector : Vector3.zero); }
+            if (this.module.secondaryChute) { orient = LerpDrag(this.module.manyDeployed ? forcedVector : Vector3.zero); }
 
             Quaternion drag = Quaternion.identity;
             Vector3 follow = this.module.dragVector + orient;
@@ -284,8 +280,8 @@ namespace RealChute
             parachute.gameObject.SetActive(false);
             this.module.Events["GUICut"].active = false;
             this.played = false;
-            if (!this.module.secondaryChute || sec.deploymentState == DeploymentStates.CUT) { this.module.SetRepack(); }
-            else if (this.module.secondaryChute && sec.deploymentState == DeploymentStates.STOWED) { this.module.armed = true; }
+            if (!this.module.secondaryChute || this.parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
+            else if (this.module.secondaryChute && this.parachutes.Any(p => p.deploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             dragTimer.Reset();
         }
 
@@ -395,10 +391,10 @@ namespace RealChute
                     {
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Copy to " + (this.secondary ? "main" : "sec"), skins.button, GUILayout.Height(20), GUILayout.Width(100)))
+                        if (GUILayout.Button("Copy to others", skins.button, GUILayout.Height(20), GUILayout.Width(100)))
                         {
-                            this.sec.minIsPressure = this.minIsPressure;
-                            this.sec.minPressure = this.minPressure;
+                            this.parachutes.ForEach(p => p.minIsPressure = this.minIsPressure);
+                            this.parachutes.ForEach(p => p.minPressure = this.minPressure);
                         }
                         GUILayout.FlexibleSpace();
                         GUILayout.EndHorizontal();
@@ -415,10 +411,10 @@ namespace RealChute
                     {
                         GUILayout.BeginHorizontal();
                         GUILayout.FlexibleSpace();
-                        if (GUILayout.Button("Copy to " + (this.secondary ? "main" : "sec"), skins.button, GUILayout.Height(20), GUILayout.Width(100)))
+                        if (GUILayout.Button("Copy to others", skins.button, GUILayout.Height(20), GUILayout.Width(100)))
                         {
-                            this.sec.minIsPressure = this.minIsPressure;
-                            this.sec.minDeployment = this.minDeployment;
+                            this.parachutes.ForEach(p => p.minIsPressure = this.minIsPressure);
+                            this.parachutes.ForEach(p => p.minDeployment = this.minDeployment);
                         }
                         GUILayout.FlexibleSpace();
                         GUILayout.EndHorizontal();
@@ -433,7 +429,7 @@ namespace RealChute
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Copy to " + (this.secondary ? "main" : "sec"), skins.button, GUILayout.Height(20), GUILayout.Width(100))) { this.sec.deploymentAlt = this.deploymentAlt; }
+                    if (GUILayout.Button("Copy to " + (this.secondary ? "main" : "sec"), skins.button, GUILayout.Height(20), GUILayout.Width(100))) { this.parachutes.ForEach(p => p.deploymentAlt = this.deploymentAlt); }
                     GUILayout.FlexibleSpace();
                     GUILayout.EndHorizontal();
                 }
@@ -441,6 +437,14 @@ namespace RealChute
             if (cutAlt > 0) { GUILayout.Label("Autocut altitude: " + cutAlt + "m", skins.label); }
             GUILayout.Label("Predeployment speed: " + preDeploymentSpeed + "s", skins.label);
             GUILayout.Label("Deployment speed: " + deploymentSpeed + "s", skins.label);
+        }
+
+        //Repack actions
+        internal void Repack()
+        {
+            deploymentState = DeploymentStates.STOWED;
+            depState = stateString;
+            cap.gameObject.SetActive(true);
         }
         #endregion
 
@@ -465,6 +469,11 @@ namespace RealChute
             node.TryGetValue("capName", ref capName);
             node.TryGetValue("forcedOrientation", ref forcedOrientation);
             node.TryGetValue("depState", ref depState);
+            if (!MaterialsLibrary.instance.TryGetMaterial(material, ref mat))
+            {
+                material = "Nylon"; 
+                mat = MaterialsLibrary.instance.GetMaterial("Nylon");
+            }
         }
 
         /// <summary>

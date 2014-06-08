@@ -26,18 +26,15 @@ namespace RealChute.Extensions
             return result;
         }
 
-        //To understand
+        /// <summary>
+        /// Sees if the part has the given AttachNode and stores it in the out value. Returns false if the node is null.
+        /// </summary>
+        /// <param name="nodeId">Name of the node to find</param>
+        /// <param name="node">Value to store the result into</param>
         public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node)
         {
             node = part.findAttachNode(nodeId);
-            if (node != null)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return node != null;
         }
 
         /// <summary>
@@ -46,8 +43,7 @@ namespace RealChute.Extensions
         public static List<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
         {
             List<Renderer> toRemove = new List<Renderer>(part.children.Select(p => p.transform).SelectMany(t => t.GetComponentsInChildren<Renderer>()));
-            toRemove.AddRange(module.main.parachute.GetComponents<Renderer>());
-            if (module.secondaryChute) { module.secondary.parachute.GetComponents<Renderer>(); }
+            toRemove.AddRange(module.parachutes.Select(p => p.parachute).SelectMany(t => t.GetComponents<Renderer>()));
             List<Renderer> renderers = part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
             return renderers;
         }

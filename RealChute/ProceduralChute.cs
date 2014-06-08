@@ -470,7 +470,7 @@ namespace RealChute
         {
             //Updating of size if possible
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable))) { return; }
+            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return; }
             
             if (sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
             {
@@ -522,7 +522,6 @@ namespace RealChute
             //Identification of the RealChuteModule
             if (this.part.Modules.Contains("RealChuteModule")) { rcModule = this.part.Modules["RealChuteModule"] as RealChuteModule; }
             else { return; }
-            if (!rcModule.isTweakable) { return; }
             secondaryChute = rcModule.secondaryChute;
             if (textureLibrary != "none") { textureLib.TryGetConfig(textureLibrary, ref textures); }
             bodies = AtmoPlanets.fetch;
@@ -580,7 +579,7 @@ namespace RealChute
                 }
             }
 
-            if (parent == null) { parent = this.part.FindModelTransform(rcModule.parachuteName).parent; }      
+            if (parent == null) { parent = this.part.FindModelTransform(rcModule.parachutes[0].parachuteName).parent; }      
 
             //Updates the part
             if (textureLibrary != "none")
@@ -593,7 +592,7 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            if ((HighLogic.LoadedSceneIsEditor || HighLogic.LoadedSceneIsFlight) && this.part.Modules.Contains("RealChuteModule") && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable) { return; }
+            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !this.part.Modules.Contains("RealChuteModule")) { return; }
 
             this.node = node;
             LoadConfig();
@@ -617,7 +616,7 @@ namespace RealChute
         public override string GetInfo()
         {
             if (!CompatibilityChecker.IsCompatible() || (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return string.Empty; }
-            else if (this.part.Modules.Contains("RealChuteModule") && ((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable) { return "This RealChute part can be tweaked from the Action Groups window."; }
+            else if (this.part.Modules.Contains("RealChuteModule")) { return "This RealChute part can be tweaked from the Action Groups window."; }
             return string.Empty;
         }
         #endregion
@@ -629,7 +628,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsEditor)
             {
-                if ((this.part.Modules["RealChuteModule"] != null && !((RealChuteModule)this.part.Modules["RealChuteModule"]).isTweakable)) { return; }              
+                if (this.part.Modules.Contains("RealChuteModule")) { return; }              
                 if (this.visible)
                 {
                     this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
