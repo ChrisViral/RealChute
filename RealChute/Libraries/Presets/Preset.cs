@@ -243,8 +243,8 @@ namespace RealChute.Libraries
                 this._preDeployedDiameter = temp.preDepDiam;
                 this._deployedDiameter = temp.depDiam;
                 this._minIsPressure = temp.isPressure;
-                this._minDeployment = this.minIsPressure ? temp.chute.minDeployment.ToString() : temp.predepClause;
-                this._minPressure = this.minIsPressure ? temp.predepClause : temp.chute.minPressure.ToString();
+                this._minDeployment = this.minIsPressure ? temp.parachute.minDeployment.ToString() : temp.predepClause;
+                this._minPressure = this.minIsPressure ? temp.predepClause : temp.parachute.minPressure.ToString();
                 this._deploymentAlt = temp.deploymentAlt;
                 this._cutAlt = temp.cutAlt;
                 this._preDeploymentSpeed = temp.preDepSpeed;

@@ -316,7 +316,8 @@ namespace RealChute
         //Loads all the parachutes into the list
         private void LoadParachutes()
         {
-            this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
+            if (!this.node.HasNode("PARACHUTE")) { return; }
+            this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select((n, i) => new Parachute(this, n, i)));
         }
         #endregion
 

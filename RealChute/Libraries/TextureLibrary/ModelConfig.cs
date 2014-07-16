@@ -1,4 +1,6 @@
-﻿using RealChute.Extensions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -100,38 +102,21 @@ namespace RealChute.Libraries
             get { return this._maxDiam; }
         }
 
-        private ModelParameters _main = null;
+        private List<ModelParameters> _parameters = new List<ModelParameters>();
         /// <summary>
-        /// Info about the main parachute of this type
+        /// Parameters for all potential chutes to be used with this model
         /// </summary>
-        public ModelParameters main
+        public List<ModelParameters> parameters
         {
-            get { return this._main; }
+            get { return this._parameters; }
         }
 
         /// <summary>
-        /// If this can be used as a main
-        /// </summary>
-        public bool hasMain
-        {
-            get { return this.main != null; }
-        }
-
-        private ModelParameters _secondary = null;
-        /// <summary>
-        /// Info about the secondary parachute of this type
-        /// </summary>
-        public ModelParameters secondary
-        {
-            get { return this._secondary; }
-        }
-
-        /// <summary>
-        /// If this can be used as a secondary
+        /// If this can have more than one chute
         /// </summary>
         public bool hasSecondary
         {
-            get { return this.secondary != null; }
+            get { return this.parameters.Count > 1; }
         }
         #endregion
 
@@ -152,8 +137,7 @@ namespace RealChute.Libraries
             node.TryGetValue("count", ref _count);
             node.TryGetValue("maxDiam", ref _maxDiam);
             ConfigNode chute = new ConfigNode();
-            if (node.TryGetNode("MAIN", ref chute)) { _main = new ModelParameters(chute); }
-            if (node.TryGetNode("SECONDARY", ref chute)) { _secondary = new ModelParameters(chute); }
+            _parameters = node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)).ToList();
         }
         #endregion
     }
