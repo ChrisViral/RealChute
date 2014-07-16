@@ -120,7 +120,6 @@ namespace RealChute
 
         #region Fields
         //Parachute
-        public int id = 0;
         public string material = "Nylon";
         public float preDeployedDiameter = 1, deployedDiameter = 25;
         public bool minIsPressure = false;
@@ -151,11 +150,10 @@ namespace RealChute
         /// </summary>
         /// <param name="module">RealChuteModule to create the Parachute from</param>
         /// <param name="node">ConfigNode to create the parachute from</param>
-        public Parachute(RealChuteModule module, ConfigNode node, int id)
+        public Parachute(RealChuteModule module, ConfigNode node)
         {
             Load(node);
             this.module = module;
-            this.id = id;
             this.module.materials.TryGetMaterial(material, ref mat);
             this.parachute = this.part.FindModelTransform(parachuteName);
             this.cap = this.part.FindModelTransform(capName);

@@ -452,7 +452,7 @@ namespace RealChute.Libraries
                 if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
             }
             this._bodyName = pChute.body.bodyName;
-            pChute.chutes.Select(c => new ChuteParameters(pChute, c));
+            _parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
         }
         #endregion
 

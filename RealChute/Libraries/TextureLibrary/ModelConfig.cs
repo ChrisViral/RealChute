@@ -129,7 +129,7 @@ namespace RealChute.Libraries
             node.TryGetValue("count", ref _count);
             node.TryGetValue("maxDiam", ref _maxDiam);
             ConfigNode chute = new ConfigNode();
-            _parameters = node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)).ToList();
+            _parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
         }
         #endregion
     }

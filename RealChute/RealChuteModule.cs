@@ -317,7 +317,7 @@ namespace RealChute
         private void LoadParachutes()
         {
             if (!this.node.HasNode("PARACHUTE")) { return; }
-            this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select((n, i) => new Parachute(this, n, i)));
+            this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
         }
         #endregion
 
@@ -537,9 +537,6 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsCompatible()) { return string.Empty; }
             //Info in the editor part window
-            float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
-            this.part.mass = caseMass + chuteMass;
-
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Case mass: {0}\n", caseMass);
             if (timer > 0) { builder.AppendFormat("Deployment timer: {0}s\n", timer); }

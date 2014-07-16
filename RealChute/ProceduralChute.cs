@@ -386,6 +386,13 @@ namespace RealChute
             {
                 chutes = new List<ChuteTemplate>(node.GetNodes("CHUTE").Select((n, i) => new ChuteTemplate(this, n, i)));
             }
+            else
+            {
+                for (int i = 0; i < this.rcModule.parachutes.Count; i++)
+                {
+                    chutes.Add(new ChuteTemplate(this, new ConfigNode(), i));
+                }
+            }
         }
         #endregion
 
