@@ -262,7 +262,7 @@ namespace RealChute.Libraries
         public bool ModelExists(string name, bool isTransformName = false)
         {
             if (!isTransformName) { return models.Any(model => model.name == name); }
-            else { return models.Any(model => (model.hasMain && model.main.transformName == name) || (model.hasSecondary && model.secondary.transformName == name)); }
+            else { return models.SelectMany(m => m.parameters).Any(p => p.transformName == name); }
         }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace RealChute.Libraries
         public ModelConfig GetModel(string name, bool isTransformName = false)
         {
             if (!isTransformName) { return models.Find(model => model.name == name); }
-            else { return models.Find(model => model.main.transformName == name || model.secondary.transformName == name); }
+            else { return models.Find(model => model.parameters.Any(p => p.transformName == name)); }
         }
 
         /// <summary>

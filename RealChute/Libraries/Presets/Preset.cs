@@ -1,4 +1,6 @@
-﻿using RealChute.Extensions;
+﻿using System.Collections.Generic;
+using System.Linq;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -236,33 +238,32 @@ namespace RealChute.Libraries
             /// </summary>
             /// <param name="pChute"></param>
             /// <param name="secondary"></param>
-            public ChuteParameters(ProceduralChute pChute, bool secondary)
+            public ChuteParameters(ProceduralChute pChute, ChuteTemplate chute)
             {
-                ChuteTemplate temp = secondary ? pChute.secondary : pChute.main;
-                this._material = MaterialsLibrary.instance.GetMaterial(temp.materialsID).name;
-                this._preDeployedDiameter = temp.preDepDiam;
-                this._deployedDiameter = temp.depDiam;
-                this._minIsPressure = temp.isPressure;
-                this._minDeployment = this.minIsPressure ? temp.parachute.minDeployment.ToString() : temp.predepClause;
-                this._minPressure = this.minIsPressure ? temp.predepClause : temp.parachute.minPressure.ToString();
-                this._deploymentAlt = temp.deploymentAlt;
-                this._cutAlt = temp.cutAlt;
-                this._preDeploymentSpeed = temp.preDepSpeed;
-                this._deploymentSpeed = temp.depSpeed;
+                this._material = MaterialsLibrary.instance.GetMaterial(chute.materialsID).name;
+                this._preDeployedDiameter = chute.preDepDiam;
+                this._deployedDiameter = chute.depDiam;
+                this._minIsPressure = chute.isPressure;
+                this._minDeployment = this.minIsPressure ? chute.parachute.minDeployment.ToString() : chute.predepClause;
+                this._minPressure = this.minIsPressure ? chute.predepClause : chute.parachute.minPressure.ToString();
+                this._deploymentAlt = chute.deploymentAlt;
+                this._cutAlt = chute.cutAlt;
+                this._preDeploymentSpeed = chute.preDepSpeed;
+                this._deploymentSpeed = chute.depSpeed;
                 if (pChute.textureLibrary != "none")
                 {
-                    if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(temp.chuteID).name; }
-                    if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(temp.modelID).name; }
+                    if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(chute.chuteID).name; }
+                    if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(chute.modelID).name; }
                 }
-                this._type = RCUtils.types[temp.typeID];
-                this._calcSelect = temp.calcSelect;
-                this._getMass = temp.getMass;
-                this._useDry = temp.useDry;
-                this._mass = temp.mass;
-                this._landingSpeed = temp.landingSpeed;
-                this._deceleration = temp.deceleration;
-                this._refDepAlt = temp.refDepAlt;
-                this._chuteCount = temp.chuteCount;
+                this._type = RCUtils.types[chute.typeID];
+                this._calcSelect = chute.calcSelect;
+                this._getMass = chute.getMass;
+                this._useDry = chute.useDry;
+                this._mass = chute.mass;
+                this._landingSpeed = chute.landingSpeed;
+                this._deceleration = chute.deceleration;
+                this._refDepAlt = chute.refDepAlt;
+                this._chuteCount = chute.chuteCount;
             }
             #endregion
 
@@ -271,9 +272,9 @@ namespace RealChute.Libraries
             /// Saves this object to a config node
             /// </summary>
             /// <param name="secondary">Wether this is the main or secondary chute</param>
-            public ConfigNode Save(bool secondary)
+            public ConfigNode Save()
             {
-                ConfigNode node = new ConfigNode((secondary ? "SECONDARY" : "MAIN"));
+                ConfigNode node = new ConfigNode("CHUTE");
                 node.AddValue("material", material);
                 node.AddValue("preDeployedDiameter", preDeployedDiameter);
                 node.AddValue("deployedDiameter", deployedDiameter);
@@ -400,30 +401,13 @@ namespace RealChute.Libraries
             get { return this._bodyName; }
         }
 
-        private ChuteParameters _main = null;
+        private List<ChuteParameters> _parameters = new List<ChuteParameters>();
         /// <summary>
-        /// Parameters for the main chute
+        /// All parameters for potential chutes
         /// </summary>
-        public ChuteParameters main
+        public List<ChuteParameters> parameters
         {
-            get { return this._main; }
-        }
-
-        private ChuteParameters _secondary = null;
-        /// <summary>
-        /// Parameters for the secondary chute
-        /// </summary>
-        public ChuteParameters secondary
-        {
-            get { return this._secondary; }
-        }
-
-        /// <summary>
-        /// If this preset has a secondary chute
-        /// </summary>
-        public bool hasSecondary
-        {
-            get { return this.secondary != null; }
+            get { return this._parameters; }
         }
         #endregion
 
@@ -445,8 +429,7 @@ namespace RealChute.Libraries
             node.TryGetValue("spares", ref _spares);
             node.TryGetValue("caseName", ref _caseName);
             node.TryGetValue("bodyName", ref _bodyName);
-            if (node.HasNode("MAIN")) { _main = new ChuteParameters(node.GetNode("MAIN")); }
-            if (node.HasNode("SECONDARY")) { _secondary = new ChuteParameters(node.GetNode("SECONDARY")); }
+            _parameters = node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)).ToList();
         }
 
         /// <summary>
@@ -469,8 +452,7 @@ namespace RealChute.Libraries
                 if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
             }
             this._bodyName = pChute.body.bodyName;
-            this._main = new ChuteParameters(pChute, false);
-            if (pChute.secondaryChute) { this._secondary = new ChuteParameters(pChute, true); }
+            pChute.chutes.Select(c => new ChuteParameters(pChute, c));
         }
         #endregion
 
@@ -492,8 +474,7 @@ namespace RealChute.Libraries
             node.AddValue("spares", spares);
             node.AddValue("caseName", caseName);
             node.AddValue("bodyName", bodyName);
-            node.AddNode(main.Save(false));
-            if (hasSecondary) { node.AddNode(secondary.Save(true)); }
+            parameters.ForEach(p => node.AddNode(p.Save()));
             return node;
         }
         #endregion

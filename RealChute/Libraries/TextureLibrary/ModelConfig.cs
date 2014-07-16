@@ -110,14 +110,6 @@ namespace RealChute.Libraries
         {
             get { return this._parameters; }
         }
-
-        /// <summary>
-        /// If this can have more than one chute
-        /// </summary>
-        public bool hasSecondary
-        {
-            get { return this.parameters.Count > 1; }
-        }
         #endregion
 
         #region Constructor

@@ -671,7 +671,7 @@ namespace RealChute
         //Applies the preset on the chute
         internal void ApplyPreset(Preset preset)
         {
-            Preset.ChuteParameters parameters = this.secondary ? preset.secondary : preset.main;
+            Preset.ChuteParameters parameters = preset.parameters[id];
             this.material = pChute.materials.GetMaterial(parameters.material);
             this.materialsID = pChute.materials.GetMaterialIndex(parameters.material);
             this.preDepDiam = parameters.preDeployedDiameter;

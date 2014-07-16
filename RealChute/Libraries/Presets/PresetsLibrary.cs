@@ -124,7 +124,7 @@ namespace RealChute.Libraries
         /// <param name="pChute">Chute to determine the result from</param>
         public string[] GetRelevantPresets(ProceduralChute pChute)
         {
-            return presets.Where(p => p.hasSecondary == pChute.secondaryChute).Select(p => p.name).ToArray();
+            return presets.Where(p => p.parameters.Count == pChute.chutes.Count).Select(p => p.name).ToArray();
         }
 
         /// <summary>
