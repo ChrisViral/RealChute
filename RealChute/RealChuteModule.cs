@@ -316,7 +316,7 @@ namespace RealChute
         //Loads all the parachutes into the list
         private void LoadParachutes()
         {
-            if (!this.node.HasNode("PARACHUTE")) { return; }
+            if (this.parachutes.Count > 0 || !this.node.HasNode("PARACHUTE")) { return; }
             this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
         }
         #endregion
@@ -493,6 +493,7 @@ namespace RealChute
 
             //Initiates the Parachutes
             LoadParachutes();
+            parachutes.ForEach(p => p.Initialize());
 
             //Initiates animations
             anim = this.part.FindModelAnimators(parachutes[0].capName).FirstOrDefault();
@@ -537,6 +538,9 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsCompatible()) { return string.Empty; }
             //Info in the editor part window
+            float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
+            this.part.mass = caseMass + chuteMass;
+
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Case mass: {0}\n", caseMass);
             if (timer > 0) { builder.AppendFormat("Deployment timer: {0}s\n", timer); }

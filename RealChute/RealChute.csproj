@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
+    <Compile Include="SizeManager.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />

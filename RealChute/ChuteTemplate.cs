@@ -122,41 +122,9 @@ namespace RealChute
         /// <param name="id">Index of the ChuteTemplate</param>
         public ChuteTemplate(ProceduralChute pChute, ConfigNode node, int id)
         {
-            Load(node);
             this.pChute = pChute;
             this.id = id;
-            parachute = pChute.rcModule.parachutes[id];
-            this.pChute.materials.TryGetMaterial(parachute.material, ref material);
-            materialsID = this.pChute.materials.GetMaterialIndex(parachute.material);
-            if (this.pChute.textureLibrary != "none")
-            {
-                this.textures.TryGetCanopy(chuteID, ref canopy);
-                this.textures.TryGetModel(modelID, ref model);
-            }
-
-            if (HighLogic.LoadedSceneIsEditor)
-            {
-                if (!this.pChute.initiated)
-                {
-                    if (this.textures.TryGetCanopy(currentCanopy, ref canopy)) { chuteID = this.textures.GetCanopyIndex(canopy); }
-                    if (this.textures.TryGetModel(parachute.parachuteName, ref model, true)) { modelID = this.textures.GetModelIndex(model); }
-                    if (RCUtils.types.Contains(currentType)) { typeID = RCUtils.types.ToList().IndexOf(currentType); }
-                }
-
-                preDepDiam = parachute.preDeployedDiameter.ToString();
-                depDiam = parachute.deployedDiameter.ToString();
-                isPressure = parachute.minIsPressure;
-                if (isPressure) { predepClause = parachute.minPressure.ToString(); }
-                else { predepClause = parachute.minDeployment.ToString(); }
-                deploymentAlt = parachute.deploymentAlt.ToString();
-                cutAlt = parachute.cutAlt.ToString();
-                if (cutAlt == "-1") { cutAlt = string.Empty; }
-                preDepSpeed = parachute.preDeploymentSpeed.ToString();
-                depSpeed = parachute.deploymentSpeed.ToString();
-            }
-            position = this.part.FindModelTransform(parachute.parachuteName).position;
-
-            if (HighLogic.LoadedSceneIsFlight) { UpdateCanopy(); }
+            Load(node);
         }
         #endregion
 
@@ -698,6 +666,45 @@ namespace RealChute
             this.deceleration = parameters.deceleration;
             this.refDepAlt = parameters.refDepAlt;
             this.chuteCount = parameters.chuteCount;
+        }
+
+        //Initializes the chute
+        public void Initialize()
+        {
+            this.pChute = pChute;
+            this.id = id;
+            parachute = pChute.rcModule.parachutes[id];
+            this.pChute.materials.TryGetMaterial(parachute.material, ref material);
+            materialsID = this.pChute.materials.GetMaterialIndex(parachute.material);
+            if (this.pChute.textureLibrary != "none")
+            {
+                this.textures.TryGetCanopy(chuteID, ref canopy);
+                this.textures.TryGetModel(modelID, ref model);
+            }
+
+            if (HighLogic.LoadedSceneIsEditor)
+            {
+                if (!this.pChute.initiated)
+                {
+                    if (this.textures.TryGetCanopy(currentCanopy, ref canopy)) { chuteID = this.textures.GetCanopyIndex(canopy); }
+                    if (this.textures.TryGetModel(parachute.parachuteName, ref model, true)) { modelID = this.textures.GetModelIndex(model); }
+                    if (RCUtils.types.Contains(currentType)) { typeID = RCUtils.types.ToList().IndexOf(currentType); }
+                }
+
+                preDepDiam = parachute.preDeployedDiameter.ToString();
+                depDiam = parachute.deployedDiameter.ToString();
+                isPressure = parachute.minIsPressure;
+                if (isPressure) { predepClause = parachute.minPressure.ToString(); }
+                else { predepClause = parachute.minDeployment.ToString(); }
+                deploymentAlt = parachute.deploymentAlt.ToString();
+                cutAlt = parachute.cutAlt.ToString();
+                if (cutAlt == "-1") { cutAlt = string.Empty; }
+                preDepSpeed = parachute.preDeploymentSpeed.ToString();
+                depSpeed = parachute.deploymentSpeed.ToString();
+            }
+            position = this.part.FindModelTransform(parachute.parachuteName).position;
+
+            if (HighLogic.LoadedSceneIsFlight) { UpdateCanopy(); }
         }
         #endregion
 

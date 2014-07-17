@@ -152,30 +152,8 @@ namespace RealChute
         /// <param name="node">ConfigNode to create the parachute from</param>
         public Parachute(RealChuteModule module, ConfigNode node)
         {
-            Load(node);
             this.module = module;
-            this.module.materials.TryGetMaterial(material, ref mat);
-            this.parachute = this.part.FindModelTransform(parachuteName);
-            this.cap = this.part.FindModelTransform(capName);
-            this.parachute.gameObject.SetActive(false);
-            this.part.InitiateAnimation(preDeploymentAnimation);
-            this.part.InitiateAnimation(deploymentAnimation);
-            if (!this.module.initiated)
-            {
-                deploymentState = DeploymentStates.STOWED;
-                depState = "STOWED";
-                played = false;
-                this.cap.gameObject.SetActive(true);
-            }
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                deploymentState = getState;
-                if (this.module.capOff)
-                {
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
-                    this.cap.gameObject.SetActive(false);
-                }
-            }
+            Load(node);
         }
         #endregion
 
@@ -445,6 +423,33 @@ namespace RealChute
             deploymentState = DeploymentStates.STOWED;
             depState = stateString;
             cap.gameObject.SetActive(true);
+        }
+
+        //Initializes the chute
+        public void Initialize()
+        {
+            this.module.materials.TryGetMaterial(material, ref mat);
+            this.parachute = this.part.FindModelTransform(parachuteName);
+            this.cap = this.part.FindModelTransform(capName);
+            this.parachute.gameObject.SetActive(false);
+            this.part.InitiateAnimation(preDeploymentAnimation);
+            this.part.InitiateAnimation(deploymentAnimation);
+            if (!this.module.initiated)
+            {
+                deploymentState = DeploymentStates.STOWED;
+                depState = "STOWED";
+                played = false;
+                this.cap.gameObject.SetActive(true);
+            }
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                deploymentState = getState;
+                if (this.module.capOff)
+                {
+                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
+                    this.cap.gameObject.SetActive(false);
+                }
+            }
         }
         #endregion
 

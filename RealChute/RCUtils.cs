@@ -316,7 +316,7 @@ namespace RealChute
         /// <param name="max">Top of the range to check</param>
         public static bool CheckRange(float f, float min, float max)
         {
-            return f <= max && f > min;
+            return f <= max && f >= min;
         }
 
         /// <summary>

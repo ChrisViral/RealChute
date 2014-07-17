@@ -80,7 +80,8 @@ namespace RealChute
         internal string presetName = string.Empty, presetDescription = string.Empty;
         internal CelestialBody body = null;
 
-        //Vectors from the module node
+        //Sizes
+        private SizeManager sizeLib = SizeManager.instance;
         public List<SizeNode> sizes = new List<SizeNode>();
         [SerializeField]
         private Transform parent = null;
@@ -375,22 +376,22 @@ namespace RealChute
         }
 
         //Reloads the size nodes
-        private void LoadConfig()
+        private void LoadChutes()
         {
-            if (node.HasNode("SIZE") && sizes.Count <= 0)
+            if (this.chutes.Count <= 0)
             {
-                sizes.Clear();
-                sizes = node.GetNodes("SIZE").Select(n => new SizeNode(n)).ToList();
-            }
-            if (node.HasNode("CHUTE"))
-            {
-                chutes = new List<ChuteTemplate>(node.GetNodes("CHUTE").Select((n, i) => new ChuteTemplate(this, n, i)));
-            }
-            else
-            {
-                for (int i = 0; i < this.rcModule.parachutes.Count; i++)
+                if (this.node.HasNode("CHUTE"))
                 {
-                    chutes.Add(new ChuteTemplate(this, new ConfigNode(), i));
+                    this.chutes = new List<ChuteTemplate>(this.node.GetNodes("CHUTE").Select((n, i) => new ChuteTemplate(this, n, i)));
+                }
+                else
+                {
+                    this.chutes.Clear();
+                    RealChuteModule module = this.rcModule ?? this.part.Modules["RealChuteModule"] as RealChuteModule;
+                    for (int i = 0; i < module.parachutes.Count; i++)
+                    {
+                        this.chutes.Add(new ChuteTemplate(this, new ConfigNode(), i));
+                    }
                 }
             }
         }
@@ -446,7 +447,11 @@ namespace RealChute
             secondaryChute = rcModule.secondaryChute;
             if (textureLibrary != "none") { textureLib.TryGetConfig(textureLibrary, ref textures); }
             bodies = AtmoPlanets.fetch;
-            LoadConfig();
+
+            //Initializes ChuteTemplates
+            LoadChutes();
+            chutes.ForEach(c => c.Initialize());
+            if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.name); }
 
             //Creates an instance of the texture library
             if (textureLibrary != "none")
@@ -502,11 +507,15 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
-            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !this.part.Modules.Contains("RealChuteModule")) { return; }
-
+            if (!CompatibilityChecker.IsCompatible() || !this.part.Modules.Contains("RealChuteModule")) { return; }
             this.node = node;
-            LoadConfig();
+            LoadChutes();
+
+            if (node.HasNode("SIZE"))
+            {
+                sizes = new List<SizeNode>(node.GetNodes("SIZE").Select(n => new SizeNode(n)));
+                sizeLib.AddSize(this.part.name, sizes);
+            }
 
             //Top node original location
             if (this.part.findAttachNode("top") != null)
@@ -526,7 +535,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsCompatible() || (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return string.Empty; }
+            if (!CompatibilityChecker.IsCompatible()) { return string.Empty; }
             else if (this.part.Modules.Contains("RealChuteModule")) { return "This RealChute part can be tweaked from the Action Groups window."; }
             return string.Empty;
         }
@@ -545,7 +554,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsEditor)
             {
-                if (this.part.Modules.Contains("RealChuteModule")) { return; }              
+                if (!this.part.Modules.Contains("RealChuteModule")) { return; }              
                 if (this.visible)
                 {
                     this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));

@@ -45,6 +45,11 @@ namespace RealChute
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
         }
 
+        private void Start()
+        {
+            enabled = true;
+        }
+
         private void OnDestroy()
         {
             RealChuteSettings.SaveSettings();
