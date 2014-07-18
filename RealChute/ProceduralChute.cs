@@ -451,7 +451,7 @@ namespace RealChute
             //Initializes ChuteTemplates
             LoadChutes();
             chutes.ForEach(c => c.Initialize());
-            if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.name); }
+            if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.partInfo.name); }
 
             //Creates an instance of the texture library
             if (textureLibrary != "none")
@@ -510,7 +510,6 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible() || !this.part.Modules.Contains("RealChuteModule")) { return; }
             this.node = node;
             LoadChutes();
-
             if (node.HasNode("SIZE"))
             {
                 sizes = new List<SizeNode>(node.GetNodes("SIZE").Select(n => new SizeNode(n)));

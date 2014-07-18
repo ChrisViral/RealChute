@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+/* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
+ * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
+ * For more information contact me on the forum. */
+
 namespace RealChute
 {
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
@@ -14,7 +18,7 @@ namespace RealChute
         #endregion
 
         #region Fields
-        private Dictionary<string, List<SizeNode>> sizes = new Dictionary<string, List<SizeNode>>();
+        private static Dictionary<string, List<SizeNode>> sizes = new Dictionary<string, List<SizeNode>>();
         #endregion
 
         #region Functions
