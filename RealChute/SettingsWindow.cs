@@ -59,10 +59,10 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
-            this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, buttonStyle);
+            this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
             if (visible)
             {
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings", skins.window);
+                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings v" + RCUtils.assemblyVersion, skins.window);
             }
         }
 
@@ -72,7 +72,7 @@ namespace RealChute
 
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
             settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke", skins.toggle);
-            settings.useStaging = GUILayout.Toggle(settings.useStaging, "Use staging to activate chutes", skins.toggle);
+            //settings.useStaging = GUILayout.Toggle(settings.useStaging, "Use staging to activate chutes", skins.toggle); unused for now
 
             if(GUILayout.Button("Close", skins.button))
             {

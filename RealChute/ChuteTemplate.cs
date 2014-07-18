@@ -671,8 +671,6 @@ namespace RealChute
         //Initializes the chute
         public void Initialize()
         {
-            this.pChute = pChute;
-            this.id = id;
             parachute = pChute.rcModule.parachutes[id];
             this.pChute.materials.TryGetMaterial(parachute.material, ref material);
             materialsID = this.pChute.materials.GetMaterialIndex(parachute.material);

@@ -45,8 +45,6 @@ namespace RealChute
         [KSPField(isPersistant = true)]
         public bool staged = false, launched = false;
         [KSPField(isPersistant = true)]
-        public string depState = "STOWED", secDepState = "STOWED";
-        [KSPField(isPersistant = true)]
         public float baseDrag = 0.2f;
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
         public int chuteCount = 5;
@@ -73,7 +71,13 @@ namespace RealChute
             get { return (groundStop || atmPressure == 0) && parachutes.All(p => p.deploymentState == DeploymentStates.CUT) && (chuteCount > 0 || chuteCount == -1); }
         }
 
-        // Wether both parachutes are deployed or not
+        //If any parachute is deployed
+        public bool anyDeployed
+        {
+            get { return parachutes.Any(p => p.isDeployed); }
+        }
+
+        // Wether multiple parachutes are deployed or not
         public bool manyDeployed
         {
             get { return parachutes.Count(p => p.isDeployed) > 1; }
@@ -91,8 +95,8 @@ namespace RealChute
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
         private Animation anim = null;
         private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch();
-        private bool displayed = false;
-        internal double terrainAlt, ASL, trueAlt;
+        private bool displayed = false, showDisarm = false;
+        internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
         internal float sqrSpeed;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
@@ -135,6 +139,7 @@ namespace RealChute
         public void GUIDisarm()
         {
             armed = false;
+            showDisarm = false;
             this.part.stackIcon.SetIconColor(XKCDColors.White);
             Events["GUIDeploy"].active = true;
             Events["GUIArm"].active = true;
@@ -243,12 +248,14 @@ namespace RealChute
             if (timerSpent && goesDown)
             {
                 wait = false;
+                showDisarm = false;
                 deploymentTimer.Reset();
             }
             else
             {
                 this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                 wait = true;
+                showDisarm = true;
             }
         }
 
@@ -266,7 +273,7 @@ namespace RealChute
         public void DeactivateRC()
         {
             this.staged = false;
-            this.launched = false;
+            if (this.vessel.LandedOrSplashed) { this.launched = false; }
             this.wait = true;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
         }
@@ -324,7 +331,7 @@ namespace RealChute
         #region Functions
         private void Update()
         {
-            if ((HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && !CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsCompatible()) { return; }
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Makes the chute icon blink if failed
@@ -363,8 +370,8 @@ namespace RealChute
                 }
 
                 if (settings.autoArm) { Events["GUIArm"].guiActive = false; }
-                if (armed || wait) { Events["GUIDisarm"].guiActive = true; }
-                else { Events["GUIDisarm"].guiActive = false; }
+                Events["GUIDisarm"].guiActive = (armed || showDisarm);
+                Events["GUIDisarm"].guiActiveUnfocused = (armed || showDisarm);
             }
 
             if (HighLogic.LoadedSceneIsEditor)
@@ -389,7 +396,7 @@ namespace RealChute
 
             if (this.vessel.mainBody.pqsController != null)
             {
-                terrainAlt = this.vessel.pqsAltitude;
+                double terrainAlt = this.vessel.pqsAltitude;
                 if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
                 trueAlt = ASL - terrainAlt;
             }
@@ -426,7 +433,7 @@ namespace RealChute
                     //If all parachutes must be cut
                     if (allMustStop)
                     {
-                        parachutes.Where(p => p.isDeployed).ToList().ForEach(p => p.Cut());
+                        GUICut();
                         SetRepack();
                     }
 

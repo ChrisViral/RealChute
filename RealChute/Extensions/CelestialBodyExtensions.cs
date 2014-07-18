@@ -49,9 +49,9 @@ namespace RealChute.Extensions
         /// <param name="alt">Altitude to get the pressure at</param>
         public static double GetPressureAtAlt(this CelestialBody body, double alt)
         {
-            if (!body.atmosphere) { return 0; }
+            if (!body.atmosphere) { return 0d; }
             double pressure = FlightGlobals.getStaticPressure(alt, body);
-            return pressure <= 1E-6 ? 0 : pressure;
+            return pressure <= 1E-6 ? 0d : pressure;
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetPressureASL(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0; }
+            if (!body.atmosphere) { return 0d; }
             return FlightGlobals.getStaticPressure(0, body);
         }
 
@@ -68,7 +68,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetMaxAtmosphereAltitude(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0; }
+            if (!body.atmosphere) { return 0d; }
             return -body.atmosphereScaleHeight * Math.Log(1E-6) * 1000;
         }
         #endregion
