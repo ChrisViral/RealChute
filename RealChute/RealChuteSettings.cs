@@ -65,6 +65,16 @@ namespace RealChute
             get { return this._position; }
             set { this._position = value; }
         }
+
+        private bool _hideIcon = false;
+        /// <summary>
+        /// If the SpaceCenter icon is hidden or not
+        /// </summary>
+        public bool hideIcon
+        {
+            get { return this._hideIcon; }
+            set { this._hideIcon = value; }
+        }
         #endregion
 
         #region Constructor
@@ -81,6 +91,7 @@ namespace RealChute
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
                 settings.AddValue("useStaging", useStaging);
+                settings.AddValue("hideIcon", hideIcon);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
@@ -92,6 +103,7 @@ namespace RealChute
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { missing = true; }
                 if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { missing = true; }
                 if (settings.TryGetValue("useStaging", ref _useStaging)) { missing = true; }
+                if (settings.TryGetValue("hideIcon", ref _hideIcon)) { missing = true; }
                 if (missing)
                 {
                     Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
@@ -99,6 +111,7 @@ namespace RealChute
                     settings.AddValue("autoArm", autoArm);
                     settings.AddValue("jokeActivated", jokeActivated);
                     settings.AddValue("useStaging", useStaging);
+                    settings.AddValue("hideIcon", hideIcon);
                     node.ClearData();
                     node.AddNode(settings);
                     node.Save(RCUtils.settingsURL);
@@ -117,6 +130,7 @@ namespace RealChute
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
             settings.AddValue("useStaging", fetch.useStaging);
+            settings.AddValue("hideIcon", fetch.hideIcon);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
                 PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));

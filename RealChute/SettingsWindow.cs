@@ -54,16 +54,25 @@ namespace RealChute
         {
             RealChuteSettings.SaveSettings();
         }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.H)) { settings.hideIcon = !settings.hideIcon; }
+        }
         #endregion
 
         #region GUI
         private void OnGUI()
         {
-            this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
-            if (visible)
+            if (!settings.hideIcon)
             {
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings v" + RCUtils.assemblyVersion, skins.window);
+                this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
+                if (visible)
+                {
+                    this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);
+                }
             }
+            else if (visible) { visible = false; }
         }
 
         private void Window(int id)

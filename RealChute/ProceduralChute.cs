@@ -177,7 +177,6 @@ namespace RealChute
         private void Apply(bool toSymmetryCounterparts)
         {
             if ((GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0))) { this.failedVisible = true; return; }
-
             rcModule.mustGoDown = mustGoDown;
             rcModule.deployOnGround = deployOnGround;
             rcModule.timer = RCUtils.ParseTime(timer);
@@ -388,12 +387,38 @@ namespace RealChute
                 {
                     this.chutes.Clear();
                     RealChuteModule module = this.rcModule ?? this.part.Modules["RealChuteModule"] as RealChuteModule;
+                    if (module.parachutes.Count <= 0) { return; }
                     for (int i = 0; i < module.parachutes.Count; i++)
                     {
                         this.chutes.Add(new ChuteTemplate(this, new ConfigNode(), i));
                     }
                 }
             }
+        }
+
+        //Copies values from the original symmetry part
+        private void CopyFromOriginal(Part p)
+        {
+            RealChuteModule module = p.Modules["RealChuteModule"] as RealChuteModule;
+            ProceduralChute pChute = p.Modules["ProceduralChute"] as ProceduralChute;
+
+            this.mustGoDown = module.mustGoDown;
+            this.timer = module.timer.ToString();
+            this.cutSpeed = module.cutSpeed.ToString();
+            this.spares = module.spareChutes.ToString();
+            this.presetID = pChute.presetID;
+            this.planets = pChute.planets;
+            this.size = pChute.size;
+            this.caseID = pChute.caseID;
+            this.mustGoDown = pChute.mustGoDown;
+            this.deployOnGround = pChute.deployOnGround;
+            this.timer = pChute.timer;
+            this.cutSpeed = pChute.cutSpeed;
+            this.spares = pChute.spares;
+
+            this.chutes.ForEach(c => c.CopyFromOriginal(module, pChute));
+
+            this.part.name = this.part.partInfo.name + "(Clone)";
         }
         #endregion
 
@@ -450,6 +475,12 @@ namespace RealChute
 
             //Initializes ChuteTemplates
             LoadChutes();
+            if (this.part.symmetryCounterparts.Count > 0 && this.part.name.Contains("(Clone)(Clone)"))
+            {
+                print("Symmetry part identified");
+                Part p = this.part.symmetryCounterparts.Find(prt => !prt.name.Contains("(Clone)(Clone)"));
+                CopyFromOriginal(p);
+            }
             chutes.ForEach(c => c.Initialize());
             if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.partInfo.name); }
 

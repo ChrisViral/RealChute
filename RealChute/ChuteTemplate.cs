@@ -14,38 +14,65 @@ namespace RealChute
     public class ChuteTemplate
     {
         #region Propreties
+        //All Parachutes objects on the part
         public List<Parachute> parachutes
         {
             get { return this.pChute.rcModule.parachutes; }
         }
+
+        //Current part
         private Part part
         {
             get { return this.pChute.part; }
         }
+
+        //Selected CelestialBody
         private CelestialBody body
         {
             get { return this.pChute.body; }
         }
+
+        //PArameters for this chute
         private ModelConfig.ModelParameters parameters
         {
             get { return model.parameters[id]; }
         }
+
+        //All current ChuteTemplate objects on this part
         private List<ChuteTemplate> chutes
         {
             get { return this.pChute.chutes; }
         }
+
+        //Current TextureConfig
         private TextureConfig textures
         {
             get { return this.pChute.textures; }
         }
+
+        //Current canopy for this chute
         public string currentCanopy
         {
-            get { return this.pChute.currentCanopies.Split(',')[id].Trim(); }
+            get
+            {
+                string[] canopies = this.pChute.currentCanopies.Split(',');
+                if (canopies.Length >= (id + 1)) { return canopies[id].Trim(); }
+                return "none";
+            }
         }
+
+        //Current type for this chute
         public string currentType
         {
-            get { return this.pChute.currentTypes.Split(',')[id].Trim(); }
+            get
+            {
+                string[] types = this.pChute.currentTypes.Split(',');
+                if (types.Length >= (id + 1)) { return types[id].Trim(); }
+                return "Main";
+            }
         }
+
+        //GUI errors
         public List<string> errors
         {
             get
@@ -76,6 +103,8 @@ namespace RealChute
                 return main;
             }
         }
+
+        //If this part has more than one chute
         public bool secondary
         {
             get { return id != 0; }
@@ -703,6 +732,45 @@ namespace RealChute
             position = this.part.FindModelTransform(parachute.parachuteName).position;
 
             if (HighLogic.LoadedSceneIsFlight) { UpdateCanopy(); }
+        }
+
+        //Copies all fields to the symmetry counterpart
+        public void CopyFromOriginal(RealChuteModule module, ProceduralChute pChute)
+        {
+            Parachute sym = module.parachutes[id];
+            ChuteTemplate template = pChute.chutes[id];
+            parachute = pChute.rcModule.parachutes[id];
+
+            material = sym.mat;
+            parachute.deployedDiameter = sym.deployedDiameter;
+            parachute.preDeployedDiameter = sym.preDeployedDiameter;
+            isPressure = sym.minIsPressure;
+            if (isPressure) { parachute.minPressure = sym.minPressure; }
+            else { parachute.minDeployment = sym.minDeployment; }
+            parachute.deploymentAlt = sym.deploymentAlt;
+            parachute.cutAlt = sym.cutAlt;
+            parachute.preDeploymentSpeed = sym.preDeploymentSpeed;
+            parachute.deploymentSpeed = sym.deploymentSpeed;
+            this.chuteID = template.chuteID;
+            this.typeID = template.typeID;
+            this.modelID = template.modelID;
+            this.materialsID = template.materialsID;
+            this.isPressure = template.isPressure;
+            this.calcSelect = template.calcSelect;
+            this.getMass = template.getMass;
+            this.useDry = template.useDry;
+            this.preDepDiam = template.preDepDiam;
+            this.depDiam = template.depDiam;
+            this.predepClause = template.predepClause;
+            this.mass = template.mass;
+            this.landingSpeed = template.landingSpeed;
+            this.deceleration = template.deceleration;
+            this.refDepAlt = template.refDepAlt;
+            this.chuteCount = template.chuteCount;
+            this.deploymentAlt = template.deploymentAlt;
+            this.cutAlt = template.cutAlt;
+            this.preDepSpeed = template.preDepSpeed;
+            this.depSpeed = template.depSpeed;
         }
         #endregion
 
