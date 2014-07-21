@@ -297,17 +297,17 @@ namespace RealChute
                     test.SetActive(true);
                     float scale = RCUtils.GetDiameter(parachute.deployedArea / model.count) / model.diameter;
                     test.transform.localScale = new Vector3(scale, scale, scale);
-                    Debug.Log("[RealChute]: " + part.partInfo.title + " #" + id + " Scale: " + scale);
+                    Debug.Log("[RealChute]: " + part.partInfo.title + " #" + (id + 1) + " Scale: " + scale);
 
                     GameObject obj = GameObject.Instantiate(test) as GameObject;
                     GameObject.Destroy(test);
                     Transform toDestroy;
-                    toDestroy = part.FindModelTransform(parachute.parachuteName);
+                    toDestroy = part.FindModelTransform(parachute.baseParachuteName);
                     obj.transform.parent = toDestroy.parent;
                     obj.transform.position = toDestroy.position;
+                    obj.transform.rotation = toDestroy.rotation;
                     GameObject.DestroyImmediate(toDestroy.gameObject);
                     parachute.parachute = part.FindModelTransform(parameters.transformName);
-                    parachute.parachute.transform.localRotation = Quaternion.identity;
                     parachute.parachuteName = parameters.transformName;
                     parachute.deploymentAnimation = parameters.depAnim;
                     parachute.preDeploymentAnimation = parameters.preDepAnim;
@@ -703,7 +703,7 @@ namespace RealChute
             parachute = pChute.rcModule.parachutes[id];
             this.pChute.materials.TryGetMaterial(parachute.material, ref material);
             materialsID = this.pChute.materials.GetMaterialIndex(parachute.material);
-            if (this.pChute.textureLibrary != "none")
+            if (this.pChute.textureLibrary != "none" && !string.IsNullOrEmpty(this.pChute.textureLibrary))
             {
                 this.textures.TryGetCanopy(chuteID, ref canopy);
                 this.textures.TryGetModel(modelID, ref model);
@@ -729,7 +729,7 @@ namespace RealChute
                 preDepSpeed = parachute.preDeploymentSpeed.ToString();
                 depSpeed = parachute.deploymentSpeed.ToString();
             }
-            position = this.part.FindModelTransform(parachute.parachuteName).position;
+            position = this.part.FindModelTransform(parachute.baseParachuteName).position;
 
             if (HighLogic.LoadedSceneIsFlight) { UpdateCanopy(); }
         }

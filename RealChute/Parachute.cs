@@ -127,7 +127,7 @@ namespace RealChute
         public float deploymentAlt = 700, cutAlt = -1;
         public float preDeploymentSpeed = 2, deploymentSpeed = 6;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
-        public string parachuteName = "parachute", capName = "cap";
+        public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
         public float forcedOrientation = 0;
         public string depState = "STOWED";
 
@@ -430,6 +430,10 @@ namespace RealChute
         {
             this.module.materials.TryGetMaterial(material, ref mat);
             this.parachute = this.part.FindModelTransform(parachuteName);
+            if (parachute == null && !string.IsNullOrEmpty(baseParachuteName))
+            {
+                this.parachute = this.part.FindModelTransform(baseParachuteName);
+            }
             this.cap = this.part.FindModelTransform(capName);
             this.parachute.gameObject.SetActive(false);
             this.part.InitiateAnimation(preDeploymentAnimation);
@@ -440,6 +444,7 @@ namespace RealChute
                 depState = "STOWED";
                 played = false;
                 this.cap.gameObject.SetActive(true);
+                if (string.IsNullOrEmpty(baseParachuteName)) { baseParachuteName = parachuteName; }
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
@@ -471,6 +476,7 @@ namespace RealChute
             node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
             node.TryGetValue("deploymentSpeed", ref deploymentSpeed);
             node.TryGetValue("parachuteName", ref parachuteName);
+            node.TryGetValue("baseParachuteName", ref baseParachuteName);
             node.TryGetValue("capName", ref capName);
             node.TryGetValue("forcedOrientation", ref forcedOrientation);
             node.TryGetValue("depState", ref depState);
@@ -498,6 +504,7 @@ namespace RealChute
             node.AddValue("preDeploymentSpeed", preDeploymentSpeed);
             node.AddValue("deploymentSpeed", deploymentSpeed);
             node.AddValue("parachuteName", parachuteName);
+            node.AddValue("baseParachuteName", baseParachuteName);
             node.AddValue("capName", capName);
             node.AddValue("forcedOrientation", forcedOrientation);
             node.AddValue("depState", depState);
