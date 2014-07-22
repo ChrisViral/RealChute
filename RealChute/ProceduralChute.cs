@@ -24,6 +24,8 @@ namespace RealChute
         public string currentCanopies = "none";
         [KSPField]
         public string currentTypes = "Main";
+        [KSPField]
+        public bool isTweakable = true;
         #endregion
 
         #region Persistent values
@@ -565,7 +567,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return string.Empty; }
+            if (!CompatibilityChecker.IsCompatible() || !this.isTweakable) { return string.Empty; }
             else if (this.part.Modules.Contains("RealChuteModule")) { return "This RealChute part can be tweaked from the Action Groups window."; }
             return string.Empty;
         }
@@ -581,10 +583,9 @@ namespace RealChute
         private void OnGUI()
         {
             //Rendering manager
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsCompatible() || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule")) { return; }
             if (HighLogic.LoadedSceneIsEditor)
-            {
-                if (!this.part.Modules.Contains("RealChuteModule")) { return; }              
+            {        
                 if (this.visible)
                 {
                     this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));

@@ -27,6 +27,8 @@ namespace RealChute
             if (instance != null) { Destroy(this); return; }
             instance = this;
             DontDestroyOnLoad(this);
+
+            print("[RealChute]: Running RealChute " + RCUtils.assemblyVersion);
         }
         #endregion
 

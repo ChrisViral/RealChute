@@ -134,6 +134,7 @@ namespace RealChute
         //Flight
         internal RealChuteModule module = null;
         internal bool secondary = false;
+        private Animation anim = null;
         internal Transform parachute = null, cap = null;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
@@ -211,7 +212,7 @@ namespace RealChute
             parachute.gameObject.SetActive(true);
             cap.gameObject.SetActive(false);
             this.module.Events["GUICut"].active = true;
-            this.part.PlayAnimation(preDeploymentAnimation, 1 / preDeploymentSpeed);
+            this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed);
             dragTimer.Start();
         }
 
@@ -228,7 +229,7 @@ namespace RealChute
             parachute.gameObject.SetActive(true);
             cap.gameObject.SetActive(false);
             this.module.Events["GUICut"].active = true;
-            this.part.PlayAnimation(preDeploymentAnimation, 1 / preDeploymentSpeed);
+            this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed);
             dragTimer.Start();
         }
 
@@ -243,7 +244,7 @@ namespace RealChute
             {
                 dragTimer.Reset();
                 dragTimer.Start();
-                this.part.PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
+                this.part.PlayAnimation(deploymentAnimation, 1f / deploymentSpeed);
                 this.played = true;
             }
             else { this.played = false; }
@@ -429,15 +430,19 @@ namespace RealChute
         public void Initialize()
         {
             this.module.materials.TryGetMaterial(material, ref mat);
+
+            anim = this.part.FindModelAnimators(capName).FirstOrDefault();
+            this.cap = this.part.FindModelTransform(capName);
+
             this.parachute = this.part.FindModelTransform(parachuteName);
-            if (parachute == null && !string.IsNullOrEmpty(baseParachuteName))
+            if (this.parachute == null && !string.IsNullOrEmpty(baseParachuteName))
             {
                 this.parachute = this.part.FindModelTransform(baseParachuteName);
             }
-            this.cap = this.part.FindModelTransform(capName);
             this.parachute.gameObject.SetActive(false);
             this.part.InitiateAnimation(preDeploymentAnimation);
             this.part.InitiateAnimation(deploymentAnimation);
+
             if (!this.module.initiated)
             {
                 deploymentState = DeploymentStates.STOWED;

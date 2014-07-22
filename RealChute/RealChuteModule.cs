@@ -93,7 +93,6 @@ namespace RealChute
         #region Fields
         //Module
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
-        private Animation anim = null;
         private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch();
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
@@ -501,9 +500,6 @@ namespace RealChute
             //Initiates the Parachutes
             LoadParachutes();
             parachutes.ForEach(p => p.Initialize());
-
-            //Initiates animations
-            anim = this.part.FindModelAnimators(parachutes[0].capName).FirstOrDefault();
 
             //First initiation of the part
             if (!initiated)
