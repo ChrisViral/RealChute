@@ -419,8 +419,6 @@ namespace RealChute
             this.spares = pChute.spares;
 
             this.chutes.ForEach(c => c.CopyFromOriginal(module, pChute));
-
-            this.part.name = this.part.partInfo.name + "(Clone)";
         }
         #endregion
 
@@ -477,6 +475,14 @@ namespace RealChute
 
             //Initializes ChuteTemplates
             LoadChutes();
+            if (this.part.name.Contains("(Clone)(Clone)"))
+            {
+                if (this.part.symmetryCounterparts.Count > 0)
+                {
+                    CopyFromOriginal(this.part.symmetryCounterparts.Find(prt => !prt.name.Contains("(Clone)(Clone)")));
+                }
+                RCUtils.RemoveClone(this.part);
+            }
             if (this.part.symmetryCounterparts.Count > 0 && this.part.name.Contains("(Clone)(Clone)"))
             {
                 print("Symmetry part identified");

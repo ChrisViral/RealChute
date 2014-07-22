@@ -729,7 +729,7 @@ namespace RealChute
                 preDepSpeed = parachute.preDeploymentSpeed.ToString();
                 depSpeed = parachute.deploymentSpeed.ToString();
             }
-            position = this.part.FindModelTransform(parachute.baseParachuteName).position;
+            position = this.parachute.parachute.position;
 
             if (HighLogic.LoadedSceneIsFlight) { UpdateCanopy(); }
         }

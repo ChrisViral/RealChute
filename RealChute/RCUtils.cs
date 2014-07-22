@@ -343,6 +343,15 @@ namespace RealChute
         {
             return !f.ToString().Contains('.');
         }
+
+        /// <summary>
+        /// Removes any excess amount of "(Clone)" bits from part names
+        /// </summary>
+        /// <param name="part">Part to fix</param>
+        public static void RemoveClone(Part part)
+        {
+            part.name = part.partInfo.name + "(Clone)";
+        }
         #endregion
     }
 }

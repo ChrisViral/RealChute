@@ -68,7 +68,7 @@ namespace RealChute
         // If the parachute can be repacked
         public bool canRepack
         {
-            get { return (groundStop || atmPressure == 0) && parachutes.All(p => p.deploymentState == DeploymentStates.CUT) && (chuteCount > 0 || chuteCount == -1); }
+            get { return (groundStop || atmPressure == 0) && parachutes.All(p => p.deploymentState == DeploymentStates.CUT || p.deploymentState == DeploymentStates.STOWED) && (chuteCount > 0 || chuteCount == -1); }
         }
 
         //If any parachute is deployed
@@ -159,7 +159,7 @@ namespace RealChute
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
                 capOff = false;
                 if (chuteCount != -1) { chuteCount--; }
-                parachutes.ForEach(p => p.Repack());
+                parachutes.Where(p => p.deploymentState == DeploymentStates.CUT).ToList().ForEach(p => p.Repack());
             }
         }
 
