@@ -443,13 +443,14 @@ namespace RealChute
             this.part.InitiateAnimation(preDeploymentAnimation);
             this.part.InitiateAnimation(deploymentAnimation);
 
+            if (string.IsNullOrEmpty(baseParachuteName)) { baseParachuteName = parachuteName; }
+
             if (!this.module.initiated)
             {
                 deploymentState = DeploymentStates.STOWED;
                 depState = "STOWED";
                 played = false;
                 this.cap.gameObject.SetActive(true);
-                if (string.IsNullOrEmpty(baseParachuteName)) { baseParachuteName = parachuteName; }
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
