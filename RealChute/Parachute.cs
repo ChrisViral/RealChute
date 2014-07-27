@@ -484,6 +484,8 @@ namespace RealChute
             node.TryGetValue("parachuteName", ref parachuteName);
             node.TryGetValue("baseParachuteName", ref baseParachuteName);
             node.TryGetValue("capName", ref capName);
+            node.TryGetValue("preDeploymentAnimation", ref preDeploymentAnimation);
+            node.TryGetValue("deploymentAnimation", ref deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref forcedOrientation);
             node.TryGetValue("depState", ref depState);
             if (!MaterialsLibrary.instance.TryGetMaterial(material, ref mat))
@@ -512,6 +514,8 @@ namespace RealChute
             node.AddValue("parachuteName", parachuteName);
             node.AddValue("baseParachuteName", baseParachuteName);
             node.AddValue("capName", capName);
+            node.AddValue("preDeploymentAnimation", preDeploymentAnimation);
+            node.AddValue("deploymentAnimation", deploymentAnimation);
             node.AddValue("forcedOrientation", forcedOrientation);
             node.AddValue("depState", depState);
             return node;
