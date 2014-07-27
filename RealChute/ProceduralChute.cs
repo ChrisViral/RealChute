@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using RealChute.Extensions;
 using UnityEngine;
 using RealChute.Libraries;
@@ -424,10 +425,7 @@ namespace RealChute
         //Returns the cost for this size, if any
         public float GetModuleCost()
         {
-            if (this.sizes.Count > 0)
-            {
-                return this.sizes[size].cost;
-            }
+            if (this.sizes.Count > 0) { return this.sizes[size].cost; }
             return 0;
         }
         #endregion
@@ -510,7 +508,7 @@ namespace RealChute
             {
                 //Windows initiation
                 this.window = new Rect(5, 370, 420, Screen.height - 375);
-                chutes.ForEach(c => c.materialsWindow = new Rect(matX, matY, 500, 500));
+                chutes.ForEach(c => c.materialsWindow = new Rect(matX, matY, 375, 275));
                 this.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
@@ -604,7 +602,7 @@ namespace RealChute
                 {
                     if (chute.materialsVisible)
                     {
-                        chute.materialsWindow = GUILayout.Window(chute.matId, chute.materialsWindow, chute.MaterialsWindow, "Parachute material", skins.window, GUILayout.MaxWidth(280), GUILayout.MaxHeight(265));
+                        chute.materialsWindow = GUILayout.Window(chute.matId, chute.materialsWindow, chute.MaterialsWindow, "Parachute material", skins.window, GUILayout.MaxWidth(375), GUILayout.MaxHeight(275));
                     }
                 }
                 if (this.failedVisible)
@@ -636,12 +634,14 @@ namespace RealChute
             GUILayout.BeginVertical();
 
             #region Info labels
-            GUILayout.Label("Selected part: " + this.part.partInfo.title, skins.label);
-            GUILayout.Label("Symmetry counterparts: " + (this.part.symmetryCounterparts.Count), skins.label);
-            GUILayout.Label("Case mass: " + rcModule.caseMass + "t", skins.label);
-            if (sizes.Count > 0) { GUILayout.Label("Case cost: " + sizes[size].cost + "f", skins.label); }
-            GUILayout.Label("Total part mass: " + this.part.TotalMass().ToString("0.###") + "t", skins.label);
-            GUILayout.Label("Total part cost: " + this.part.TotalCost().ToString("0.#") + "f", skins.label);
+            StringBuilder builder = new StringBuilder();
+            builder.Append("Selected part: ").AppendLine(this.part.partInfo.title);
+            builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
+            builder.Append("Case mass: ").Append(rcModule.caseMass.ToString()).Append("t");
+            if (sizes.Count > 0) { builder.Append("\t\t\t\t\tCase cost: ").Append(this.sizes[size].cost.ToString()).Append("f"); }
+            builder.Append("\nTotal part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
+            builder.Append("\t\t\tTotal case part cost: ").Append(this.part.TotalCost().ToString("0.#")).Append("f");
+            GUILayout.Label(builder.ToString(), skins.label);
             #endregion
 
             #region Presets

@@ -93,7 +93,7 @@ namespace RealChute
         #region Fields
         //Module
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
-        private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch();
+        private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch(), launchTimer = new Stopwatch();
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
@@ -398,22 +398,31 @@ namespace RealChute
             if (!CompatibilityChecker.IsCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
-
-            if (this.vessel.mainBody.pqsController != null)
-            {
-                double terrainAlt = this.vessel.pqsAltitude;
-                if (this.vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
-                trueAlt = ASL - terrainAlt;
-            }
-            else { trueAlt = ASL; }
+            trueAlt = this.vessel.GetTrueAlt(ASL);
             atmPressure = this.vessel.mainBody.GetPressureAtAlt(ASL);
             atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             sqrSpeed = velocity.sqrMagnitude;
             dragVector = -velocity.normalized;
             if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && this.part.inverseStage == Staging.CurrentStage) { ActivateRC(); }
-            if (!this.launched && !this.vessel.LandedOrSplashed) { this.launched = true; }
-            if (this.launched && !this.staged && deployOnGround && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
+            if (this.deployOnGround && !this.staged)
+            {
+                if (!this.launched && !this.vessel.LandedOrSplashed)
+                {
+                    if (!this.vessel.LandedOrSplashed)
+                    {
+                        //Dampening timer
+                        if (!this.launchTimer.IsRunning) { this.launchTimer.Start(); }
+                        if (this.launchTimer.ElapsedMilliseconds >= 3000)
+                        {
+                            this.launchTimer.Reset();
+                            this.launched = true;
+                        }
+                    }
+                    else if (this.launchTimer.IsRunning) { launchTimer.Reset(); }
+                }
+                if (this.launched && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
+            }
             
             if (this.staged)
             {
@@ -626,32 +635,27 @@ namespace RealChute
         {
             GUI.DragWindow(new Rect(0, 0, window.width, 30));
             GUILayout.BeginVertical();
-            GUILayout.Label("Part: " + this.part.partInfo.title, skins.label);
-            GUILayout.Label("Symmetry counterparts: " + this.part.symmetryCounterparts.Count, skins.label);
-            GUILayout.Label("Mass: " + this.part.TotalMass().ToString("0.###"), skins.label);
+            StringBuilder builder = new StringBuilder("Part name: ").AppendLine(this.part.partInfo.title);
+            builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
+            builder.Append("Part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
+            GUILayout.Label(builder.ToString(), skins.label);
             GUILayout.Space(5);
             scroll = GUILayout.BeginScrollView(scroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box);
             GUILayout.Space(5);
             GUILayout.Label("General:", RCUtils.boldLabel, GUILayout.Width(120));
-            GUILayout.Label("Autocut speed: " + cutSpeed + "m/s", skins.label);
-            if (timer >= 60) { GUILayout.Label("Deployment timer: " + RCUtils.ToMinutesSeconds(timer), skins.label); }
-            else { GUILayout.Label("Deployment timer: " + timer.ToString("0.#") + "s", skins.label); }
-            GUILayout.Label("Must go down to deploy: " + mustGoDown.ToString(), skins.label);
-            GUILayout.Label("Deploys on ground contact: " + deployOnGround.ToString(), skins.label);
-            GUILayout.Label("Spare chutes: " + chuteCount, skins.label);
+            builder = new StringBuilder("Autocut speed: ").Append(cutSpeed).AppendLine("m/s");
+            if (timer >= 60) { builder.Append("Deployment timer: ").AppendLine(RCUtils.ToMinutesSeconds(timer)); }
+            else if (timer > 0) { builder.Append("Deployment timer: ").Append(timer.ToString("0.#")).AppendLine("s"); }
+            if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy"); }
+            if (this.deployOnGround) { builder.AppendLine("Automatically deploys on ground contact"); }
+            if (this.spareChutes >= 0) { builder.Append("Spare chutes: ").Append(chuteCount); }
+            else { builder.Append("Spare chutes: inf"); }
+            GUILayout.Label(builder.ToString(), skins.label);
             for (int i = 0; i < parachutes.Count; i++)
             {
                 GUILayout.Label("___________________________________________", RCUtils.boldLabel);
                 GUILayout.Space(3);
-                switch (i)
-                {
-                    case 0:
-                        GUILayout.Label("Main chute:", RCUtils.boldLabel, GUILayout.Width(120)); break;
-                    case 1:
-                        GUILayout.Label("Secondary chute:", RCUtils.boldLabel, GUILayout.Width(120)); break;
-                    default:
-                        GUILayout.Label(String.Format("Chute #{0}:", i + 1), RCUtils.boldLabel, GUILayout.Width(120)); break;
-                }
+                GUILayout.Label(RCUtils.ParachuteNumber(i), RCUtils.boldLabel, GUILayout.Width(120));
                 parachutes[i].UpdateGUI();
             }
 

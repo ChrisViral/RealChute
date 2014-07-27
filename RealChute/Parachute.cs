@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
@@ -346,10 +347,12 @@ namespace RealChute
         //Info window GUI
         internal void UpdateGUI()
         {
-            GUILayout.Label("Material: " + mat.name, skins.label);
-            GUILayout.Label("Drag coefficient: " + mat.dragCoefficient.ToString("0.00"), skins.label);
-            GUILayout.Label("Predeployed diameter: " + preDeployedDiameter + "m    area:" + preDeployedArea.ToString("0.###") + "m²", skins.label);
-            GUILayout.Label("Deployed diameter: " + deployedDiameter + "m    area:" + deployedArea.ToString("0.###") + "m²", skins.label);
+            StringBuilder builder = new StringBuilder();
+            builder.Append("Material: ").AppendLine(mat.name);
+            builder.Append("Drag coefficient: ").AppendLine(mat.dragCoefficient.ToString("0.00#"));
+            builder.Append("Predeployed diameter: ").Append(preDeployedDiameter).Append("m\t\tarea: ").Append(preDeployedArea.ToString("0.###")).AppendLine("m²");
+            builder.Append("Deployed diameter: ").Append(deployedDiameter).Append("m\t\tarea: ").Append(deployedArea.ToString("0.###")).Append("m²");
+            GUILayout.Label(builder.ToString(), skins.label);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 GUILayout.BeginHorizontal();
@@ -408,14 +411,16 @@ namespace RealChute
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.FlexibleSpace();
-                    if (GUILayout.Button("Copy to " + (this.secondary ? "main" : "sec"), skins.button, GUILayout.Height(20), GUILayout.Width(100))) { this.parachutes.ForEach(p => p.deploymentAlt = this.deploymentAlt); }
+                    if (GUILayout.Button("Copy to others", skins.button, GUILayout.Height(20), GUILayout.Width(100))) { this.parachutes.ForEach(p => p.deploymentAlt = this.deploymentAlt); }
                     GUILayout.FlexibleSpace();
                     GUILayout.EndHorizontal();
                 }
             }
-            if (cutAlt > 0) { GUILayout.Label("Autocut altitude: " + cutAlt + "m", skins.label); }
-            GUILayout.Label("Predeployment speed: " + preDeploymentSpeed + "s", skins.label);
-            GUILayout.Label("Deployment speed: " + deploymentSpeed + "s", skins.label);
+            builder = new StringBuilder();
+            if (cutAlt > 0) { builder.Append("Autocut altitude: ").Append(cutAlt).AppendLine("m"); }
+            builder.Append("Predeployment speed: ").Append(preDeploymentSpeed).AppendLine("s");
+            builder.Append("Deployment speed: ").Append(deploymentSpeed).Append("s");
+            GUILayout.Label(builder.ToString(), skins.label);
         }
 
         //Repack actions

@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
+    <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="SettingsWindow.cs" />

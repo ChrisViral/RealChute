@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
@@ -179,7 +180,7 @@ namespace RealChute
                 float acc = 0;
                 if (typeID == 2) { acc = float.Parse(deceleration); }
                 else { acc = (float)(body.GeeASL * RCUtils.geeToAcc); }
-                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " MAIN - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
+                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id)," - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                 parachute.deployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * material.dragCoefficient * density * float.Parse(chuteCount))));
                 if ((this.pChute.textureLibrary != "none" || this.textures.modelNames.Length > 0) && parachute.deployedDiameter > model.maxDiam)
@@ -195,7 +196,7 @@ namespace RealChute
                 else { this.pChute.warning = false; }
                 if (typeID == 0) { parachute.preDeployedDiameter = RCUtils.Round(parachute.deployedDiameter / 20); }
                 else { parachute.preDeployedDiameter = RCUtils.Round(parachute.deployedDiameter / 2); }
-                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " MAIN - depDiam: ", parachute.deployedDiameter, "m, preDepDiam: ", parachute.preDeployedDiameter, "m"));
+                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id), " - depDiam: ", parachute.deployedDiameter, "m, preDepDiam: ", parachute.preDeployedDiameter, "m"));
             }
 
             else
@@ -285,19 +286,19 @@ namespace RealChute
                 {
                     if (string.IsNullOrEmpty(parameters.modelURL))
                     {
-                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[modelID] + " #" + (id + 1) + " URL is empty");
+                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[modelID] + " #" + (this.id + 1) + " URL is empty");
                         return;
                     }
                     GameObject test = GameDatabase.Instance.GetModel(parameters.modelURL);
                     if (test == null)
                     {
-                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[modelID] + " #" + (id + 1) + " GameObject is null");
+                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[modelID] + " #" + (this.id + 1) + " GameObject is null");
                         return;
                     }
                     test.SetActive(true);
                     float scale = RCUtils.GetDiameter(parachute.deployedArea / model.count) / model.diameter;
                     test.transform.localScale = new Vector3(scale, scale, scale);
-                    Debug.Log("[RealChute]: " + part.partInfo.title + " #" + (id + 1) + " Scale: " + scale);
+                    Debug.Log("[RealChute]: " + part.partInfo.title + " " + RCUtils.ParachuteNumber(this.id) + " Scale: " + scale);
 
                     GameObject obj = GameObject.Instantiate(test) as GameObject;
                     GameObject.Destroy(test);
@@ -637,31 +638,27 @@ namespace RealChute
             materialsID = GUILayout.SelectionGrid(materialsID, this.pChute.materials.materials.Values.ToArray(), 1, skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("Description:", skins.label);
-            GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].description, skins.label);
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("Drag coefficient:", skins.label);
-            GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("Area density:", skins.label);
-            GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].areaDensity * 1000 + "kg/m²", skins.label);
-            GUILayout.FlexibleSpace();
-            GUILayout.Label("Area cost:", skins.label);
-            GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].areaCost + "f/m²", skins.label);
-            GUILayout.FlexibleSpace();
+            MaterialDefinition material = this.pChute.materials.materials.Keys.ToArray()[materialsID];
+            StringBuilder builder = new StringBuilder();
+            builder.Append("Description:  ").AppendLine(material.description);
+            builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));
+            builder.Append("\nArea density:  ").Append(material.areaDensity * 1000).AppendLine("kg/m²\n");
+            builder.Append("Area cost:  ").Append(material.areaCost.ToString()).Append("f/m²");
+            GUILayout.Label(builder.ToString(), skins.label);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button("Choose material", skins.button))
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Choose material", skins.button, GUILayout.Width(150)))
             {
-                material = this.pChute.materials.materials.Keys.ToArray()[materialsID];
+                this.material = material;
                 this.materialsVisible = false;
             }
-            if (GUILayout.Button("Cancel", skins.button))
+            if (GUILayout.Button("Cancel", skins.button, GUILayout.Width(150)))
             {
                 this.materialsVisible = false;
             }
+            GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
         }

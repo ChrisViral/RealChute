@@ -325,14 +325,13 @@ namespace RealChute
         /// <param name="time">Time value to transform</param>
         public static string ToMinutesSeconds(float time)
         {
-            float minutes = 0, seconds = 0;
-            while (time >= 60)
+            float minutes = 0, seconds = time;
+            while (seconds >= 60)
             {
-                time -= 60;
+                seconds -= 60;
                 minutes++;
             }
-            seconds = time;
-            return minutes.ToString("0") + "m " + seconds.ToString("0.#") + "s";
+            return String.Concat(minutes, "m ", seconds.ToString("0.#"), "s");
         }
 
         /// <summary>
@@ -351,6 +350,23 @@ namespace RealChute
         public static void RemoveClone(Part part)
         {
             part.name = part.partInfo.name + "(Clone)";
+        }
+
+        /// <summary>
+        /// Returns a simplified string for the chute number
+        /// </summary>
+        /// <param name="id">ID of the parachute</param>
+        public static string ParachuteNumber(int id)
+        {
+            switch (id)
+            {
+                case 0:
+                    return "Main chute:";
+                case 1:
+                    return "Secondary chute:";
+                default:
+                    return String.Format("Chute #{0}:", id + 1);
+            }
         }
         #endregion
     }
