@@ -15,8 +15,7 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
         private bool visible = false;
-        private Rect window = new Rect();
-        private Rect button = new Rect();
+        private Rect window = new Rect(), button = new Rect();
         private Texture2D buttonTexture = new Texture2D(1, 1);
         private RealChuteSettings settings = RealChuteSettings.fetch;
         #endregion
@@ -85,10 +84,8 @@ namespace RealChute
         private void Window(int id)
         {
             GUI.DragWindow(new Rect(0, 0, window.width, 20));
-
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
             settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke", skins.toggle);
-            //settings.useStaging = GUILayout.Toggle(settings.useStaging, "Use staging to activate chutes", skins.toggle); unused for now
             GUILayout.Label("You can hide this window by pressing 'h'.", skins.label);
             if(GUILayout.Button("Close", skins.button))
             {

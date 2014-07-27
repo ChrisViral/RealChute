@@ -639,7 +639,6 @@ namespace RealChute
             builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
             builder.Append("Part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
             GUILayout.Label(builder.ToString(), skins.label);
-            GUILayout.Space(5);
             scroll = GUILayout.BeginScrollView(scroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box);
             GUILayout.Space(5);
             GUILayout.Label("General:", RCUtils.boldLabel, GUILayout.Width(120));

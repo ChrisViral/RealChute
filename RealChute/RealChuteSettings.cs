@@ -46,16 +46,6 @@ namespace RealChute
             set { this._jokeActivated = value; }
         }
 
-        private bool _useStaging = true;
-        /// <summary>
-        /// If parachutes can be activated through staging
-        /// </summary>
-        public bool useStaging
-        {
-            get { return this._useStaging; }
-            set { this._useStaging = value; }
-        }
-
         private Vector2 _position = new Vector2(100, 100);
         /// <summary>
         /// Position vector of the window
@@ -68,7 +58,7 @@ namespace RealChute
 
         private bool _hideIcon = false;
         /// <summary>
-        /// If the SpaceCenter icon is hidden or not
+        /// If the RealChute settings icon is hidden in the SpaceCenter
         /// </summary>
         public bool hideIcon
         {
@@ -90,7 +80,6 @@ namespace RealChute
                 Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Creating new version.");
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
-                settings.AddValue("useStaging", useStaging);
                 settings.AddValue("hideIcon", hideIcon);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
@@ -102,7 +91,6 @@ namespace RealChute
                 bool missing = false;
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { missing = true; }
                 if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { missing = true; }
-                if (settings.TryGetValue("useStaging", ref _useStaging)) { missing = true; }
                 if (settings.TryGetValue("hideIcon", ref _hideIcon)) { missing = true; }
                 if (missing)
                 {
@@ -110,7 +98,6 @@ namespace RealChute
                     settings.ClearValues();
                     settings.AddValue("autoArm", autoArm);
                     settings.AddValue("jokeActivated", jokeActivated);
-                    settings.AddValue("useStaging", useStaging);
                     settings.AddValue("hideIcon", hideIcon);
                     node.ClearData();
                     node.AddNode(settings);
@@ -129,7 +116,6 @@ namespace RealChute
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
-            settings.AddValue("useStaging", fetch.useStaging);
             settings.AddValue("hideIcon", fetch.hideIcon);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
