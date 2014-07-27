@@ -641,12 +641,14 @@ namespace RealChute
             GUILayout.Label("Description:", skins.label);
             GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].description, skins.label);
             GUILayout.FlexibleSpace();
-            GUILayout.FlexibleSpace();
             GUILayout.Label("Drag coefficient:", skins.label);
             GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].dragCoefficient.ToString("0.00#"), skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.Label("Area density:", skins.label);
             GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].areaDensity * 1000 + "kg/m²", skins.label);
+            GUILayout.FlexibleSpace();
+            GUILayout.Label("Area cost:", skins.label);
+            GUILayout.Label(this.pChute.materials.materials.Keys.ToArray()[materialsID].areaCost + "f/m²", skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();

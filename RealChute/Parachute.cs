@@ -476,7 +476,7 @@ namespace RealChute
             node.TryGetValue("deployedDiameter", ref deployedDiameter);
             node.TryGetValue("minIsPressure", ref minIsPressure);
             node.TryGetValue("minDeployment", ref minDeployment);
-            node.TryGetValue("minPressure", ref minIsPressure);
+            node.TryGetValue("minPressure", ref minPressure);
             node.TryGetValue("deploymentAlt", ref deploymentAlt);
             node.TryGetValue("cutAlt", ref cutAlt);
             node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
@@ -504,7 +504,7 @@ namespace RealChute
             node.AddValue("deployedDiameter", deployedDiameter);
             node.AddValue("minIsPressure", minIsPressure);
             node.AddValue("minDeployment", minDeployment);
-            node.AddValue("minPressure", minIsPressure);
+            node.AddValue("minPressure", minPressure);
             node.AddValue("deploymentAlt", deploymentAlt);
             node.AddValue("cutAlt", cutAlt);
             node.AddValue("preDeploymentSpeed", preDeploymentSpeed);

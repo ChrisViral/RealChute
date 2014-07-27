@@ -22,7 +22,7 @@ namespace RealChute
         CUT
     }
 
-    public class RealChuteModule : PartModule
+    public class RealChuteModule : PartModule, IPartCostModifier
     {
         #region Persistent fields
         // Values from the .cfg file
@@ -324,6 +324,12 @@ namespace RealChute
         {
             if (this.parachutes.Count > 0 || !this.node.HasNode("PARACHUTE")) { return; }
             this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
+        }
+
+        //Gives the cost for this parachute
+        public float GetModuleCost()
+        {
+            return RCUtils.Round(this.parachutes.Sum(p => p.deployedArea * p.mat.areaCost));
         }
         #endregion
 

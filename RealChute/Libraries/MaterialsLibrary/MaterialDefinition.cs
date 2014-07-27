@@ -44,6 +44,15 @@ namespace RealChute.Libraries
         {
             get { return this._dragCoefficient; }
         }
+
+        private float _areaCost = 0.075f;
+        /// <summary>
+        /// Cost of a square meter of this material
+        /// </summary>
+        public float areaCost
+        {
+            get { return this._areaCost; }
+        }
         #endregion
 
         #region Constructor
@@ -62,6 +71,7 @@ namespace RealChute.Libraries
             node.TryGetValue("description", ref _description);
             node.TryGetValue("areaDensity", ref _areaDensity);
             node.TryGetValue("dragCoefficient", ref _dragCoefficient);
+            node.TryGetValue("areaCost", ref _areaCost);
         }
         #endregion
     }

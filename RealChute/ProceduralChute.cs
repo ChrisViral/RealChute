@@ -11,7 +11,7 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
-    public class ProceduralChute : PartModule
+    public class ProceduralChute : PartModule, IPartCostModifier
     {
         #region Config values
         [KSPField]
@@ -420,6 +420,16 @@ namespace RealChute
 
             this.chutes.ForEach(c => c.CopyFromOriginal(module, pChute));
         }
+
+        //Returns the cost for this size, if any
+        public float GetModuleCost()
+        {
+            if (this.sizes.Count > 0)
+            {
+                return this.sizes[size].cost;
+            }
+            return 0;
+        }
         #endregion
 
         #region Functions
@@ -483,12 +493,6 @@ namespace RealChute
                 }
                 RCUtils.RemoveClone(this.part);
             }
-            if (this.part.symmetryCounterparts.Count > 0 && this.part.name.Contains("(Clone)(Clone)"))
-            {
-                print("Symmetry part identified");
-                Part p = this.part.symmetryCounterparts.Find(prt => !prt.name.Contains("(Clone)(Clone)"));
-                CopyFromOriginal(p);
-            }
             chutes.ForEach(c => c.Initialize());
             if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.partInfo.name); }
 
@@ -506,7 +510,7 @@ namespace RealChute
             {
                 //Windows initiation
                 this.window = new Rect(5, 370, 420, Screen.height - 375);
-                chutes.ForEach(c => c.materialsWindow = new Rect(matX, matY, 375, 280));
+                chutes.ForEach(c => c.materialsWindow = new Rect(matX, matY, 500, 500));
                 this.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
@@ -635,7 +639,9 @@ namespace RealChute
             GUILayout.Label("Selected part: " + this.part.partInfo.title, skins.label);
             GUILayout.Label("Symmetry counterparts: " + (this.part.symmetryCounterparts.Count), skins.label);
             GUILayout.Label("Case mass: " + rcModule.caseMass + "t", skins.label);
+            if (sizes.Count > 0) { GUILayout.Label("Case cost: " + sizes[size].cost + "f", skins.label); }
             GUILayout.Label("Total part mass: " + this.part.TotalMass().ToString("0.###") + "t", skins.label);
+            GUILayout.Label("Total part cost: " + this.part.TotalCost().ToString("0.#") + "f", skins.label);
             #endregion
 
             #region Presets

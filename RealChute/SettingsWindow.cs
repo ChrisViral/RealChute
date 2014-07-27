@@ -40,6 +40,11 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
+            if (!CompatibilityChecker.IsCompatible())
+            {
+                Destroy(this);
+                return;
+            }
             this.window = new Rect(100, 100, 260, 130);
             this.button = new Rect(30, 100, 30, 30);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
@@ -52,6 +57,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
+            if (!CompatibilityChecker.IsCompatible()) { return; }
             RealChuteSettings.SaveSettings();
         }
 
@@ -64,6 +70,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
+            if (!CompatibilityChecker.IsCompatible()) { return; }
             if (!settings.hideIcon)
             {
                 this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
@@ -82,7 +89,7 @@ namespace RealChute
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
             settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke", skins.toggle);
             //settings.useStaging = GUILayout.Toggle(settings.useStaging, "Use staging to activate chutes", skins.toggle); unused for now
-
+            GUILayout.Label("You can hide this window by pressing 'h'.", skins.label);
             if(GUILayout.Button("Close", skins.button))
             {
                 this.visible = false;

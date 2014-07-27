@@ -57,6 +57,14 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// Total cost of this part
+        /// </summary>
+        public static float TotalCost(this Part part)
+        {
+            return part.GetModuleCosts() + part.partInfo.cost;
+        }
+
+        /// <summary>
         /// Initiates an animation for later use
         /// </summary>
         /// <param name="animationName">Name of the animation</param>

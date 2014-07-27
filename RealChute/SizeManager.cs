@@ -24,6 +24,11 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
+            if (!CompatibilityChecker.IsCompatible())
+            {
+                Destroy(this);
+                return;
+            }
             if (instance != null) { Destroy(this); return; }
             instance = this;
             DontDestroyOnLoad(this);

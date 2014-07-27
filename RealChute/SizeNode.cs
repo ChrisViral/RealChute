@@ -72,6 +72,15 @@ namespace RealChute
         {
             get { return this._bottomNodeSize; }
         }
+
+        private float _cost = 400;
+        /// <summary>
+        /// The cost of this case
+        /// </summary>
+        public float cost
+        {
+            get { return this._cost; }
+        }
         #endregion
 
         #region Constructor
@@ -88,6 +97,7 @@ namespace RealChute
             node.TryGetValue("topNodeSize", ref _topNodeSize);
             node.TryGetValue("bottomNode", ref _bottomNode);
             node.TryGetValue("bottomNodeSize", ref _bottomNodeSize);
+            node.TryGetValue("cost", ref _cost);
         }
         #endregion
     }
