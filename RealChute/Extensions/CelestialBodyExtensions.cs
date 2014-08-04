@@ -17,19 +17,12 @@ namespace RealChute.Extensions
         public static double GetDensityAtAlt(this CelestialBody body, double alt)
         {
             if (alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            if (RCUtils.FARLoaded)
+            if (RCUtils.FARLoaded && !RCUtils.disabled)
             {
-                try
+                FARMethod method = RCUtils.densityMethod;
+                if (method != null)
                 {
-                    return (double)AssemblyLoader.loadedAssemblies.First(a => a.dllName == "FerramAerospaceResearch").assembly
-                        .GetTypes().First(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
-                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
-                        .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double))
-                        .Invoke(null, new object[] { body, alt });
-                }
-                catch (Exception e)
-                {
-                    UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                    return method.Invoke(body, alt);
                 }
             }
            return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt));

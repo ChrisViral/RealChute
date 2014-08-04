@@ -12,6 +12,8 @@ using UnityEngine;
 
 namespace RealChute
 {
+    public delegate double FARMethod(CelestialBody body, double alt);
+
     public static class RCUtils
     {
         #region Constants
@@ -134,6 +136,41 @@ namespace RealChute
         public static bool FARLoaded
         {
             get { return AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
+        }
+
+        /// <summary>
+        /// If the FAR detection is disabled
+        /// </summary>
+        public static bool disabled = false;
+
+        private static FARMethod _densityMethod = null;
+        /// <summary>
+        /// A delegate to the FAR GetCurrentDensity method
+        /// </summary>
+        public static FARMethod densityMethod
+        {
+            get
+            {
+                if (disabled) { return null; }
+                if (_densityMethod == null)
+                {
+                    MethodInfo method = null;
+                    try
+                    {
+                        method = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
+                            .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
+                            .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
+                            .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
+                    }
+                    catch (Exception e)
+                    {
+                        UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                        return null;
+                    }
+                    _densityMethod = Delegate.CreateDelegate(typeof(FARMethod), method) as FARMethod;
+                }
+                return _densityMethod;
+            }
         }
         #endregion
 
