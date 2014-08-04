@@ -157,7 +157,7 @@ namespace RealChute
                     MethodInfo method = null;
                     try
                     {
-                        method = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
+                        method = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
                             .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
                             .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
                             .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
@@ -165,6 +165,7 @@ namespace RealChute
                     catch (Exception e)
                     {
                         UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                        disabled = true;
                         return null;
                     }
                     _densityMethod = Delegate.CreateDelegate(typeof(FARMethod), method) as FARMethod;
