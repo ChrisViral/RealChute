@@ -33,6 +33,14 @@ namespace RealChute.Libraries
         {
             get { return this._bodies; }
         }
+
+        /// <summary>
+        /// Returns the string names of the bodies
+        /// </summary>
+        public string[] bodyNames
+        {
+            get { return bodies.Values.ToArray(); }
+        }
         #endregion
 
         #region Constructor
@@ -72,14 +80,6 @@ namespace RealChute.Libraries
         public int GetPlanetIndex(string name)
         {
             return bodies.Values.ToList().IndexOf(name);
-        }
-
-        /// <summary>
-        /// Returns the the values of the dictionary in an array
-        /// </summary>
-        public string[] GetNames()
-        {
-            return bodies.Values.ToArray();
         }
         #endregion
     }

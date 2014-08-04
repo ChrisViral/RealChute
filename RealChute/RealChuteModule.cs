@@ -104,7 +104,7 @@ namespace RealChute
         public ConfigNode node = new ConfigNode();
 
         //GUI
-        protected bool visible = false, hid = false;
+        protected bool visible = false;
         private int ID = Guid.NewGuid().GetHashCode();
         private GUISkin skins = HighLogic.Skin;
         private Rect window = new Rect();
@@ -331,6 +331,18 @@ namespace RealChute
         {
             return RCUtils.Round(this.parachutes.Sum(p => p.deployedArea * p.mat.areaCost));
         }
+
+        //Event when the UI is hidden (F2)
+        private void HideUI()
+        {
+            this.visible = false;
+        }
+
+        //Event when the UI is shown (F2)
+        private void ShowUI()
+        {
+            this.visible = true;
+        }
         #endregion
 
         #region Functions
@@ -361,16 +373,6 @@ namespace RealChute
                         displayed = false;
                         this.part.stackIcon.SetIconColor(XKCDColors.White);
                         failedTimer.Reset();
-                    }
-                }
-
-                //Hides the window if F2 is pressed
-                if(HighLogic.LoadedSceneIsFlight && Input.GetKeyDown(KeyCode.F2))
-                {
-                    if (this.visible || this.hid)
-                    {
-                        this.visible = !this.visible;
-                        this.hid = !this.hid;
                     }
                 }
 
@@ -462,6 +464,14 @@ namespace RealChute
                 }
             }
         }
+
+        private void OnDestroy()
+        {
+            if (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
+            //Hide/show UI event removal
+            GameEvents.onHideUI.Remove(HideUI);
+            GameEvents.onShowUI.Remove(ShowUI);
+        }
         #endregion
 
         #region Overrides
@@ -536,6 +546,10 @@ namespace RealChute
                 }
                 System.Random random = new System.Random();
                 parachutes.ForEach(p => p.randomTime = (float)random.NextDouble());
+
+                //Hide/show UI event addition
+                GameEvents.onHideUI.Add(HideUI);
+                GameEvents.onShowUI.Add(ShowUI);
             }
 
             //GUI

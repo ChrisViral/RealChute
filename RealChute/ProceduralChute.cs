@@ -228,14 +228,12 @@ namespace RealChute
         {
             if (sizes.Count <= 1) { return; }
             SizeNode size = sizes[this.size], lastSize = sizes[this.lastSize];
-            part.transform.GetChild(0).localScale = Vector3.Scale(originalSize, size.size);
+            Transform root = part.transform.GetChild(0);
+            root.localScale = Vector3.Scale(originalSize, size.size);
             module.caseMass = size.caseMass;
-
 			AttachNode topNode = null, bottomNode = null;
 			bool hasTopNode = part.TryGetAttachNodeById("top", out topNode);
 			bool hasBottomNode = part.TryGetAttachNodeById("bottom", out bottomNode);
-
-            List<Part> allChildParts = new List<Part>(), allTopChildParts = new List<Part>(), allBottomChildParts = new List<Part>();
 
 			// If this is the root part, move things for the top and the bottom.
             if ((HighLogic.LoadedSceneIsEditor && part == EditorLogic.SortedShipList[0]) || (HighLogic.LoadedSceneIsFlight  && this.vessel.rootPart == part))
@@ -248,8 +246,6 @@ namespace RealChute
                     {
                         float topDifference = size.topNode.y - lastSize.topNode.y;
                         topNode.attachedPart.transform.Translate(0, topDifference, 0, part.transform);
-                        if (allTopChildParts == null) { allTopChildParts = topNode.attachedPart.GetAllChildren(); }
-                        foreach (Part child in allTopChildParts) { child.transform.Translate(0, topDifference, 0, part.transform); }
                     }
                 }
 
@@ -261,8 +257,6 @@ namespace RealChute
                     {
                         float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
                         bottomNode.attachedPart.transform.Translate(0, bottomDifference, 0, part.transform);
-                        if (allBottomChildParts == null) { allBottomChildParts = bottomNode.attachedPart.GetAllChildren(); }
-                        foreach (Part child in allBottomChildParts) { child.transform.Translate(0, bottomDifference, 0, part.transform); }
                     }
                 }
             }
@@ -279,8 +273,7 @@ namespace RealChute
                     topNode.position = size.topNode;
                     topNode.size = size.topNodeSize;
                     float topDifference = size.topNode.y - lastSize.topNode.y;
-                    if (allChildParts == null) { allChildParts = part.GetAllChildren(); }
-                    foreach (Part child in allChildParts) { child.transform.Translate(0, -(bottomDifference - topDifference), 0, part.transform); }
+                    topNode.attachedPart.transform.Translate(0, -(bottomDifference - topDifference), 0, part.transform);
 				}
             }
 			// If not root and parent is attached to the top
@@ -295,35 +288,35 @@ namespace RealChute
                     bottomNode.position = size.bottomNode;
                     bottomNode.size = size.bottomNodeSize;
                     float bottomDifference = size.bottomNode.y - lastSize.bottomNode.y;
-                    if (allChildParts == null) { allChildParts = part.GetAllChildren(); }
-                    foreach (Part child in allChildParts) { child.transform.Translate(0, -(topDifference - bottomDifference), 0, part.transform); }
+                    bottomNode.attachedPart.transform.Translate(0, -(topDifference - bottomDifference), 0, part.transform);
                 }
             }
 
 			//Parachute transforms
-            float scaleX = part.transform.GetChild(0).localScale.x / Vector3.Scale(originalSize, lastSize.size).x;
-            float scaleZ = part.transform.GetChild(0).localScale.z / Vector3.Scale(originalSize, lastSize.size).z;
+            float scaleX = root.localScale.x / Vector3.Scale(originalSize, lastSize.size).x;
+            float scaleY = root.localScale.y / Vector3.Scale(originalSize, lastSize.size).y;
+            float scaleZ = root.localScale.z / Vector3.Scale(originalSize, lastSize.size).z;
             foreach (Parachute chute in rcModule.parachutes)
             {
                 Vector3 pos = chute.forcePosition - part.transform.position;
-                chute.parachute.transform.Translate(pos.x * (scaleX - 1), 0, pos.z * (scaleZ - 1), part.transform);
+                chute.parachute.transform.Translate(pos.x * (scaleX - 1), pos.y * (scaleY - 1), pos.z * (scaleZ - 1), part.transform);
             }
 
 			//Surface attached parts
-			foreach (Part child in part.children)
-			{
-				if (child.attachMode == AttachModes.SRF_ATTACH)
-				{
-					Vector3 pos = new Vector3();
-					foreach (Part srfAttchdChild in child.GetAllChildren())
-					{
-						pos = srfAttchdChild.transform.position - part.transform.position;
-						srfAttchdChild.transform.Translate(pos.x * (scaleX - 1), 0, pos.z * (scaleZ - 1), part.transform);
-					}
-					pos = child.transform.position - part.transform.position;
-					child.transform.Translate(pos.x * (scaleX - 1), 0, pos.z * (scaleZ - 1), part.transform);
-				}
-			}
+            if (part.children.Any(p => p.attachMode == AttachModes.SRF_ATTACH))
+            {
+                foreach (Part child in part.children)
+                {
+                    if (child.attachMode == AttachModes.SRF_ATTACH)
+                    {
+                        // vv  From https://github.com/Biotronic/TweakScale/blob/master/Scale.cs#L403  vv
+                        Vector3 vX = (child.transform.localPosition + child.transform.localRotation * child.srfAttachNode.position) - part.transform.position;
+
+                        Vector3 vY = child.transform.position - part.transform.position;
+                        child.transform.Translate(vX.x * (scaleX - 1), vY.y * (scaleY - 1), vX.z * (scaleZ - 1), part.transform);
+                    }
+                }
+            }
             this.lastSize = this.size;
         }
 
@@ -554,7 +547,7 @@ namespace RealChute
             if (node.HasNode("SIZE"))
             {
                 sizes = new List<SizeNode>(node.GetNodes("SIZE").Select(n => new SizeNode(n)));
-                sizeLib.AddSize(this.part.name, sizes);
+                sizeLib.AddSizes(this.part.name, sizes);
             }
 
             //Top node original location
@@ -662,7 +655,7 @@ namespace RealChute
             GUILayout.Label("Target planet:", skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
-            planets = GUILayout.SelectionGrid(planets, bodies.GetNames(), 4, skins.button, GUILayout.Width(250));
+            planets = GUILayout.SelectionGrid(planets, bodies.bodyNames, 4, skins.button, GUILayout.Width(250));
             GUILayout.EndHorizontal();
             body = bodies.GetBody(planets);
             #endregion

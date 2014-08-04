@@ -21,58 +21,55 @@ namespace RealChute.Libraries
             get { return this._name; }
         }
 
-        private List<CaseConfig> _cases = new List<CaseConfig>();
+        private Dictionary<CaseConfig, string> _cases = new Dictionary<CaseConfig, string>();
         /// <summary>
         /// List of all the case configs
         /// </summary>
-        public List<CaseConfig> cases
+        public Dictionary<CaseConfig, string> cases
         {
             get { return this._cases; }
         }
 
-        private string[] _caseNames = new string[] { };
         /// <summary>
         /// Array of the names of all the case configs available
         /// </summary>
         public string[] caseNames
         {
-            get { return this._caseNames; }
+            get { return this.cases.Values.ToArray(); }
         }
 
-        private List<CanopyConfig> _canopies = new List<CanopyConfig>();
+        private Dictionary<CanopyConfig, string> _canopies = new Dictionary<CanopyConfig, string>();
         /// <summary>
         /// List of all the canopy configs
         /// </summary>
-        public List<CanopyConfig> canopies
+        public Dictionary<CanopyConfig, string> canopies
         {
             get { return this._canopies; }
         }
 
-        private string[] _canopyNames = new string[] { };
         /// <summary>
         /// Array of the name of all the canopy configs available
         /// </summary>
         public string[] canopyNames
         {
-            get { return this._canopyNames; }
+            get { return this.canopies.Values.ToArray(); }
         }
 
-        private List<ModelConfig> _models = new List<ModelConfig>();
+        private Dictionary<ModelConfig, string> _models = new Dictionary<ModelConfig, string>();
         /// <summary>
         /// List of all the model configs
         /// </summary>
-        public List<ModelConfig> models
+        public Dictionary<ModelConfig, string> models
         {
             get { return this._models; }
         }
 
-        private string[] _modelNames = new string[] { };
         /// <summary>
         /// Array of the names of all the model configs available
         /// </summary>
         public string[] modelNames
         {
-            get { return this._modelNames; }
+            get { return this.models.Values.ToArray(); }
         }
         #endregion
 
@@ -88,32 +85,9 @@ namespace RealChute.Libraries
         public TextureConfig(ConfigNode node)
         {
             node.TryGetValue("name", ref _name);
-            foreach(ConfigNode cfg in node.nodes)
-            {
-                if (cfg.name == "CASE_TEXTURE")
-                {
-                    CaseConfig parachuteCase = new CaseConfig(cfg);
-                    _cases.Add(parachuteCase);
-                    continue;
-                }
-
-                if (cfg.name == "CANOPY_TEXTURE")
-                {
-                    CanopyConfig canopy = new CanopyConfig(cfg);
-                    _canopies.Add(canopy);
-                    continue;
-                }
-
-                if (cfg.name == "CANOPY_MODEL")
-                {
-                    ModelConfig model = new ModelConfig(cfg);
-                    _models.Add(model);
-                    continue;
-                }
-            }
-            if (_cases.Count > 0) { _caseNames = _cases.Select(c => c.name).ToArray(); }
-            if (_canopies.Count > 0) { _canopyNames = _canopies.Select(c => c.name).ToArray(); }
-            if (_models.Count > 0) { _modelNames = _models.Select(m => m.name).ToArray(); }
+            _cases = node.GetNodes("CASE_TEXTURE").Select(n => new CaseConfig(n)).ToDictionary(c => c, c => c.name);
+            _canopies = node.GetNodes("CANOPY_TEXTURE").Select(n => new CanopyConfig(n)).ToDictionary(c => c, c => c.name);
+            _models = node.GetNodes("CANOPY_MODEL").Select(n => new ModelConfig(n)).ToDictionary(m => m, m => m.name);
         }
         #endregion
 
@@ -124,7 +98,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the config searched for</param>
         public bool CaseExists(string name)
         {
-            return cases.Any(_case => _case.name == name);
+            return cases.Keys.Any(c => c.name == name);
         }
 
         /// <summary>
@@ -133,7 +107,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the Config to obtain</param>
         public CaseConfig GetCase(string name)
         {
-            return cases.Find(c => c.name == name);
+            return cases.Keys.First(c => c.name == name);
         }
 
         /// <summary>
@@ -142,7 +116,7 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the case config</param>
         public CaseConfig GetCase(int index, string type)
         {
-            return cases.Where(c => c.types.Contains(type)).ToArray()[index];
+            return cases.Keys.Where(c => c.types.Contains(type)).ToArray()[index];
         }
 
         /// <summary>
@@ -183,7 +157,7 @@ namespace RealChute.Libraries
         /// <param name="parachuteCase">Case config searched for</param>
         public int GetCaseIndex(CaseConfig parachuteCase)
         {
-            return cases.IndexOf(parachuteCase);
+            return cases.Keys.ToList().IndexOf(parachuteCase);
         }
 
         /// <summary>
@@ -192,7 +166,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the config searched for</param>
         public bool CanopyExists(string name)
         {
-            return canopies.Any(canopy => canopy.name == name);
+            return canopies.Keys.Any(c => c.name == name);
         }
 
         /// <summary>
@@ -201,7 +175,7 @@ namespace RealChute.Libraries
         /// <param name="name"></param>
         public CanopyConfig GetCanopy(string name)
         {
-            return canopies.Find(canopy => canopy.name == name);
+            return canopies.Keys.First(c => c.name == name);
         }
 
         /// <summary>
@@ -210,7 +184,7 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the config</param>
         public CanopyConfig GetCanopy(int index)
         {
-            return canopies[index];
+            return canopies.Keys.ToArray()[index];
         }
 
         /// <summary>
@@ -251,7 +225,7 @@ namespace RealChute.Libraries
         /// <param name="canopy">Canopy config searched for</param>
         public int GetCanopyIndex(CanopyConfig canopy)
         {
-            return canopies.IndexOf(canopy);
+            return canopies.Keys.ToList().IndexOf(canopy);
         }
 
         /// <summary>
@@ -261,8 +235,8 @@ namespace RealChute.Libraries
         /// <param name="isTransformName">If the name is transform or config name</param>
         public bool ModelExists(string name, bool isTransformName = false)
         {
-            if (!isTransformName) { return models.Any(model => model.name == name); }
-            else { return models.SelectMany(m => m.parameters).Any(p => p.transformName == name); }
+            if (!isTransformName) { return models.Keys.Any(m => m.name == name); }
+            else { return models.Keys.SelectMany(m => m.parameters).Any(p => p.transformName == name); }
         }
 
         /// <summary>
@@ -272,8 +246,8 @@ namespace RealChute.Libraries
         /// <param name="isTransformName">If the name is transform or config name</param>
         public ModelConfig GetModel(string name, bool isTransformName = false)
         {
-            if (!isTransformName) { return models.Find(model => model.name == name); }
-            else { return models.Find(model => model.parameters.Any(p => p.transformName == name)); }
+            if (!isTransformName) { return models.Keys.First(m => m.name == name); }
+            else { return models.Keys.First(m => m.parameters.Any(p => p.transformName == name)); }
         }
 
         /// <summary>
@@ -282,7 +256,7 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the config to get</param>
         public ModelConfig GetModel(int index)
         {
-            return models[index];
+            return models.Keys.ToArray()[index];
         }
 
         /// <summary>
@@ -323,7 +297,7 @@ namespace RealChute.Libraries
         /// <param name="model">Model config searched for</param>
         public int GetModelIndex(ModelConfig model)
         {
-            return models.IndexOf(model);
+            return models.Keys.ToList().IndexOf(model);
         }
         #endregion
     }

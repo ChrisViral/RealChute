@@ -24,12 +24,7 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            if (!CompatibilityChecker.IsCompatible())
-            {
-                Destroy(this);
-                return;
-            }
-            if (instance != null) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsCompatible() || instance != null) { Destroy(this); return; }
             instance = this;
             DontDestroyOnLoad(this);
 
@@ -43,7 +38,7 @@ namespace RealChute
         /// </summary>
         /// <param name="name">Part name to associate the sizes with</param>
         /// <param name="nodes">Size nodes for the given part</param>
-        public void AddSize(string name, List<SizeNode> nodes)
+        public void AddSizes(string name, List<SizeNode> nodes)
         {
             if (!sizes.ContainsKey(name))
             {

@@ -46,16 +46,6 @@ namespace RealChute
             set { this._jokeActivated = value; }
         }
 
-        private Vector2 _position = new Vector2(100, 100);
-        /// <summary>
-        /// Position vector of the window
-        /// </summary>
-        public Vector2 position
-        {
-            get { return this._position; }
-            set { this._position = value; }
-        }
-
         private bool _hideIcon = false;
         /// <summary>
         /// If the RealChute settings icon is hidden in the SpaceCenter

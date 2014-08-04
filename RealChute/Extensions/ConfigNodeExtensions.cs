@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -24,16 +22,6 @@ namespace RealChute.Extensions
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// Returns true if the node has a value that equals the specified output
-        /// </summary>
-        /// <param name="name">Name of the value to check</param>
-        /// <param name="value">Value to check</param>
-        public static bool HasValue(this ConfigNode node, string name, string value)
-        {
-            return node.HasValue(name) && node.GetValue(name) == value;
         }
 
         /// <summary>
@@ -137,8 +125,7 @@ namespace RealChute.Extensions
         /// <param name="value">Value to store the result in</param>
         public static bool TryGetValue(this ConfigNode node, string name, ref Vector3 value)
         {
-            if (node.HasValue(name) && RCUtils.TryParseVector3(node.GetValue(name), ref value)) { return true; }
-            return false;
+            return node.HasValue(name) && RCUtils.TryParseVector3(node.GetValue(name), ref value);
         }
         #endregion
     }

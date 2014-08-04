@@ -35,11 +35,13 @@ namespace RealChute
         /// </summary>
         public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
         {
+            #region States
             { DeploymentStates.STOWED, "STOWED" },
             { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
             { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
             { DeploymentStates.DEPLOYED, "DEPLOYED" },
             { DeploymentStates.CUT, "CUT" }
+           #endregion
         };
         #endregion
 

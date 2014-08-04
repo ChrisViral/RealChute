@@ -14,7 +14,7 @@ namespace RealChute
         #region Fields
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
-        private bool visible = false;
+        private bool visible = false, showing = true;
         private Rect window = new Rect(), button = new Rect();
         private Texture2D buttonTexture = new Texture2D(1, 1);
         private RealChuteSettings settings = RealChuteSettings.fetch;
@@ -70,7 +70,7 @@ namespace RealChute
         private void OnGUI()
         {
             if (!CompatibilityChecker.IsCompatible()) { return; }
-            if (!settings.hideIcon)
+            if (!settings.hideIcon && showing)
             {
                 this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
                 if (visible)
@@ -85,7 +85,7 @@ namespace RealChute
         {
             GUI.DragWindow(new Rect(0, 0, window.width, 20));
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
-            settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke", skins.toggle);
+            settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", skins.toggle);
             GUILayout.Label("You can hide this window by pressing 'h'.", skins.label);
             if(GUILayout.Button("Close", skins.button))
             {

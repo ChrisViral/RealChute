@@ -171,8 +171,7 @@ namespace RealChute
             }
 
             float time = Time.time;
-            Vector3 rotation = new Vector3(5 * (Mathf.PerlinNoise(time, randomX + Mathf.Sin(time)) - 0.5f), 5 * (Mathf.PerlinNoise(time, randomY + Mathf.Sin(time)) - 0.5f), 0);
-            parachute.Rotate(rotation);
+            parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(time, randomX + Mathf.Sin(time)) - 0.5f), 5 * (Mathf.PerlinNoise(time, randomY + Mathf.Sin(time)) - 0.5f), 0));
         }
 
         //Lerps the drag vector between upright and the forced angle
@@ -190,11 +189,10 @@ namespace RealChute
             Vector3 orient = Vector3.zero;
             if (this.module.secondaryChute) { orient = LerpDrag(this.module.manyDeployed ? forcedVector : Vector3.zero); }
 
-            Quaternion drag = Quaternion.identity;
             Vector3 follow = this.module.dragVector + orient;
-            if (follow.magnitude > 0)
+            if (follow.sqrMagnitude > 0)
             {
-                drag = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, parachute.up) : Quaternion.LookRotation(follow.normalized, parachute.up);
+                Quaternion drag = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, parachute.up) : Quaternion.LookRotation(follow.normalized, parachute.up);
                 parachute.rotation = drag;
             }
             ParachuteNoise();
