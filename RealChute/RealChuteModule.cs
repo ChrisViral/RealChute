@@ -261,6 +261,9 @@ namespace RealChute
         //Activates the parachute
         public void ActivateRC()
         {
+            // Stop the timewarp instantly
+            TimeWarp.SetRate(0, true);
+            
             this.staged = true;
             if (settings.autoArm) { this.armed = true; }
             Events["GUIDeploy"].active = false;
