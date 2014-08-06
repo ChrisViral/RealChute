@@ -104,7 +104,7 @@ namespace RealChute
         public ConfigNode node = new ConfigNode();
 
         //GUI
-        protected bool visible = false;
+        protected bool visible = false, hid = false;
         private int ID = Guid.NewGuid().GetHashCode();
         private GUISkin skins = HighLogic.Skin;
         private Rect window = new Rect();
@@ -335,13 +335,13 @@ namespace RealChute
         //Event when the UI is hidden (F2)
         private void HideUI()
         {
-            this.visible = false;
+            this.hid = true;
         }
 
         //Event when the UI is shown (F2)
         private void ShowUI()
         {
-            this.visible = true;
+            this.hid = false;
         }
         #endregion
 
@@ -637,7 +637,7 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
             {
                 //Info window visibility
-                if (this.visible)
+                if (this.visible && !this.hid)
                 {
                     this.window = GUILayout.Window(this.ID, this.window, Window, "RealChute Info Window " + RCUtils.assemblyVersion, skins.window);
                 }

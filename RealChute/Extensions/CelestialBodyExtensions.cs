@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Reflection;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -19,10 +20,14 @@ namespace RealChute.Extensions
             if (alt > GetMaxAtmosphereAltitude(body)) { return 0; }
             if (RCUtils.FARLoaded && !RCUtils.disabled)
             {
-                FARMethod method = RCUtils.densityMethod;
-                if (method != null)
+                try
                 {
-                    return method.Invoke(body, alt);
+                    RCUtils.densityMethod.Invoke(null, new object[] { body, alt });
+                }
+                catch (Exception e)
+                {
+                    UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                    RCUtils.disabled = true;
                 }
             }
            return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt));

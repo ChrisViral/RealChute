@@ -9,6 +9,7 @@ namespace RealChute.Extensions
 {
     public static class StringExtensions
     {
+        #region Methods
         //Big thanks to Majiir here for both methods
         /// <summary>
         /// Concatenates this sequence of strings together using the specified separator.
@@ -37,5 +38,6 @@ namespace RealChute.Extensions
             }
             return builder;
         }
+        #endregion
     }
 }

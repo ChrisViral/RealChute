@@ -19,7 +19,7 @@ namespace RealChute.Extensions
             if (part.children.Count <= 0) { return new List<Part>(); }
             //Thanks to Padishar here
             List<Part> result = new List<Part>(part.children);
-            for (int i = 0; i < result.Count; i++ )
+            for (int i = 0; i < result.Count; i++)
             {
                 if (result[i].children.Count > 0) { result.AddRange(result[i].children); }
             }

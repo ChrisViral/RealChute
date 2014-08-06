@@ -12,8 +12,6 @@ using UnityEngine;
 
 namespace RealChute
 {
-    public delegate double FARMethod(CelestialBody body, double alt);
-
     public static class RCUtils
     {
         #region Constants
@@ -143,32 +141,20 @@ namespace RealChute
         /// </summary>
         public static bool disabled = false;
 
-        private static FARMethod _densityMethod = null;
+        private static MethodInfo _densityMethod = null;
         /// <summary>
         /// A delegate to the FAR GetCurrentDensity method
         /// </summary>
-        public static FARMethod densityMethod
+        public static MethodInfo densityMethod
         {
             get
             {
-                if (disabled) { return null; }
                 if (_densityMethod == null)
                 {
-                    MethodInfo method = null;
-                    try
-                    {
-                        method = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
-                            .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
-                            .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
-                            .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
-                    }
-                    catch (Exception e)
-                    {
-                        UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
-                        disabled = true;
-                        return null;
-                    }
-                    _densityMethod = Delegate.CreateDelegate(typeof(FARMethod), method) as FARMethod;
+                    _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
+                        .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
+                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
+                        .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
                 }
                 return _densityMethod;
             }
@@ -322,7 +308,7 @@ namespace RealChute
         /// <param name="diameter">Diameter of the chute</param>
         public static float GetArea(float diameter)
         {
-            return Mathf.Pow(diameter, 2f) * Mathf.PI / 4f;
+            return (diameter * diameter * Mathf.PI) / 4f;
         }
 
         /// <summary>
