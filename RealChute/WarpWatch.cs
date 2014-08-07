@@ -11,8 +11,28 @@ namespace RealChute
     /// </summary>
     public class WarpWatch
     {
+        #region Constants
+        /// <summary>
+        /// The amound of ticks in a second
+        /// </summary>
+        protected const long ticksPerSecond = 10000000L;
+
+        /// <summary>
+        /// The amount of milliseconds in a second
+        /// </summary>
+        protected const long ticksPerMillisecond = 10000L;
+        #endregion
+
         #region Fields
-        protected double lastFrame = 0, total = 0;
+        /// <summary>
+        /// UT Time of the last frame
+        /// </summary>
+        protected double lastFrame = 0d;
+
+        /// <summary>
+        /// Total elapsed time calculated by the watch in seconds
+        /// </summary>
+        protected long totalTicks = 0L;
         #endregion
 
         #region Propreties
@@ -25,7 +45,6 @@ namespace RealChute
             get { return this._isRunning; }
         }
 
-        private TimeSpan _elapsed = TimeSpan.Zero;
         /// <summary>
         /// The current elapsed time of the watch
         /// </summary>
@@ -34,7 +53,7 @@ namespace RealChute
             get
             {
                 if (this._isRunning) { UpdateWatch(); }
-                return this._elapsed;
+                return new TimeSpan(this.totalTicks);
             }
         }
 
@@ -46,7 +65,7 @@ namespace RealChute
             get
             {
                 if (this._isRunning) { UpdateWatch(); }
-                return (long)this.total * 1000;
+                return this.totalTicks * ticksPerMillisecond;
             }
         }
 
@@ -58,7 +77,7 @@ namespace RealChute
             get
             {
                 if (this._isRunning) { UpdateWatch(); }
-                return (long)this.total * TimeSpan.TicksPerSecond;
+                return this.totalTicks;
             }
         }
         #endregion
@@ -76,7 +95,7 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            lastFrame = Planetarium.GetUniversalTime();
+            this.lastFrame = Planetarium.GetUniversalTime();
             this._isRunning = true;
         }
 
@@ -85,7 +104,18 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
+            UpdateWatch();
             this._isRunning = false;
+        }
+
+        /// <summary>
+        /// Resets the watch to zero and starts it
+        /// </summary>
+        public void Restart()
+        {
+            this.totalTicks = 0L;
+            this.lastFrame = 0d;
+            this._isRunning = true;
         }
 
         /// <summary>
@@ -93,9 +123,8 @@ namespace RealChute
         /// </summary>
         public void Reset()
         {
-            this.total = 0;
-            this.lastFrame = 0;
-            this._elapsed = TimeSpan.Zero;
+            this.totalTicks = 0L;
+            this.lastFrame = 0d;
             this._isRunning = false;
         }
 
@@ -107,8 +136,7 @@ namespace RealChute
             double current = Planetarium.GetUniversalTime();
             double delta = current - this.lastFrame;
             this.lastFrame = current;
-            this.total += delta;
-            this._elapsed.Add(TimeSpan.FromSeconds(delta));
+            this.totalTicks += (long)delta * ticksPerSecond;
         }
         #endregion
 
@@ -118,7 +146,7 @@ namespace RealChute
         /// </summary>
         public override string ToString()
         {
-            return _elapsed.ToString();
+            return elapsed.ToString();
         }
         #endregion
 
