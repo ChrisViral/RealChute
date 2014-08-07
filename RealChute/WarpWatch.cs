@@ -20,7 +20,7 @@ namespace RealChute
         /// <summary>
         /// The amount of milliseconds in a second
         /// </summary>
-        protected const long ticksPerMillisecond = 10000L;
+        protected const long millisecondPerSecond = 1000L;
         #endregion
 
         #region Fields
@@ -32,7 +32,7 @@ namespace RealChute
         /// <summary>
         /// Total elapsed time calculated by the watch in seconds
         /// </summary>
-        protected long totalTicks = 0L;
+        protected double totalSeconds = 0d;
         #endregion
 
         #region Propreties
@@ -50,11 +50,7 @@ namespace RealChute
         /// </summary>
         public TimeSpan elapsed
         {
-            get
-            {
-                if (this._isRunning) { UpdateWatch(); }
-                return new TimeSpan(this.totalTicks);
-            }
+            get { return new TimeSpan(this.elapsedTicks); }
         }
 
         /// <summary>
@@ -65,7 +61,7 @@ namespace RealChute
             get
             {
                 if (this._isRunning) { UpdateWatch(); }
-                return this.totalTicks * ticksPerMillisecond;
+                return (long)Math.Round(this.totalSeconds * millisecondPerSecond);
             }
         }
 
@@ -77,7 +73,7 @@ namespace RealChute
             get
             {
                 if (this._isRunning) { UpdateWatch(); }
-                return this.totalTicks;
+                return (long)Math.Round(this.totalSeconds * ticksPerSecond);
             }
         }
         #endregion
@@ -113,7 +109,7 @@ namespace RealChute
         /// </summary>
         public void Restart()
         {
-            this.totalTicks = 0L;
+            this.totalSeconds = 0d;
             this.lastFrame = 0d;
             this._isRunning = true;
         }
@@ -123,7 +119,7 @@ namespace RealChute
         /// </summary>
         public void Reset()
         {
-            this.totalTicks = 0L;
+            this.totalSeconds = 0d;
             this.lastFrame = 0d;
             this._isRunning = false;
         }
@@ -136,7 +132,7 @@ namespace RealChute
             double current = Planetarium.GetUniversalTime();
             double delta = current - this.lastFrame;
             this.lastFrame = current;
-            this.totalTicks += (long)delta * ticksPerSecond;
+            this.totalSeconds += delta;
         }
         #endregion
 
