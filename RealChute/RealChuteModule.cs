@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Diagnostics;
 using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
@@ -93,7 +92,7 @@ namespace RealChute
         #region Fields
         //Module
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
-        private Stopwatch deploymentTimer = new Stopwatch(), failedTimer = new Stopwatch(), launchTimer = new Stopwatch();
+        private WarpWatch deploymentTimer = new WarpWatch(), failedTimer = new WarpWatch(), launchTimer = new WarpWatch();
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
@@ -219,18 +218,18 @@ namespace RealChute
         {
             bool timerSpent = true, goesDown = true;
             //Timer
-            if (timer > 0 && deploymentTimer.Elapsed.TotalSeconds < timer)
+            if (timer > 0 && deploymentTimer.elapsed.TotalSeconds < timer)
             {
                 timerSpent = false;
-                if (!deploymentTimer.IsRunning) { deploymentTimer.Start(); }
+                if (!deploymentTimer.isRunning) { deploymentTimer.Start(); }
                 if (this.vessel.isActiveVessel)
                 {
-                    float time = timer - (float)deploymentTimer.Elapsed.TotalSeconds;
+                    float time = timer - (float)deploymentTimer.elapsed.TotalSeconds;
                     if (time < 60) { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0:0.0}s", time), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
                     else { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time)), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
                 }
             }
-            else if (deploymentTimer.IsRunning) { deploymentTimer.Stop(); }
+            else if (deploymentTimer.isRunning) { deploymentTimer.Stop(); }
 
             //Goes down
             if (mustGoDown && this.vessel.verticalSpeed >= 0)
@@ -352,9 +351,9 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Makes the chute icon blink if failed
-                if (failedTimer.IsRunning)
+                if (failedTimer.isRunning)
                 {
-                    if (failedTimer.Elapsed.TotalSeconds <= 2.5)
+                    if (failedTimer.elapsed.TotalSeconds <= 2.5)
                     {
                         if (!displayed)
                         {
@@ -364,7 +363,7 @@ namespace RealChute
                             else { ScreenMessages.PostScreenMessage("Reason: too high.", 2, ScreenMessageStyle.UPPER_CENTER); }
                         }
                         displayed = true;
-                        double time = failedTimer.Elapsed.TotalSeconds;
+                        double time = failedTimer.elapsed.TotalSeconds;
                         if (time < 0.5 || (time >= 1 && time < 1.5) || (time >= 2)) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
                         else { this.part.stackIcon.SetIconColor(XKCDColors.White); }
                     }
@@ -414,14 +413,14 @@ namespace RealChute
                     if (!this.vessel.LandedOrSplashed)
                     {
                         //Dampening timer
-                        if (!this.launchTimer.IsRunning) { this.launchTimer.Start(); }
-                        if (this.launchTimer.ElapsedMilliseconds >= 3000)
+                        if (!this.launchTimer.isRunning) { this.launchTimer.Start(); }
+                        if (this.launchTimer.elapsedMilliseconds >= 3000)
                         {
                             this.launchTimer.Reset();
                             this.launched = true;
                         }
                     }
-                    else if (this.launchTimer.IsRunning) { launchTimer.Reset(); }
+                    else if (this.launchTimer.isRunning) { launchTimer.Reset(); }
                 }
                 if (this.launched && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
             }

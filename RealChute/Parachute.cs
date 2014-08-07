@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -50,9 +49,9 @@ namespace RealChute
         {
             get
             {
-                if (!this.randomTimer.IsRunning) { this.randomTimer.Start(); }
+                if (!this.randomTimer.isRunning) { this.randomTimer.Start(); }
 
-                if (this.randomTimer.Elapsed.TotalSeconds >= this.randomTime)
+                if (this.randomTimer.elapsed.TotalSeconds >= this.randomTime)
                 {
                     this.randomTimer.Reset();
                     return true;
@@ -140,7 +139,7 @@ namespace RealChute
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
         internal bool played = false, randomized = false;
-        internal Stopwatch randomTimer = new Stopwatch(), dragTimer = new Stopwatch();
+        internal WarpWatch randomTimer = new WarpWatch(), dragTimer = new WarpWatch();
         internal DeploymentStates deploymentState = DeploymentStates.STOWED;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
@@ -266,11 +265,11 @@ namespace RealChute
         //Calculates parachute deployed area
         private float DragDeployment(float time, float debutArea, float endArea)
         {
-            if (!dragTimer.IsRunning) { dragTimer.Start(); }
+            if (!dragTimer.isRunning) { dragTimer.Start(); }
 
-            if (dragTimer.Elapsed.TotalSeconds <= time)
+            if (dragTimer.elapsed.TotalSeconds <= time)
             {
-                float deploymentTime = (Mathf.Exp((float)dragTimer.Elapsed.TotalSeconds) / Mathf.Exp(time)) * ((float)dragTimer.Elapsed.TotalSeconds / time);
+                float deploymentTime = (Mathf.Exp((float)dragTimer.elapsed.TotalSeconds) / Mathf.Exp(time)) * ((float)dragTimer.elapsed.TotalSeconds / time);
                 return Mathf.Lerp(debutArea, endArea, deploymentTime);
             }
             else { return endArea; }
