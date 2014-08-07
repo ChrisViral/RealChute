@@ -43,6 +43,7 @@ namespace RealChute
         public bool isRunning
         {
             get { return this._isRunning; }
+            protected set { this._isRunning = value; }
         }
 
         /// <summary>
@@ -110,7 +111,7 @@ namespace RealChute
         public void Restart()
         {
             this.totalSeconds = 0d;
-            this.lastFrame = 0d;
+            this.lastFrame = Planetarium.GetUniversalTime();
             this._isRunning = true;
         }
 

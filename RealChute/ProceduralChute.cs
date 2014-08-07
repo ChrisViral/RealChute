@@ -104,7 +104,7 @@ namespace RealChute
             if (textureLibrary == "none") { return new string[] { }; }
             if (entries == "case" && textures.caseNames.Length > 1) { return textures.caseNames.Where(c => textures.GetCase(c).types.Contains(type)).ToArray(); }
             if (entries == "chute" && textures.canopyNames.Length > 1) { return textures.canopyNames; }
-            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m =>textures.GetModel(m).parameters.Count == this.chutes.Count).ToArray(); }
+            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m =>textures.GetModel(m).parameters.Count >= this.chutes.Count).ToArray(); }
             return new string[] { };
         }
 

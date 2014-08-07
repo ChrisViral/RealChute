@@ -357,7 +357,7 @@ namespace RealChute
                 seconds -= 60;
                 minutes++;
             }
-            return String.Concat(minutes, "m ", seconds.ToString("0.#"), "s");
+            return String.Concat(minutes, "m ", seconds.ToString("0.0"), "s");
         }
 
         /// <summary>
