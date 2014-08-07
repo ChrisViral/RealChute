@@ -101,7 +101,7 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
-            UpdateWatch();
+            if (this._isRunning) { UpdateWatch(); }
             this._isRunning = false;
         }
 
@@ -131,9 +131,8 @@ namespace RealChute
         protected virtual void UpdateWatch()
         {
             double current = Planetarium.GetUniversalTime();
-            double delta = current - this.lastFrame;
+            this.totalSeconds += current - this.lastFrame;
             this.lastFrame = current;
-            this.totalSeconds += delta;
         }
         #endregion
 
