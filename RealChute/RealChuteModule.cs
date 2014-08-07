@@ -314,7 +314,7 @@ namespace RealChute
         }
 
         //Drag formula calculations
-        internal float DragCalculation(float area, float Cd)
+        public float DragCalculation(float area, float Cd)
         {
             return (float)atmDensity * sqrSpeed * Cd * area / 2000f;
         }

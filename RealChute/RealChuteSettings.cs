@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.IO;
+using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
 
@@ -65,9 +66,9 @@ namespace RealChute
         {
             ConfigNode node = new ConfigNode(), settings = new ConfigNode("REALCHUTE_SETTINGS");
             Debug.Log("[RealChute]: Loading settings file.");
-            if (!System.IO.File.Exists(RCUtils.settingsURL))
+            if (!File.Exists(RCUtils.settingsURL))
             {
-                Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Creating new version.");
+                Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
                 settings.AddValue("hideIcon", hideIcon);
@@ -77,12 +78,13 @@ namespace RealChute
             else
             {
                 node = ConfigNode.Load(RCUtils.settingsURL);
-                node.TryGetNode("REALCHUTE_SETTINGS", ref settings);
-                bool missing = false;
-                if (!settings.TryGetValue("autoArm", ref _autoArm)) { missing = true; }
-                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { missing = true; }
-                if (settings.TryGetValue("hideIcon", ref _hideIcon)) { missing = true; }
-                if (missing)
+                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { goto missing; }
+                if (!settings.TryGetValue("autoArm", ref _autoArm)) { goto missing; }
+                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { goto missing; }
+                if (settings.TryGetValue("hideIcon", ref _hideIcon)) { goto missing; }
+                return;
+
+                missing:
                 {
                     Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
                     settings.ClearValues();

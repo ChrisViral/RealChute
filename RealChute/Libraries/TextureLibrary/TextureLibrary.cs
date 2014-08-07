@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 /* RealChute was made by Christophe Savard (stupid_chris) and is licensed under CC-BY-NC-SA. You can remix, modify and
  * redistribute the work, but you must give attribution to the original author (me) and you cannot sell your derivatives.
@@ -40,11 +41,7 @@ namespace RealChute.Libraries
         /// </summary>
         public TextureLibrary()
         {
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY"))
-            {
-                TextureConfig config = new TextureConfig(node);
-                _configs.Add(config);
-            }
+            _configs.AddRange(GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n)));
         }
         #endregion
 
@@ -55,7 +52,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the searched config</param>
         public bool ConfigExists(string name)
         {
-            return configs.Exists(config => config.name == name);
+            return configs.Any(config => config.name == name);
         }
 
         /// <summary>
@@ -64,7 +61,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the config searched for</param>
         public TextureConfig GetConfig(string name)
         {
-            return configs.Find(config => config.name == name);
+            return configs.Single(config => config.name == name);
         }
 
         /// <summary>
@@ -79,7 +76,7 @@ namespace RealChute.Libraries
                 config = GetConfig(name);
                 return true;
             }
-            if (name != "none") { UnityEngine.Debug.LogWarning("[RealChute]: Could not find the " + name + " texture config in the GameData folder"); }
+            if (name != "none" && name != string.Empty) { UnityEngine.Debug.LogWarning("[RealChute]: Could not find the " + name + " texture config in the GameData folder"); }
             return false;
         }
         #endregion

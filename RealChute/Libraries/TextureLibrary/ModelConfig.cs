@@ -128,7 +128,7 @@ namespace RealChute.Libraries
             node.TryGetValue("diameter", ref _diameter);
             node.TryGetValue("count", ref _count);
             node.TryGetValue("maxDiam", ref _maxDiam);
-            _parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
+            _parameters.AddRange(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
         }
         #endregion
     }

@@ -27,7 +27,7 @@ namespace RealChute.Extensions
         /// <param name="separator">String separating each element</param>
         public static StringBuilder AppendJoin(this StringBuilder builder, IEnumerable<string> seq, string separator)
         {
-            var e = seq.GetEnumerator();
+            IEnumerator<string> e = seq.GetEnumerator();
             if (e.MoveNext())
             {
                 builder.Append(e.Current);

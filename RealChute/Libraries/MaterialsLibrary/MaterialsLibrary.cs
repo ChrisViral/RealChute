@@ -35,13 +35,12 @@ namespace RealChute.Libraries
             get { return this._materials; }
         }
 
-        private double _count = 0;
         /// <summary>
         /// The amount of materials currently stored
         /// </summary>
         public double count
         {
-            get { return this._count; }
+            get { return this.materials.Count; }
         }
         #endregion
 
@@ -51,12 +50,7 @@ namespace RealChute.Libraries
         /// </summary>
         public MaterialsLibrary()
         {
-            foreach (ConfigNode node in GameDatabase.Instance.GetConfigNodes("MATERIAL"))
-            {
-                MaterialDefinition material = new MaterialDefinition(node);
-                _materials.Add(material, material.name);
-            }
-            _count = materials.Count;
+            _materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n)).ToDictionary(m => m, m => m.name);
         }
         #endregion
 
@@ -76,7 +70,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the material</param>
         public MaterialDefinition GetMaterial(string name)
         {
-            return materials.Keys.First(key => key.name == name);
+            return materials.Single(pair => pair.Value == name).Key;
         }
 
         /// <summary>

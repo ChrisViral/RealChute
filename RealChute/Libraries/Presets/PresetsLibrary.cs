@@ -76,7 +76,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the preset to get</param>
         public Preset GetPreset(string name)
         {
-            return presets.Find(p => p.name == name);
+            return presets.Single(p => p.name == name);
         }
 
         /// <summary>
@@ -100,6 +100,7 @@ namespace RealChute.Libraries
                 preset = GetPreset(name);
                 return true;
             }
+            UnityEngine.Debug.Log("[RealChute]: Could not find the preset " + name + " within the config");
             return false;
         }
 
@@ -115,6 +116,7 @@ namespace RealChute.Libraries
                 preset = GetPreset(index);
                 return true;
             }
+            UnityEngine.Debug.Log("[RealChute]: Could not find the preset at the index [" + index + "] within the config");
             return false;
         }
 

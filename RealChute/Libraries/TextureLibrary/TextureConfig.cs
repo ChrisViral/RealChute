@@ -98,7 +98,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the config searched for</param>
         public bool CaseExists(string name)
         {
-            return cases.Keys.Any(c => c.name == name);
+            return cases.Values.Contains(name);
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the Config to obtain</param>
         public CaseConfig GetCase(string name)
         {
-            return cases.Keys.First(c => c.name == name);
+            return cases.Keys.Single(c => c.name == name);
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the config searched for</param>
         public bool CanopyExists(string name)
         {
-            return canopies.Keys.Any(c => c.name == name);
+            return canopies.Values.Contains(name);
         }
 
         /// <summary>
@@ -175,7 +175,7 @@ namespace RealChute.Libraries
         /// <param name="name"></param>
         public CanopyConfig GetCanopy(string name)
         {
-            return canopies.Keys.First(c => c.name == name);
+            return canopies.Keys.Single(c => c.name == name);
         }
 
         /// <summary>
@@ -235,8 +235,7 @@ namespace RealChute.Libraries
         /// <param name="isTransformName">If the name is transform or config name</param>
         public bool ModelExists(string name, bool isTransformName = false)
         {
-            if (!isTransformName) { return models.Keys.Any(m => m.name == name); }
-            else { return models.Keys.SelectMany(m => m.parameters).Any(p => p.transformName == name); }
+            return isTransformName ? models.Keys.SelectMany(m => m.parameters).Any(p => p.transformName == name) : models.Values.Contains(name);
         }
 
         /// <summary>
@@ -246,8 +245,7 @@ namespace RealChute.Libraries
         /// <param name="isTransformName">If the name is transform or config name</param>
         public ModelConfig GetModel(string name, bool isTransformName = false)
         {
-            if (!isTransformName) { return models.Keys.First(m => m.name == name); }
-            else { return models.Keys.First(m => m.parameters.Any(p => p.transformName == name)); }
+            return isTransformName ? models.Keys.Single(m => m.parameters.Any(p => p.transformName == name)) : models.Keys.Single(m => m.name == name);
         }
 
         /// <summary>
