@@ -15,28 +15,29 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
         private bool visible = false, showing = true;
-        private Rect window = new Rect(), button = new Rect();
-        private Texture2D buttonTexture = new Texture2D(1, 1);
+        private Rect window = new Rect();
+        private Texture2D buttonTexture = new Texture2D(38, 38);
+        private ApplicationLauncherButton button = new ApplicationLauncherButton();
         private RealChuteSettings settings = RealChuteSettings.fetch;
         #endregion
 
-        #region Propreties
-        private GUIStyle _buttonStyle = null;
-        private GUIStyle buttonStyle
+        #region Methods
+        private void AddButton()
         {
-            get
+            if (ApplicationLauncher.Ready)
             {
-                if (_buttonStyle == null)
-                {
-                    _buttonStyle = new GUIStyle(skins.button);
-                    _buttonStyle.onNormal = _buttonStyle.hover;
-                }
-                return _buttonStyle;
+                button = ApplicationLauncher.Instance.AddModApplication(
+                    () => { this.visible = true; },
+                    () => { this.visible = false; },
+                    () => { },
+                    () => { },
+                    () => { },
+                    () => { },
+                    ApplicationLauncher.AppScenes.SPACECENTER,
+                    (Texture)buttonTexture);
             }
         }
-        #endregion
 
-        #region Methods
         private void HideUI()
         {
             this.showing = false;
@@ -51,17 +52,21 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsCompatible()) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
             this.window = new Rect(100, 100, 330, 130);
-            this.button = new Rect(30, 100, 32, 32);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
-            GameEvents.onGUIAstronautComplexDespawn.Add(ShowUI);
-            GameEvents.onGUIRnDComplexDespawn.Add(ShowUI);
-            GameEvents.onGUIMissionControlDespawn.Add(ShowUI);
+            GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
+            GameEvents.onShowUI.Add(ShowUI);
+            GameEvents.onHideUI.Add(HideUI);
             GameEvents.onGUIAstronautComplexSpawn.Add(HideUI);
+            GameEvents.onGUIAstronautComplexDespawn.Add(ShowUI);
             GameEvents.onGUIRnDComplexSpawn.Add(HideUI);
+            GameEvents.onGUIRnDComplexDespawn.Add(ShowUI);
             GameEvents.onGUIMissionControlSpawn.Add(HideUI);
+            GameEvents.onGUIMissionControlDespawn.Add(ShowUI);
+            GameEvents.onGUIAdministrationFacilitySpawn.Add(HideUI);
+            GameEvents.onGUIAdministrationFacilityDespawn.Add(ShowUI);
         }
 
         private void Start()
@@ -71,34 +76,32 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             RealChuteSettings.SaveSettings();
 
-            GameEvents.onGUIAstronautComplexDespawn.Remove(ShowUI);
-            GameEvents.onGUIRnDComplexDespawn.Remove(ShowUI);
-            GameEvents.onGUIMissionControlDespawn.Remove(ShowUI);
+            GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
+            GameEvents.onShowUI.Remove(ShowUI);
+            GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onGUIAstronautComplexSpawn.Remove(HideUI);
+            GameEvents.onGUIAstronautComplexDespawn.Remove(ShowUI);
             GameEvents.onGUIRnDComplexSpawn.Remove(HideUI);
+            GameEvents.onGUIRnDComplexDespawn.Remove(ShowUI);
             GameEvents.onGUIMissionControlSpawn.Remove(HideUI);
-        }
+            GameEvents.onGUIMissionControlDespawn.Remove(ShowUI);
+            GameEvents.onGUIAdministrationFacilitySpawn.Remove(HideUI);
+            GameEvents.onGUIAdministrationFacilityDespawn.Remove(ShowUI);
 
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.H)) { settings.hideIcon = !settings.hideIcon; }
+            ApplicationLauncher.Instance.RemoveModApplication(button);
         }
         #endregion
 
         #region GUI
         private void OnGUI()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
-            if (!settings.hideIcon && this.showing)
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (this.showing && this.visible)
             {
-                this.visible = GUI.Toggle(this.button, this.visible, this.buttonTexture, this.buttonStyle);
-                if (this.visible)
-                {
-                    this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);
-                }
+                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);
             }
         }
 
@@ -107,15 +110,15 @@ namespace RealChute
             GUI.DragWindow(new Rect(0, 0, window.width, 20));
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
             settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", skins.toggle);
+
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("You can hide this window by pressing 'h'.", skins.label);
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
             if(GUILayout.Button("Close", skins.button))
             {
-                this.visible = false;
+                button.SetFalse();
             }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
         }
         #endregion
     }

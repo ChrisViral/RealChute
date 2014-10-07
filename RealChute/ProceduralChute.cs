@@ -56,7 +56,7 @@ namespace RealChute
 
         //GUI strings
         [KSPField(isPersistant = true)]
-        public string timer = string.Empty, cutSpeed = string.Empty, spares = string.Empty;
+        public string timer = string.Empty, cutSpeed = string.Empty, spares = string.Empty, landingAlt = "0";
         #endregion
 
         #region Fields
@@ -136,6 +136,7 @@ namespace RealChute
                 if (!RCUtils.CanParseTime(timer) || !RCUtils.CheckRange(RCUtils.ParseTime(timer), 0, 3600)) { general.Add("Deployment timer"); }
                 if (!RCUtils.CanParseWithEmpty(spares) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(spares), -1, 10) || !RCUtils.IsWholeNumber(RCUtils.ParseWithEmpty(spares))) { general.Add("Spare chutes"); }
                 if (!RCUtils.CanParse(cutSpeed) || !RCUtils.CheckRange(float.Parse(cutSpeed), 0.01f, 100)) { general.Add("Autocut speed"); }
+                if (!RCUtils.CanParse(landingAlt) || !RCUtils.CheckRange(float.Parse(landingAlt), 0, (float)body.GetMaxAtmosphereAltitude())) { general.Add("Landing altitude"); }
                 return general;
             }
             else if (type == "main" || type == "secondary") { return chutes.SelectMany(c => c.errors).ToList(); }
@@ -215,6 +216,7 @@ namespace RealChute
 
             this.successfulVisible = true;
             if (!warning) { successfulWindow.height = 50; }
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         //Checks if th given AttachNode has the parent part
@@ -443,7 +445,7 @@ namespace RealChute
         private void Update()
         {
             //Updating of size if possible
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return; }
             
             if (sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
@@ -481,7 +483,7 @@ namespace RealChute
         #region Overrides
         public override void OnStart(PartModule.StartState state)
         {
-            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !CompatibilityChecker.IsCompatible()) { return; }
+            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !CompatibilityChecker.IsAllCompatible()) { return; }
 
             //Identification of the RealChuteModule
             if (this.part.Modules.Contains("RealChuteModule")) { rcModule = this.part.Modules["RealChuteModule"] as RealChuteModule; }
@@ -557,7 +559,7 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsCompatible() || !this.part.Modules.Contains("RealChuteModule")) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.part.Modules.Contains("RealChuteModule")) { return; }
             this.node = node;
             LoadChutes();
             if (node.HasNode("SIZE"))
@@ -584,13 +586,14 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsCompatible() || !this.isTweakable) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.isTweakable) { return string.Empty; }
             else if (this.part.Modules.Contains("RealChuteModule")) { return "This RealChute part can be tweaked from the Action Groups window."; }
             return string.Empty;
         }
 
         public override void OnSave(ConfigNode node)
         {
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Saves the templates to the persistence or craft file
             chutes.ForEach(c => node.AddNode(c.Save()));
         }
@@ -600,7 +603,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Rendering manager
-            if (!CompatibilityChecker.IsCompatible() || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule")) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule")) { return; }
             if (HighLogic.LoadedSceneIsEditor)
             {        
                 if (this.visible)
@@ -753,6 +756,9 @@ namespace RealChute
 
             //CutSpeed
             CreateEntryArea("Autocut speed (m/s):", ref cutSpeed, 0.01f, 100);
+
+            //LandingAlt
+            CreateEntryArea("Landing alt (m):", ref landingAlt, 0, (float)body.GetMaxAtmosphereAltitude());
             #endregion
 
             #region Main

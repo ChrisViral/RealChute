@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -342,12 +343,53 @@ namespace RealChute
         {
             this.hid = false;
         }
+
+        private IEnumerator UpdateOnReload()
+        {
+            while (!FlightGlobals.ready) { yield return null; }
+
+            print("RCModule OnLoad");
+            foreach (Parachute parachute in parachutes)
+            {
+                this.part.InitiateAnimation(parachute.preDeploymentAnimation);
+                this.part.InitiateAnimation(parachute.deploymentAnimation);
+
+                if (parachute.isDeployed)
+                {
+                    parachute.parachute.gameObject.SetActive(true);
+                    switch (parachute.deploymentState)
+                    {
+                        case DeploymentStates.PREDEPLOYED:
+                            {
+                                this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+                                this.part.SkipToAnimationEnd(parachute.preDeploymentAnimation);
+                                break;
+                            }
+
+                        case DeploymentStates.LOWDEPLOYED:
+                        case DeploymentStates.DEPLOYED:
+                            {
+                                this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+                                this.part.SkipToAnimationEnd(parachute.deploymentAnimation);
+                                break;
+                            }
+
+                        default:
+                            break;
+                    }
+                }
+                else { parachute.parachute.gameObject.SetActive(false); }
+            }
+
+            if (armed) { this.part.stackIcon.SetIconColor(XKCDColors.LightCyan); }
+            else if (parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { SetRepack(); }
+        }
         #endregion
 
         #region Functions
         private void Update()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Makes the chute icon blink if failed
@@ -396,7 +438,7 @@ namespace RealChute
         private void FixedUpdate()
         {
             //Flight values
-            if (!CompatibilityChecker.IsCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
             trueAlt = this.vessel.GetTrueAlt(ASL);
@@ -466,7 +508,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() && !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
             //Hide/show UI event removal
             GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onShowUI.Remove(ShowUI);
@@ -477,7 +519,7 @@ namespace RealChute
         public override void OnStart(PartModule.StartState state)
         {
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
-            if (!CompatibilityChecker.IsCompatible())
+            if (!CompatibilityChecker.IsAllCompatible())
             {
                 foreach (BaseAction action in Actions)
                 {
@@ -557,17 +599,19 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Gets the materials
             this.node = node;
             LoadParachutes();
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
+
+            if (HighLogic.LoadedSceneIsFlight && staged || parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { StartCoroutine(UpdateOnReload()); }
         }
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
             //Info in the editor part window
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
@@ -616,13 +660,14 @@ namespace RealChute
 
         public override void OnActive()
         {
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Activates the part
             ActivateRC();
         }
 
         public override void OnSave(ConfigNode node)
         {
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Saves the parachutes to the persistence
             parachutes.ForEach(p => node.AddNode(p.Save()));
         }
@@ -632,7 +677,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Handles GUI rendering
-            if (!CompatibilityChecker.IsCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
             {
                 //Info window visibility

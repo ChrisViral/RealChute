@@ -7,7 +7,7 @@
 namespace RealChute
 {
     /// <summary>
-    /// A generic StopWatch clone which runs on KSP's internal clock
+    /// A generic Stopwatch clone which runs on KSP's internal clock
     /// </summary>
     public class WarpWatch
     {
@@ -25,7 +25,7 @@ namespace RealChute
 
         #region Fields
         /// <summary>
-        /// UT Time of the last frame
+        /// UT of the last frame
         /// </summary>
         protected double lastFrame = 0d;
 

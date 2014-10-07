@@ -441,9 +441,10 @@ namespace RealChute
             {
                 this.parachute = this.part.FindModelTransform(baseParachuteName);
             }
-            this.parachute.gameObject.SetActive(false);
+            this.parachute.gameObject.SetActive(true);
             this.part.InitiateAnimation(preDeploymentAnimation);
             this.part.InitiateAnimation(deploymentAnimation);
+            this.parachute.gameObject.SetActive(false);
 
             if (string.IsNullOrEmpty(baseParachuteName)) { baseParachuteName = parachuteName; }
 
@@ -490,11 +491,13 @@ namespace RealChute
             node.TryGetValue("deploymentAnimation", ref deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref forcedOrientation);
             node.TryGetValue("depState", ref depState);
+            deploymentState = getState;
             if (!MaterialsLibrary.instance.TryGetMaterial(material, ref mat))
             {
                 material = "Nylon"; 
                 mat = MaterialsLibrary.instance.GetMaterial("Nylon");
             }
+            this.part.FindModelTransform(parachuteName).gameObject.SetActive(false);
         }
 
         /// <summary>
@@ -519,7 +522,7 @@ namespace RealChute
             node.AddValue("preDeploymentAnimation", preDeploymentAnimation);
             node.AddValue("deploymentAnimation", deploymentAnimation);
             node.AddValue("forcedOrientation", forcedOrientation);
-            node.AddValue("depState", depState);
+            node.AddValue("depState", stateString);
             return node;
         }
         #endregion

@@ -46,16 +46,6 @@ namespace RealChute
             get { return this._jokeActivated; }
             set { this._jokeActivated = value; }
         }
-
-        private bool _hideIcon = false;
-        /// <summary>
-        /// If the RealChute settings icon is hidden in the SpaceCenter
-        /// </summary>
-        public bool hideIcon
-        {
-            get { return this._hideIcon; }
-            set { this._hideIcon = value; }
-        }
         #endregion
 
         #region Constructor
@@ -71,7 +61,6 @@ namespace RealChute
                 Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
-                settings.AddValue("hideIcon", hideIcon);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
@@ -81,7 +70,6 @@ namespace RealChute
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { goto missing; }
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { goto missing; }
                 if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { goto missing; }
-                if (settings.TryGetValue("hideIcon", ref _hideIcon)) { goto missing; }
                 return;
 
                 missing:
@@ -90,10 +78,10 @@ namespace RealChute
                     settings.ClearValues();
                     settings.AddValue("autoArm", autoArm);
                     settings.AddValue("jokeActivated", jokeActivated);
-                    settings.AddValue("hideIcon", hideIcon);
                     node.ClearData();
                     node.AddNode(settings);
                     node.Save(RCUtils.settingsURL);
+                    return;
                 }
             }
         }
@@ -108,7 +96,6 @@ namespace RealChute
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
-            settings.AddValue("hideIcon", fetch.hideIcon);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
                 PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));

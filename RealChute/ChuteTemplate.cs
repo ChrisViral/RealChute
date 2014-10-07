@@ -130,7 +130,8 @@ namespace RealChute
         public bool getMass = true, useDry = true;
         public string preDepDiam = string.Empty, depDiam = string.Empty, predepClause = string.Empty;
         public string mass = "10", landingSpeed = "6", deceleration = "10", refDepAlt = "700", chuteCount = "1";
-        public string deploymentAlt = string.Empty, cutAlt = string.Empty, preDepSpeed = string.Empty, depSpeed = string.Empty;
+        public string deploymentAlt = string.Empty, landingAlt = "0", cutAlt = string.Empty;
+        public string preDepSpeed = string.Empty, depSpeed = string.Empty;
 
         //GUI
         internal Rect materialsWindow = new Rect();
@@ -171,16 +172,15 @@ namespace RealChute
                 if (getMass) { m = this.pChute.GetCraftMass(useDry); }
                 else { m = float.Parse(mass); }
 
-                float density = 0;
-                if (typeID == 1) { density = (float)body.GetDensityAtAlt(double.Parse(refDepAlt)); }
-                else { density = (float)body.GetDensityASL(); }
+                double alt = typeID == 1 ? double.Parse(refDepAlt) : double.Parse(pChute.landingAlt);
+                float density = (float)body.GetDensityAtAlt(alt);
 
-                float speed2 = Mathf.Pow(float.Parse(landingSpeed), 2f);
+                float speed = float.Parse(landingSpeed);
+                float speed2 = speed * speed;
 
-                float acc = 0;
-                if (typeID == 2) { acc = float.Parse(deceleration); }
-                else { acc = (float)(body.GeeASL * RCUtils.geeToAcc); }
-                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id)," - m: ", m, "t, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
+                float acc = typeID == 2 ? float.Parse(deceleration) : (float)(body.GeeASL * RCUtils.geeToAcc);
+
+                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id)," - m: ", m, "t, alt: ", alt, "m, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
 
                 parachute.deployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * material.dragCoefficient * density * float.Parse(chuteCount))));
                 if ((this.pChute.textureLibrary != "none" || this.textures.modelNames.Length > 0) && parachute.deployedDiameter > model.maxDiam)
@@ -194,8 +194,7 @@ namespace RealChute
                     this.pChute.warning = true;
                 }
                 else { this.pChute.warning = false; }
-                if (typeID == 0) { parachute.preDeployedDiameter = RCUtils.Round(parachute.deployedDiameter / 20); }
-                else { parachute.preDeployedDiameter = RCUtils.Round(parachute.deployedDiameter / 2); }
+                parachute.preDeployedDiameter = RCUtils.Round(typeID == 0 ? (parachute.deployedDiameter / 20) : (parachute.deployedDiameter / 2));
                 Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id), " - depDiam: ", parachute.deployedDiameter, "m, preDepDiam: ", parachute.preDeployedDiameter, "m"));
             }
 
@@ -603,9 +602,7 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Deployment altitude
-            string alt = deploymentAlt;
-            this.pChute.CreateEntryArea("Deployment altitude", ref alt, 10, (float)body.GetMaxAtmosphereAltitude());
-            deploymentAlt = alt;
+            this.pChute.CreateEntryArea("Deployment altitude", ref deploymentAlt, 10, (float)body.GetMaxAtmosphereAltitude());
 
             //Cut altitude
             GUILayout.Space(5);
@@ -617,14 +614,10 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Predeployment speed
-            string preSpeed = preDepSpeed;
-            this.pChute.CreateEntryArea("Pre deployment speed (s):", ref preSpeed, 0.5f, 5);
-            preDepSpeed = preSpeed;
+            this.pChute.CreateEntryArea("Pre deployment speed (s):", ref preDepSpeed, 0.5f, 5);
 
             //Deployment speed
-            string speed = depSpeed;
-            this.pChute.CreateEntryArea("Deployment speed (s):", ref speed, 1, 10);
-            depSpeed = speed;
+            this.pChute.CreateEntryArea("Deployment speed (s):", ref depSpeed, 1, 10);
             #endregion
         }
 
