@@ -45,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
-    <Compile Include="CostWidgetFix.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="RCEditorGUI.cs" />
     <Compile Include="WarpWatch.cs" />
