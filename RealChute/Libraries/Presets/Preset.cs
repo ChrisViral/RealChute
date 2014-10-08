@@ -383,6 +383,15 @@ namespace RealChute.Libraries
             get { return this._spares; }
         }
 
+        private string _landingAlt = "0";
+        /// <summary>
+        /// Planned landing altitude of the craft
+        /// </summary>
+        public string landingAlt
+        {
+            get { return this._landingAlt; }
+        }
+
         private string _caseName = string.Empty;
         /// <summary>
         /// GUI ID for case texture
@@ -427,6 +436,7 @@ namespace RealChute.Libraries
             node.TryGetValue("mustGoDown", ref _mustGoDown);
             node.TryGetValue("deployOnGround", ref _deployOnGround);
             node.TryGetValue("spares", ref _spares);
+            node.TryGetValue("landingAlt", ref _landingAlt);
             node.TryGetValue("caseName", ref _caseName);
             node.TryGetValue("bodyName", ref _bodyName);
             _parameters = node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)).ToList();
@@ -438,8 +448,8 @@ namespace RealChute.Libraries
         /// <param name="pChute">ProceduralChute to create the object from</param>
         public Preset(ProceduralChute pChute)
         {
-            this._name = pChute.presetName;
-            this._description = pChute.presetDescription;
+            this._name = pChute.editorGUI.presetName;
+            this._description = pChute.editorGUI.presetDescription;
             this._textureLibrary = pChute.textureLibrary;
             if (pChute.sizes.Count > 0) { this._sizeID = pChute.sizes[pChute.size].sizeID; }
             this._cutSpeed = pChute.cutSpeed;
@@ -447,6 +457,7 @@ namespace RealChute.Libraries
             this._mustGoDown = pChute.mustGoDown;
             this._deployOnGround = pChute.deployOnGround;
             this._spares = pChute.spares;
+            this._landingAlt = pChute.landingAlt;
             if (textureLibrary != "none")
             {
                 if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
@@ -472,6 +483,7 @@ namespace RealChute.Libraries
             node.AddValue("mustGoDown", mustGoDown);
             node.AddValue("deployOnGround", deployOnGround);
             node.AddValue("spares", spares);
+            node.AddValue("landingAlt", landingAlt);
             node.AddValue("caseName", caseName);
             node.AddValue("bodyName", bodyName);
             parameters.ForEach(p => node.AddNode(p.Save()));

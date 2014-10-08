@@ -34,12 +34,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Kerbal Space Program\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\Kerbal Space Program\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -47,6 +47,7 @@
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="CostWidgetFix.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
+    <Compile Include="RCEditorGUI.cs" />
     <Compile Include="WarpWatch.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

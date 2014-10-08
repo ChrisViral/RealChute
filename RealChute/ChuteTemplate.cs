@@ -110,6 +110,12 @@ namespace RealChute
         {
             get { return id != 0; }
         }
+
+        //GUI
+        private RCEditorGUI editorGUI
+        {
+            get { return pChute.editorGUI; }
+        }
         #endregion
 
         #region Fields
@@ -186,14 +192,14 @@ namespace RealChute
                 if ((this.pChute.textureLibrary != "none" || this.textures.modelNames.Length > 0) && parachute.deployedDiameter > model.maxDiam)
                 {
                     parachute.deployedDiameter = model.maxDiam;
-                    this.pChute.warning = true;
+                    this.editorGUI.warning = true;
                 }
                 else if ((this.pChute.textureLibrary == "none" || this.textures.modelNames.Length <= 0) && parachute.deployedDiameter > 70f)
                 {
                     parachute.deployedDiameter = 70f;
-                    this.pChute.warning = true;
+                    this.editorGUI.warning = true;
                 }
-                else { this.pChute.warning = false; }
+                else { this.editorGUI.warning = false; }
                 parachute.preDeployedDiameter = RCUtils.Round(typeID == 0 ? (parachute.deployedDiameter / 20) : (parachute.deployedDiameter / 2));
                 Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id), " - depDiam: ", parachute.deployedDiameter, "m, preDepDiam: ", parachute.preDeployedDiameter, "m"));
             }
@@ -325,10 +331,10 @@ namespace RealChute
             {
                 if (this.materialsVisible && this.pChute.chutes.TrueForAll(c => !c.materialsVisible))
                 {
-                    this.pChute.matX = (int)materialsWindow.x;
-                    this.pChute.matY = (int)materialsWindow.y;
-                    this.pChute.chutes.First(c => c.materialsVisible).materialsWindow.x = this.pChute.matX;
-                    this.pChute.chutes.First(c => c.materialsVisible).materialsWindow.y = this.pChute.matY;
+                    this.editorGUI.matX = (int)materialsWindow.x;
+                    this.editorGUI.matY = (int)materialsWindow.y;
+                    this.pChute.chutes.First(c => c.materialsVisible).materialsWindow.x = this.editorGUI.matX;
+                    this.pChute.chutes.First(c => c.materialsVisible).materialsWindow.y = this.editorGUI.matY;
                 }
             }
 
@@ -495,7 +501,7 @@ namespace RealChute
                 else
                 {
                     string m = mass;
-                    this.pChute.CreateEntryArea("Mass to use (t):", ref m, 0.1f, 10000, 100);
+                    this.editorGUI.CreateEntryArea("Mass to use (t):", ref m, 0.1f, 10000, 100);
                     mass = m;
                 }
 
@@ -523,19 +529,19 @@ namespace RealChute
                 if (typeID == 2)
                 {
                     string decel = deceleration;
-                    this.pChute.CreateEntryArea("Wanted deceleration (m/s²):", ref decel, 0.1f, 100, 100);
+                    this.editorGUI.CreateEntryArea("Wanted deceleration (m/s²):", ref decel, 0.1f, 100, 100);
                     deceleration = decel;
                 }
 
                 if (typeID == 1)
                 {
                     string depAlt = refDepAlt;
-                    this.pChute.CreateEntryArea("Target altitude (m):", ref depAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
+                    this.editorGUI.CreateEntryArea("Target altitude (m):", ref depAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
                     refDepAlt = depAlt;
                 }
 
                 string chutes = chuteCount;
-                this.pChute.CreateEntryArea("Parachutes used (parts):", ref chutes, 1, 100, 100);
+                this.editorGUI.CreateEntryArea("Parachutes used (parts):", ref chutes, 1, 100, 100);
                 chuteCount = chutes;
             }
             #endregion
@@ -545,12 +551,12 @@ namespace RealChute
             {
                 //Predeployed diameter
                 string preDep = preDepDiam, dep = depDiam;
-                this.pChute.CreateEntryArea("Predeployed diameter (m):", ref preDep, 0.5f, model.maxDiam / 2, 100);
+                this.editorGUI.CreateEntryArea("Predeployed diameter (m):", ref preDep, 0.5f, model.maxDiam / 2, 100);
                 if (RCUtils.CanParse(preDepDiam)) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(float.Parse(preDepDiam)).ToString("0.00") + "m²", skins.label); }
                 else { GUILayout.Label("Resulting predeployed area: --- m²", skins.label); }
 
                 //Deployed diameter
-                this.pChute.CreateEntryArea("Deployed diameter (m):", ref dep, 1, model.maxDiam, 100);
+                this.editorGUI.CreateEntryArea("Deployed diameter (m):", ref dep, 1, model.maxDiam, 100);
                 if (RCUtils.CanParse(depDiam)) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(float.Parse(depDiam)).ToString("0.00") + "m²", skins.label); }
                 else { GUILayout.Label("Resulting deployed area: --- m²", skins.label); }
                 preDepDiam = preDep;
@@ -602,7 +608,7 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Deployment altitude
-            this.pChute.CreateEntryArea("Deployment altitude", ref deploymentAlt, 10, (float)body.GetMaxAtmosphereAltitude());
+            this.editorGUI.CreateEntryArea("Deployment altitude", ref deploymentAlt, 10, (float)body.GetMaxAtmosphereAltitude());
 
             //Cut altitude
             GUILayout.Space(5);
@@ -614,10 +620,10 @@ namespace RealChute
             GUILayout.EndHorizontal();
 
             //Predeployment speed
-            this.pChute.CreateEntryArea("Pre deployment speed (s):", ref preDepSpeed, 0.5f, 5);
+            this.editorGUI.CreateEntryArea("Pre deployment speed (s):", ref preDepSpeed, 0.5f, 5);
 
             //Deployment speed
-            this.pChute.CreateEntryArea("Deployment speed (s):", ref depSpeed, 1, 10);
+            this.editorGUI.CreateEntryArea("Deployment speed (s):", ref depSpeed, 1, 10);
             #endregion
         }
 
