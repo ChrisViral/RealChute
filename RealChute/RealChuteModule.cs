@@ -394,7 +394,7 @@ namespace RealChute
         #region Functions
         private void Update()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Makes the chute icon blink if failed
@@ -443,7 +443,7 @@ namespace RealChute
         private void FixedUpdate()
         {
             //Flight values
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
             trueAlt = this.vessel.GetTrueAlt(ASL);
@@ -513,7 +513,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible() && !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             //Hide/show UI event removal
             GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onShowUI.Remove(ShowUI);
@@ -524,7 +524,7 @@ namespace RealChute
         public override void OnStart(PartModule.StartState state)
         {
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
-            if (!CompatibilityChecker.IsAllCompatible())
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT)))
             {
                 foreach (BaseAction action in Actions)
                 {
@@ -604,7 +604,7 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             //Gets the materials
             this.node = node;
             LoadParachutes();
@@ -616,7 +616,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return string.Empty; }
             //Info in the editor part window
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
@@ -665,14 +665,14 @@ namespace RealChute
 
         public override void OnActive()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             //Activates the part
             ActivateRC();
         }
 
         public override void OnSave(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             //Saves the parachutes to the persistence
             parachutes.ForEach(p => node.AddNode(p.Save()));
         }
@@ -682,7 +682,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Handles GUI rendering
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
             {
                 //Info window visibility

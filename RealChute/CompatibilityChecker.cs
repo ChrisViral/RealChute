@@ -159,7 +159,7 @@ namespace RealChute
 
             String message = String.Empty;
 
-            if (IsWin64())
+            if (SixtyFourBitsMustDie())
             {
                 message += "WARNING: You are using 64-bit KSP on Windows. This version of KSP is known to cause crashes. It's highly recommended that you use either 32-bit KSP on Windows or switch to Linux.";
             }
@@ -183,20 +183,20 @@ namespace RealChute
                 }
             }
 
-            if ((incompatible.Length > 0) || (incompatibleUnity.Length > 0) || IsWin64())
+            if ((incompatible.Length > 0) || (incompatibleUnity.Length > 0) || SixtyFourBitsMustDie())
             {
                 PopupDialog.SpawnPopupDialog("Compatibility Checker", message, "OK", true, HighLogic.Skin);
             }
         }
 
-        public static bool IsWin64()
+        public static bool SixtyFourBitsMustDie()
         {
             return (IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT);
         }
 
         public static bool IsAllCompatible()
         {
-            return IsCompatible() && !IsWin64();
+            return IsCompatible() && !SixtyFourBitsMustDie();
         }
 
         private static IEnumerable<Type> getAllTypes()

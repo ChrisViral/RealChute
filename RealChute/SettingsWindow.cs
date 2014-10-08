@@ -32,16 +32,28 @@ namespace RealChute
             if (ApplicationLauncher.Ready)
             {
                 button = ApplicationLauncher.Instance.AddModApplication(
-                    () => { this.visible = true; },
-                    () => { this.visible = false; },
-                    () => { },
-                    () => { },
-                    () => { },
-                    () => { },
+                    Show,
+                    Hide,
+                    Empty,
+                    Empty,
+                    Empty,
+                    Empty,
                     ApplicationLauncher.AppScenes.SPACECENTER,
                     (Texture)buttonTexture);
             }
         }
+
+        private void Show()
+        {
+            this.visible = true;
+        }
+
+        private void Hide()
+        {
+            this.visible = false;
+        }
+
+        private void Empty() { }
 
         private void HideUI()
         {
@@ -57,7 +69,7 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { Destroy(this); return; }
             this.window = new Rect(100, 100, 330, 130);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
@@ -81,7 +93,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             RealChuteSettings.SaveSettings();
 
             GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
@@ -103,7 +115,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             if (this.showing && this.visible)
             {
                 this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -29,7 +30,7 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || instance != null) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT)) || instance != null) { Destroy(this); return; }
             instance = this;
             DontDestroyOnLoad(this);
 

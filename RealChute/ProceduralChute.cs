@@ -423,7 +423,7 @@ namespace RealChute
         private void Update()
         {
             //Updating of size if possible
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return; }
             
             if (sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
@@ -460,7 +460,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Rendering manager
-            if (!CompatibilityChecker.IsAllCompatible() || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule")) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT)) || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule")) { return; }
 
             editorGUI.RenderGUI();
         }
@@ -469,7 +469,7 @@ namespace RealChute
         #region Overrides
         public override void OnStart(PartModule.StartState state)
         {
-            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !CompatibilityChecker.IsAllCompatible()) { return; }
+            if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
 
             //Identification of the RealChuteModule
             if (this.part.Modules.Contains("RealChuteModule")) { rcModule = this.part.Modules["RealChuteModule"] as RealChuteModule; }
@@ -546,7 +546,7 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible() || !this.part.Modules.Contains("RealChuteModule")) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.part.Modules.Contains("RealChuteModule") || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             this.node = node;
             LoadChutes();
             if (node.HasNode("SIZE"))
@@ -573,14 +573,14 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || !this.isTweakable) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.isTweakable || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return string.Empty; }
             else if (this.part.Modules.Contains("RealChuteModule")) { return "This RealChute part can be tweaked from the Action Groups window."; }
             return string.Empty;
         }
 
         public override void OnSave(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
             //Saves the templates to the persistence or craft file
             chutes.ForEach(c => node.AddNode(c.Save()));
         }
