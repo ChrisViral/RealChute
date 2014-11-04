@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -311,6 +310,7 @@ namespace RealChute
         //Allows the chute to be repacked if available
         public void SetRepack()
         {
+            print("setting repack");
             this.part.stackIcon.SetIconColor(XKCDColors.Red);
             parachutes.ForEach(p => p.randomTimer.Reset());
             wait = true;
@@ -347,47 +347,6 @@ namespace RealChute
         private void ShowUI()
         {
             this.hid = false;
-        }
-
-        private IEnumerator UpdateOnReload()
-        {
-            while (!FlightGlobals.ready) { yield return null; }
-
-            print("RCModule OnLoad");
-            foreach (Parachute parachute in parachutes)
-            {
-                this.part.InitiateAnimation(parachute.preDeploymentAnimation);
-                this.part.InitiateAnimation(parachute.deploymentAnimation);
-
-                if (parachute.isDeployed)
-                {
-                    parachute.parachute.gameObject.SetActive(true);
-                    switch (parachute.deploymentState)
-                    {
-                        case DeploymentStates.PREDEPLOYED:
-                            {
-                                this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
-                                this.part.SkipToAnimationEnd(parachute.preDeploymentAnimation);
-                                break;
-                            }
-
-                        case DeploymentStates.LOWDEPLOYED:
-                        case DeploymentStates.DEPLOYED:
-                            {
-                                this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-                                this.part.SkipToAnimationEnd(parachute.deploymentAnimation);
-                                break;
-                            }
-
-                        default:
-                            break;
-                    }
-                }
-                else { parachute.parachute.gameObject.SetActive(false); }
-            }
-
-            if (armed) { this.part.stackIcon.SetIconColor(XKCDColors.LightCyan); }
-            else if (parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { SetRepack(); }
         }
         #endregion
 
@@ -539,6 +498,7 @@ namespace RealChute
                 Fields["chuteCount"].guiActive = false;
                 return;
             }
+
             //Staging icon
             this.part.stagingIcon = "PARACHUTES";
 
@@ -610,8 +570,7 @@ namespace RealChute
             LoadParachutes();
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
-
-            if (HighLogic.LoadedSceneIsFlight && staged || parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { StartCoroutine(UpdateOnReload()); }
+            if (parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT)) { SetRepack(); }
         }
 
         public override string GetInfo()
@@ -661,13 +620,6 @@ namespace RealChute
                 }
             }
             return builder.ToString();
-        }
-
-        public override void OnActive()
-        {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
-            //Activates the part
-            ActivateRC();
         }
 
         public override void OnSave(ConfigNode node)

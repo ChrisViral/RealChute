@@ -502,7 +502,8 @@ namespace RealChute
                 material = "Nylon"; 
                 mat = MaterialsLibrary.instance.GetMaterial("Nylon");
             }
-            this.part.FindModelTransform(parachuteName).gameObject.SetActive(false);
+            Transform p = this.part.FindModelTransform(parachuteName);
+            if (p != null) { p.gameObject.SetActive(false); }
         }
 
         /// <summary>

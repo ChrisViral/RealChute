@@ -104,22 +104,6 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
-        /// Skips directly to the end of the animation
-        /// </summary>
-        /// <param name="animationName">Name of the animation</param>
-        public static void SkipToAnimationEnd(this Part part, string animationName)
-        {
-            foreach (Animation animation in part.FindModelAnimators(animationName))
-            {
-                AnimationState state = animation[animationName];
-                state.normalizedTime = 1;
-                state.normalizedSpeed = 1;
-                state.enabled = true;
-                animation.Play(animationName);
-            }
-        }
-
-        /// <summary>
         /// Returns if the animation is playing
         /// </summary>
         /// <param name="animationName">Name of the animation to check</param>
