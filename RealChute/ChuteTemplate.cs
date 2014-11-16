@@ -117,7 +117,7 @@ namespace RealChute
         }
 
         //GUI
-        private RCEditorGUI editorGUI
+        private EditorGUI editorGUI
         {
             get { return pChute.editorGUI; }
         }

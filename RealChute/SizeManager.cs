@@ -30,15 +30,9 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            if ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))
-            {
-                print("[RealChute]: Running on Win64bit KSP, deactivating.");
-                if (!CompatibilityChecker.SixtyFourBitsMustDie()) { print("[RealChute]: CC 64bit check deactivated. Shame on you."); }
-            }
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT)) || instance != null) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible() || instance != null) { Destroy(this); return; }
             instance = this;
             DontDestroyOnLoad(this);
-
             print("[RealChute]: Running RealChute " + RCUtils.assemblyVersion);
         }
         #endregion

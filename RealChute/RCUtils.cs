@@ -38,9 +38,10 @@ namespace RealChute
         /// <summary>
         /// DeploymentStates with their string equivalent
         /// </summary>
-        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
+        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(6)
         {
             #region States
+            { DeploymentStates.NONE, "NONE"},
             { DeploymentStates.STOWED, "STOWED" },
             { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
             { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
@@ -133,18 +134,18 @@ namespace RealChute
             }
         }
 
+        internal static bool check = false, loaded = false, disabled = false;
         /// <summary>
         /// Returns if FAR is currently loaded in the game
         /// </summary>
         public static bool FARLoaded
         {
-            get { return AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
+            get 
+            {
+                if (!check) { loaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
+                return loaded;
+            }
         }
-
-        /// <summary>
-        /// If the FAR detection is disabled
-        /// </summary>
-        public static bool disabled = false;
 
         private static MethodInfo _densityMethod = null;
         /// <summary>
@@ -313,7 +314,7 @@ namespace RealChute
         /// <param name="diameter">Diameter of the chute</param>
         public static float GetArea(float diameter)
         {
-            return (diameter * diameter * Mathf.PI) / 4f;
+            return (float)((diameter * diameter * Math.PI) / 4d);
         }
 
         /// <summary>
@@ -322,7 +323,7 @@ namespace RealChute
         /// <param name="area">Area to determine dthe diameter of</param>
         public static float GetDiameter(float area)
         {
-            return Mathf.Sqrt(area / Mathf.PI) * 2f;
+            return (float)(Math.Sqrt(area / Math.PI) * 2);
         }
 
         /// <summary>
@@ -331,12 +332,7 @@ namespace RealChute
         /// <param name="f">Number to round</param>
         public static float Round(float f)
         {
-            string[] splits = f.ToString().Split('.').Select(s => s.Trim()).ToArray();
-            if (splits.Length != 2) { return f; }
-            float round = 0, decimals = float.Parse("0." + splits[1]);
-            if (decimals >= 0.25f && decimals < 0.75) { round = 0.5f; }
-            else if (decimals >= 0.75) { round = 1; }
-            return Mathf.Max(float.Parse(splits[0]) + round, 0.5f);
+            return (float)Math.Max(Math.Round(f, 1, MidpointRounding.AwayFromZero), 0.1);
         }
 
         /// <summary>

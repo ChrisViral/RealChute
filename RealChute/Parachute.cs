@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -86,22 +87,10 @@ namespace RealChute
             }
         }
 
-        //Returns the current DeploymentState
-        public DeploymentStates getState
-        {
-            get { return RCUtils.states.First(pair => pair.Value == depState).Key; }
-        }
-
-        //Returns the current DeploymentState string
-        public string stateString
-        {
-            get { return RCUtils.states.First(pair => pair.Key == deploymentState).Value; }
-        }
-
         //If the parachute is deployed
         public bool isDeployed
         {
-            get { return this.stateString.Contains("DEPLOYED"); }
+            get { return this.depState.Contains("DEPLOYED"); }
         }
 
         //The added vector to drag to angle the parachute
@@ -121,16 +110,32 @@ namespace RealChute
         {
             get { return this.module.parachutes; }
         }
+
+        //Gets/sets the DeploymentState correctly
+        public DeploymentStates deploymentState
+        {
+            get
+            {
+                if (state == DeploymentStates.NONE) { state = RCUtils.states.First(pair => pair.Value == depState).Key; }
+                return this.state;
+            }
+            set
+            {
+                this.state = value;
+                this.depState = RCUtils.states.First(pair => pair.Key == value).Value;
+            }
+        }
         #endregion
 
         #region Fields
         //Parachute
         public string material = "Nylon";
         public float preDeployedDiameter = 1, deployedDiameter = 25;
-        public bool minIsPressure = false;
+        public bool minIsPressure = false, capOff = false;
         public float minDeployment = 25000, minPressure = 0.01f;
         public float deploymentAlt = 700, cutAlt = -1;
         public float preDeploymentSpeed = 2, deploymentSpeed = 6;
+        public double time = 0;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
         public float forcedOrientation = 0;
@@ -144,8 +149,8 @@ namespace RealChute
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
         internal bool played = false, randomized = false;
-        internal WarpWatch randomTimer = new WarpWatch(), dragTimer = new WarpWatch();
-        internal DeploymentStates deploymentState = DeploymentStates.STOWED;
+        internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
+        internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
         #endregion
@@ -206,16 +211,13 @@ namespace RealChute
         public void LowDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            this.module.capOff = true;
-            this.module.Events["GUIDeploy"].active = false;
-            this.module.Events["GUIArm"].active = false;
+            this.capOff = true;
             this.part.Effect("rcdeploy");
             deploymentState = DeploymentStates.LOWDEPLOYED;
-            depState = stateString;
             parachute.gameObject.SetActive(true);
             cap.gameObject.SetActive(false);
-            this.module.Events["GUICut"].active = true;
-            this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed);
+            if (this.dragTimer.elapsedMilliseconds != 0) { this.part.SkipToAnimationEnd(deploymentAnimation); this.played = true; }
+            else { this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed); }
             dragTimer.Start();
         }
 
@@ -223,16 +225,13 @@ namespace RealChute
         public void PreDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
-            this.module.capOff = true;
-            this.module.Events["GUIDeploy"].active = false;
-            this.module.Events["GUIArm"].active = false;
+            this.capOff = true;
             this.part.Effect("rcpredeploy");
             deploymentState = DeploymentStates.PREDEPLOYED;
-            depState = stateString;
             parachute.gameObject.SetActive(true);
             cap.gameObject.SetActive(false);
-            this.module.Events["GUICut"].active = true;
-            this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed);
+            if (this.dragTimer.elapsedMilliseconds != 0) { this.part.SkipToAnimationEnd(preDeploymentAnimation); }
+            else { this.part.PlayAnimation(preDeploymentAnimation, 1f / preDeploymentSpeed); }
             dragTimer.Start();
         }
 
@@ -242,7 +241,6 @@ namespace RealChute
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.part.Effect("rcdeploy");
             deploymentState = DeploymentStates.DEPLOYED;
-            depState = stateString;
             if (!this.part.CheckAnimationPlaying(preDeploymentAnimation))
             {
                 dragTimer.Reset();
@@ -258,9 +256,7 @@ namespace RealChute
         {
             this.part.Effect("rccut");
             deploymentState = DeploymentStates.CUT;
-            depState = stateString;
             parachute.gameObject.SetActive(false);
-            this.module.Events["GUICut"].active = false;
             this.played = false;
             if (!this.module.secondaryChute || this.parachutes.All(p => p.deploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
             else if (this.module.secondaryChute && this.parachutes.Any(p => p.deploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
@@ -272,9 +268,10 @@ namespace RealChute
         {
             if (!dragTimer.isRunning) { dragTimer.Start(); }
 
-            if (dragTimer.elapsed.TotalSeconds <= time)
+            this.time = this.dragTimer.elapsed.TotalSeconds;
+            if (this.time <= time)
             {
-                float deploymentTime = (Mathf.Exp((float)dragTimer.elapsed.TotalSeconds) / Mathf.Exp(time)) * ((float)dragTimer.elapsed.TotalSeconds / time);
+                float deploymentTime = (float)((Math.Exp(this.time) / Math.Exp(time)) * (this.time / time));
                 return Mathf.Lerp(debutArea, endArea, deploymentTime);
             }
             else { return endArea; }
@@ -292,54 +289,51 @@ namespace RealChute
             if (canDeploy)
             {
                 this.module.oneWasDeployed = true;
-                if (!this.module.wait)
+                if (isDeployed) { FollowDragDirection(); }
+
+                switch (deploymentState)
                 {
-                    if (isDeployed) { FollowDragDirection(); }
-
-                    switch (deploymentState)
-                    {
-                        case DeploymentStates.STOWED:
-                            {
-                                this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                                if (this.module.trueAlt > deploymentAlt && deploymentClause && randomDeployment) { PreDeploy(); }
-                                else if (this.module.trueAlt <= deploymentAlt && randomDeployment) { LowDeploy(); }
-                                break;
-                            }
-
-                        case DeploymentStates.PREDEPLOYED:
-                            {
-                                this.part.rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, preDeploymentSpeed), forcePosition, ForceMode.Force);
-                                if (this.module.trueAlt <= deploymentAlt) { Deploy(); }
-                                break;
-                            }
-                        case DeploymentStates.LOWDEPLOYED:
-                            {
-                                this.part.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
-                                if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
-                                {
-                                    dragTimer.Reset();
-                                    dragTimer.Start();
-                                    this.part.PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
-                                    this.played = true;
-                                }
-                                break;
-                            }
-
-                        case DeploymentStates.DEPLOYED:
-                            {
-                                this.part.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, deploymentSpeed), forcePosition, ForceMode.Force);
-                                if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
-                                {
-                                    dragTimer.Reset();
-                                    dragTimer.Start();
-                                    this.part.PlayAnimation(deploymentAnimation, 1 / deploymentSpeed);
-                                    this.played = true;
-                                }
-                                break;
-                            }
-                        default:
+                    case DeploymentStates.STOWED:
+                        {
+                            this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+                            if (this.module.trueAlt > deploymentAlt && deploymentClause && randomDeployment) { PreDeploy(); }
+                            else if (this.module.trueAlt <= deploymentAlt && randomDeployment) { LowDeploy(); }
                             break;
-                    }
+                        }
+
+                    case DeploymentStates.PREDEPLOYED:
+                        {
+                            this.part.rigidbody.AddForceAtPosition(DragForce(0, preDeployedArea, preDeploymentSpeed), forcePosition, ForceMode.Force);
+                            if (this.module.trueAlt <= deploymentAlt) { Deploy(); }
+                            break;
+                        }
+                    case DeploymentStates.LOWDEPLOYED:
+                        {
+                            this.part.rigidbody.AddForceAtPosition(DragForce(0, deployedArea, preDeploymentSpeed + deploymentSpeed), forcePosition, ForceMode.Force);
+                            if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
+                            {
+                                dragTimer.Reset();
+                                dragTimer.Start();
+                                this.part.PlayAnimation(deploymentAnimation, 1f / deploymentSpeed);
+                                this.played = true;
+                            }
+                            break;
+                        }
+
+                    case DeploymentStates.DEPLOYED:
+                        {
+                            this.part.rigidbody.AddForceAtPosition(DragForce(preDeployedArea, deployedArea, deploymentSpeed), forcePosition, ForceMode.Force);
+                            if (!this.part.CheckAnimationPlaying(preDeploymentAnimation) && !this.played)
+                            {
+                                dragTimer.Reset();
+                                dragTimer.Start();
+                                this.part.PlayAnimation(deploymentAnimation, 1f / deploymentSpeed);
+                                this.played = true;
+                            }
+                            break;
+                        }
+                    default:
+                        break;
                 }
             }
             //Deactivation
@@ -429,7 +423,10 @@ namespace RealChute
         internal void Repack()
         {
             deploymentState = DeploymentStates.STOWED;
-            depState = stateString;
+            this.randomTimer.Reset();
+            this.dragTimer.Reset();
+            this.time = 0;
+            this.capOff = false;
             cap.gameObject.SetActive(true);
         }
 
@@ -455,18 +452,21 @@ namespace RealChute
 
             if (!this.module.initiated)
             {
-                deploymentState = DeploymentStates.STOWED;
-                depState = "STOWED";
                 played = false;
                 this.cap.gameObject.SetActive(true);
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
-                deploymentState = getState;
-                if (this.module.capOff)
+                if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
+                if (this.capOff)
                 {
                     this.part.stackIcon.SetIconColor(XKCDColors.Red);
                     this.cap.gameObject.SetActive(false);
+                }
+
+                if (this.module.staged && this.deploymentState != DeploymentStates.CUT)
+                {
+                    this.deploymentState = DeploymentStates.STOWED;
                 }
             }
         }
@@ -483,12 +483,14 @@ namespace RealChute
             node.TryGetValue("preDeployedDiameter", ref preDeployedDiameter);
             node.TryGetValue("deployedDiameter", ref deployedDiameter);
             node.TryGetValue("minIsPressure", ref minIsPressure);
+            node.TryGetValue("capOff", ref capOff);
             node.TryGetValue("minDeployment", ref minDeployment);
             node.TryGetValue("minPressure", ref minPressure);
             node.TryGetValue("deploymentAlt", ref deploymentAlt);
             node.TryGetValue("cutAlt", ref cutAlt);
             node.TryGetValue("preDeploymentSpeed", ref preDeploymentSpeed);
             node.TryGetValue("deploymentSpeed", ref deploymentSpeed);
+            node.TryGetValue("time", ref time);
             node.TryGetValue("parachuteName", ref parachuteName);
             node.TryGetValue("baseParachuteName", ref baseParachuteName);
             node.TryGetValue("capName", ref capName);
@@ -496,7 +498,6 @@ namespace RealChute
             node.TryGetValue("deploymentAnimation", ref deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref forcedOrientation);
             node.TryGetValue("depState", ref depState);
-            deploymentState = getState;
             if (!MaterialsLibrary.instance.TryGetMaterial(material, ref mat))
             {
                 material = "Nylon"; 
@@ -516,19 +517,21 @@ namespace RealChute
             node.AddValue("preDeployedDiameter", preDeployedDiameter);
             node.AddValue("deployedDiameter", deployedDiameter);
             node.AddValue("minIsPressure", minIsPressure);
+            node.AddValue("capOff", capOff);
             node.AddValue("minDeployment", minDeployment);
             node.AddValue("minPressure", minPressure);
             node.AddValue("deploymentAlt", deploymentAlt);
             node.AddValue("cutAlt", cutAlt);
             node.AddValue("preDeploymentSpeed", preDeploymentSpeed);
             node.AddValue("deploymentSpeed", deploymentSpeed);
+            node.AddValue("time", time);
             node.AddValue("parachuteName", parachuteName);
             node.AddValue("baseParachuteName", baseParachuteName);
             node.AddValue("capName", capName);
             node.AddValue("preDeploymentAnimation", preDeploymentAnimation);
             node.AddValue("deploymentAnimation", deploymentAnimation);
             node.AddValue("forcedOrientation", forcedOrientation);
-            node.AddValue("depState", stateString);
+            node.AddValue("depState", depState);
             return node;
         }
         #endregion

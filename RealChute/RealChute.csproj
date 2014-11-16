@@ -46,8 +46,8 @@
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
-    <Compile Include="RCEditorGUI.cs" />
-    <Compile Include="WarpWatch.cs" />
+    <Compile Include="EditorGUI.cs" />
+    <Compile Include="PhysicsWatch.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />
     <Compile Include="SettingsWindow.cs" />

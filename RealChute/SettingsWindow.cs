@@ -69,7 +69,7 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
             this.window = new Rect(100, 100, 330, 130);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
@@ -93,7 +93,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             RealChuteSettings.SaveSettings();
 
             GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
@@ -115,7 +115,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if (this.showing && this.visible)
             {
                 this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);

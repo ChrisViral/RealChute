@@ -19,6 +19,7 @@ namespace RealChute
 {
     public enum DeploymentStates
     {
+        NONE,
         STOWED,
         LOWDEPLOYED,
         PREDEPLOYED,
@@ -43,13 +44,11 @@ namespace RealChute
         [KSPField(isPersistant = true)]
         public float spareChutes = 5;
         [KSPField(isPersistant = true)]
-        public bool initiated = false, capOff = false;
+        public bool initiated = false;
         [KSPField(isPersistant = true)]
         public bool wait = true, armed = false, oneWasDeployed = false;
         [KSPField(isPersistant = true)]
         public bool staged = false, launched = false;
-        [KSPField(isPersistant = true)]
-        public float baseDrag = 0.2f;
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
         public int chuteCount = 5;
         [KSPField]
@@ -72,7 +71,7 @@ namespace RealChute
         // If the parachute can be repacked
         public bool canRepack
         {
-            get { return (groundStop || atmPressure == 0) && parachutes.All(p => p.deploymentState == DeploymentStates.CUT || p.deploymentState == DeploymentStates.STOWED) && (chuteCount > 0 || chuteCount == -1); }
+            get { return (groundStop || atmPressure == 0) && parachutes.Any(p => p.deploymentState == DeploymentStates.CUT) && parachutes.All(p => p.deploymentState == DeploymentStates.CUT || p.deploymentState == DeploymentStates.STOWED) && (chuteCount > 0 || chuteCount == -1); }
         }
 
         //If any parachute is deployed
@@ -92,12 +91,55 @@ namespace RealChute
         {
             get { return parachutes.Count > 1; }
         }
+
+        //Quick access to the part GUI events
+        private BaseEvent _deploy = null, _arm = null, _disarm = null, _cut = null, _repack = null;
+        private BaseEvent deploy
+        {
+            get
+            {
+                if (this._deploy == null) { this._deploy = Events["GUIDeploy"]; }
+                return this._deploy;
+            }
+        }
+        private BaseEvent arm
+        {
+            get
+            {
+                if (this._arm == null) { this._arm = Events["GUIArm"]; }
+                return this._arm;
+            }
+        }
+        private BaseEvent disarm
+        {
+            get
+            {
+                if (this._disarm == null) { this._disarm = Events["GUIDisarm"]; }
+                return this._disarm;
+            }
+        }
+        private BaseEvent cut
+        {
+            get
+            {
+                if (this._cut == null) { this._cut = Events["GUICut"]; }
+                return this._cut;
+            }
+        }
+        private BaseEvent repack
+        {
+            get
+            {
+                if (this._repack == null) { this._repack = Events["GUIRepack"]; }
+                return this._repack;
+            }
+        }
         #endregion
 
         #region Fields
         //Module
         internal Vector3 dragVector = new Vector3(), pos = new Vector3d();
-        private WarpWatch deploymentTimer = new WarpWatch(), failedTimer = new WarpWatch(), launchTimer = new WarpWatch();
+        private PhysicsWatch deploymentTimer = new PhysicsWatch(), failedTimer = new PhysicsWatch(), launchTimer = new PhysicsWatch();
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
@@ -157,11 +199,8 @@ namespace RealChute
             {
                 this.part.Effect("rcrepack");
                 Events["GUIRepack"].guiActiveUnfocused = false;
-                Events["GUIDeploy"].active = true;
-                Events["GUIArm"].active = true;
                 oneWasDeployed = false;
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
-                capOff = false;
                 if (chuteCount != -1) { chuteCount--; }
                 parachutes.Where(p => p.deploymentState == DeploymentStates.CUT).ToList().ForEach(p => p.Repack());
             }
@@ -200,7 +239,7 @@ namespace RealChute
         [KSPAction("Cut main chute")]
         public void ActionCut(KSPActionParam param)
         {
-            if (parachutes.Any(p => p.isDeployed)) { parachutes.Where(p => p.isDeployed).ToList().ForEach(p => p.Cut()); }
+            if (parachutes.Any(p => p.isDeployed)) { GUICut(); }
         }
 
         //Arms parachutes
@@ -237,7 +276,7 @@ namespace RealChute
             else if (deploymentTimer.isRunning) { deploymentTimer.Stop(); }
 
             //Goes down
-            if (mustGoDown && this.vessel.verticalSpeed >= 0)
+            if (mustGoDown && this.vessel.verticalSpeed > 0)
             {
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
@@ -267,8 +306,6 @@ namespace RealChute
         {
             this.staged = true;
             if (settings.autoArm) { this.armed = true; }
-            Events["GUIDeploy"].active = false;
-            Events["GUIArm"].active = false;
             print("[RealChute]: " + this.part.partInfo.name + " was activated in stage " + this.part.inverseStage);
         }
 
@@ -310,12 +347,9 @@ namespace RealChute
         //Allows the chute to be repacked if available
         public void SetRepack()
         {
-            print("setting repack");
             this.part.stackIcon.SetIconColor(XKCDColors.Red);
-            parachutes.ForEach(p => p.randomTimer.Reset());
             wait = true;
             StagingReset();
-            if (chuteCount > 0 || chuteCount == -1) { Events["GUIRepack"].guiActiveUnfocused = true; }
         }
 
         //Drag formula calculations
@@ -353,56 +387,45 @@ namespace RealChute
         #region Functions
         private void Update()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
-            if (HighLogic.LoadedSceneIsFlight)
+            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight) { return; }
+
+            //Makes the chute icon blink if failed
+            if (failedTimer.isRunning)
             {
-                //Makes the chute icon blink if failed
-                if (failedTimer.isRunning)
+                double time = failedTimer.elapsed.TotalSeconds;
+                if (time <= 2.5)
                 {
-                    if (failedTimer.elapsed.TotalSeconds <= 2.5)
+                    if (!displayed)
                     {
-                        if (!displayed)
-                        {
-                            ScreenMessages.PostScreenMessage("Parachute deployment failed.", 2, ScreenMessageStyle.UPPER_CENTER);
-                            if (groundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2, ScreenMessageStyle.UPPER_CENTER); }
-                            else if (atmPressure == 0) { ScreenMessages.PostScreenMessage("Reason: in space.", 2, ScreenMessageStyle.UPPER_CENTER); }
-                            else { ScreenMessages.PostScreenMessage("Reason: too high.", 2, ScreenMessageStyle.UPPER_CENTER); }
-                        }
-                        displayed = true;
-                        double time = failedTimer.elapsed.TotalSeconds;
-                        if (time < 0.5 || (time >= 1 && time < 1.5) || (time >= 2)) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
-                        else { this.part.stackIcon.SetIconColor(XKCDColors.White); }
+                        ScreenMessages.PostScreenMessage("Parachute deployment failed.", 2.5f, ScreenMessageStyle.UPPER_CENTER);
+                        if (groundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else if (atmPressure == 0) { ScreenMessages.PostScreenMessage("Reason: in space.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else { ScreenMessages.PostScreenMessage("Reason: too high.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                     }
-                    else
-                    {
-                        displayed = false;
-                        this.part.stackIcon.SetIconColor(XKCDColors.White);
-                        failedTimer.Reset();
-                    }
+                    displayed = true;
+                    if (time < 0.5 || (time >= 1 && time < 1.5) || (time >= 2)) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
+                    else { this.part.stackIcon.SetIconColor(XKCDColors.White); }
                 }
-
-                if (settings.autoArm) { Events["GUIArm"].guiActive = false; }
-                Events["GUIDisarm"].guiActive = (armed || showDisarm);
-                Events["GUIDisarm"].guiActiveUnfocused = (armed || showDisarm);
+                else
+                {
+                    displayed = false;
+                    this.part.stackIcon.SetIconColor(XKCDColors.White);
+                    failedTimer.Reset();
+                }
             }
 
-            if (HighLogic.LoadedSceneIsEditor)
-            {
-                //Updates the spare chute count correctly
-                chuteCount = (int)spareChutes;
-                if (spareChutes < 0) { Fields["chuteCount"].guiActive = false; }
-
-                //Calculates parachute mass
-                this.part.mass = caseMass + parachutes.Sum(p => p.chuteMass);
-
-                if (settings.autoArm) { Actions["ActionArm"].active = false; }
-            }
+            disarm.active = (armed || showDisarm);
+            bool canDeploy = (!staged && !parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT));
+            deploy.active = canDeploy;
+            arm.active = (!settings.autoArm && canDeploy);
+            repack.guiActiveUnfocused = canRepack;
+            cut.active = anyDeployed;
         }
 
         private void FixedUpdate()
         {
             //Flight values
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             pos = this.part.transform.position;
             ASL = FlightGlobals.getAltitudeAtPos(pos);
             trueAlt = this.vessel.GetTrueAlt(ASL);
@@ -428,7 +451,7 @@ namespace RealChute
                     }
                     else if (this.launchTimer.isRunning) { launchTimer.Reset(); }
                 }
-                if (this.launched && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
+                else if (this.launched && !groundStop && this.vessel.LandedOrSplashed) { ActivateRC(); }
             }
             
             if (this.staged)
@@ -440,7 +463,7 @@ namespace RealChute
                     if (parachutes.Any(p => p.canDeploy)) { armed = false; }
                 }
                 //Parachute deployments
-                if (!armed)
+                else
                 {
                     if (wait)
                     {
@@ -463,8 +486,6 @@ namespace RealChute
                     {
                         failedTimer.Start();
                         StagingReset();
-                        Events["GUIDeploy"].active = true;
-                        Events["GUIArm"].active = true;
                     }
                 }
             }
@@ -472,7 +493,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible() || (!HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor)) { return; }
             //Hide/show UI event removal
             GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onShowUI.Remove(ShowUI);
@@ -483,7 +504,7 @@ namespace RealChute
         public override void OnStart(PartModule.StartState state)
         {
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT)))
+            if (!CompatibilityChecker.IsAllCompatible())
             {
                 foreach (BaseAction action in Actions)
                 {
@@ -506,27 +527,13 @@ namespace RealChute
             settings = RealChuteSettings.fetch;
 
             //Part GUI
-            Events["GUIDeploy"].active = true;
-            Events["GUICut"].active = false;
-            Events["GUIArm"].active = true;
-            Events["GUIRepack"].guiActiveUnfocused = false;
             if (spareChutes < 0) { Fields["chuteCount"].guiActive = false; }
             if (!secondaryChute)
             {
                 Actions["ActionCut"].guiName = "Cut chute";
                 Events["GUICut"].guiName = "Cut chute";
             }
-
-            if (settings.autoArm)
-            {
-                Events["GUIArm"].active = false;
-                Actions["ActionArm"].active = false;
-            }
-            else
-            {
-                Events["GUIArm"].active = true;
-                Actions["ActionArm"].active = true;
-            }
+            Actions["ActionArm"].active = !settings.autoArm;
 
             //Initiates the Parachutes
             LoadParachutes();
@@ -536,26 +543,21 @@ namespace RealChute
             if (!initiated)
             {
                 initiated = true;
-                capOff = false;
                 armed = false;
-                this.baseDrag = this.part.maximum_drag;
                 if (spareChutes >= 0) { chuteCount = (int)spareChutes; }
             }
 
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
-                //If the part has been staged in the past
-                if (capOff)
-                {
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
-                }
                 System.Random random = new System.Random();
                 parachutes.ForEach(p => p.randomTime = (float)random.NextDouble());
 
                 //Hide/show UI event addition
                 GameEvents.onHideUI.Add(HideUI);
                 GameEvents.onShowUI.Add(ShowUI);
+
+                if (canRepack) { SetRepack(); }
             }
 
             //GUI
@@ -564,18 +566,17 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Gets the materials
             this.node = node;
             LoadParachutes();
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
-            if (parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT)) { SetRepack(); }
         }
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
             //Info in the editor part window
             float chuteMass = parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
             this.part.mass = caseMass + chuteMass;
@@ -624,7 +625,7 @@ namespace RealChute
 
         public override void OnSave(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Saves the parachutes to the persistence
             parachutes.ForEach(p => node.AddNode(p.Save()));
         }
@@ -634,7 +635,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Handles GUI rendering
-            if (!CompatibilityChecker.IsAllCompatible() || ((IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT))) { return; }
+            if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor)
             {
                 //Info window visibility

@@ -17,7 +17,7 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
-    public class RCEditorGUI
+    public class EditorGUI
     {
         #region Propreties
         private Part part
@@ -67,13 +67,13 @@ namespace RealChute
         /// <summary>
         /// Creates a new blank EditorGUI object
         /// </summary>
-        public RCEditorGUI() { }
+        public EditorGUI() { }
 
         /// <summary>
         /// Creates a new RCEditorGUI
         /// </summary>
         /// <param name="pChute">ProceduralChute module to create the object from</param>
-        public RCEditorGUI(ProceduralChute pChute)
+        public EditorGUI(ProceduralChute pChute)
         {
             this.pChute = pChute;
         }

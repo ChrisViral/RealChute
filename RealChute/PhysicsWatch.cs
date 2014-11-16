@@ -14,7 +14,7 @@ namespace RealChute
     /// <summary>
     /// A generic Stopwatch clone which runs on KSP's internal clock
     /// </summary>
-    public class WarpWatch
+    public class PhysicsWatch
     {
         #region Constants
         /// <summary>
@@ -86,9 +86,18 @@ namespace RealChute
 
         #region Constructor
         /// <summary>
-        /// Creates a new WarpWatch
+        /// Creates a new PhysicsWatch
         /// </summary>
-        public WarpWatch() { }
+        public PhysicsWatch() { }
+
+        /// <summary>
+        /// Creates a new PhysicsWatch starting at a certain amount of time
+        /// </summary>
+        /// <param name="seconds">Time to start at, in seconds</param>
+        public PhysicsWatch(double seconds)
+        {
+            this.totalSeconds = seconds;
+        }
         #endregion
 
         #region Methods
@@ -153,11 +162,22 @@ namespace RealChute
 
         #region Static Methods
         /// <summary>
-        /// Creates a new WarpWatch, starts it, and returns the current instance
+        /// Creates a new PhysicsWatch, starts it, and returns the current instance
         /// </summary>
-        public static WarpWatch StartNew()
+        public static PhysicsWatch StartNew()
         {
-            WarpWatch watch = new WarpWatch();
+            PhysicsWatch watch = new PhysicsWatch();
+            watch.Start();
+            return watch;
+        }
+
+        /// <summary>
+        /// Creates a new PhysicsWatch from a certain amount of time, starts it, and returns the current instance
+        /// </summary>
+        /// <param name="seconds">Time to start the watch at, in seconds</param>
+        public static PhysicsWatch StartNewFromTime(double seconds)
+        {
+            PhysicsWatch watch = new PhysicsWatch(seconds);
             watch.Start();
             return watch;
         }
