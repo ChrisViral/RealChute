@@ -47,6 +47,7 @@
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
+    <Compile Include="RCFilterManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="Extensions\StringExtensions.cs" />

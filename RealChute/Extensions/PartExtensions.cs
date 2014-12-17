@@ -66,7 +66,8 @@ namespace RealChute.Extensions
         /// </summary>
         public static float TotalCost(this Part part)
         {
-            return part.GetModuleCosts() + part.partInfo.cost;
+            float cost = part.partInfo.cost;
+            return part.GetModuleCosts(cost) + cost;
         }
 
         /// <summary>

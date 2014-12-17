@@ -413,7 +413,7 @@ namespace RealChute
         }
 
         //Returns the cost for this size, if any
-        public float GetModuleCost()
+        public float GetModuleCost(float defaultCost)
         {
             if (this.sizes.Count > 0) { return this.sizes[size].cost; }
             return 0;
@@ -432,7 +432,7 @@ namespace RealChute
             }
 
             //If unselected
-            if (!HighLogic.LoadedSceneIsEditor || !EditorLogic.fetch || EditorLogic.fetch.editorScreen != EditorLogic.EditorScreen.Actions || !this.part.Modules.Contains("RealChuteModule"))
+            if (!HighLogic.LoadedSceneIsEditor || !EditorLogic.fetch || EditorLogic.fetch.editorScreen != EditorScreen.Actions || !this.part.Modules.Contains("RealChuteModule"))
             {
                 this.editorGUI.visible = false;
                 return;

@@ -27,7 +27,7 @@ namespace RealChute
         CUT
     }
 
-    public class RealChuteModule : PartModule, IPartCostModifier
+    public class RealChuteModule : PartModule, IPartCostModifier, IModuleInfo
     {
         #region Persistent fields
         // Values from the .cfg file
@@ -366,9 +366,27 @@ namespace RealChute
         }
 
         //Gives the cost for this parachute
-        public float GetModuleCost()
+        public float GetModuleCost(float defaultCost)
         {
             return RCUtils.Round(this.parachutes.Sum(p => p.deployedArea * p.mat.areaCost));
+        }
+
+        //Not needed
+        public Callback<Rect> GetDrawModulePanelCallback()
+        {
+            return null;
+        }
+
+        //Sets module info title
+        public string GetModuleTitle()
+        {
+            return "RealChute";
+        }
+
+        //Sets part info field
+        public string GetPrimaryField()
+        {
+            return "<b>Parachute count:</b> " + this.parachutes.Count;
         }
 
         //Event when the UI is hidden (F2)
@@ -670,7 +688,7 @@ namespace RealChute
             {
                 GUILayout.Label("___________________________________________", RCUtils.boldLabel);
                 GUILayout.Space(3);
-                GUILayout.Label(RCUtils.ParachuteNumber(i), RCUtils.boldLabel, GUILayout.Width(120));
+                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", RCUtils.boldLabel, GUILayout.Width(120));
                 parachutes[i].UpdateGUI();
             }
 

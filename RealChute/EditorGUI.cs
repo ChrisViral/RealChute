@@ -272,7 +272,7 @@ namespace RealChute
                     //Indicator label
                     GUILayout.Space(10);
                     GUILayout.Label("________________________________________________", RCUtils.boldLabel);
-                    GUILayout.Label("Chute #" + (i + 1) + " :", RCUtils.boldLabel, GUILayout.Width(150));
+                    GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", RCUtils.boldLabel, GUILayout.Width(150));
                     GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
 
                     #region Texture selectors

@@ -388,11 +388,11 @@ namespace RealChute
             switch (id)
             {
                 case 0:
-                    return "Main chute:";
+                    return "Main chute";
                 case 1:
-                    return "Secondary chute:";
+                    return "Secondary chute";
                 default:
-                    return String.Format("Chute #{0}:", id + 1);
+                    return String.Format("Chute #{0}", id + 1);
             }
         }
         #endregion
