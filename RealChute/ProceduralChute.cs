@@ -87,6 +87,24 @@ namespace RealChute
         public ConfigNode node = null;
         #endregion
 
+        #region Part GUI
+        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Next size")]
+        public void GUINextSize()
+        {
+            this.size++;
+            if (this.size > this.sizes.Count - 1) { this.size = 0; }
+            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, false); }
+        }
+
+        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Previous size")]
+        public void GUIPreviousSize()
+        {
+            this.size--;
+            if (this.size < 0) { this.size = this.sizes.Count - 1; }
+            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, false); }
+        }
+        #endregion
+
         #region Methods
         //Gets the strings for the selection grids
         internal string[] TextureEntries(string entries)
@@ -156,9 +174,9 @@ namespace RealChute
         }
 
         //Applies the parameters to the parachute
-        internal void Apply(bool toSymmetryCounterparts)
+        internal void Apply(bool toSymmetryCounterparts, bool showMessage = true)
         {
-            if ((GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0))) { this.editorGUI.failedVisible = true; return; }
+            if (!showMessage && (GetErrors("general").Count != 0 || GetErrors("main").Count != 0 || (secondaryChute && GetErrors("secondary").Count != 0))) { this.editorGUI.failedVisible = true; return; }
             rcModule.mustGoDown = mustGoDown;
             rcModule.deployOnGround = deployOnGround;
             rcModule.timer = RCUtils.ParseTime(timer);
@@ -193,8 +211,11 @@ namespace RealChute
                 }
             }
             this.part.mass = rcModule.caseMass + rcModule.parachutes.Sum(p => p.chuteMass);
-            this.editorGUI.successfulVisible = true;
-            if (!editorGUI.warning) { editorGUI.successfulWindow.height = 50; }
+            if (showMessage)
+            {
+                this.editorGUI.successfulVisible = true;
+                if (!editorGUI.warning) { editorGUI.successfulWindow.height = 50; }
+            }
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
@@ -476,6 +497,7 @@ namespace RealChute
             secondaryChute = rcModule.secondaryChute;
             if (textureLibrary != "none") { textureLib.TryGetConfig(textureLibrary, ref textures); }
             bodies = AtmoPlanets.fetch;
+            this.body = this.bodies.GetBody(0);
 
             //Initializes ChuteTemplates
             LoadChutes();
@@ -511,6 +533,30 @@ namespace RealChute
                 this.editorGUI.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
                 this.editorGUI.presetsSaveWindow = new Rect(Screen.width / 2 - 175, Screen.height / 2 - 110, 350, 220);
                 this.editorGUI.presetsWarningWindow = new Rect(Screen.width / 2 - 100, Screen.height / 2 - 50, 200, 100);
+
+                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
+                {
+                    float level = 0;
+                    switch (EditorDriver.editorFacility)
+                    {
+                        case EditorFacility.VAB:
+                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding); break;
+
+                        case EditorFacility.SPH:
+                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); break;
+
+                        default:
+                            break;
+                    }
+                    if (GameVariables.Instance.UnlockedActionGroupsStock(level))
+                    {
+                        Events.ForEach(e => e.guiActiveEditor = false);
+                    }
+                }
+                else
+                {
+                    Events.ForEach(e => e.guiActiveEditor = false);
+                }
 
                 if (!initiated)
                 {

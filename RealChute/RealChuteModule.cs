@@ -192,11 +192,16 @@ namespace RealChute
         }
 
         //Repacks chute from EVA if in space or on the ground
-        [KSPEvent(guiActive = false, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
+        [KSPEvent(guiActive = false, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
         public void GUIRepack()
         {
             if (canRepack)
             {
+                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && (!FlightGlobals.ActiveVessel.isEVA || FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < 1))
+                {
+                    ScreenMessages.PostScreenMessage("Only a lvl 1 and higher engineer can repack a parachute", 5, ScreenMessageStyle.UPPER_CENTER);
+                    return;
+                }
                 this.part.Effect("rcrepack");
                 Events["GUIRepack"].guiActiveUnfocused = false;
                 oneWasDeployed = false;

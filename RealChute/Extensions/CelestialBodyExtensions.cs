@@ -25,7 +25,7 @@ namespace RealChute.Extensions
             {
                 try
                 {
-                    RCUtils.densityMethod.Invoke(null, new object[] { body, alt });
+                    RCUtils.densityMethod.Invoke(null, new object[] { body, alt, true });
                 }
                 catch (Exception e)
                 {

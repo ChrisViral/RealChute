@@ -21,7 +21,7 @@ namespace RealChute
         private void AddFilter()
         {
             /*
-            Texture2D normal = new Texture2D(1, 1), selected = new Texture2D(1, 1);
+            Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
             normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon.png")));
             selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon_selected.png")));
             PartCategorizer.Icon icon = new PartCategorizer.Icon("RealChute", normal, selected);
@@ -30,12 +30,16 @@ namespace RealChute
             //Will replace with custom icons once sumghai does them
             PartCategorizer.Icon icon = PartCategorizer.Instance.GetIcon("R&D_node_icon_survivability");
 
+            //Adds the buton in the Filter by Fodule category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Function");
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName == "RealChute"));
-            PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Module")
-                .subcategories.Find(s => s.button.categoryName == "RealChute").button.SetIcon(icon);
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
-            //Apparently needed to make sure the icon actually shows at first
+            //Sets the buttons in the Filter by Module category
+            List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Module").subcategories;
+            modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
+            modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
+
+            //Apparently needed to make sure the buttons in Filter by Function show correctly
             RUIToggleButtonTyped button = filterByFunction.button.activeButton;
             button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCED);
             button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCED);

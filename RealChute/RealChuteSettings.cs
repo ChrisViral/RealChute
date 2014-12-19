@@ -51,6 +51,16 @@ namespace RealChute
             get { return this._jokeActivated; }
             set { this._jokeActivated = value; }
         }
+
+        private bool _guiResizeUpdates = false;
+        /// <summary>
+        /// Whether or not resizing the parachutes through part GUI updates the canopy diameter
+        /// </summary>
+        public bool guiResizeUpdates
+        {
+            get { return this._guiResizeUpdates; }
+            set { this._guiResizeUpdates = value; }
+        }
         #endregion
 
         #region Constructor
@@ -66,6 +76,7 @@ namespace RealChute
                 Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
                 settings.AddValue("autoArm", autoArm);
                 settings.AddValue("jokeActivated", jokeActivated);
+                settings.AddValue("guiResizeUpdates", guiResizeUpdates);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
@@ -75,14 +86,16 @@ namespace RealChute
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { goto missing; }
                 if (!settings.TryGetValue("autoArm", ref _autoArm)) { goto missing; }
                 if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { goto missing; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref _guiResizeUpdates)) { goto missing; }
                 return;
 
                 missing:
                 {
                     Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
                     settings.ClearValues();
-                    settings.AddValue("autoArm", autoArm);
-                    settings.AddValue("jokeActivated", jokeActivated);
+                    settings.AddValue("autoArm", false);
+                    settings.AddValue("jokeActivated", false);
+                    settings.AddValue("guiResizeUpdates", false);
                     node.ClearData();
                     node.AddNode(settings);
                     node.Save(RCUtils.settingsURL);
@@ -101,6 +114,7 @@ namespace RealChute
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", fetch.autoArm);
             settings.AddValue("jokeActivated", fetch.jokeActivated);
+            settings.AddValue("guiResizeUpdates", fetch.guiResizeUpdates);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
                 PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));

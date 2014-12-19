@@ -134,7 +134,7 @@ namespace RealChute
             }
         }
 
-        internal static bool check = false, loaded = false, disabled = false;
+        private static bool _FARLoaded = false, check = true;
         /// <summary>
         /// Returns if FAR is currently loaded in the game
         /// </summary>
@@ -142,11 +142,12 @@ namespace RealChute
         {
             get 
             {
-                if (!check) { loaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
-                return loaded;
+                if (check) { _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); check = false; }
+                return _FARLoaded;
             }
         }
 
+        internal static bool disabled = false;
         private static MethodInfo _densityMethod = null;
         /// <summary>
         /// A delegate to the FAR GetCurrentDensity method
@@ -159,8 +160,8 @@ namespace RealChute
                 {
                     _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
                         .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
-                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
-                        .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
+                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
+                        .Single(p => p.Value[0].ParameterType == typeof(CelestialBody) && p.Value[1].ParameterType == typeof(double)).Key;
                 }
                 return _densityMethod;
             }

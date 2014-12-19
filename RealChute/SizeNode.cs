@@ -51,7 +51,7 @@ namespace RealChute
             get { return this._topNode; }
         }
 
-        private int _topNodeSize = 1;
+        private int _topNodeSize = -1;
         /// <summary>
         /// Size of the top node if any
         /// </summary>
@@ -69,7 +69,7 @@ namespace RealChute
             get { return this._bottomNode; }
         }
 
-        private int _bottomNodeSize = 1;
+        private int _bottomNodeSize = -1;
         /// <summary>
         /// Size of the bottom node if any
         /// </summary>

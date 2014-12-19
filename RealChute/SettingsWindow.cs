@@ -31,14 +31,8 @@ namespace RealChute
         {
             if (ApplicationLauncher.Ready)
             {
-                button = ApplicationLauncher.Instance.AddModApplication(
-                    Show,
-                    Hide,
-                    Empty,
-                    Empty,
-                    Empty,
-                    Empty,
-                    ApplicationLauncher.AppScenes.SPACECENTER,
+                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
+                    Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
                     (Texture)buttonTexture);
             }
         }
@@ -70,7 +64,7 @@ namespace RealChute
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
-            this.window = new Rect(100, 100, 330, 130);
+            this.window = new Rect(100, 100, 330, 150);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
             GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
@@ -84,11 +78,6 @@ namespace RealChute
             GameEvents.onGUIMissionControlDespawn.Add(ShowUI);
             GameEvents.onGUIAdministrationFacilitySpawn.Add(HideUI);
             GameEvents.onGUIAdministrationFacilityDespawn.Add(ShowUI);
-        }
-
-        private void Start()
-        {
-            enabled = true;
         }
 
         private void OnDestroy()
@@ -127,10 +116,11 @@ namespace RealChute
             GUI.DragWindow(new Rect(0, 0, window.width, 20));
             settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
             settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", skins.toggle);
+            settings.guiResizeUpdates = GUILayout.Toggle(settings.guiResizeUpdates, "Part GUI resize updates canopy size", skins.toggle);
 
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if(GUILayout.Button("Close", skins.button))
+            if(GUILayout.Button("Close", skins.button, GUILayout.Width(100)))
             {
                 button.SetFalse();
             }

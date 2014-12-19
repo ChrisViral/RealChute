@@ -181,13 +181,13 @@ namespace RealChute
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Previous size", skins.button, GUILayout.Width(125)))
                 {
-                    pChute.size--;
-                    if (pChute.size < 0) { pChute.size = sizes.Count - 1; }
+                    this.pChute.size--;
+                    if (this.pChute.size < 0) { this.pChute.size = this.sizes.Count - 1; }
                 }
                 if (GUILayout.Button("Next size", skins.button, GUILayout.Width(125)))
                 {
-                    pChute.size++;
-                    if (pChute.size > sizes.Count - 1) { pChute.size = 0; }
+                    this.pChute.size++;
+                    if (this.pChute.size > this.sizes.Count - 1) { this.pChute.size = 0; }
                 }
                 GUILayout.EndHorizontal();
             }
