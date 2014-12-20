@@ -147,6 +147,7 @@ namespace RealChute.Libraries
         /// <param name="parachuteCase">Value to store the result in</param>
         public bool TryGetCase(int index, string type, ref CaseConfig parachuteCase)
         {
+            if (index < 0 || index > caseNames.Length - 1) { return false; }
             if (caseNames.Length > 0 && CaseExists(caseNames[index]))
             {
                 parachuteCase = GetCase(index, type);
@@ -215,6 +216,7 @@ namespace RealChute.Libraries
         /// <param name="canopy">Value to store the result in</param>
         public bool TryGetCanopy(int index, ref CanopyConfig canopy)
         {
+            if (index < 0 || index > canopyNames.Length - 1) { return false; }
             if (canopyNames.Length > 0 && CanopyExists(canopyNames[index]))
             {
                 canopy = GetCanopy(index);
@@ -285,6 +287,7 @@ namespace RealChute.Libraries
         /// <param name="model">Value to store the result in</param>
         public bool TryGetModel(int index, ref ModelConfig model)
         {
+            if (index < 0 || index > modelNames.Length - 1) { return false; }
             if (modelNames.Length > 0 && ModelExists(modelNames[index]))
             {
                 model = GetModel(index);

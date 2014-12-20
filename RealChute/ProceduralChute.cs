@@ -37,7 +37,7 @@ namespace RealChute
         #region Persistent values
         //Selection grid IDs
         [KSPField(isPersistant = true)]
-        public int caseID = 0, lastCaseID = 0;
+        public int caseID = -1, lastCaseID = -1;
         [KSPField(isPersistant = true)]
         public int size = 0, lastSize = 0, planets = 0;
         [KSPField(isPersistant = true)]
@@ -404,33 +404,10 @@ namespace RealChute
                     if (module.parachutes.Count <= 0) { return; }
                     for (int i = 0; i < module.parachutes.Count; i++)
                     {
-                        this.chutes.Add(new ChuteTemplate(this, new ConfigNode(), i));
+                        this.chutes.Add(new ChuteTemplate(this, null, i));
                     }
                 }
             }
-        }
-
-        //Copies values from the original symmetry part
-        private void CopyFromOriginal(Part p)
-        {
-            RealChuteModule module = p.Modules["RealChuteModule"] as RealChuteModule;
-            ProceduralChute pChute = p.Modules["ProceduralChute"] as ProceduralChute;
-
-            this.mustGoDown = module.mustGoDown;
-            this.timer = module.timer.ToString();
-            this.cutSpeed = module.cutSpeed.ToString();
-            this.spares = module.spareChutes.ToString();
-            this.presetID = pChute.presetID;
-            this.planets = pChute.planets;
-            this.size = pChute.size;
-            this.caseID = pChute.caseID;
-            this.mustGoDown = pChute.mustGoDown;
-            this.deployOnGround = pChute.deployOnGround;
-            this.timer = pChute.timer;
-            this.cutSpeed = pChute.cutSpeed;
-            this.spares = pChute.spares;
-
-            this.chutes.ForEach(c => c.CopyFromOriginal(module, pChute));
         }
 
         //Returns the cost for this size, if any
@@ -497,18 +474,10 @@ namespace RealChute
             secondaryChute = rcModule.secondaryChute;
             if (textureLibrary != "none") { textureLib.TryGetConfig(textureLibrary, ref textures); }
             bodies = AtmoPlanets.fetch;
-            this.body = this.bodies.GetBody(0);
+            this.body = this.bodies.GetBody(planets);
 
             //Initializes ChuteTemplates
             LoadChutes();
-            if (this.part.name.Contains("(Clone)(Clone)"))
-            {
-                if (this.part.symmetryCounterparts.Count > 0)
-                {
-                    CopyFromOriginal(this.part.symmetryCounterparts.Find(p => !p.name.Contains("(Clone)(Clone)")));
-                }
-                RCUtils.RemoveClone(this.part);
-            }
             chutes.ForEach(c => c.Initialize());
             if (sizes.Count <= 0) { sizes = sizeLib.GetSizes(this.part.partInfo.name); }
 
@@ -558,15 +527,17 @@ namespace RealChute
                     Events.ForEach(e => e.guiActiveEditor = false);
                 }
 
+                //Gets the original part state
+                if (textureLibrary != "none" && caseID == -1)
+                {
+                    if (textures.TryGetCase(currentCase, ref parachuteCase)) { caseID = textures.GetCaseIndex(parachuteCase); }
+                    lastCaseID = caseID;
+                }
+
                 if (!initiated)
                 {
-                    planets = bodies.GetPlanetIndex("Kerbin");
-                    //Gets the original part state
-                    if (textureLibrary != "none")
-                    {
-                        if (textures.TryGetCase(currentCase, ref parachuteCase)) { caseID = textures.GetCaseIndex(parachuteCase); }
-                        lastCaseID = caseID;
-                    }
+                    if (bodies.bodyNames.Contains("Kerbin")) { planets = bodies.GetPlanetIndex("Kerbin"); }
+                    this.body = this.bodies.GetBody(planets);
 
                     //Identification of the values from the RealChuteModule
                     mustGoDown = rcModule.mustGoDown;

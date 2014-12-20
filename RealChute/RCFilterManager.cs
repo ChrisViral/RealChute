@@ -20,17 +20,17 @@ namespace RealChute
         #region Methods
         private void AddFilter()
         {
-            /*
+            /* Custom icon code, will uncomment once sumghai does the custom icons
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
             normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon.png")));
             selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon_selected.png")));
-            PartCategorizer.Icon icon = new PartCategorizer.Icon("RealChute", normal, selected);
+            PartCategorizer.Icon icon = new PartCategorizer.Icon("Parachutes", normal, selected);
             */
 
-            //Will replace with custom icons once sumghai does them
+            //Will remove once sumghai does the custom icons
             PartCategorizer.Icon icon = PartCategorizer.Instance.GetIcon("R&D_node_icon_survivability");
 
-            //Adds the buton in the Filter by Fodule category
+            //Adds the buton in the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Function");
             PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
@@ -39,7 +39,15 @@ namespace RealChute
             modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
 
-            //Apparently needed to make sure the buttons in Filter by Function show correctly
+            /* Custom icon code, will uncomment once sumghai does the custom icons
+            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "realchuteIcon.png")));
+            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "realchuteIcon_selected.png")));
+            icon = new PartCategorizer.Icon("RealChute", normal, selected);
+            PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Manufacturer")
+                .subcategories.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
+            */
+
+            //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
             RUIToggleButtonTyped button = filterByFunction.button.activeButton;
             button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCED);
             button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCED);
