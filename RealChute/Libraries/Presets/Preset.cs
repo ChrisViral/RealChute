@@ -245,30 +245,31 @@ namespace RealChute.Libraries
             /// <param name="secondary"></param>
             public ChuteParameters(ProceduralChute pChute, ChuteTemplate chute)
             {
-                this._material = MaterialsLibrary.instance.GetMaterial(chute.materialsID).name;
-                this._preDeployedDiameter = chute.preDepDiam;
-                this._deployedDiameter = chute.depDiam;
-                this._minIsPressure = chute.isPressure;
-                this._minDeployment = this.minIsPressure ? chute.parachute.minDeployment.ToString() : chute.predepClause;
-                this._minPressure = this.minIsPressure ? chute.predepClause : chute.parachute.minPressure.ToString();
-                this._deploymentAlt = chute.deploymentAlt;
-                this._cutAlt = chute.cutAlt;
-                this._preDeploymentSpeed = chute.preDepSpeed;
-                this._deploymentSpeed = chute.depSpeed;
+                TemplateGUI templateGUI = chute.templateGUI;
+                this._material = MaterialsLibrary.instance.GetMaterial(templateGUI.materialsID).name;
+                this._preDeployedDiameter = templateGUI.preDepDiam;
+                this._deployedDiameter = templateGUI.depDiam;
+                this._minIsPressure = templateGUI.isPressure;
+                this._minDeployment = this.minIsPressure ? chute.parachute.minDeployment.ToString() : templateGUI.predepClause;
+                this._minPressure = this.minIsPressure ? templateGUI.predepClause : chute.parachute.minPressure.ToString();
+                this._deploymentAlt = templateGUI.deploymentAlt;
+                this._cutAlt = templateGUI.cutAlt;
+                this._preDeploymentSpeed = templateGUI.preDepSpeed;
+                this._deploymentSpeed = templateGUI.depSpeed;
                 if (pChute.textureLibrary != "none")
                 {
-                    if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(chute.chuteID).name; }
-                    if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(chute.modelID).name; }
+                    if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(templateGUI.chuteID).name; }
+                    if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(templateGUI.modelID).name; }
                 }
-                this._type = RCUtils.types[chute.typeID];
-                this._calcSelect = chute.calcSelect;
-                this._getMass = chute.getMass;
-                this._useDry = chute.useDry;
-                this._mass = chute.mass;
-                this._landingSpeed = chute.landingSpeed;
-                this._deceleration = chute.deceleration;
-                this._refDepAlt = chute.refDepAlt;
-                this._chuteCount = chute.chuteCount;
+                this._type = RCUtils.types[templateGUI.typeID];
+                this._calcSelect = templateGUI.calcSelect;
+                this._getMass = templateGUI.getMass;
+                this._useDry = templateGUI.useDry;
+                this._mass = templateGUI.mass;
+                this._landingSpeed = templateGUI.landingSpeed;
+                this._deceleration = templateGUI.deceleration;
+                this._refDepAlt = templateGUI.refDepAlt;
+                this._chuteCount = templateGUI.chuteCount;
             }
             #endregion
 

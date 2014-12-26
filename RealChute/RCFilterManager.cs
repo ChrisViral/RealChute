@@ -20,32 +20,25 @@ namespace RealChute
         #region Methods
         private void AddFilter()
         {
-            /* Custom icon code, will uncomment once sumghai does the custom icons
+            //Loads the RealChute parachutes icon
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
-            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon.png")));
-            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "filterIcon_selected.png")));
+            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon.png")));
+            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon_selected.png")));
             PartCategorizer.Icon icon = new PartCategorizer.Icon("Parachutes", normal, selected);
-            */
 
-            //Will remove once sumghai does the custom icons
-            PartCategorizer.Icon icon = PartCategorizer.Instance.GetIcon("R&D_node_icon_survivability");
-
-            //Adds the buton in the Filter by Function category
-            PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Function");
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
+            //Adds the Parachutes filter to the Filter by Function category
+            List<AvailablePart> realchute = new List<AvailablePart>(PartLoader.Instance.parts
+                .Where(p => p.moduleInfos.Any(m => m.moduleName == "RealChute")));
+            PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
+                .Find(f => f.button.categoryName == "Filter by Function");
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon,
+                p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
             //Sets the buttons in the Filter by Module category
-            List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Module").subcategories;
+            List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters
+                .Find(f => f.button.categoryName == "Filter by Module").subcategories;
             modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
-
-            /* Custom icon code, will uncomment once sumghai does the custom icons
-            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "realchuteIcon.png")));
-            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "realchuteIcon_selected.png")));
-            icon = new PartCategorizer.Icon("RealChute", normal, selected);
-            PartCategorizer.Instance.filters.Find(f => f.button.categoryName == "Filter by Manufacturer")
-                .subcategories.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
-            */
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
             RUIToggleButtonTyped button = filterByFunction.button.activeButton;
@@ -60,8 +53,8 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible())
             {
                 //Removes RealChute parts from being seen if incompatible
-                List<AvailablePart> parts = new List<AvailablePart>(PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Any(m => m.moduleName == "Real Chute Module")));
-                parts.ForEach(p => p.category = PartCategories.none);
+                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Any(m => m.moduleName == "RealChute"))
+                    .ToList().ForEach(p => p.category = PartCategories.none);
             }
             else
             {

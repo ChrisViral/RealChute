@@ -138,7 +138,9 @@ namespace RealChute
             this.lastFrame = 0d;
             this._isRunning = false;
         }
+        #endregion
 
+        #region Virtual Methods
         /// <summary>
         /// Updates the time on the watch
         /// </summary>

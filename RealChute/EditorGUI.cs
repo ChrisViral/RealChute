@@ -89,7 +89,7 @@ namespace RealChute
                 {
                     this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
                 }
-                foreach (ChuteTemplate chute in chutes)
+                foreach (TemplateGUI chute in chutes.Select(s => s.templateGUI))
                 {
                     if (chute.materialsVisible)
                     {
@@ -199,13 +199,13 @@ namespace RealChute
 
             #region Texture selectors
             GUILayout.Space(5);
-            chutes[0].TextureSelector();
+            chutes[0].templateGUI.TextureSelector();
             #endregion
 
             #region General
             //Materials editor
             GUILayout.Space(5);
-            chutes[0].MaterialsSelector();
+            chutes[0].templateGUI.MaterialsSelector();
 
             //MustGoDown
             GUILayout.Space(5);
@@ -259,7 +259,7 @@ namespace RealChute
             GUILayout.Label("Main chute:", RCUtils.boldLabel, GUILayout.Width(150));
             GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
 
-            chutes[0].Calculations();
+            chutes[0].templateGUI.Calculations();
             #endregion
 
             #region Secondary
@@ -277,14 +277,14 @@ namespace RealChute
 
                     #region Texture selectors
                     GUILayout.Space(5);
-                    chute.TextureSelector();
+                    chute.templateGUI.TextureSelector();
                     #endregion
 
                     //Materials editor
                     GUILayout.Space(5);
-                    chute.MaterialsSelector();
+                    chute.templateGUI.MaterialsSelector();
 
-                    chute.Calculations();
+                    chute.templateGUI.Calculations();
                 }
             }
             #endregion

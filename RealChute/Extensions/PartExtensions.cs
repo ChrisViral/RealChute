@@ -26,7 +26,8 @@ namespace RealChute.Extensions
             List<Part> result = new List<Part>(part.children);
             for (int i = 0; i < result.Count; i++)
             {
-                if (result[i].children.Count > 0) { result.AddRange(result[i].children); }
+                Part p = result[i];
+                if (p.children.Count > 0) { result.AddRange(p.children); }
             }
             return result;
         }
