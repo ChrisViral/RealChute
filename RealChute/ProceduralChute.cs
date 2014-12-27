@@ -135,7 +135,7 @@ namespace RealChute
                 if (!RCUtils.CanParse(landingAlt) || !RCUtils.CheckRange(float.Parse(landingAlt), 0, (float)body.GetMaxAtmosphereAltitude())) { general.Add("Landing altitude"); }
                 return general;
             }
-            else if (type == "main" || type == "secondary") { return chutes.SelectMany(c => c.templateGUI.errors).ToList(); }
+            else if (type == "main" || type == "secondary") { return chutes.SelectMany(c => c.errors).ToList(); }
             return new List<string>();
         }
 
@@ -444,7 +444,7 @@ namespace RealChute
             else
             {
                 this.editorGUI.visible = false;
-                chutes.ForEach(c => c.templateGUI.materialsVisible = false);
+                chutes.ForEach(c => c.materialsVisible = false);
                 this.editorGUI.failedVisible = false;
                 this.editorGUI.successfulVisible = false;
             }
@@ -496,7 +496,7 @@ namespace RealChute
             {
                 //Windows initiation
                 this.editorGUI.window = new Rect(5, 370, 420, Screen.height - 375);
-                this.chutes.ForEach(c => c.templateGUI.materialsWindow = new Rect(editorGUI.matX, editorGUI.matY, 375, 275));
+                this.chutes.ForEach(c => c.materialsWindow = new Rect(editorGUI.matX, editorGUI.matY, 375, 275));
                 this.editorGUI.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.editorGUI.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.editorGUI.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
