@@ -24,7 +24,7 @@ namespace RealChute
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
             normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon.png")));
             selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon_selected.png")));
-            PartCategorizer.Icon icon = new PartCategorizer.Icon("Parachutes", normal, selected);
+            PartCategorizer.Icon icon = new PartCategorizer.Icon("RC_Parachutes", normal, selected);
 
             //Adds the Parachutes filter to the Filter by Function category
             List<AvailablePart> realchute = new List<AvailablePart>(PartLoader.Instance.parts

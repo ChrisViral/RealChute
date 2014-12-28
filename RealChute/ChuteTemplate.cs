@@ -270,7 +270,7 @@ namespace RealChute
         internal void UpdateCanopyTexture()
         {
             if (this.pChute.textureLibrary == "none") { return; }
-            if (this.textures.TryGetCanopy(chuteID, ref canopy))
+            if (this.textures.canopyNames.Length > 0 && this.textures.TryGetCanopy(chuteID, ref canopy))
             {
                 if (string.IsNullOrEmpty(canopy.textureURL))
                 {
@@ -292,7 +292,7 @@ namespace RealChute
         {
             if (this.pChute.textureLibrary != "none")
             {
-                if (this.textures.TryGetModel(this.textures.modelNames[modelID], ref model))
+                if (this.textures.modelNames.Length > 0 && this.textures.TryGetModel(this.textures.modelNames[modelID], ref model))
                 {
                     if (string.IsNullOrEmpty(parameters.modelURL))
                     {
@@ -713,15 +713,23 @@ namespace RealChute
 
             if (HighLogic.LoadedSceneIsEditor)
             {
-                if (this.pChute.textureLibrary != "none")
+                if (this.pChute.textureLibrary != "none" && this.textures != null)
                 {
-                    if (this.chuteID == -1 && this.textures.TryGetCanopy(this.currentCanopy, ref this.canopy)) { this.chuteID = this.textures.GetCanopyIndex(this.canopy); }
-                    if (this.modelID == -1 && this.textures.TryGetModel(this.parachute.parachuteName, ref this.model, true)) { this.modelID = this.textures.GetModelIndex(this.model); }
+                    if (this.chuteID == -1 && this.textures.TryGetCanopy(this.currentCanopy, ref this.canopy))
+                    {
+                        this.chuteID = this.textures.GetCanopyIndex(this.canopy);
+                    }
+                    else if (this.chuteID == -1) { this.modelID = 0; }
+                    if (this.modelID == -1 && this.textures.TryGetModel(this.parachute.parachuteName, ref this.model, true))
+                    {
+                        this.modelID = this.textures.GetModelIndex(this.model);
+                    }
+                    else if (this.modelID == -1) { this.modelID = 0; }
                     if (this.typeID == -1 && RCUtils.types.Contains(this.currentType))
                     {
                         this.typeID = RCUtils.types.ToList().IndexOf(this.currentType);
-                        this.lastTypeID = this.typeID;
                     }
+                    else if (this.typeID == -1) { this.typeID = 0; }
                 }
 
                 this.preDepDiam = this.parachute.preDeployedDiameter.ToString();

@@ -54,7 +54,11 @@ namespace RealChute.Libraries
         /// </summary>
         public AtmoPlanets()
         {
-            if (FlightGlobals.Bodies.Count > 0) { _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null).ToDictionary(b => b, b => b.bodyName); }
+            if (FlightGlobals.Bodies.Count > 0)
+            {
+                _bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null)
+                    .ToDictionary(b => b, b => b.bodyName);
+            }
         }
         #endregion
 
