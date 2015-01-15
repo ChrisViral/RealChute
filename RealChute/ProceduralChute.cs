@@ -112,7 +112,7 @@ namespace RealChute
             if (textureLibrary == "none") { return new string[] { }; }
             if (entries == "case" && textures.caseNames.Length > 1) { return textures.caseNames.Where(c => textures.GetCase(c).types.Contains(type)).ToArray(); }
             if (entries == "chute" && textures.canopyNames.Length > 1) { return textures.canopyNames; }
-            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m =>textures.GetModel(m).parameters.Count >= this.chutes.Count).ToArray(); }
+            if (entries == "model" && textures.modelNames.Length > 1) { return textures.modelNames.Where(m => textures.GetModel(m).parameters.Count >= this.chutes.Count).ToArray(); }
             return new string[] { };
         }
 
@@ -135,7 +135,7 @@ namespace RealChute
                 if (!RCUtils.CanParse(landingAlt) || !RCUtils.CheckRange(float.Parse(landingAlt), 0, (float)body.GetMaxAtmosphereAltitude())) { general.Add("Landing altitude"); }
                 return general;
             }
-            else if (type == "main" || type == "secondary") { return chutes.SelectMany(c => c.errors).ToList(); }
+            else if (type == "main" || type == "secondary") { return chutes.SelectMany(c => c.templateGUI.errors).ToList(); }
             return new List<string>();
         }
 
@@ -145,7 +145,7 @@ namespace RealChute
             if (GetErrors("general").Count != 0)
             {
                 GUILayout.Label("General:", skins.label);
-                foreach(string error in GetErrors("general"))
+                foreach (string error in GetErrors("general"))
                 {
                     GUILayout.Label(error, RCUtils.redLabel);
                 }
@@ -155,7 +155,7 @@ namespace RealChute
             if (GetErrors("main").Count != 0)
             {
                 GUILayout.Label("Main chute:", skins.label);
-                foreach(string error in GetErrors("main"))
+                foreach (string error in GetErrors("main"))
                 {
                     GUILayout.Label(error, RCUtils.redLabel);
                 }
@@ -423,7 +423,7 @@ namespace RealChute
         {
             //Updating of size if possible
             if (!CompatibilityChecker.IsAllCompatible() || (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight)) { return; }
-            
+
             if (sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(originalSize, sizes[size].size))
             {
                 UpdateScale(this.part, rcModule);
@@ -444,7 +444,7 @@ namespace RealChute
             else
             {
                 this.editorGUI.visible = false;
-                chutes.ForEach(c => c.materialsVisible = false);
+                chutes.ForEach(c => c.templateGUI.materialsVisible = false);
                 this.editorGUI.failedVisible = false;
                 this.editorGUI.successfulVisible = false;
             }
@@ -496,7 +496,7 @@ namespace RealChute
             {
                 //Windows initiation
                 this.editorGUI.window = new Rect(5, 370, 420, Screen.height - 375);
-                this.chutes.ForEach(c => c.materialsWindow = new Rect(editorGUI.matX, editorGUI.matY, 375, 275));
+                this.chutes.ForEach(c => c.templateGUI.materialsWindow = new Rect(editorGUI.matX, editorGUI.matY, 375, 275));
                 this.editorGUI.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.editorGUI.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.editorGUI.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);
@@ -550,7 +550,7 @@ namespace RealChute
                 }
             }
 
-            if (parent == null) { parent = this.part.FindModelTransform(rcModule.parachutes[0].parachuteName).parent; }      
+            if (parent == null) { parent = this.part.FindModelTransform(rcModule.parachutes[0].parachuteName).parent; }
 
             //Updates the part
             if (textureLibrary != "none")
@@ -584,7 +584,7 @@ namespace RealChute
             }
 
             //Original part size
-            if (debut == 0) { debut = this.part.transform.GetChild(0).localScale.y; }   
+            if (debut == 0) { debut = this.part.transform.GetChild(0).localScale.y; }
         }
 
         public override string GetInfo()

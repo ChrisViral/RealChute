@@ -73,6 +73,7 @@
     <Compile Include="Libraries\TextureLibrary\TextureLibrary.cs" />
     <Compile Include="RealChuteSettings.cs" />
     <Compile Include="SizeNode.cs" />
+    <Compile Include="TemplateGUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
