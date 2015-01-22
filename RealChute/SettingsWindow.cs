@@ -65,7 +65,7 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
             this.window = new Rect(100, 100, 330, 150);
-            this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
+            this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.iconsURL, "RC_Icon.png")));
 
             GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
             GameEvents.onShowUI.Add(ShowUI);

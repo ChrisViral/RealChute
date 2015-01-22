@@ -33,7 +33,7 @@ namespace RealChute
         /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
-        public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
+        public const string localIconsURL = "GameData/RealChute/Icons";
 
         /// <summary>
         /// DeploymentStates with their string equivalent
@@ -73,11 +73,11 @@ namespace RealChute
         }
 
         /// <summary>
-        /// Returns the RealChute PluginData folder
+        /// Returns the RealChute Icons folder
         /// </summary>
-        public static string pluginDataURL
+        public static string iconsURL
         {
-            get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
+            get { return Path.Combine(KSPUtil.ApplicationRootPath, localIconsURL); }
         }
 
         private static GUIStyle _redLabel = null;
