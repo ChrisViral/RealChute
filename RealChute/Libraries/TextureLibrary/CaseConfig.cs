@@ -23,7 +23,7 @@ namespace RealChute.Libraries
             get { return this._name; }
         }
 
-        private string[] _types = new string[] { };
+        private string[] _types = new string[0];
         /// <summary>
         /// Types of parachute this texture applies to
         /// </summary>

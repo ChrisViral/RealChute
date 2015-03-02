@@ -61,6 +61,15 @@ namespace RealChute
             get { return this._guiResizeUpdates; }
             set { this._guiResizeUpdates = value; }
         }
+
+        private ConfigNode[] _presets = new ConfigNode[0];
+        /// <summary>
+        /// All the current preset nodes
+        /// </summary>
+        public ConfigNode[] presets
+        {
+            get { return this._presets; }
+        }
         #endregion
 
         #region Constructor
@@ -83,24 +92,11 @@ namespace RealChute
             else
             {
                 node = ConfigNode.Load(RCUtils.settingsURL);
-                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { goto missing; }
-                if (!settings.TryGetValue("autoArm", ref _autoArm)) { goto missing; }
-                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { goto missing; }
-                if (!settings.TryGetValue("guiResizeUpdates", ref _guiResizeUpdates)) { goto missing; }
-                return;
-
-                missing:
-                {
-                    Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
-                    settings.ClearValues();
-                    settings.AddValue("autoArm", false);
-                    settings.AddValue("jokeActivated", false);
-                    settings.AddValue("guiResizeUpdates", false);
-                    node.ClearData();
-                    node.AddNode(settings);
-                    node.Save(RCUtils.settingsURL);
-                    return;
-                }
+                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { FixConfig(); return; }
+                if (!settings.TryGetValue("autoArm", ref _autoArm)) { FixConfig(); return; }
+                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { FixConfig(); return; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref _guiResizeUpdates)) { FixConfig(); return; }
+                _presets = settings.GetNodes("PRESET");
             }
         }
         #endregion
@@ -117,11 +113,28 @@ namespace RealChute
             settings.AddValue("guiResizeUpdates", fetch.guiResizeUpdates);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
-                PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));
+                foreach (Preset preset in PresetsLibrary.instance.presets.Values)
+                {
+                    settings.AddNode(preset.Save());
+                }
             }
             node.AddNode(settings);
             node.Save(RCUtils.settingsURL);
             Debug.Log("[RealChute]: Saved settings file.");
+        }
+
+        /// <summary>
+        /// Creates a new Settings config
+        /// </summary>
+        private void FixConfig()
+        {
+            Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
+            ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
+            settings.AddValue("autoArm", false);
+            settings.AddValue("jokeActivated", false);
+            settings.AddValue("guiResizeUpdates", false);
+            node.AddNode(settings);
+            node.Save(RCUtils.settingsURL);
         }
         #endregion
     }

@@ -336,9 +336,12 @@ namespace RealChute
             #region Manual
             else
             {
-                //Predeployed diameter
                 string preDep = preDepDiam, dep = depDiam;
-                this.editorGUI.CreateEntryArea("Predeployed diameter (m):", ref preDep, 0.5f, model.maxDiam / 2, 100);
+                float diam;
+                if (!float.TryParse(dep, out diam)) { diam = model.maxDiam / 2; }
+
+                //Predeployed diameter
+                this.editorGUI.CreateEntryArea("Predeployed diameter (m):", ref preDep, 0.5f, diam, 100);
                 if (RCUtils.CanParse(preDepDiam)) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(float.Parse(preDepDiam)).ToString("0.00") + "m²", skins.label); }
                 else { GUILayout.Label("Resulting predeployed area: --- m²", skins.label); }
 
@@ -421,10 +424,10 @@ namespace RealChute
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
             materialsScroll = GUILayout.BeginScrollView(materialsScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.MaxHeight(200), GUILayout.Width(140));
-            materialsID = GUILayout.SelectionGrid(materialsID, this.pChute.materials.materials.Values.ToArray(), 1, skins.button);
+            materialsID = GUILayout.SelectionGrid(materialsID, this.pChute.materials.materialNames, 1, skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
-            MaterialDefinition material = this.pChute.materials.materials.Keys.ToArray()[materialsID];
+            MaterialDefinition material = this.pChute.materials.GetMaterial(materialsID);
             StringBuilder builder = new StringBuilder();
             builder.Append("Description:  ").AppendLine(material.description);
             builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));

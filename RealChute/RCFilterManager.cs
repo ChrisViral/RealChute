@@ -27,8 +27,6 @@ namespace RealChute
             PartCategorizer.Icon icon = new PartCategorizer.Icon("RC_Parachutes", normal, selected);
 
             //Adds the Parachutes filter to the Filter by Function category
-            List<AvailablePart> realchute = new List<AvailablePart>(PartLoader.Instance.parts
-                .Where(p => p.moduleInfos.Any(m => m.moduleName == "RealChute")));
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == "Filter by Function");
             PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon,

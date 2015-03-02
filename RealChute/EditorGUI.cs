@@ -357,13 +357,14 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             presetScroll = GUILayout.BeginScrollView(presetScroll, false, false, skins.horizontalScrollbar, skins.verticalScrollbar, skins.box, GUILayout.Width(200));
-            if (presets.GetRelevantPresets(pChute).Length > 0) { pChute.presetID = GUILayout.SelectionGrid(pChute.presetID, presets.GetRelevantPresets(pChute), 1, skins.button); }
+            string[] current = presets.GetRelevantPresets(pChute.chutes.Count);
+            if (current.Length > 0) { pChute.presetID = GUILayout.SelectionGrid(pChute.presetID, current, 1, skins.button); }
             else { GUILayout.Label("No saved presets", skins.label); }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
 
             GUILayout.BeginVertical(GUILayout.Width(200));
-            if (presets.GetRelevantPresets(pChute).Length > 0) { GUILayout.Label("Description: " + presets.GetPreset(presets.GetRelevantPresets(pChute)[pChute.presetID]).description, skins.label); }
+            if (current.Length > 0) { GUILayout.Label("Description: " + presets.GetPreset(current[pChute.presetID]).description, skins.label); }
             else { GUILayout.Label("---", skins.label); }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
@@ -400,7 +401,7 @@ namespace RealChute
             if (GUILayout.Button("Save...", skins.button))
             {
                 if (presetName == string.Empty) { PopupDialog.SpawnPopupDialog("Error!", "Preset name cannot be empty!", "Close", false, skins); }
-                else if (presets.presetNames.Any(n => n == presetName)) { this.presetWarningVisible = true; saveWarning = true; }
+                else if (presets.ContainsPreset(presetName)) { this.presetWarningVisible = true; saveWarning = true; }
                 else if ((pChute.GetErrors("general").Count != 0 || pChute.GetErrors("main").Count != 0 || (pChute.secondaryChute && pChute.GetErrors("secondary").Count != 0))) { this.failedVisible = true; }
                 else
                 {
@@ -421,7 +422,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes", skins.button))
             {
-                Preset preset = saveWarning ? presets.GetPreset(presetName) : presets.GetPreset(presets.GetRelevantPresets(pChute)[pChute.presetID]);
+                Preset preset = saveWarning ? presets.GetPreset(presetName) : presets.GetPreset(pChute.presetID, pChute.chutes.Count);
                 Debug.Log("[RealChute]: Deleting the \"" + preset.name + "\" preset from the database.");
                 presets.DeletePreset(preset);
                 if (saveWarning) { pChute.CreatePreset(); this.presetSaveVisible = false; }

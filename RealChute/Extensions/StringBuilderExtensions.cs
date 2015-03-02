@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -12,7 +13,7 @@ using System.Text;
 
 namespace RealChute.Extensions
 {
-    public static class StringExtensions
+    public static class StringBuilderExtensions
     {
         #region Methods
         //Big thanks to Majiir here for both methods

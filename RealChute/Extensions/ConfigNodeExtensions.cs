@@ -18,12 +18,12 @@ namespace RealChute.Extensions
         /// Sees if the ConfigNode has a named node and stores it in the ref value
         /// </summary>
         /// <param name="name">Name of the node to find</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryGetNode(this ConfigNode node, string name, ref ConfigNode result)
+        /// <param name="node">Value to store the result in</param>
+        public static bool TryGetNode(this ConfigNode config, string name, ref ConfigNode node)
         {
-            if (node.HasNode(name))
+            if (config.HasNode(name))
             {
-                result = node.GetNode(name);
+                node = config.GetNode(name);
                 return true;
             }
             return false;

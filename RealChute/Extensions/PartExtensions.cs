@@ -50,8 +50,7 @@ namespace RealChute.Extensions
         {
             List<Renderer> toRemove = new List<Renderer>(part.children.Select(p => p.transform).SelectMany(t => t.GetComponentsInChildren<Renderer>()));
             toRemove.AddRange(module.parachutes.Select(p => p.parachute).SelectMany(t => t.GetComponents<Renderer>()));
-            List<Renderer> renderers = part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
-            return renderers;
+            return part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
         }
 
         /// <summary>
@@ -59,7 +58,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static float TotalMass(this Part part)
         {
-            return part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0f;
+            return part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0;
         }
 
         /// <summary>

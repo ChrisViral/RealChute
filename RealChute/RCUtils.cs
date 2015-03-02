@@ -5,6 +5,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Version = System.Version;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -23,12 +24,12 @@ namespace RealChute
         /// <summary>
         /// Transforms from gees to m/s²
         /// </summary>
-        public const double geeToAcc = 9.80665d;
+        public const double geeToAcc = 9.80665;
 
         /// <summary>
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
-        public const string localSettingsURL = "GameData/RealChute/RealChute_Settings.cfg";
+        public const string localSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
 
         /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
@@ -38,17 +39,30 @@ namespace RealChute
         /// <summary>
         /// DeploymentStates with their string equivalent
         /// </summary>
-        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(6)
+        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>    
+        #region States
         {
-            #region States
-            { DeploymentStates.NONE, "NONE"},
+            { DeploymentStates.NONE, string.Empty },
             { DeploymentStates.STOWED, "STOWED" },
             { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
             { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
             { DeploymentStates.DEPLOYED, "DEPLOYED" },
             { DeploymentStates.CUT, "CUT" }
-           #endregion
         };
+        #endregion
+
+        /// <summary>
+        /// ParachuteTypes with their string equivalents
+        /// </summary>
+        public static readonly Dictionary<ParachuteType, string> type = new Dictionary<ParachuteType,string>
+        #region Types
+        {
+            { ParachuteType.NONE, string.Empty},
+            { ParachuteType.MAIN, "Main" },
+            { ParachuteType.DROGUE, "Drogue" },
+            { ParachuteType.DRAG, "Drag" }
+        };
+        #endregion
         #endregion
 
         #region Arrays
@@ -117,6 +131,7 @@ namespace RealChute
             }
         }
 
+        private static string _assemblyVersion = string.Empty;
         /// <summary>
         /// Gets the current version of the assembly
         /// </summary>
@@ -124,13 +139,17 @@ namespace RealChute
         {
             get
             {
-                System.Version version = new System.Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
-                if (version.Revision == 0)
+                if (string.IsNullOrEmpty(_assemblyVersion))
                 {
-                    if (version.Build == 0) { return "v" + version.ToString(2); }
-                    return "v" + version.ToString(3);
+                    Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
+                    if (version.Revision == 0)
+                    {
+                        if (version.Build == 0) { _assemblyVersion = "v" + version.ToString(2); }
+                        _assemblyVersion = "v" + version.ToString(3);
+                    }
+                    _assemblyVersion = "v" + version.ToString();
                 }
-                return "v" + version.ToString();
+                return _assemblyVersion;
             }
         }
 
@@ -142,12 +161,15 @@ namespace RealChute
         {
             get 
             {
-                if (check) { _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); check = false; }
+                if (check)
+                {
+                    _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
+                    check = false;
+                }
                 return _FARLoaded;
             }
         }
 
-        internal static bool disabled = false;
         private static MethodInfo _densityMethod = null;
         /// <summary>
         /// A delegate to the FAR GetCurrentDensity method
@@ -161,7 +183,7 @@ namespace RealChute
                     _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
                         .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
                         .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
-                        .Single(p => p.Value[0].ParameterType == typeof(CelestialBody) && p.Value[1].ParameterType == typeof(double)).Key;
+                        .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
                 }
                 return _densityMethod;
             }
@@ -368,16 +390,7 @@ namespace RealChute
         /// <param name="f">Float to check</param>
         public static bool IsWholeNumber(float f)
         {
-            return !f.ToString().Contains('.');
-        }
-
-        /// <summary>
-        /// Removes any excess amount of "(Clone)" bits from part names
-        /// </summary>
-        /// <param name="part">Part to fix</param>
-        public static void RemoveClone(Part part)
-        {
-            part.name = part.partInfo.name + "(Clone)";
+            return Math.Truncate(f) == f;
         }
 
         /// <summary>
@@ -390,10 +403,12 @@ namespace RealChute
             {
                 case 0:
                     return "Main chute";
+
                 case 1:
                     return "Secondary chute";
+
                 default:
-                    return String.Format("Chute #{0}", id + 1);
+                    return "Chute #" + (id + 1);
             }
         }
         #endregion

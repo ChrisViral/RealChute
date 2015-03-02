@@ -32,7 +32,7 @@ namespace RealChute
         /// <summary>
         /// UT of the last frame
         /// </summary>
-        protected double lastFrame = 0d;
+        protected double lastCheck = 0d;
 
         /// <summary>
         /// Total elapsed time calculated by the watch in seconds
@@ -106,7 +106,7 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            this.lastFrame = Planetarium.GetUniversalTime();
+            this.lastCheck = Planetarium.GetUniversalTime();
             this._isRunning = true;
         }
 
@@ -124,8 +124,8 @@ namespace RealChute
         /// </summary>
         public void Restart()
         {
-            this.totalSeconds = 0d;
-            this.lastFrame = Planetarium.GetUniversalTime();
+            this.totalSeconds = 0;
+            this.lastCheck = Planetarium.GetUniversalTime();
             this._isRunning = true;
         }
 
@@ -134,8 +134,8 @@ namespace RealChute
         /// </summary>
         public void Reset()
         {
-            this.totalSeconds = 0d;
-            this.lastFrame = 0d;
+            this.totalSeconds = 0;
+            this.lastCheck = 0;
             this._isRunning = false;
         }
         #endregion
@@ -147,8 +147,8 @@ namespace RealChute
         protected virtual void UpdateWatch()
         {
             double current = Planetarium.GetUniversalTime();
-            this.totalSeconds += current - this.lastFrame;
-            this.lastFrame = current;
+            this.totalSeconds += current - this.lastCheck;
+            this.lastCheck = current;
         }
         #endregion
 

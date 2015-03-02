@@ -14,11 +14,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("RealChute")]
-[assembly: AssemblyDescription("RealChute Parachute Systems")]
+[assembly: AssemblyDescription("Realistic Parachutes for Kerbal Space Program")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wenkel Corporation")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2014")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

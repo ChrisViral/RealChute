@@ -1,4 +1,5 @@
 ﻿using System;
+using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -13,7 +14,13 @@ namespace RealChute.Extensions
 {
     public static class CelestialBodyExtensions
     {
+        #region Constants
+        //this number is -Ln(1E-6) * 1000
+        private const double atmScaleConstant = 13815.510557964274;
+        #endregion
+
         #region Methods
+        private static bool disabled = false;
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
         /// </summary>
@@ -21,16 +28,16 @@ namespace RealChute.Extensions
         public static double GetDensityAtAlt(this CelestialBody body, double alt)
         {
             if (alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            if (RCUtils.FARLoaded && !RCUtils.disabled)
+            if (RCUtils.FARLoaded && !disabled)
             {
                 try
                 {
-                    RCUtils.densityMethod.Invoke(null, new object[] { body, alt, true });
+                    return (double)RCUtils.densityMethod.Invoke(null, new object[] { body, alt, true });
                 }
                 catch (Exception e)
                 {
-                    UnityEngine.Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
-                    RCUtils.disabled = true;
+                    Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
+                    disabled = true;
                 }
             }
            return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt));
@@ -50,9 +57,9 @@ namespace RealChute.Extensions
         /// <param name="alt">Altitude to get the pressure at</param>
         public static double GetPressureAtAlt(this CelestialBody body, double alt)
         {
-            if (!body.atmosphere) { return 0d; }
+            if (!body.atmosphere) { return 0; }
             double pressure = FlightGlobals.getStaticPressure(alt, body);
-            return pressure <= 1E-6 ? 0d : pressure;
+            return pressure <= 1E-6 ? 0 : pressure;
         }
 
         /// <summary>
@@ -60,7 +67,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetPressureASL(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0d; }
+            if (!body.atmosphere) { return 0; }
             return FlightGlobals.getStaticPressure(0, body);
         }
 
@@ -69,8 +76,8 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetMaxAtmosphereAltitude(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0d; }
-            return -body.atmosphereScaleHeight * Math.Log(1E-6) * 1000;
+            if (!body.atmosphere) { return 0; }
+            return body.atmosphereScaleHeight * atmScaleConstant;
         }
         #endregion
     }

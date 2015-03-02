@@ -326,7 +326,7 @@ namespace RealChute.Libraries
             get { return this._description; }
         }
 
-        private string _textureLibrary = "none";
+        private string _textureLibrary = string.Empty;
         /// <summary>
         /// TextureLibrary for this part
         /// </summary>
@@ -445,7 +445,7 @@ namespace RealChute.Libraries
             node.TryGetValue("landingAlt", ref _landingAlt);
             node.TryGetValue("caseName", ref _caseName);
             node.TryGetValue("bodyName", ref _bodyName);
-            _parameters = node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)).ToList();
+            _parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
         }
 
         /// <summary>

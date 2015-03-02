@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -31,21 +33,31 @@ namespace RealChute.Libraries
         #endregion
 
         #region Propreties
-        private Dictionary<MaterialDefinition, string> _materials = new Dictionary<MaterialDefinition, string>();
+        private Dictionary<string, MaterialDefinition> _materials = new Dictionary<string, MaterialDefinition>();
         /// <summary>
-        /// Dictionary containing MaterialDefinitions as keys and material names as values
+        /// Dictionary containing the name of the materials and their associated MaterialDefinition
         /// </summary>
-        public Dictionary<MaterialDefinition, string> materials
+        public Dictionary<string, MaterialDefinition> materials
         {
             get { return this._materials; }
         }
 
+        private string[] _materialNames = new string[0];
+        /// <summary>
+        /// String array of the materials' names
+        /// </summary>
+        public string[] materialNames
+        {
+            get { return this._materialNames; }
+        }
+
+        private int _count = 0;
         /// <summary>
         /// The amount of materials currently stored
         /// </summary>
-        public double count
+        public int count
         {
-            get { return this.materials.Count; }
+            get { return this._count; }
         }
         #endregion
 
@@ -55,7 +67,10 @@ namespace RealChute.Libraries
         /// </summary>
         public MaterialsLibrary()
         {
-            _materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n)).ToDictionary(m => m, m => m.name);
+            this._materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n))
+                .ToDictionary(m => m.name, m => m);
+            this._materialNames = this._materials.Keys.ToArray();
+            this._count = this._materialNames.Length;
         }
         #endregion
 
@@ -64,18 +79,19 @@ namespace RealChute.Libraries
         /// Returns true if the MaterialLibrary contains a definition for the given material
         /// </summary>
         /// <param name="name">Name of the material</param>
-        public bool MaterialExists(string name)
+        public bool ContainsMaterial(string name)
         {
-            return materials.Values.Contains(name);
+            return this._materials.ContainsKey(name);
         }
 
         /// <summary>
-        /// Returns a specified material
+        /// Returns the MAterialDefinition of the given name
         /// </summary>
         /// <param name="name">Name of the material</param>
         public MaterialDefinition GetMaterial(string name)
         {
-            return materials.Single(pair => pair.Value == name).Key;
+            if (!ContainsMaterial(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" MaterialDefinition in the library"); }
+            return this._materials[name];
         }
 
         /// <summary>
@@ -84,22 +100,23 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the material</param>
         public MaterialDefinition GetMaterial(int index)
         {
-            return materials.Keys.ToArray()[index];
+            if (!this.materialNames.IndexInRange(index)) { throw new IndexOutOfRangeException("Material index [" + index + "] is out of range"); }
+            return GetMaterial(this._materialNames[index]);
         }
 
         /// <summary>
-        /// Returns true and stores the value in the ref if the library contains a definition for the material.
+        /// Tries to get the material of the given name and stores it in the out value
         /// </summary>
-        /// <param name="name">Name of the material</param>
-        /// <param name="material">Value to store the result in</param>
+        /// <param name="name">Name of the material to find</param>
+        /// <param name="material">Value to store the result into</param>
         public bool TryGetMaterial(string name, ref MaterialDefinition material)
         {
-            if (MaterialExists(name))
+            if (ContainsMaterial(name))
             {
-                material = GetMaterial(name);
+                material = this._materials[name];
                 return true;
             }
-            if (name != "empty" && name != string.Empty) { UnityEngine.Debug.LogWarning("[RealChute]: Could not find the " + name + " material within library"); }
+            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
             return false;
         }
 
@@ -109,7 +126,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the material</param>
         public int GetMaterialIndex(string name)
         {
-            return materials.Values.ToList().IndexOf(name);
+            return _materialNames.IndexOf(name);
         }
         #endregion
     }

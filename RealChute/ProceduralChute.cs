@@ -17,6 +17,14 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
+    public enum ParachuteType
+    {
+        NONE,
+        MAIN,
+        DROGUE,
+        DRAG
+    }
+
     public class ProceduralChute : PartModule, IPartCostModifier
     {
         #region Config values
@@ -365,7 +373,7 @@ namespace RealChute
         //Applies the selected preset
         internal void ApplyPreset()
         {
-            Preset preset = presets.GetPreset(presets.GetRelevantPresets(this)[presetID]);
+            Preset preset = presets.GetPreset(this.presetID, this.chutes.Count);
             if (sizes.Any(s => s.sizeID == preset.sizeID)) { this.size = sizes.IndexOf(sizes.First(s => s.sizeID == preset.sizeID)); }
             this.cutSpeed = preset.cutSpeed;
             this.timer = preset.timer;
@@ -373,7 +381,7 @@ namespace RealChute
             this.deployOnGround = preset.deployOnGround;
             this.spares = preset.spares;
             if ((this.textureLibrary == preset.textureLibrary || (this.textureLibrary != "none" && this.textures.caseNames.Contains(preset.caseName))) && this.textures.cases.Count > 0 && !string.IsNullOrEmpty(preset.caseName)) { this.caseID = textures.GetCaseIndex(textures.GetCase(preset.caseName)); }
-            if (bodies.bodies.Values.Contains(preset.bodyName)) { this.planets = bodies.GetPlanetIndex(preset.bodyName); }
+            bodies.TryGetBodyIndex(preset.bodyName, ref planets);
             chutes.ForEach(c => c.ApplyPreset(preset));
             Apply(false);
             print("[RealChute]: Applied the " + preset.name + " preset on " + this.part.partInfo.title);
@@ -536,7 +544,7 @@ namespace RealChute
 
                 if (!initiated)
                 {
-                    if (bodies.bodyNames.Contains("Kerbin")) { planets = bodies.GetPlanetIndex("Kerbin"); }
+                    bodies.TryGetBodyIndex("Kerbin", ref planets);
                     this.body = this.bodies.GetBody(planets);
 
                     //Identification of the values from the RealChuteModule

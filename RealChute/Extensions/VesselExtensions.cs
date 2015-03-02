@@ -20,7 +20,7 @@ namespace RealChute.Extensions
         {
             if (vessel.mainBody.pqsController == null) { return ASL; }
             double terrainAlt = vessel.pqsAltitude;
-            if (vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
+            if (vessel.mainBody.ocean && terrainAlt <= 0) { return ASL; }
             return ASL - terrainAlt;
         }
         #endregion
