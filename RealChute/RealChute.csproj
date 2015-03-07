@@ -45,7 +45,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
-    <Compile Include="Extensions\ArrayExtensions.cs" />
+    <Compile Include="EnumUtils.cs" />
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />

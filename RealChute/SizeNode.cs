@@ -95,14 +95,14 @@ namespace RealChute
         /// <param name="node">ConfigNode to create the object from</param>
         public SizeNode(ConfigNode node)
         {
-            node.TryGetValue("size", ref _size);
-            node.TryGetValue("sizeID", ref _sizeID);
-            node.TryGetValue("caseMass", ref _caseMass);
-            node.TryGetValue("topNode", ref _topNode);
-            node.TryGetValue("topNodeSize", ref _topNodeSize);
-            node.TryGetValue("bottomNode", ref _bottomNode);
-            node.TryGetValue("bottomNodeSize", ref _bottomNodeSize);
-            node.TryGetValue("cost", ref _cost);
+            node.TryGetValue("size", ref this._size);
+            node.TryGetValue("sizeID", ref this._sizeID);
+            node.TryGetValue("caseMass", ref this._caseMass);
+            node.TryGetValue("topNode", ref this._topNode);
+            node.TryGetValue("topNodeSize", ref this._topNodeSize);
+            node.TryGetValue("bottomNode", ref this._bottomNode);
+            node.TryGetValue("bottomNodeSize", ref this._bottomNodeSize);
+            node.TryGetValue("cost", ref this._cost);
         }
         #endregion
     }

@@ -83,9 +83,9 @@ namespace RealChute
             if (!File.Exists(RCUtils.settingsURL))
             {
                 Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
-                settings.AddValue("autoArm", autoArm);
-                settings.AddValue("jokeActivated", jokeActivated);
-                settings.AddValue("guiResizeUpdates", guiResizeUpdates);
+                settings.AddValue("autoArm", this._autoArm);
+                settings.AddValue("jokeActivated", this._jokeActivated);
+                settings.AddValue("guiResizeUpdates", this._guiResizeUpdates);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
@@ -93,10 +93,10 @@ namespace RealChute
             {
                 node = ConfigNode.Load(RCUtils.settingsURL);
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { FixConfig(); return; }
-                if (!settings.TryGetValue("autoArm", ref _autoArm)) { FixConfig(); return; }
-                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { FixConfig(); return; }
-                if (!settings.TryGetValue("guiResizeUpdates", ref _guiResizeUpdates)) { FixConfig(); return; }
-                _presets = settings.GetNodes("PRESET");
+                if (!settings.TryGetValue("autoArm", ref this._autoArm)) { FixConfig(); return; }
+                if (!settings.TryGetValue("jokeActivated", ref this._jokeActivated)) { FixConfig(); return; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref this._guiResizeUpdates)) { FixConfig(); return; }
+                this._presets = settings.GetNodes("PRESET");
             }
         }
         #endregion

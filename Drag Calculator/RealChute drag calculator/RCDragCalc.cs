@@ -41,7 +41,7 @@ namespace RealChute_drag_calculator
             /// </summary>
             public double density
             {
-                get { return this.gravity * 1.223d; }
+                get { return this.pressure * 1.223d; }
             }
             #endregion
 
@@ -107,7 +107,8 @@ namespace RealChute_drag_calculator
         //Returns the density according to the altitude
         private double GetDensityAtAlt(double altitude)
         {
-            return 1.223d * body.pressure * Math.Exp(-altitude / body.scale);
+            if (altitude == 0) { return body.density; }
+            return body.density * Math.Exp(-altitude / body.scale);
         }
         #endregion
 

@@ -20,7 +20,7 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
         private bool visible = false, showing = true;
-        private Rect window = new Rect();
+        private Rect window = new Rect(), drag = new Rect();
         private Texture2D buttonTexture = new Texture2D(38, 38);
         private ApplicationLauncherButton button = new ApplicationLauncherButton();
         private RealChuteSettings settings = RealChuteSettings.fetch;
@@ -31,9 +31,9 @@ namespace RealChute
         {
             if (ApplicationLauncher.Ready)
             {
-                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
+                this.button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
                     Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
-                    (Texture)buttonTexture);
+                    (Texture)this.buttonTexture);
             }
         }
 
@@ -65,6 +65,7 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
             this.window = new Rect(100, 100, 330, 150);
+            this.drag = new Rect(0, 0, 330, 20);
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
             GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
@@ -107,25 +108,18 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             if (this.showing && this.visible)
             {
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, skins.window);
+                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, this.skins.window);
             }
         }
 
         private void Window(int id)
         {
-            GUI.DragWindow(new Rect(0, 0, window.width, 20));
-            settings.autoArm = GUILayout.Toggle(settings.autoArm, "Automatically arm when deploying", skins.toggle);
-            settings.jokeActivated = GUILayout.Toggle(settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", skins.toggle);
-            settings.guiResizeUpdates = GUILayout.Toggle(settings.guiResizeUpdates, "Part GUI resize updates canopy size", skins.toggle);
+            GUI.DragWindow(drag);
+            this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when deploying", this.skins.toggle);
+            this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
+            this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
 
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if(GUILayout.Button("Close", skins.button, GUILayout.Width(100)))
-            {
-                button.SetFalse();
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
+            RCUtils.CenteredButton("Close", () => this.button.SetFalse(), 100);
         }
         #endregion
     }

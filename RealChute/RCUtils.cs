@@ -35,34 +35,6 @@ namespace RealChute
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
         public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
-
-        /// <summary>
-        /// DeploymentStates with their string equivalent
-        /// </summary>
-        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>    
-        #region States
-        {
-            { DeploymentStates.NONE, string.Empty },
-            { DeploymentStates.STOWED, "STOWED" },
-            { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
-            { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
-            { DeploymentStates.DEPLOYED, "DEPLOYED" },
-            { DeploymentStates.CUT, "CUT" }
-        };
-        #endregion
-
-        /// <summary>
-        /// ParachuteTypes with their string equivalents
-        /// </summary>
-        public static readonly Dictionary<ParachuteType, string> type = new Dictionary<ParachuteType,string>
-        #region Types
-        {
-            { ParachuteType.NONE, string.Empty},
-            { ParachuteType.MAIN, "Main" },
-            { ParachuteType.DROGUE, "Drogue" },
-            { ParachuteType.DRAG, "Drag" }
-        };
-        #endregion
         #endregion
 
         #region Arrays
@@ -410,6 +382,24 @@ namespace RealChute
                 default:
                     return "Chute #" + (id + 1);
             }
+        }
+
+        /// <summary>
+        /// Creates a centered GUI button
+        /// </summary>
+        /// <param name="text">Button text</param>
+        /// <param name="action">Action on button click</param>
+        /// <param name="width">Width of the button</param>
+        public static void CenteredButton(string text, Action action, float width = 150)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button(text, HighLogic.Skin.button, GUILayout.Width(width)))
+            {
+                action();
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
         }
         #endregion
     }

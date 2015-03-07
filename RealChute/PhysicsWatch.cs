@@ -106,8 +106,11 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            this.lastCheck = Planetarium.GetUniversalTime();
-            this._isRunning = true;
+            if (!this._isRunning)
+            {
+                this.lastCheck = Planetarium.GetUniversalTime();
+                this._isRunning = true;
+            }
         }
 
         /// <summary>
@@ -115,8 +118,11 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
-            if (this._isRunning) { UpdateWatch(); }
-            this._isRunning = false;
+            if (this._isRunning)
+            {
+                UpdateWatch();
+                this._isRunning = false;
+            }
         }
 
         /// <summary>

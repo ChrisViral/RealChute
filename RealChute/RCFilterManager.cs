@@ -2,6 +2,7 @@
 using System.Linq;
 using System.IO;
 using UnityEngine;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -51,8 +52,8 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible())
             {
                 //Removes RealChute parts from being seen if incompatible
-                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Any(m => m.moduleName == "RealChute"))
-                    .ToList().ForEach(p => p.category = PartCategories.none);
+                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute"))
+                    .ForEach(p => p.category = PartCategories.none);
             }
             else
             {

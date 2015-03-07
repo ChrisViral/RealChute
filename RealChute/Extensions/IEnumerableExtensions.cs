@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -11,7 +12,7 @@
 
 namespace RealChute.Extensions
 {
-    public static class ArrayExtensions
+    public static class IEnumerableExtensions
     {
         #region Methods
         /// <summary>
@@ -32,6 +33,23 @@ namespace RealChute.Extensions
         public static void ForEach<T>(this T[] array, Action<T> action)
         {
             Array.ForEach(array, action);
+        }
+
+        /// <summary>
+        /// Executes the given action on each member of the IEnumerable
+        /// </summary>
+        /// <typeparam name="T">Type of the elements</typeparam>
+        /// <param name="action">Action to execute</param>
+        public static void ForEach<T>(this IEnumerable<T> seq, Action<T> action)
+        {
+            if (seq == null) { throw new ArgumentNullException("seq"); }
+            if (action == null) { throw new ArgumentNullException("action"); }
+
+            IEnumerator<T> e = seq.GetEnumerator();
+            while (e.MoveNext())
+            {
+                action(e.Current);
+            }
         }
 
         /// <summary>
