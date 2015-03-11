@@ -18,6 +18,9 @@ using Random = System.Random;
 
 namespace RealChute
 {
+    /// <summary>
+    /// Parachute deployment states
+    /// </summary>
     public enum DeploymentStates
     {
         NONE,

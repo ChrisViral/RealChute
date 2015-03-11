@@ -169,8 +169,13 @@ namespace RealChute
         /// <param name="text">Time value to parse</param>
         public static bool CanParseTime(string text)
         {
-            float f = 0;
-            return TryParseTime(text, ref f);
+            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException("text"); }
+            if (timeSuffixes.Contains(text[text.Length - 1]))
+            {
+                text = text.Remove(text.Length - 1, 1);
+            }
+            float f;
+            return float.TryParse(text, out f);
         }
 
         /// <summary>
@@ -179,9 +184,16 @@ namespace RealChute
         /// <param name="text">String to parse</param>
         public static float ParseTime(string text)
         {
-            float result = 0;
-            TryParseTime(text, ref result);
-            return result;
+
+            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException("text"); }
+            char indicator = text[text.Length - 1];
+            float multiplier = 1;
+            if (timeSuffixes.Contains(indicator))
+            {
+                text = text.Remove(text.Length - 1, 1);
+                if (indicator == 'm') { multiplier = 60; }
+            }
+            return float.Parse(text) * multiplier;
         }
 
         /// <summary>
@@ -192,16 +204,16 @@ namespace RealChute
         public static bool TryParseTime(string text, ref float result)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-            float multiplier = 1, test = 0;
+            float multiplier = 1, f = 0;
             char indicator = text[text.Length - 1];
             if (timeSuffixes.Contains(indicator))
             {
                 text = text.Remove(text.Length - 1);
                 if (indicator == 'm') { multiplier = 60; }
             }
-            if (float.TryParse(text, out test))
+            if (float.TryParse(text, out f))
             {
-                result = test * multiplier;
+                result = f * multiplier;
                 return true;
             }
             return false;
@@ -213,8 +225,8 @@ namespace RealChute
         /// <param name="text">String to parse</param>
         public static bool CanParse(string text)
         {
-            float f = 0;
-            return TryParse(text, ref f);
+            float f;
+            return float.TryParse(text, out f);
         }
 
         /// <summary>
@@ -225,7 +237,7 @@ namespace RealChute
         public static bool TryParse(string text, ref float result)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-            float f = 0;
+            float f;
             if (float.TryParse(text, out f))
             {
                 result = f;
@@ -238,18 +250,18 @@ namespace RealChute
         /// Checks if the spares can be parsed
         /// </summary>
         /// <param name="text">Value to parse</param>
-        public static bool CanParseWithEmpty(string text)
+        public static bool CanParseEmpty(string text)
         {
             if (string.IsNullOrEmpty(text)) { return true; }
-            float test;
-            return float.TryParse(text, out test);
+            float f;
+            return float.TryParse(text, out f);
         }
 
         /// <summary>
         /// Parse the string and returns -1 if it's empty
         /// </summary>
         /// <param name="text">String to parse</param>
-        public static float ParseWithEmpty(string text)
+        public static float ParseEmpty(string text)
         {
             if (string.IsNullOrEmpty(text)) { return -1; }
             return float.Parse(text);
@@ -267,10 +279,10 @@ namespace RealChute
                 result = -1;
                 return true;
             }
-            float test;
-            if (float.TryParse(text, out test))
+            float f;
+            if (float.TryParse(text, out f))
             {
-                result = test;
+                result = f;
                 return true;
             }
             return false;
@@ -293,12 +305,12 @@ namespace RealChute
         public static bool TryParseVector3(string text, ref Vector3 result)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-            string[] splits = ParseArray(text);
-            if (splits.Length != 3) { return false; }
+            string[] elements = ParseArray(text);
+            if (elements.Length != 3) { return false; }
             float x, y, z;
-            if (!float.TryParse(splits[0], out x)) { return false; }
-            if (!float.TryParse(splits[1], out y)) { return false; }
-            if (!float.TryParse(splits[2], out z)) { return false; }
+            if (!float.TryParse(elements[0], out x)) { return false; }
+            if (!float.TryParse(elements[1], out y)) { return false; }
+            if (!float.TryParse(elements[2], out z)) { return false; }
             result = new Vector3(x, y, z);
             return true;
         }
@@ -325,9 +337,9 @@ namespace RealChute
         /// Rounds the float to the closets half
         /// </summary>
         /// <param name="f">Number to round</param>
-        public static float Round(float f)
+        public static float Round(double d)
         {
-            return (float)Math.Max(Math.Round(f, 1, MidpointRounding.AwayFromZero), 0.1);
+            return (float)Math.Max(Math.Round(d, 1, MidpointRounding.AwayFromZero), 0.1);
         }
 
         /// <summary>
@@ -347,12 +359,12 @@ namespace RealChute
         /// <param name="time">Time value to transform</param>
         public static string ToMinutesSeconds(float time)
         {
-            float minutes = 0, seconds = time;
-            while (seconds >= 60)
+            float minutes = 0, seconds;
+            for (seconds = time; seconds >= 60; seconds -= 60)
             {
-                seconds -= 60;
                 minutes++;
             }
+
             return String.Concat(minutes, "m ", seconds.ToString("0.0"), "s");
         }
 

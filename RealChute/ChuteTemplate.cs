@@ -41,7 +41,7 @@ namespace RealChute
         //PArameters for this chute
         private ModelConfig.ModelParameters parameters
         {
-            get { return model.parameters[id]; }
+            get { return this.model.parameters[this.id]; }
         }
 
         //All current ChuteTemplate objects on this part
@@ -61,9 +61,9 @@ namespace RealChute
         {
             get
             {
-                string[] canopies = this.pChute.currentCanopies.Split(',');
-                if (canopies.Length >= (id + 1)) { return canopies[id].Trim(); }
-                return "none";
+                string[] canopies = RCUtils.ParseArray(this.pChute.currentCanopies);
+                if (canopies.IndexInRange(this.id)) { return canopies[this.id]; }
+                return string.Empty;
             }
         }
 
@@ -72,22 +72,22 @@ namespace RealChute
         {
             get
             {
-                string[] chutes = this.pChute.currentTypes.Split(',');
-                if (chutes.Length >= (id + 1)) { return chutes[id].Trim(); }
-                return "none";
+                string[] chutes = RCUtils.ParseArray(this.pChute.currentTypes);
+                if (chutes.IndexInRange(this.id)) { return chutes[this.id]; }
+                return string.Empty;
             }
         }
 
         //If this part has more than one chute
         public bool secondary
         {
-            get { return id != 0; }
+            get { return this.id != 0; }
         }
 
         //GUI
         public EditorGUI editorGUI
         {
-            get { return pChute.editorGUI; }
+            get { return this.pChute.editorGUI; }
         }
         #endregion
 
@@ -127,72 +127,63 @@ namespace RealChute
         //Applies changes to the parachute
         internal void ApplyChanges(bool toSymmetryCounterparts)
         {
-            parachute.material = material.name;
-            parachute.mat = material;
+            this.parachute.material = this.material.name;
+            this.parachute.mat = this.material;
 
             if (this.templateGUI.calcSelect)
             {
-                float m = 0;
-                if (this.templateGUI.getMass) { m = this.pChute.GetCraftMass(this.templateGUI.useDry); }
-                else { m = float.Parse(this.templateGUI.mass); }
+                double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass);
+                double alt = this.templateGUI.typeID == 1 ? double.Parse(this.templateGUI.refDepAlt) : double.Parse(this.pChute.landingAlt);
+                double density = this.body.GetDensityAtAlt(alt);
+                double speed = double.Parse(this.templateGUI.landingSpeed);
+                speed = speed * speed;
+                double acc = this.templateGUI.typeID == 2 ? double.Parse(this.templateGUI.deceleration) : (this.body.GeeASL * RCUtils.geeToAcc);
 
-                double alt = this.templateGUI.typeID == 1 ? double.Parse(this.templateGUI.refDepAlt) : double.Parse(pChute.landingAlt);
-                float density = (float)body.GetDensityAtAlt(alt);
+                Debug.Log(String.Format("[RealChute]: {0} {1} - m: {2}t, alt: {3}m, ρ: {4}kg/m³, v²: {5}m²/s², a: {6}m/s²", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), m, alt, density, speed, acc));
 
-                float speed = float.Parse(this.templateGUI.landingSpeed);
-                float speed2 = speed * speed;
-
-                float acc = this.templateGUI.typeID == 2 ? float.Parse(this.templateGUI.deceleration) : (float)(body.GeeASL * RCUtils.geeToAcc);
-
-                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id), " - m: ", m, "t, alt: ", alt, "m, rho: ", density, "kg/m³, v²: ", speed2, "m²/s², acceleration: ", acc, "m/s²"));
-
-                parachute.deployedDiameter = RCUtils.Round(Mathf.Sqrt((8000f * m * acc) / (Mathf.PI * speed2 * material.dragCoefficient * density * float.Parse(this.templateGUI.chuteCount))));
-                if ((this.pChute.textureLibrary != "none" || this.textures.modelNames.Length > 0) && parachute.deployedDiameter > model.maxDiam)
+                this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((8000 * m * acc) / (Math.PI * speed * material.dragCoefficient * density * double.Parse(this.templateGUI.chuteCount))));
+                float maxDiam = (this.textures != null || this.textures.models.Count > 0) ? this.model.maxDiam : 70;
+                if (this.parachute.deployedDiameter > this.model.maxDiam)
                 {
-                    parachute.deployedDiameter = model.maxDiam;
-                    this.editorGUI.warning = true;
-                }
-                else if ((this.pChute.textureLibrary == "none" || this.textures.modelNames.Length <= 0) && parachute.deployedDiameter > 70f)
-                {
-                    parachute.deployedDiameter = 70f;
+                    this.parachute.deployedDiameter = maxDiam;
                     this.editorGUI.warning = true;
                 }
                 else { this.editorGUI.warning = false; }
-                parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.typeID == 0 ? (parachute.deployedDiameter / 20) : (parachute.deployedDiameter / 2));
-                Debug.Log(String.Concat("[RealChute]: ", this.part.partInfo.title, " ", RCUtils.ParachuteNumber(this.id), " - depDiam: ", parachute.deployedDiameter, "m, preDepDiam: ", parachute.preDeployedDiameter, "m"));
+                this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.typeID == 0 ? (this.parachute.deployedDiameter / 20) : (this.parachute.deployedDiameter / 2));
+                Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
             }
 
             else
             {
-                parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam));
-                parachute.deployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.depDiam));
+                this.parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam));
+                this.parachute.deployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.depDiam));
+                Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
             }
 
-            parachute.minIsPressure = this.templateGUI.isPressure;
-            if (this.templateGUI.isPressure) { parachute.minPressure = float.Parse(this.templateGUI.predepClause); }
-            else { parachute.minDeployment = float.Parse(this.templateGUI.predepClause); }
-            parachute.deploymentAlt = float.Parse(this.templateGUI.deploymentAlt);
-            parachute.cutAlt = RCUtils.ParseWithEmpty(this.templateGUI.cutAlt);
-            parachute.preDeploymentSpeed = float.Parse(this.templateGUI.preDepSpeed);
-            parachute.deploymentSpeed = float.Parse(this.templateGUI.depSpeed);
+            this.parachute.minIsPressure = this.templateGUI.isPressure;
+            if (this.templateGUI.isPressure) { this.parachute.minPressure = float.Parse(this.templateGUI.predepClause); }
+            else { this.parachute.minDeployment = float.Parse(this.templateGUI.predepClause); }
+            this.parachute.deploymentAlt = float.Parse(this.templateGUI.deploymentAlt);
+            this.parachute.cutAlt = RCUtils.ParseEmpty(this.templateGUI.cutAlt);
+            this.parachute.preDeploymentSpeed = float.Parse(this.templateGUI.preDepSpeed);
+            this.parachute.deploymentSpeed = float.Parse(this.templateGUI.depSpeed);
 
             if (toSymmetryCounterparts)
             {
                 foreach (Part part in this.part.symmetryCounterparts)
                 {
                     Parachute sym = ((RealChuteModule)part.Modules["RealChuteModule"]).parachutes[id];
-                    sym.material = material.name;
-                    sym.mat = material;
-                    sym.deployedDiameter = parachute.deployedDiameter;
-                    sym.preDeployedDiameter = parachute.preDeployedDiameter;
-
-                    sym.minIsPressure = this.templateGUI.isPressure;
-                    if (this.templateGUI.isPressure) { sym.minPressure = parachute.minPressure; }
-                    else { sym.minDeployment = parachute.minDeployment; }
-                    sym.deploymentAlt = parachute.deploymentAlt;
-                    sym.cutAlt = parachute.cutAlt;
-                    sym.preDeploymentSpeed = parachute.preDeploymentSpeed;
-                    sym.deploymentSpeed = parachute.deploymentSpeed;
+                    sym.material = this.material.name;
+                    sym.mat = this.material;
+                    sym.deployedDiameter = this.parachute.deployedDiameter;
+                    sym.preDeployedDiameter = this.parachute.preDeployedDiameter;
+                    sym.minIsPressure = this.templateGUI.isPressure; 
+                    sym.minPressure = this.parachute.minPressure;
+                    sym.minDeployment = this.parachute.minDeployment;
+                    sym.deploymentAlt = this.parachute.deploymentAlt;
+                    sym.cutAlt = this.parachute.cutAlt;
+                    sym.preDeploymentSpeed = this.parachute.preDeploymentSpeed;
+                    sym.deploymentSpeed = this.parachute.deploymentSpeed;
 
                     TemplateGUI template = ((ProceduralChute)part.Modules["ProceduralChute"]).chutes[id].templateGUI;
                     template.chuteID = this.templateGUI.chuteID;
@@ -222,64 +213,62 @@ namespace RealChute
         //Updates the canopy texture
         internal void UpdateCanopyTexture()
         {
-            if (this.pChute.textureLibrary == "none") { return; }
-            if (this.textures.canopyNames.Length > 0 && this.textures.TryGetCanopy(this.templateGUI.chuteID, ref canopy))
+            if (this.textures == null) { return; }
+            if (this.textures.TryGetCanopy(this.templateGUI.chuteID, ref this.canopy))
             {
-                if (string.IsNullOrEmpty(canopy.textureURL))
+                if (string.IsNullOrEmpty(this.canopy.textureURL))
                 {
-                    Debug.LogWarning("[RealChute]: The " + this.textures.canopyNames[this.templateGUI.chuteID] + "URL is empty");
+                    Debug.LogWarning("[RealChute]: The " + this.canopy.name + "URL is empty");
                     return;
                 }
-                Texture2D texture = GameDatabase.Instance.GetTexture(canopy.textureURL, false);
+                Texture2D texture = GameDatabase.Instance.GetTexture(this.canopy.textureURL, false);
                 if (texture == null)
                 {
-                    Debug.LogWarning("[RealChute]: The " + this.textures.canopyNames[this.templateGUI.chuteID] + "texture is null");
+                    Debug.LogWarning("[RealChute]: The " + this.canopy.name + "texture is null");
                     return;
                 }
-                parachute.parachute.GetComponents<Renderer>().ToList().ForEach(r => r.material.mainTexture = texture);
+                this.parachute.parachute.GetComponents<Renderer>().ForEach(r => r.material.mainTexture = texture);
             }
         }
 
         //Updates the canopy model
         internal void UpdateCanopy()
         {
-            if (this.pChute.textureLibrary != "none")
+            if (this.textures == null) { return; }
+            if (this.textures.TryGetModel(this.templateGUI.modelID, ref this.model))
             {
-                if (this.textures.modelNames.Length > 0 && this.textures.TryGetModel(this.textures.modelNames[this.templateGUI.modelID], ref model))
+                if (string.IsNullOrEmpty(this.parameters.modelURL))
                 {
-                    if (string.IsNullOrEmpty(parameters.modelURL))
-                    {
-                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[this.templateGUI.modelID] + " #" + (this.id + 1) + " URL is empty");
-                        return;
-                    }
-                    GameObject test = GameDatabase.Instance.GetModel(parameters.modelURL);
-                    if (test == null)
-                    {
-                        Debug.LogWarning("[RealChute]: The " + this.textures.modelNames[this.templateGUI.modelID] + " #" + (this.id + 1) + " GameObject is null");
-                        return;
-                    }
-                    test.SetActive(true);
-                    float scale = RCUtils.GetDiameter(parachute.deployedArea / model.count) / model.diameter;
-                    test.transform.localScale = new Vector3(scale, scale, scale);
-                    Debug.Log("[RealChute]: " + part.partInfo.title + " " + RCUtils.ParachuteNumber(this.id) + " Scale: " + scale);
-
-                    GameObject obj = GameObject.Instantiate(test) as GameObject;
-                    GameObject.Destroy(test);
-                    Transform toDestroy = parachute.parachute;
-                    obj.transform.parent = toDestroy.parent;
-                    obj.transform.position = toDestroy.position;
-                    obj.transform.rotation = toDestroy.rotation;
-                    GameObject.DestroyImmediate(toDestroy.gameObject);
-                    parachute.parachute = part.FindModelTransform(parameters.transformName);
-                    parachute.parachuteName = parameters.transformName;
-                    parachute.deploymentAnimation = parameters.depAnim;
-                    parachute.preDeploymentAnimation = parameters.preDepAnim;
-                    this.part.InitiateAnimation(parachute.deploymentAnimation);
-                    this.part.InitiateAnimation(parachute.preDeploymentAnimation);
-                    parachute.parachute.gameObject.SetActive(false);
+                    Debug.LogWarning("[RealChute]: The " + this.model.name + " #" + (this.id + 1) + " URL is empty");
+                    return;
                 }
-                UpdateCanopyTexture();
+                GameObject test = GameDatabase.Instance.GetModel(this.parameters.modelURL);
+                if (test == null)
+                {
+                    Debug.LogWarning("[RealChute]: The " + this.model.name + " #" + (this.id + 1) + " GameObject is null");
+                    return;
+                }
+                test.SetActive(true);
+                float scale = RCUtils.GetDiameter(this.parachute.deployedArea / this.model.count) / this.model.diameter;
+                test.transform.localScale = new Vector3(scale, scale, scale);
+                Debug.Log("[RealChute]: " + this.part.partInfo.title + " " + RCUtils.ParachuteNumber(this.id) + " Scale: " + scale);
+
+                GameObject obj = GameObject.Instantiate(test) as GameObject;
+                GameObject.Destroy(test);
+                Transform toDestroy = this.parachute.parachute;
+                obj.transform.parent = toDestroy.parent;
+                obj.transform.position = toDestroy.position;
+                obj.transform.rotation = toDestroy.rotation;
+                GameObject.DestroyImmediate(toDestroy.gameObject);
+                this.parachute.parachute = this.part.FindModelTransform(this.parameters.transformName);
+                this.parachute.parachuteName = this.parameters.transformName;
+                this.parachute.deploymentAnimation = this.parameters.depAnim;
+                this.parachute.preDeploymentAnimation = this.parameters.preDepAnim;
+                this.part.InitiateAnimation(this.parachute.deploymentAnimation);
+                this.part.InitiateAnimation(this.parachute.preDeploymentAnimation);
+                this.parachute.parachute.gameObject.SetActive(false);
             }
+            UpdateCanopyTexture();
         }
 
         //Type switchup event
@@ -291,8 +280,8 @@ namespace RealChute
                 {
                     this.editorGUI.matX = (int)templateGUI.materialsWindow.x;
                     this.editorGUI.matY = (int)templateGUI.materialsWindow.y;
-                    this.pChute.chutes.Select(c => c.templateGUI).First(t => t.materialsVisible).materialsWindow.x = this.editorGUI.matX;
-                    this.pChute.chutes.Select(c => c.templateGUI).First(t => t.materialsVisible).materialsWindow.y = this.editorGUI.matY;
+                    this.pChute.chutes.Find(c => c.templateGUI.materialsVisible).templateGUI.materialsWindow.x = this.editorGUI.matX;
+                    this.pChute.chutes.Find(c => c.templateGUI.materialsVisible).templateGUI.materialsWindow.y = this.editorGUI.matY;
                 }
             }
 
@@ -303,8 +292,8 @@ namespace RealChute
         internal void ApplyPreset(Preset preset)
         {
             Preset.ChuteParameters parameters = preset.parameters[id];
-            this.material = pChute.materials.GetMaterial(parameters.material);
-            this.templateGUI.materialsID = pChute.materials.GetMaterialIndex(parameters.material);
+            this.material = this.pChute.materials.GetMaterial(parameters.material);
+            this.templateGUI.materialsID = this.pChute.materials.GetMaterialIndex(parameters.material);
             this.templateGUI.preDepDiam = parameters.preDeployedDiameter;
             this.templateGUI.depDiam = parameters.deployedDiameter;
             this.templateGUI.isPressure = parameters.minIsPressure;
@@ -315,12 +304,12 @@ namespace RealChute
             this.templateGUI.cutAlt = parameters.cutAlt;
             this.templateGUI.preDepSpeed = parameters.preDeploymentSpeed;
             this.templateGUI.depSpeed = parameters.deploymentSpeed;
-            if (pChute.textureLibrary == preset.textureLibrary || pChute.textureLibrary != "none")
+            if (this.textures != null)
             {
-                if (textures.canopyNames.Contains(parameters.chuteTexture) && textures.canopies.Count > 0 && !string.IsNullOrEmpty(parameters.chuteTexture)) { this.templateGUI.chuteID = textures.GetCanopyIndex(textures.GetCanopy(parameters.chuteTexture)); }
-                if (textures.modelNames.Contains(parameters.modelName) && textures.models.Count > 0 && !string.IsNullOrEmpty(parameters.modelName)) { this.templateGUI.modelID = textures.GetModelIndex(textures.GetModel(parameters.modelName)); }
+                if (this.textures.ContainsCanopy(parameters.chuteTexture)) { this.templateGUI.chuteID = this.textures.GetCanopyIndex(parameters.chuteTexture); }
+                if (this.textures.ContainsModel(parameters.modelName)) { this.templateGUI.modelID = this.textures.GetModelIndex(parameters.modelName); }
             }
-            this.templateGUI.typeID = RCUtils.types.ToList().IndexOf(parameters.type);
+            this.templateGUI.typeID = RCUtils.types.IndexOf(parameters.type);
             this.templateGUI.calcSelect = parameters.calcSelect;
             this.templateGUI.getMass = parameters.getMass;
             this.templateGUI.useDry = parameters.useDry;
@@ -337,7 +326,7 @@ namespace RealChute
             this.parachute = this.pChute.rcModule.parachutes[this.id];
             this.pChute.materials.TryGetMaterial(this.parachute.material, ref this.material);
             this.templateGUI.materialsID = this.pChute.materials.GetMaterialIndex(this.parachute.material);
-            if (this.pChute.textureLibrary != "none" && !string.IsNullOrEmpty(this.pChute.textureLibrary))
+            if (this.textures != null)
             {
                 this.textures.TryGetCanopy(this.templateGUI.chuteID, ref this.canopy);
                 this.textures.TryGetModel(this.templateGUI.modelID, ref this.model);
@@ -345,23 +334,34 @@ namespace RealChute
 
             if (HighLogic.LoadedSceneIsEditor)
             {
-                if (this.pChute.textureLibrary != "none" && this.textures != null)
+                if (this.textures != null)
                 {
-                    if (this.templateGUI.chuteID == -1 && this.textures.TryGetCanopy(this.currentCanopy, ref this.canopy))
+                    if (this.templateGUI.chuteID == -1)
                     {
-                        this.templateGUI.chuteID = this.textures.GetCanopyIndex(this.canopy);
+                        if (this.textures.TryGetCanopy(this.currentCanopy, ref this.canopy))
+                        {
+                            this.templateGUI.chuteID = this.textures.GetCanopyIndex(this.canopy.name);
+                        }
+                        else { this.templateGUI.modelID = 0; }
                     }
-                    else if (this.templateGUI.chuteID == -1) { this.templateGUI.modelID = 0; }
-                    if (this.templateGUI.modelID == -1 && this.textures.TryGetModel(this.parachute.parachuteName, ref this.model, true))
+
+                    if (this.templateGUI.modelID == -1)
                     {
-                        this.templateGUI.modelID = this.textures.GetModelIndex(this.model);
+                        if (this.textures.TryGetModel(this.parachute.parachuteName, ref this.model, true))
+                        {
+                            this.templateGUI.modelID = this.textures.GetModelIndex(this.model.name);
+                        }
+                        else { this.templateGUI.modelID = 0; }
                     }
-                    else if (this.templateGUI.modelID == -1) { this.templateGUI.modelID = 0; }
-                    if (this.templateGUI.typeID == -1 && RCUtils.types.Contains(this.currentType))
+
+                    if (this.templateGUI.typeID == -1)
                     {
-                        this.templateGUI.typeID = RCUtils.types.ToList().IndexOf(this.currentType);
+                        if (RCUtils.types.Contains(this.currentType))
+                        {
+                            this.templateGUI.typeID = RCUtils.types.IndexOf(this.currentType);
+                        }
+                        else { this.templateGUI.typeID = 0; }
                     }
-                    else if (this.templateGUI.typeID == -1) { this.templateGUI.typeID = 0; }
                 }
 
                 this.templateGUI.preDepDiam = this.parachute.preDeployedDiameter.ToString();
@@ -370,8 +370,7 @@ namespace RealChute
                 if (this.templateGUI.isPressure) { this.templateGUI.predepClause = this.parachute.minPressure.ToString(); }
                 else { this.templateGUI.predepClause = this.parachute.minDeployment.ToString(); }
                 this.templateGUI.deploymentAlt = this.parachute.deploymentAlt.ToString();
-                this.templateGUI.cutAlt = this.parachute.cutAlt.ToString();
-                if (this.templateGUI.cutAlt == "-1") { this.templateGUI.cutAlt = string.Empty; }
+                this.templateGUI.cutAlt = this.parachute.cutAlt == -1 ? string.Empty : this.parachute.cutAlt.ToString();
                 this.templateGUI.preDepSpeed = this.parachute.preDeploymentSpeed.ToString();
                 this.templateGUI.depSpeed = this.parachute.deploymentSpeed.ToString();
             }

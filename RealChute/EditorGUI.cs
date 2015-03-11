@@ -17,6 +17,17 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
+    /// <summary>
+    /// Parachute calculation type
+    /// </summary>
+    public enum ParachuteType
+    {
+        NONE,
+        MAIN,
+        DROGUE,
+        DRAG
+    }
+
     public class EditorGUI
     {
         #region Propreties
@@ -239,7 +250,7 @@ namespace RealChute
             //Spares
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (RCUtils.CanParseWithEmpty(pChute.spares) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(pChute.spares), -1, 10) && RCUtils.IsWholeNumber(RCUtils.ParseWithEmpty(pChute.spares))) { GUILayout.Label("Spare chutes:", skins.label); }
+            if (RCUtils.CanParseEmpty(pChute.spares) && RCUtils.CheckRange(RCUtils.ParseEmpty(pChute.spares), -1, 10) && RCUtils.IsWholeNumber(RCUtils.ParseEmpty(pChute.spares))) { GUILayout.Label("Spare chutes:", skins.label); }
             else { GUILayout.Label("Spare chutes:", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             pChute.spares = GUILayout.TextField(pChute.spares, 10, skins.textField, GUILayout.Width(150));

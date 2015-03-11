@@ -80,7 +80,7 @@ namespace RealChute
                     else { main.Add("Predeployment altitude"); }
                 }
                 if (!RCUtils.CanParse(deploymentAlt) || !RCUtils.CheckRange(float.Parse(deploymentAlt), 10, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Deployment altitude"); }
-                if (!RCUtils.CanParseWithEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Autocut altitude"); }
+                if (!RCUtils.CanParseEmpty(cutAlt) || !RCUtils.CheckRange(RCUtils.ParseEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { main.Add("Autocut altitude"); }
                 if (!RCUtils.CanParse(preDepSpeed) || !RCUtils.CheckRange(float.Parse(preDepSpeed), 0.5f, 5)) { main.Add("Predeployment speed"); }
                 if (!RCUtils.CanParse(depSpeed) || !RCUtils.CheckRange(float.Parse(depSpeed), 1, 10)) { main.Add("Deployment speed"); }
                 return main;
@@ -403,7 +403,7 @@ namespace RealChute
             //Cut altitude
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (RCUtils.CanParseWithEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseWithEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { GUILayout.Label("Autocut altitude (m):", skins.label); }
+            if (RCUtils.CanParseEmpty(cutAlt) && RCUtils.CheckRange(RCUtils.ParseEmpty(cutAlt), -1, (float)body.GetMaxAtmosphereAltitude())) { GUILayout.Label("Autocut altitude (m):", skins.label); }
             else { GUILayout.Label("Autocut altitude (m):", RCUtils.redLabel); }
             GUILayout.FlexibleSpace();
             cutAlt = GUILayout.TextField(cutAlt, 10, skins.textField, GUILayout.Width(150));

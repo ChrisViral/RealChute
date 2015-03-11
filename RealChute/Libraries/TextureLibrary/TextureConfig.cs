@@ -36,11 +36,11 @@ namespace RealChute.Libraries
             get { return this._cases; }
         }
 
-        public Dictionary<string, CaseConfig[]> _types = new Dictionary<string, CaseConfig[]>();
+        public Dictionary<string, string[]> _types = new Dictionary<string, string[]>();
         /// <summary>
         /// Dictionary of all the available parachute types associated with all the CaseConfigs which it apply it
         /// </summary>
-        private Dictionary<string, CaseConfig[]> types
+        private Dictionary<string, string[]> types
         {
             get { return this._types; }
         }
@@ -90,6 +90,15 @@ namespace RealChute.Libraries
             get { return this._transforms; }
         }
 
+        private Dictionary<int, string[]> _parameters = new Dictionary<int, string[]>();
+        /// <summary>
+        /// Amount of parameters, and so avaiable chutes, with the names of the ModelConfigs which have the given amount
+        /// </summary>
+        public Dictionary<int, string[]> parameters
+        {
+            get { return this._parameters; }
+        }
+
         private string[] _modelNames = new string[0];
         /// <summary>
         /// Array of the names of all the model configs available
@@ -102,11 +111,6 @@ namespace RealChute.Libraries
 
         #region Constructor
         /// <summary>
-        /// Creates an empty TextureConfig
-        /// </summary>
-        public TextureConfig() { }
-
-        /// <summary>
         /// Initiates all the texture and model nodes in this model config
         /// </summary>
         public TextureConfig(ConfigNode node)
@@ -114,18 +118,17 @@ namespace RealChute.Libraries
             node.TryGetValue("name", ref _name);
 
             this._cases = node.GetNodes("CASE_TEXTURE").Select(n => new CaseConfig(n)).ToDictionary(c => c.name, c => c);
-            string[] distrinctTypes = this._cases.Values.SelectMany(c => c.types).Distinct().ToArray();
             this._caseNames = this._cases.Keys.ToArray();
-            foreach(string type in distrinctTypes)
-            {
-                this._types.Add(type, this._cases.Values.Where(c => c.types.Contains(type)).ToArray());
-            }
+            this._cases.Values.SelectMany(c => c.types).Distinct().ForEach(t => this._types
+                .Add(t, this._cases.Values.Where(c => c.types.Contains(t)).Select(c => c.name).ToArray()));
 
             this._canopies = node.GetNodes("CANOPY_TEXTURE").Select(n => new CanopyConfig(n)).ToDictionary(c => c.name, c => c);
             this._canopyNames = this._canopies.Keys.ToArray();
 
             this._models = node.GetNodes("CANOPY_MODEL").Select(n => new ModelConfig(n)).ToDictionary(m => m.name, m => m);
             this._modelNames = this._models.Keys.ToArray();
+            this._models.Values.Select(m => m.parameters.Count).Distinct().ForEach(c => this._parameters
+                .Add(c, this.models.Values.Where(m => m.parameters.Count == c).Select(m => m.name).ToArray()));
             foreach (ModelConfig model in models.Values)
             {
                 model.parameters.ForEach(p => _transforms.Add(p.transformName, model));
@@ -143,6 +146,10 @@ namespace RealChute.Libraries
             return _cases.ContainsKey(name);
         }
 
+        /// <summary>
+        /// If the types dictionary contains the given type
+        /// </summary>
+        /// <param name="type">Type of the chute</param>
         public bool ContainsType(string type)
         {
             return this._types.ContainsKey(type);
@@ -162,7 +169,7 @@ namespace RealChute.Libraries
         /// Returns all the CaseConfigs of the given parachute type
         /// </summary>
         /// <param name="type">Type of the parachute</param>
-        public CaseConfig[] GetCasesOfType(string type)
+        public string[] GetCasesOfType(string type)
         {
             if (!ContainsType(type)) { throw new KeyNotFoundException("Could not find \"" + type + " parachute type in the library"); }
             return this._types[type];
@@ -175,9 +182,9 @@ namespace RealChute.Libraries
         /// <param name="type">Type of the parachute</param>
         public CaseConfig GetCase(int index, string type)
         {
-            CaseConfig[] cases = GetCasesOfType(type);
-            if (!cases.IndexInRange(index)) { throw new IndexOutOfRangeException("CaseConfig index [" + index + "] of \"" + type + "\" type is out of range"); }
-            return cases[index];
+            string[] names = GetCasesOfType(type);
+            if (!names.IndexInRange(index)) { throw new IndexOutOfRangeException("CaseConfig index [" + index + "] of \"" + type + "\" type is out of range"); }
+            return this._cases[names[index]];
         }
 
         /// <summary>
@@ -206,10 +213,10 @@ namespace RealChute.Libraries
         {
             if (ContainsType(type))
             {
-                CaseConfig[] cases = this._types[type];
-                if (cases.IndexInRange(index))
+                string[] names = this._types[type];
+                if (names.IndexInRange(index))
                 {
-                    parachuteCase = cases[index];
+                    parachuteCase = this.cases[names[index]];
                     return true;
                 }
             }
@@ -220,10 +227,10 @@ namespace RealChute.Libraries
         /// <summary>
         /// Returns the index of this case if it exists
         /// </summary>
-        /// <param name="parachuteCase">Case config searched for</param>
-        public int GetCaseIndex(CaseConfig parachuteCase)
+        /// <param name="name">Name of the CaseConfig to look for</param>
+        public int GetCaseIndex(string name)
         {
-            return this._caseNames.IndexOf(parachuteCase.name);
+            return this._caseNames.IndexOf(name);
         }
 
         /// <summary>
@@ -294,10 +301,10 @@ namespace RealChute.Libraries
         /// <summary>
         /// Returns the index of the canopy config if it exists
         /// </summary>
-        /// <param name="canopy">Canopy config searched for</param>
-        public int GetCanopyIndex(CanopyConfig canopy)
+        /// <param name="name">CName of the CanopyConfig to find</param>
+        public int GetCanopyIndex(string name)
         {
-            return this._canopyNames.IndexOf(canopy.name);
+            return this._canopyNames.IndexOf(name);
         }
 
         /// <summary>
@@ -308,6 +315,15 @@ namespace RealChute.Libraries
         public bool ContainsModel(string name, bool isTransformName = false)
         {
             return isTransformName ? this._transforms.ContainsKey(name) : this._models.ContainsKey(name);
+        }
+
+        /// <summary>
+        /// If there are ModelConfigs with the given amount of parameters
+        /// </summary>
+        /// <param name="count">Amount of parameters</param>
+        public bool ContainsParameters(int count)
+        {
+            return this._parameters.ContainsKey(count);
         }
 
         /// <summary>
@@ -334,6 +350,16 @@ namespace RealChute.Libraries
         {
             if (this._modelNames.IndexInRange(index)) { throw new IndexOutOfRangeException("ModelConfig index [" + index + "] is out of range"); }
             return GetModel(this._modelNames[index]);
+        }
+
+        /// <summary>
+        /// Returns all the ModelConfig names who have the given amount of parameters
+        /// </summary>
+        /// <param name="count">Number of parameters in the ModelConfig</param>
+        public string[] GetParameterModels(int count)
+        {
+            if (ContainsParameters(count)) { throw new KeyNotFoundException("Could not find Model config with " + name + " parameters in the library"); }
+            return this._parameters[count];
         }
 
         /// <summary>
@@ -386,10 +412,10 @@ namespace RealChute.Libraries
         /// <summary>
         /// Returns the index of the model config if it exists
         /// </summary>
-        /// <param name="model">Model config searched for</param>
-        public int GetModelIndex(ModelConfig model)
+        /// <param name="name">Name of the ModelConfig to find</param>
+        public int GetModelIndex(string name)
         {
-            return this._modelNames.IndexOf(model.name);
+            return this._modelNames.IndexOf(name);
         }
         #endregion
     }
