@@ -26,6 +26,16 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// If the given array contains the value looked for
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="value">Element to find in the array</param>
+        public static bool Contains<T>(this T[] array, T value)
+        {
+            return Array.IndexOf(array, value) != -1;
+        }
+
+        /// <summary>
         /// Executes the given action on all the elements of the array
         /// </summary>
         /// <typeparam name="T">Type of the array</typeparam>
@@ -33,6 +43,16 @@ namespace RealChute.Extensions
         public static void ForEach<T>(this T[] array, Action<T> action)
         {
             Array.ForEach(array, action);
+        }
+
+        /// <summary>
+        /// Returns true only if the given index is within the range of the array (above 0 and under the lenght)
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="index">Index to use</param>
+        public static bool IndexInRange<T>(this T[] array, int index)
+        {
+            return index > 0 && index < array.Length;
         }
 
         /// <summary>
@@ -50,16 +70,6 @@ namespace RealChute.Extensions
             {
                 action(e.Current);
             }
-        }
-
-        /// <summary>
-        /// Returns true only if the given index is within the range of the array (above 0 and under the lenght)
-        /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="index">Index to use</param>
-        public static bool IndexInRange<T>(this T[] array, int index)
-        {
-            return index > 0 && index < array.Length;
         }
         #endregion
     }

@@ -39,11 +39,6 @@ namespace RealChute
 
         #region Arrays
         /// <summary>
-        /// Represents the time suffixes
-        /// </summary>
-        public static readonly char[] timeSuffixes = { 's', 'm' };
-
-        /// <summary>
         /// Represent the types of parachutes
         /// </summary>
         public static readonly string[] types = { "Main", "Drogue", "Drag" };
@@ -164,131 +159,6 @@ namespace RealChute
 
         #region Methods
         /// <summary>
-        /// Returns true if the time is parseable, returns false otherwise
-        /// </summary>
-        /// <param name="text">Time value to parse</param>
-        public static bool CanParseTime(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException("text"); }
-            if (timeSuffixes.Contains(text[text.Length - 1]))
-            {
-                text = text.Remove(text.Length - 1, 1);
-            }
-            float f;
-            return float.TryParse(text, out f);
-        }
-
-        /// <summary>
-        /// Parse a time value
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static float ParseTime(string text)
-        {
-
-            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException("text"); }
-            char indicator = text[text.Length - 1];
-            float multiplier = 1;
-            if (timeSuffixes.Contains(indicator))
-            {
-                text = text.Remove(text.Length - 1, 1);
-                if (indicator == 'm') { multiplier = 60; }
-            }
-            return float.Parse(text) * multiplier;
-        }
-
-        /// <summary>
-        /// Tries to parse a float, taking into account the last character as a time indicator. If none, seconds are assumed.
-        /// </summary>
-        /// <param name="text">Time value to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParseTime(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            float multiplier = 1, f = 0;
-            char indicator = text[text.Length - 1];
-            if (timeSuffixes.Contains(indicator))
-            {
-                text = text.Remove(text.Length - 1);
-                if (indicator == 'm') { multiplier = 60; }
-            }
-            if (float.TryParse(text, out f))
-            {
-                result = f * multiplier;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if the value is parsable without actually parsing it
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static bool CanParse(string text)
-        {
-            float f;
-            return float.TryParse(text, out f);
-        }
-
-        /// <summary>
-        /// Tries parsing a float from text. IF it fails, the ref value is left unchanged.
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParse(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            float f;
-            if (float.TryParse(text, out f))
-            {
-                result = f;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if the spares can be parsed
-        /// </summary>
-        /// <param name="text">Value to parse</param>
-        public static bool CanParseEmpty(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { return true; }
-            float f;
-            return float.TryParse(text, out f);
-        }
-
-        /// <summary>
-        /// Parse the string and returns -1 if it's empty
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static float ParseEmpty(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { return -1; }
-            return float.Parse(text);
-        }
-
-        /// <summary>
-        /// Parses the spare chutes. If string is empty, returns true and value becomes -1.
-        /// </summary>
-        /// <param name="text">Value to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParseWithEmpty(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                result = -1;
-                return true;
-            }
-            float f;
-            if (float.TryParse(text, out f))
-            {
-                result = f;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
         /// Returns the array of values contained within a string
         /// </summary>
         /// <param name="text">Array to parse</param>
@@ -343,17 +213,6 @@ namespace RealChute
         }
 
         /// <summary>
-        /// Checks if the value is within the given range
-        /// </summary>
-        /// <param name="f">Value to check</param>
-        /// <param name="min">Bottom of the range to check</param>
-        /// <param name="max">Top of the range to check</param>
-        public static bool CheckRange(float f, float min, float max)
-        {
-            return f <= max && f >= min;
-        }
-
-        /// <summary>
         /// Transform the given time value in seconds to minutes and seconds
         /// </summary>
         /// <param name="time">Time value to transform</param>
@@ -394,24 +253,6 @@ namespace RealChute
                 default:
                     return "Chute #" + (id + 1);
             }
-        }
-
-        /// <summary>
-        /// Creates a centered GUI button
-        /// </summary>
-        /// <param name="text">Button text</param>
-        /// <param name="action">Action on button click</param>
-        /// <param name="width">Width of the button</param>
-        public static void CenteredButton(string text, Action action, float width = 150)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button(text, HighLogic.Skin.button, GUILayout.Width(width)))
-            {
-                action();
-            }
-            GUILayout.FlexibleSpace();
-            GUILayout.EndHorizontal();
         }
         #endregion
     }

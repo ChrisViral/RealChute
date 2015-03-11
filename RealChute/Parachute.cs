@@ -491,7 +491,7 @@ namespace RealChute
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Copy to others", this.skins.button, GUILayout.Height(20), GUILayout.Width(100)))
+                if (GUILayout.Button("Copy to symmetry counterparts", this.skins.button, GUILayout.Height(20), GUILayout.Width(100)))
                 {
                     foreach (Parachute p in this.parachutes)
                     {

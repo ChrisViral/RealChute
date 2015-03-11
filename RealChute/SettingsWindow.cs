@@ -119,7 +119,7 @@ namespace RealChute
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
 
-            RCUtils.CenteredButton("Close", () => this.button.SetFalse(), 100);
+            GUIUtils.CenteredButton("Close", () => this.button.SetFalse(), 100);
         }
         #endregion
     }

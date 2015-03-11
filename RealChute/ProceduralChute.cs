@@ -144,10 +144,10 @@ namespace RealChute
             {
                 List<string> errors = new List<string>();
                 float f = 0;
-                if (!RCUtils.TryParse(this.timer, ref f) || !RCUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
-                if (!RCUtils.TryParseWithEmpty(this.spares, ref f) || !RCUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
-                if (!float.TryParse(this.cutSpeed, out f) || !RCUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
-                if (!float.TryParse(this.landingAlt, out f) || !RCUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
+                if (!GUIUtils.TryParseTime(this.timer, out f) || !GUIUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
+                if (!GUIUtils.TryParseWithEmpty(this.spares, out f) || !GUIUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
+                if (!float.TryParse(this.cutSpeed, out f) || !GUIUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
+                if (!float.TryParse(this.landingAlt, out f) || !GUIUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
                 return errors;
             }
             else { return new List<string>(this.chutes.SelectMany(c => c.templateGUI.errors)); }
@@ -175,9 +175,9 @@ namespace RealChute
             if (!showMessage && (GetErrors(true).Count > 0 || GetErrors(false).Count > 0)) { this.editorGUI.failedVisible = true; return; }
             this.rcModule.mustGoDown = this.mustGoDown;
             this.rcModule.deployOnGround = this.deployOnGround;
-            this.rcModule.timer = RCUtils.ParseTime(this.timer);
+            this.rcModule.timer = GUIUtils.ParseTime(this.timer);
             this.rcModule.cutSpeed = float.Parse(this.cutSpeed);
-            this.rcModule.spareChutes = RCUtils.ParseEmpty(this.spares);
+            this.rcModule.spareChutes = GUIUtils.ParseEmpty(this.spares);
             this.rcModule.chuteCount = (int)this.rcModule.spareChutes;
 
             this.chutes.ForEach(c => c.ApplyChanges(toSymmetryCounterparts));
@@ -191,9 +191,9 @@ namespace RealChute
                     UpdateScale(part, module);
 
                     module.mustGoDown = this.mustGoDown;
-                    module.timer = RCUtils.ParseTime(this.timer);
+                    module.timer = GUIUtils.ParseTime(this.timer);
                     module.cutSpeed = float.Parse(this.cutSpeed);
-                    module.spareChutes = RCUtils.ParseEmpty(this.spares);
+                    module.spareChutes = GUIUtils.ParseEmpty(this.spares);
 
                     ProceduralChute pChute = part.Modules["ProceduralChute"] as ProceduralChute;
                     pChute.presetID = this.presetID;
@@ -496,7 +496,11 @@ namespace RealChute
             {
                 //Windows initiation
                 this.editorGUI.window = new Rect(5, 370, 420, Screen.height - 375);
-                this.chutes.ForEach(c => c.templateGUI.materialsWindow = new Rect(editorGUI.matX, editorGUI.matY, 375, 275));
+                this.chutes.ForEach(c =>
+                {
+                    c.templateGUI.materialsWindow = new Rect(this.editorGUI.matX, this.editorGUI.matY, 375, 275);
+                    c.templateGUI.drag = new Rect(0, 0, 375, 25);
+                });
                 this.editorGUI.failedWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 150, 300, 300);
                 this.editorGUI.successfulWindow = new Rect(Screen.width / 2 - 150, Screen.height / 2 - 25, 300, 50);
                 this.editorGUI.presetsWindow = new Rect(Screen.width / 2 - 200, Screen.height / 2 - 250, 400, 500);

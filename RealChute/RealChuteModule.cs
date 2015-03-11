@@ -723,11 +723,11 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                RCUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
+                GUIUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
             }
 
             //Close button
-            RCUtils.CenteredButton("Close", () => this.visible = false);
+            GUIUtils.CenteredButton("Close", () => this.visible = false);
 
             //Closer
             GUILayout.EndVertical();
