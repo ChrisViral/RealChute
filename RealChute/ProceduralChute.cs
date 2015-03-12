@@ -162,13 +162,13 @@ namespace RealChute
             GUILayout.Label("General:", this.skins.label);
             StringBuilder builder = new StringBuilder();
             builder.AppendJoin(GetErrors(true), "\n");
-            GUILayout.Label(builder.ToString(), RCUtils.redLabel);
+            GUILayout.Label(builder.ToString(), GUIUtils.redLabel);
             GUILayout.Space(10);
 
             GUILayout.Label("Chutes:", this.skins.label);
             builder = new StringBuilder();
             builder.AppendJoin(GetErrors(false), "\n");
-            GUILayout.Label(builder.ToString(), RCUtils.redLabel);
+            GUILayout.Label(builder.ToString(), GUIUtils.redLabel);
             GUILayout.Space(10);
         }
 

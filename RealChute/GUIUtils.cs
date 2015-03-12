@@ -22,6 +22,45 @@ namespace RealChute
         private static GUISkin skins = HighLogic.Skin;
         #endregion
 
+        #region Properties
+        private static GUIStyle _redLabel = null;
+        /// <summary>
+        /// A red KSP label for ProceduralChute
+        /// </summary>
+        public static GUIStyle redLabel
+        {
+            get
+            {
+                if (_redLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(skins.label);
+                    style.normal.textColor = XKCDColors.Red;
+                    style.hover.textColor = XKCDColors.Red;
+                    _redLabel = style;
+                }
+                return _redLabel;
+            }
+        }
+
+        private static GUIStyle _boldLabel = null;
+        /// <summary>
+        /// A bold KSP style label for RealChute GUI
+        /// </summary>
+        public static GUIStyle boldLabel
+        {
+            get
+            {
+                if (_boldLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(skins.label);
+                    style.fontStyle = FontStyle.Bold;
+                    _boldLabel = style;
+                }
+                return _boldLabel;
+            }
+        }
+        #endregion
+
         #region Arrays
         /// <summary>
         /// Represents the time suffixes
@@ -133,7 +172,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, RCUtils.redLabel); }
+            else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
@@ -153,7 +192,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, RCUtils.redLabel); }
+            else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
@@ -173,7 +212,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, RCUtils.redLabel); }
+            else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();

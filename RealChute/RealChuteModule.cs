@@ -708,7 +708,7 @@ namespace RealChute
             //Beggining scroll
             this.scroll = GUILayout.BeginScrollView(this.scroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box);
             GUILayout.Space(5);
-            GUILayout.Label("General:", RCUtils.boldLabel, GUILayout.Width(120));
+            GUILayout.Label("General:", GUIUtils.boldLabel, GUILayout.Width(120));
 
             //General labels
             builder = new StringBuilder("Autocut speed: ").Append(cutSpeed).AppendLine("m/s");
@@ -723,9 +723,9 @@ namespace RealChute
             //Specific labels
             for (int i = 0; i < this.parachutes.Count; i++)
             {
-                GUILayout.Label("___________________________________________", RCUtils.boldLabel);
+                GUILayout.Label("___________________________________________", GUIUtils.boldLabel);
                 GUILayout.Space(3);
-                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", RCUtils.boldLabel, GUILayout.Width(120));
+                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GUIUtils.boldLabel, GUILayout.Width(120));
                 this.parachutes[i].UpdateGUI();
             }
 
@@ -735,7 +735,7 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                GUIUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
+                GUIUtils.CenteredButton("Copy to others chutes", CopyToCouterparts);
             }
 
             //Close button
