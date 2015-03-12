@@ -29,8 +29,8 @@ namespace RealChute.Extensions
         /// </summary>
         public static bool IsEngineer(this Vessel vessel)
         {
-            return FlightGlobals.ActiveVessel.FindPartModulesImplementing<KerbalEVA>()[0]
-                    .part.protoModuleCrew[0].experienceTrait.Title == "Engineer";
+            return FlightGlobals.ActiveVessel.parts[0].Modules["KerbalEVA"].part.protoModuleCrew[0]
+                .experienceTrait.Title == "Engineer";
         }
         #endregion
     }

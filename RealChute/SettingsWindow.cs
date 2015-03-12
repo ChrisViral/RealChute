@@ -19,7 +19,8 @@ namespace RealChute
         #region Fields
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
-        private bool visible = false, showing = true;
+        private bool visible = false, showing = true, destroying = false;
+        private string level = string.Empty;
         private Rect window = new Rect(), drag = new Rect();
         private Texture2D buttonTexture = new Texture2D(38, 38);
         private ApplicationLauncherButton button = new ApplicationLauncherButton();
@@ -58,14 +59,22 @@ namespace RealChute
         {
             this.showing = true;
         }
+
+        private void CloseWindow()
+        {
+            int i = 1;
+            if (int.TryParse(level, out i)) { this.settings.engineerLevel = i; }
+            if (!this.destroying) { this.button.SetFalse(); }
+        }
         #endregion
 
         #region Initialization
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
-            this.window = new Rect(100, 100, 330, 150);
+            this.window = new Rect(100, 100, 330, 175);
             this.drag = new Rect(0, 0, 330, 20);
+            this.level = this.settings.engineerLevel.ToString();
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
             GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
@@ -84,6 +93,8 @@ namespace RealChute
         private void OnDestroy()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            this.destroying = true;
+            CloseWindow();
             RealChuteSettings.SaveSettings();
 
             GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
@@ -118,8 +129,9 @@ namespace RealChute
             this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when staging", this.skins.toggle);
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
+            GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
 
-            GUIUtils.CenteredButton("Close", () => this.button.SetFalse(), 100);
+            GUIUtils.CenteredButton("Close", CloseWindow, 100);
         }
         #endregion
     }
