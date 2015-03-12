@@ -222,9 +222,9 @@ namespace RealChute
             #region Main
             //Indicator label
             GUILayout.Space(10);
-            GUILayout.Label("________________________________________________", RCUtils.boldLabel);
-            GUILayout.Label("Main chute:", RCUtils.boldLabel, GUILayout.Width(150));
-            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
+            GUILayout.Label("________________________________________________", GUIUtils.boldLabel);
+            GUILayout.Label("Main chute:", GUIUtils.boldLabel, GUILayout.Width(150));
+            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GUIUtils.boldLabel);
 
             this.chutes[0].templateGUI.Calculations();
             #endregion
@@ -238,9 +238,9 @@ namespace RealChute
 
                     //Indicator label
                     GUILayout.Space(10);
-                    GUILayout.Label("________________________________________________", RCUtils.boldLabel);
-                    GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", RCUtils.boldLabel, GUILayout.Width(150));
-                    GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", RCUtils.boldLabel);
+                    GUILayout.Label("________________________________________________", GUIUtils.boldLabel);
+                    GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GUIUtils.boldLabel, GUILayout.Width(150));
+                    GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GUIUtils.boldLabel);
 
                     //Texture selector
                     GUILayout.Space(5);
@@ -306,7 +306,7 @@ namespace RealChute
 
             if (this.warning)
             {
-                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", RCUtils.redLabel);
+                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", GUIUtils.redLabel);
             }
 
             if (GUILayout.Button("Close", this.skins.button))
@@ -392,7 +392,7 @@ namespace RealChute
         private void PresetWarning(int id)
         {
             GUILayout.BeginVertical();
-            GUILayout.Label(this.saveWarning ? "Warning: there is already a preset saved under this name. Are you sure you wish to proceed?" : "Are you sure you wish to delete this preset?", RCUtils.redLabel);
+            GUILayout.Label(this.saveWarning ? "Warning: there is already a preset saved under this name. Are you sure you wish to proceed?" : "Are you sure you wish to delete this preset?", GUIUtils.redLabel);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes", this.skins.button))
             {

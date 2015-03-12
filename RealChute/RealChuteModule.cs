@@ -88,8 +88,8 @@ namespace RealChute
         {
             get
             {
-                return HighLogic.CurrentGame.Mode == Game.Modes.CAREER //&& FlightGlobals.ActiveVessel.IsEngineer() will test once optimization is complete
-                    && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value > 1;
+                return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !this.settings.mustBeEngineer || (FlightGlobals.ActiveVessel.IsEngineer()
+                        && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= this.settings.engineerLevel);
             }
         }
 
@@ -218,7 +218,9 @@ namespace RealChute
             {
                 if (!this.canRepackCareer)
                 {
-                    ScreenMessages.PostScreenMessage("Only a lvl 1 and higher engineer can repack a parachute", 5, ScreenMessageStyle.UPPER_CENTER);
+                    int level = this.settings.engineerLevel;
+                    string message = level > 0 ? "Only a level " + level + " and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
+                    ScreenMessages.PostScreenMessage(message, 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
                 }
 
@@ -706,7 +708,7 @@ namespace RealChute
             //Beggining scroll
             this.scroll = GUILayout.BeginScrollView(this.scroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box);
             GUILayout.Space(5);
-            GUILayout.Label("General:", RCUtils.boldLabel, GUILayout.Width(120));
+            GUILayout.Label("General:", GUIUtils.boldLabel, GUILayout.Width(120));
 
             //General labels
             builder = new StringBuilder("Autocut speed: ").Append(cutSpeed).AppendLine("m/s");
@@ -721,9 +723,9 @@ namespace RealChute
             //Specific labels
             for (int i = 0; i < this.parachutes.Count; i++)
             {
-                GUILayout.Label("___________________________________________", RCUtils.boldLabel);
+                GUILayout.Label("___________________________________________", GUIUtils.boldLabel);
                 GUILayout.Space(3);
-                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", RCUtils.boldLabel, GUILayout.Width(120));
+                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GUIUtils.boldLabel, GUILayout.Width(120));
                 this.parachutes[i].UpdateGUI();
             }
 
@@ -733,7 +735,7 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                GUIUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
+                GUIUtils.CenteredButton("Copy to others chutes", CopyToCouterparts);
             }
 
             //Close button

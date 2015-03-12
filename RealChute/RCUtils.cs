@@ -54,43 +54,6 @@ namespace RealChute
             get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
         }
 
-        private static GUIStyle _redLabel = null;
-        /// <summary>
-        /// A red KSP label for ProceduralChute
-        /// </summary>
-        public static GUIStyle redLabel
-        {
-            get
-            {
-                if (_redLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.normal.textColor = XKCDColors.Red;
-                    style.hover.textColor = XKCDColors.Red;
-                    _redLabel = style;
-                }
-                return _redLabel;
-            }
-        }
-
-        private static GUIStyle _boldLabel = null;
-        /// <summary>
-        /// A bold KSP style label for RealChute GUI
-        /// </summary>
-        public static GUIStyle boldLabel
-        {
-            get
-            {
-                if (_boldLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.fontStyle = FontStyle.Bold;
-                    _boldLabel = style;
-                }
-                return _boldLabel;
-            }
-        }
-
         private static string _assemblyVersion = string.Empty;
         /// <summary>
         /// Gets the current version of the assembly
