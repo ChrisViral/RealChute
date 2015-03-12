@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Experience;
 using RealChute.Extensions;
 using RealChute.Libraries;
 using Random = System.Random;
@@ -18,6 +19,9 @@ using Random = System.Random;
 
 namespace RealChute
 {
+    /// <summary>
+    /// Parachute deployment states
+    /// </summary>
     public enum DeploymentStates
     {
         NONE,
@@ -75,8 +79,17 @@ namespace RealChute
             get
             {
                 return (this.groundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.deploymentState == DeploymentStates.CUT)
-                    && this.parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT || p.deploymentState == DeploymentStates.STOWED)
-                    && (this.chuteCount > 0 || this.chuteCount == -1);
+                    && this.parachutes.TrueForAll(p => !p.isDeployed) && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
+            }
+        }
+
+        //If the Kerbal can repack the chute in career mode
+        public bool canRepackCareer
+        {
+            get
+            {
+                return HighLogic.CurrentGame.Mode == Game.Modes.CAREER //&& FlightGlobals.ActiveVessel.IsEngineer() will test once optimization is complete
+                    && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value > 1;
             }
         }
 
@@ -201,9 +214,9 @@ namespace RealChute
         [KSPEvent(guiActive = false, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
         public void GUIRepack()
         {
-            if (canRepack)
+            if (this.canRepack)
             {
-                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER && (!FlightGlobals.ActiveVessel.isEVA || FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value < 1))
+                if (!this.canRepackCareer)
                 {
                     ScreenMessages.PostScreenMessage("Only a lvl 1 and higher engineer can repack a parachute", 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
@@ -461,8 +474,8 @@ namespace RealChute
             this.atmPressure = this.vessel.mainBody.GetPressureAtAlt(ASL);
             this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
-            sqrSpeed = velocity.sqrMagnitude;
-            dragVector = -velocity.normalized;
+            this.sqrSpeed = velocity.sqrMagnitude;
+            this.dragVector = -velocity.normalized;
             if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == Staging.CurrentStage - 1 || Staging.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
@@ -720,11 +733,11 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                RCUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
+                GUIUtils.CenteredButton("Copy to counterparts", CopyToCouterparts);
             }
 
             //Close button
-            RCUtils.CenteredButton("Close", () => this.visible = false);
+            GUIUtils.CenteredButton("Close", () => this.visible = false);
 
             //Closer
             GUILayout.EndVertical();

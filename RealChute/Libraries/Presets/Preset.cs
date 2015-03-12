@@ -126,11 +126,11 @@ namespace RealChute.Libraries
                 get { return this._modelName; }
             }
 
-            private string _type = string.Empty;
+            private int _type = 0;
             /// <summary>
             /// ID of the parachute type
             /// </summary>
-            public string type
+            public int type
             {
                 get { return this._type; }
             }
@@ -261,7 +261,7 @@ namespace RealChute.Libraries
                     if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(templateGUI.chuteID).name; }
                     if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(templateGUI.modelID).name; }
                 }
-                this._type = RCUtils.types[templateGUI.typeID];
+                this._type = templateGUI.typeID;
                 this._calcSelect = templateGUI.calcSelect;
                 this._getMass = templateGUI.getMass;
                 this._useDry = templateGUI.useDry;
@@ -407,15 +407,6 @@ namespace RealChute.Libraries
             get { return this._caseName; }
         }
 
-        private string _bodyName = string.Empty;
-        /// <summary>
-        /// ID of the target planet
-        /// </summary>
-        public string bodyName
-        {
-            get { return this._bodyName; }
-        }
-
         private List<ChuteParameters> _parameters = new List<ChuteParameters>();
         /// <summary>
         /// All parameters for potential chutes
@@ -444,7 +435,6 @@ namespace RealChute.Libraries
             node.TryGetValue("spares", ref _spares);
             node.TryGetValue("landingAlt", ref _landingAlt);
             node.TryGetValue("caseName", ref _caseName);
-            node.TryGetValue("bodyName", ref _bodyName);
             _parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
         }
 
@@ -468,7 +458,6 @@ namespace RealChute.Libraries
             {
                 if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
             }
-            this._bodyName = pChute.body.bodyName;
             _parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
         }
         #endregion
@@ -480,19 +469,18 @@ namespace RealChute.Libraries
         public ConfigNode Save()
         {
             ConfigNode node = new ConfigNode("PRESET");
-            node.AddValue("name", name);
-            node.AddValue("description", description);
-            node.AddValue("textureLibrary", textureLibrary);
-            node.AddValue("sizeID", sizeID);
-            node.AddValue("cutSpeed", cutSpeed);
-            node.AddValue("timer", timer);
-            node.AddValue("mustGoDown", mustGoDown);
-            node.AddValue("deployOnGround", deployOnGround);
-            node.AddValue("spares", spares);
-            node.AddValue("landingAlt", landingAlt);
-            node.AddValue("caseName", caseName);
-            node.AddValue("bodyName", bodyName);
-            parameters.ForEach(p => node.AddNode(p.Save()));
+            node.AddValue("name", this.name);
+            node.AddValue("description", this.description);
+            node.AddValue("textureLibrary", this.textureLibrary);
+            node.AddValue("sizeID", this.sizeID);
+            node.AddValue("cutSpeed", this.cutSpeed);
+            node.AddValue("timer", this.timer);
+            node.AddValue("mustGoDown", this.mustGoDown);
+            node.AddValue("deployOnGround", this.deployOnGround);
+            node.AddValue("spares", this.spares);
+            node.AddValue("landingAlt", this.landingAlt);
+            node.AddValue("caseName", this.caseName);
+            this.parameters.ForEach(p => node.AddNode(p.Save()));
             return node;
         }
         #endregion

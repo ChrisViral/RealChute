@@ -26,6 +26,36 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// If the given array contains the value looked for
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="value">Element to find in the array</param>
+        public static bool Contains<T>(this T[] array, T value)
+        {
+            return Array.IndexOf(array, value) != -1;
+        }
+
+        /// <summary>
+        /// Returns true if one of the elements of the array matches the given predicate
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="match">Match for the element to find</param>
+        public static bool Exists<T>(this T[] array, Predicate<T> match)
+        {
+            return Array.Exists(array, match);
+        }
+
+        /// <summary>
+        /// Returns true only if the given index is within the range of the array (above 0 and under the lenght)
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="index">Index to use</param>
+        public static bool IndexInRange<T>(this T[] array, int index)
+        {
+            return index >= 0 && index < array.Length;
+        }
+
+        /// <summary>
         /// Executes the given action on all the elements of the array
         /// </summary>
         /// <typeparam name="T">Type of the array</typeparam>
@@ -50,16 +80,6 @@ namespace RealChute.Extensions
             {
                 action(e.Current);
             }
-        }
-
-        /// <summary>
-        /// Returns true only if the given index is within the range of the array (above 0 and under the lenght)
-        /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="index">Index to use</param>
-        public static bool IndexInRange<T>(this T[] array, int index)
-        {
-            return index > 0 && index < array.Length;
         }
         #endregion
     }

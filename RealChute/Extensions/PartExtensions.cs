@@ -46,11 +46,11 @@ namespace RealChute.Extensions
         /// <summary>
         /// Gets the children transforms of this specific part
         /// </summary>
-        public static List<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
+        public static IEnumerable<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
         {
-            List<Renderer> toRemove = new List<Renderer>(part.children.Select(p => p.transform).SelectMany(t => t.GetComponentsInChildren<Renderer>()));
-            toRemove.AddRange(module.parachutes.Select(p => p.parachute).SelectMany(t => t.GetComponents<Renderer>()));
-            return part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
+            List<Renderer> toRemove = new List<Renderer>(part.children.SelectMany(p => p.transform.GetComponentsInChildren<Renderer>()));
+            toRemove.AddRange(module.parachutes.SelectMany(p => p.parachute.GetComponents<Renderer>()));
+            return part.transform.GetComponentsInChildren<Renderer>().Except(toRemove);
         }
 
         /// <summary>
@@ -126,8 +126,7 @@ namespace RealChute.Extensions
         /// <param name="animationName">Name of the animation to check</param>
         public static bool CheckAnimationPlaying(this Part part, string animationName)
         {
-            foreach (Animation animation in part.FindModelAnimators(animationName)) { return animation[animationName].normalizedTime >= 1; }
-            return false;
+            return part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
         }
         #endregion
     }

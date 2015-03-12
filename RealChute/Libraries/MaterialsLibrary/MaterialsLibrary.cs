@@ -116,7 +116,7 @@ namespace RealChute.Libraries
                 material = this._materials[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this._materials.Count > 0) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
             return false;
         }
 

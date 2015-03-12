@@ -23,6 +23,15 @@ namespace RealChute.Extensions
             if (vessel.mainBody.ocean && terrainAlt <= 0) { return ASL; }
             return ASL - terrainAlt;
         }
+
+        /// <summary>
+        /// If the given vessel is a Kerbal engineer
+        /// </summary>
+        public static bool IsEngineer(this Vessel vessel)
+        {
+            return FlightGlobals.ActiveVessel.FindPartModulesImplementing<KerbalEVA>()[0]
+                    .part.protoModuleCrew[0].experienceTrait.Title == "Engineer";
+        }
         #endregion
     }
 }
