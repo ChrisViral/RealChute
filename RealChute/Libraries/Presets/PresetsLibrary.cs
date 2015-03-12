@@ -132,6 +132,7 @@ namespace RealChute.Libraries
         /// </summary>
         private void RefreshData()
         {
+            if (this._presets.Count <= 0) { return; }
             int max = this._presets.Values.Select(p => p.parameters.Count).Max();
             for (int i = 1; i <= max; i++)
             {

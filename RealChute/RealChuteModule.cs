@@ -88,8 +88,8 @@ namespace RealChute
         {
             get
             {
-                return HighLogic.CurrentGame.Mode == Game.Modes.CAREER //&& FlightGlobals.ActiveVessel.IsEngineer() will test once optimization is complete
-                    && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value > 1;
+                return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !this.settings.mustBeEngineer || (FlightGlobals.ActiveVessel.IsEngineer()
+                        && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= this.settings.engineerLevel);
             }
         }
 
@@ -218,7 +218,9 @@ namespace RealChute
             {
                 if (!this.canRepackCareer)
                 {
-                    ScreenMessages.PostScreenMessage("Only a lvl 1 and higher engineer can repack a parachute", 5, ScreenMessageStyle.UPPER_CENTER);
+                    int level = this.settings.engineerLevel;
+                    string message = level > 0 ? "Only a level " + level + " and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
+                    ScreenMessages.PostScreenMessage(message, 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
                 }
 
