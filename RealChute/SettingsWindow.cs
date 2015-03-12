@@ -72,7 +72,7 @@ namespace RealChute
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
-            this.window = new Rect(100, 100, 330, 175);
+            this.window = new Rect(100, 100, 330, 200);
             this.drag = new Rect(0, 0, 330, 20);
             this.level = this.settings.engineerLevel.ToString();
             this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
@@ -129,7 +129,10 @@ namespace RealChute
             this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when staging", this.skins.toggle);
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
+            this.settings.mustBeEngineer = GUILayout.Toggle(this.settings.mustBeEngineer, "Only engineers can repack in career", this.skins.toggle);
+            if (!this.settings.mustBeEngineer) { GUI.enabled = false; }
             GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
+            if (!this.settings.mustBeEngineer) { GUI.enabled = true; }
 
             GUIUtils.CenteredButton("Close", CloseWindow, 100);
         }
