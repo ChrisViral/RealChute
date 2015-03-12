@@ -126,11 +126,11 @@ namespace RealChute.Libraries
                 get { return this._modelName; }
             }
 
-            private string _type = string.Empty;
+            private int _type = 0;
             /// <summary>
             /// ID of the parachute type
             /// </summary>
-            public string type
+            public int type
             {
                 get { return this._type; }
             }
@@ -261,7 +261,7 @@ namespace RealChute.Libraries
                     if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(templateGUI.chuteID).name; }
                     if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(templateGUI.modelID).name; }
                 }
-                this._type = RCUtils.types[templateGUI.typeID];
+                this._type = templateGUI.typeID;
                 this._calcSelect = templateGUI.calcSelect;
                 this._getMass = templateGUI.getMass;
                 this._useDry = templateGUI.useDry;

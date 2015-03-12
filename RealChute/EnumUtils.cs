@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -47,28 +48,32 @@ namespace RealChute
         /// <summary>
         /// Quick string -> ParachuteType conversion dictionary
         /// </summary>
-        private static readonly Dictionary<string, ParachuteType> types = new Dictionary<string, ParachuteType>
+        private static readonly Dictionary<int, ParachuteType> typesDict = new Dictionary<int, ParachuteType>
         #region Types
         {
-            { string.Empty, ParachuteType.NONE},
-            { "Main", ParachuteType.MAIN},
-            { "Drogue", ParachuteType.DROGUE},
-            { "Drag", ParachuteType.DRAG}
+            { -1, ParachuteType.NONE},
+            { 0, ParachuteType.MAIN},
+            { 1, ParachuteType.DROGUE},
+            { 2, ParachuteType.DRAG}
         };
         #endregion
 
         /// <summary>
         /// Quick ParachuteState -> string conversion dictionary
         /// </summary>
-        private static readonly Dictionary<ParachuteType, string> typeStrings = new Dictionary<ParachuteType, string>
+        private static readonly Dictionary<ParachuteType, int> typeStrings = new Dictionary<ParachuteType, int>
         #region Types
         {
-            { ParachuteType.NONE, string.Empty},
-            { ParachuteType.MAIN, "Main" },
-            { ParachuteType.DROGUE, "Drogue" },
-            { ParachuteType.DRAG, "Drag" }
+            { ParachuteType.NONE, -1 },
+            { ParachuteType.MAIN, 0 },
+            { ParachuteType.DROGUE, 1 },
+            { ParachuteType.DRAG, 2 }
         };
         #endregion
+        #endregion
+
+        #region Arrays
+        public static readonly string[] types = { "Main", "Drogue", "Drag" };
         #endregion
 
         #region Methods
@@ -91,19 +96,37 @@ namespace RealChute
         }
 
         /// <summary>
-        /// Get the ParachuteType equivalent to the string
+        /// If there exists a type of the given name
         /// </summary>
-        /// <param name="type">String element to get the ParachuteType from</param>
-        public static ParachuteType GetType(string type)
+        /// <param name="type">Name of the type</param>
+        public static bool ContainsType(string type)
         {
-            return types[type];
+            return types.Contains(type);
         }
 
         /// <summary>
-        /// Get the string equivalent to the given ParachuteType
+        /// The int index of the ParachuteType of the given name
+        /// </summary>
+        /// <param name="type">String representation of the ParachuteType</param>
+        public static int IndexOfType(string type)
+        {
+            return types.IndexOf(type);
+        }
+
+        /// <summary>
+        /// Get the ParachuteType equivalent to the given index
+        /// </summary>
+        /// <param name="type">Interget index to get the ParachuteType from</param>
+        public static ParachuteType GetType(int type)
+        {
+            return typesDict[type];
+        }
+
+        /// <summary>
+        /// Get the index equivalent to the given ParachuteType
         /// </summary>
         /// <param name="type">ParachuteType to get the string from</param>
-        public static string GetTypeString(ParachuteType type)
+        public static int GetTypeID(ParachuteType type)
         {
             return typeStrings[type];
         }

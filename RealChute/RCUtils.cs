@@ -37,13 +37,6 @@ namespace RealChute
         public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
         #endregion
 
-        #region Arrays
-        /// <summary>
-        /// Represent the types of parachutes
-        /// </summary>
-        public static readonly string[] types = { "Main", "Drogue", "Drag" };
-        #endregion
-
         #region Propreties
         /// <summary>
         /// String URL to the RealChute settings config

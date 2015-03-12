@@ -17,17 +17,6 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
-    /// <summary>
-    /// Parachute calculation type
-    /// </summary>
-    public enum ParachuteType
-    {
-        NONE,
-        MAIN,
-        DROGUE,
-        DRAG
-    }
-
     public class EditorGUI
     {
         #region Propreties

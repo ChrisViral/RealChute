@@ -133,11 +133,34 @@ namespace RealChute
             if (this.templateGUI.calcSelect)
             {
                 double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass);
-                double alt = this.templateGUI.typeID == 1 ? double.Parse(this.templateGUI.refDepAlt) : double.Parse(this.pChute.landingAlt);
+                double alt = 0, acc = 0;
+                switch (this.templateGUI.type)
+                {
+                    case ParachuteType.MAIN:
+                        {
+                            alt = double.Parse(this.pChute.landingAlt);
+                            acc = (this.body.GeeASL * RCUtils.geeToAcc);
+                            break;
+                        }
+                    case ParachuteType.DROGUE:
+                        {
+                            alt = double.Parse(this.templateGUI.refDepAlt);
+                            acc = (this.body.GeeASL * RCUtils.geeToAcc);
+                            break;
+                        }
+                    case ParachuteType.DRAG:
+                        {
+                            alt = double.Parse(this.pChute.landingAlt);
+                            acc = double.Parse(this.templateGUI.deceleration);
+                            break;
+                        }
+                    default:
+                        break;
+
+                }
                 double density = this.body.GetDensityAtAlt(alt);
                 double speed = double.Parse(this.templateGUI.landingSpeed);
                 speed = speed * speed;
-                double acc = this.templateGUI.typeID == 2 ? double.Parse(this.templateGUI.deceleration) : (this.body.GeeASL * RCUtils.geeToAcc);
 
                 Debug.Log(String.Format("[RealChute]: {0} {1} - m: {2}t, alt: {3}m, ρ: {4}kg/m³, v²: {5}m²/s², a: {6}m/s²", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), m, alt, density, speed, acc));
 
@@ -149,7 +172,7 @@ namespace RealChute
                     this.editorGUI.warning = true;
                 }
                 else { this.editorGUI.warning = false; }
-                this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.typeID == 0 ? (this.parachute.deployedDiameter / 20) : (this.parachute.deployedDiameter / 2));
+                this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.type == ParachuteType.MAIN ? (this.parachute.deployedDiameter / 20) : (this.parachute.deployedDiameter / 2));
                 Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
             }
 
@@ -309,7 +332,7 @@ namespace RealChute
                 if (this.textures.ContainsCanopy(parameters.chuteTexture)) { this.templateGUI.chuteID = this.textures.GetCanopyIndex(parameters.chuteTexture); }
                 if (this.textures.ContainsModel(parameters.modelName)) { this.templateGUI.modelID = this.textures.GetModelIndex(parameters.modelName); }
             }
-            this.templateGUI.typeID = RCUtils.types.IndexOf(parameters.type);
+            this.templateGUI.typeID = parameters.type;
             this.templateGUI.calcSelect = parameters.calcSelect;
             this.templateGUI.getMass = parameters.getMass;
             this.templateGUI.useDry = parameters.useDry;
@@ -354,11 +377,11 @@ namespace RealChute
                         else { this.templateGUI.modelID = 0; }
                     }
 
-                    if (this.templateGUI.typeID == -1)
+                    if (this.templateGUI.type == ParachuteType.NONE)
                     {
-                        if (RCUtils.types.Contains(this.currentType))
+                        if (EnumUtils.ContainsType(this.currentType))
                         {
-                            this.templateGUI.typeID = RCUtils.types.IndexOf(this.currentType);
+                            this.templateGUI.typeID = EnumUtils.IndexOfType(this.currentType);
                         }
                         else { this.templateGUI.typeID = 0; }
                     }
@@ -387,10 +410,11 @@ namespace RealChute
         /// <param name="node">ConfigNode to load the object from</param>
         private void Load(ConfigNode node)
         {
+            int t = 0;
             node.TryGetValue("chuteID", ref this.templateGUI.chuteID);
             node.TryGetValue("modelID", ref this.templateGUI.modelID);
-            node.TryGetValue("typeID", ref this.templateGUI.typeID);
-            node.TryGetValue("lastTypeID", ref this.templateGUI.lastTypeID);
+            if (node.TryGetValue("typeID", ref t)) { this.templateGUI.typeID = t; }
+            if (node.TryGetValue("lastTypeID", ref t)) { this.templateGUI.lastTypeID = t; }
             node.TryGetValue("position", ref this.position);
             node.TryGetValue("isPressure", ref this.templateGUI.isPressure);
             node.TryGetValue("calcSelect", ref this.templateGUI.calcSelect);
