@@ -62,16 +62,6 @@ namespace RealChute
             set { this._guiResizeUpdates = value; }
         }
 
-        private bool _mustBeEngineer = true;
-        /// <summary>
-        /// If a Kerbal must be an engineer to repack a parachute in career
-        /// </summary>
-        public bool mustBeEngineer
-        {
-            get { return this._mustBeEngineer; }
-            set { this._mustBeEngineer = value; }
-        }
-
         private int _engineerLevel = 1;
         /// <summary>
         /// The level at which an engineer must be to be able to repack a parachute
@@ -106,7 +96,6 @@ namespace RealChute
                 settings.AddValue("autoArm", this._autoArm);
                 settings.AddValue("jokeActivated", this._jokeActivated);
                 settings.AddValue("guiResizeUpdates", this._guiResizeUpdates);
-                settings.AddValue("mustBeEngineer", this._mustBeEngineer);
                 settings.AddValue("engineerLevel", this._engineerLevel);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
@@ -119,7 +108,6 @@ namespace RealChute
                 if (!settings.TryGetValue("autoArm", ref this._autoArm)) { mustSave = true; return; }
                 if (!settings.TryGetValue("jokeActivated", ref this._jokeActivated)) { mustSave = true; return; }
                 if (!settings.TryGetValue("guiResizeUpdates", ref this._guiResizeUpdates)) { mustSave = true; return; }
-                if (!settings.TryGetValue("mustBeEngineer", ref this._mustBeEngineer)) { mustSave = true; return; }
                 if (!settings.TryGetValue("engineerLevel", ref this._engineerLevel)) { mustSave = true; return; }
                 this._presets = settings.GetNodes("PRESET");
                 if (mustSave) { SaveSettings(); }
@@ -137,7 +125,6 @@ namespace RealChute
             settings.AddValue("autoArm", fetch._autoArm);
             settings.AddValue("jokeActivated", fetch._jokeActivated);
             settings.AddValue("guiResizeUpdates", fetch._guiResizeUpdates);
-            settings.AddValue("mustBeEngineer", fetch._mustBeEngineer);
             settings.AddValue("engineerLevel", fetch._engineerLevel);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
