@@ -93,7 +93,7 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the body</param>
         public CelestialBody GetBody(int index)
         {
-            if (this._bodyNames.IndexInRange(index)) { throw new IndexOutOfRangeException("CelestialBody index [" + index + "] is out of range"); }
+            if (!this._bodyNames.IndexInRange(index)) { throw new IndexOutOfRangeException("CelestialBody index [" + index + "] is out of range"); }
             return GetBody(this._bodyNames[index]);
         }
 
@@ -109,7 +109,7 @@ namespace RealChute.Libraries
                 index = this._bodyNames.IndexOf(name);
                 return true;
             }
-            Debug.LogError("[RealChute]: Could not find the atmospheric CelestialBody \"" + name + "\" in the library");
+            if (!string.IsNullOrEmpty(name) && this._bodyNames.Length > 0) { Debug.LogError("[RealChute]: Could not find the atmospheric CelestialBody \"" + name + "\" in the library"); }
             return false;
         }
         #endregion

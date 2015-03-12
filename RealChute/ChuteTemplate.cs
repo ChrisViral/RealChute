@@ -349,11 +349,6 @@ namespace RealChute
             this.parachute = this.pChute.rcModule.parachutes[this.id];
             this.pChute.materials.TryGetMaterial(this.parachute.material, ref this.material);
             this.templateGUI.materialsID = this.pChute.materials.GetMaterialIndex(this.parachute.material);
-            if (this.textures != null)
-            {
-                this.textures.TryGetCanopy(this.templateGUI.chuteID, ref this.canopy);
-                this.textures.TryGetModel(this.templateGUI.modelID, ref this.model);
-            }
 
             if (HighLogic.LoadedSceneIsEditor)
             {
@@ -385,6 +380,11 @@ namespace RealChute
                         }
                         else { this.templateGUI.typeID = 0; }
                     }
+                }
+                else if (this.textures != null)
+                {
+                    this.textures.TryGetCanopy(this.templateGUI.chuteID, ref this.canopy);
+                    this.textures.TryGetModel(this.templateGUI.modelID, ref this.model);
                 }
 
                 this.templateGUI.preDepDiam = this.parachute.preDeployedDiameter.ToString();

@@ -118,17 +118,20 @@ namespace RealChute
         //Gets the strings for the selection grids
         internal string[] TextureEntries(SelectorType type)
         {
+            if (this.textures == null) { return new string[0]; }
+            string[] texts = new string[0];
             switch (type)
             {
                 case SelectorType.CASE:
-                    return this.textures.GetCasesOfType(this.type);
+                    this.textures.TryGetCasesOfType(this.type, ref texts); break;
                 case SelectorType.CHUTE:
                     return this.textures.canopyNames;
                 case SelectorType.MODEL:
-                    return this.textures.GetParameterModels(this.chutes.Count);
+                    this.textures.TryGetParameterModels(this.chutes.Count, ref texts); break;
                 default:
                     return new string[0];
             }
+            return texts;
         }
 
         //Gets the total mass of the craft
@@ -373,7 +376,6 @@ namespace RealChute
             {
                 this.caseID = this.textures.GetCaseIndex(preset.caseName);
             }
-            this.bodies.TryGetBodyIndex(preset.bodyName, ref this.planets);
             this.chutes.ForEach(c => c.ApplyPreset(preset));
             Apply(false);
             print("[RealChute]: Applied the " + preset.name + " preset on " + this.part.partInfo.title);
@@ -483,15 +485,6 @@ namespace RealChute
 
             //Creates an instance of the texture library
             this.editorGUI = new EditorGUI(this);
-            if (this.textures != null)
-            {
-                this.editorGUI.cases = this.textures.caseNames;
-                this.editorGUI.canopies = this.textures.canopyNames;
-                this.editorGUI.models = this.textures.modelNames;
-                this.textures.TryGetCase(this.caseID, this.type, ref this.parachuteCase);
-                this.lastCaseID = this.caseID;
-            }
-
             if (HighLogic.LoadedSceneIsEditor)
             {
                 //Windows initiation
@@ -534,7 +527,14 @@ namespace RealChute
                 //Gets the original part state
                 if (this.textures != null && this.caseID == -1)
                 {
-                    if (this.textures.TryGetCase(this.currentCase, ref this.parachuteCase)) { this.caseID = this.textures.GetCaseIndex(this.parachuteCase.name); }
+                    if (this.caseID == -1)
+                    {
+                        if (this.textures.TryGetCase(this.currentCase, ref this.parachuteCase)) { this.caseID = this.textures.GetCaseIndex(this.parachuteCase.name); }
+                    }
+                    else
+                    {
+                        this.textures.TryGetCase(this.caseID, this.type, ref this.parachuteCase);
+                    }
                     this.lastCaseID = this.caseID;
                 }
 
@@ -553,13 +553,21 @@ namespace RealChute
                     this.initiated = true;
                 }
             }
+            else  if (this.textures != null)
+            {
+                this.textures.TryGetCase(this.caseID, this.type, ref this.parachuteCase);
+                this.lastCaseID = this.caseID;
+            }
 
             if (this.parent == null) { this.parent = this.part.FindModelTransform(this.rcModule.parachutes[0].parachuteName).parent; }
 
             //Updates the part
-            if (!string.IsNullOrEmpty(this.textureLibrary))
+            if (this.textures != null)
             {
                 UpdateCaseTexture(this.part, this.rcModule);
+                this.editorGUI.cases = this.textures.caseNames;
+                this.editorGUI.canopies = this.textures.canopyNames;
+                this.editorGUI.models = this.textures.modelNames;
             }
             UpdateScale(this.part, this.rcModule);
         }

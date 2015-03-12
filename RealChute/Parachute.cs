@@ -70,7 +70,12 @@ namespace RealChute
         //If the parachute has passed the minimum deployment clause
         public bool deploymentClause
         {
-            get { return this.minIsPressure ? this.module.atmPressure >= this.minPressure : this.module.trueAlt <= this.minDeployment; }
+            get
+            {
+                if (this.minIsPressure) { return this.module.atmPressure >= this.minPressure; }
+                else if (this.minDeployment == 0) { return this.part.vessel.LandedOrSplashed; }
+                return this.module.trueAlt <= this.minDeployment;
+            }
         }
 
         //If the parachute can deploy
@@ -111,10 +116,14 @@ namespace RealChute
         {
             get
             {
-                if (forcedOrientation >= 90 || forcedOrientation <= 0) { return Vector3.zero; }
-                Vector3 follow = this.forcePosition - this.module.pos;
-                float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
-                return follow.normalized * length;
+                if (this.check)
+                {
+                    if (forcedOrientation >= 90 || forcedOrientation <= 0) { this.forced = Vector3.zero; }
+                    Vector3 follow = this.forcePosition - this.module.pos;
+                    float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
+                    this.forced = follow.normalized * length;
+                }
+                return this.forced;
             }
         }
 
@@ -166,6 +175,8 @@ namespace RealChute
         internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
+        private bool check = true;
+        private Vector3 forced = new Vector3();
         #endregion
 
         #region Constructor

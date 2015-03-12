@@ -126,8 +126,7 @@ namespace RealChute.Extensions
         /// <param name="animationName">Name of the animation to check</param>
         public static bool CheckAnimationPlaying(this Part part, string animationName)
         {
-            foreach (Animation animation in part.FindModelAnimators(animationName)) { return animation[animationName].normalizedTime >= 1; }
-            return false;
+            return part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
         }
         #endregion
     }

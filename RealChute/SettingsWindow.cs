@@ -115,7 +115,7 @@ namespace RealChute
         private void Window(int id)
         {
             GUI.DragWindow(drag);
-            this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when deploying", this.skins.toggle);
+            this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when staging", this.skins.toggle);
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
 

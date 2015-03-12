@@ -84,7 +84,7 @@ namespace RealChute.Libraries
                 config = this._configs[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the TextureConfig \"" + name + "\" in the GameData folder"); }
+            if (!string.IsNullOrEmpty(name) && this._configs.Count > 0) { Debug.LogError("[RealChute]: Could not find the TextureConfig \"" + name + "\" in the GameData folder"); }
             return false;
         }
         #endregion

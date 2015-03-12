@@ -36,13 +36,13 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
-        /// Executes the given action on all the elements of the array
+        /// Returns true if one of the elements of the array matches the given predicate
         /// </summary>
         /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="action">Action to execute on each member of the array</param>
-        public static void ForEach<T>(this T[] array, Action<T> action)
+        /// <param name="match">Match for the element to find</param>
+        public static bool Exists<T>(this T[] array, Predicate<T> match)
         {
-            Array.ForEach(array, action);
+            return Array.Exists(array, match);
         }
 
         /// <summary>
@@ -52,7 +52,17 @@ namespace RealChute.Extensions
         /// <param name="index">Index to use</param>
         public static bool IndexInRange<T>(this T[] array, int index)
         {
-            return index > 0 && index < array.Length;
+            return index >= 0 && index < array.Length;
+        }
+
+        /// <summary>
+        /// Executes the given action on all the elements of the array
+        /// </summary>
+        /// <typeparam name="T">Type of the array</typeparam>
+        /// <param name="action">Action to execute on each member of the array</param>
+        public static void ForEach<T>(this T[] array, Action<T> action)
+        {
+            Array.ForEach(array, action);
         }
 
         /// <summary>

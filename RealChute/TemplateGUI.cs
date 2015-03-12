@@ -468,10 +468,10 @@ namespace RealChute
             GUILayout.BeginVertical();
             MaterialDefinition material = this.pChute.materials.GetMaterial(this.materialsID);
             StringBuilder builder = new StringBuilder();
-            builder.Append("Description:  ").AppendLine(this.material.description);
-            builder.Append("\nDrag coefficient:  ").AppendLine(this.material.dragCoefficient.ToString("0.00#"));
-            builder.Append("\nArea density:  ").Append(this.material.areaDensity * 1000).AppendLine("kg/m²\n");
-            builder.Append("Area cost:  ").Append(this.material.areaCost.ToString()).Append("F/m²");
+            builder.Append("Description:  ").AppendLine(material.description);
+            builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));
+            builder.Append("\nArea density:  ").Append(material.areaDensity * 1000).AppendLine("kg/m²\n");
+            builder.Append("Area cost:  ").Append(material.areaCost.ToString()).Append("F/m²");
             GUILayout.Label(builder.ToString(), this.skins.label);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();

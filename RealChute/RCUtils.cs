@@ -104,10 +104,9 @@ namespace RealChute
                     Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
                     if (version.Revision == 0)
                     {
-                        if (version.Build == 0) { _assemblyVersion = "v" + version.ToString(2); }
-                        _assemblyVersion = "v" + version.ToString(3);
+                        _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
                     }
-                    _assemblyVersion = "v" + version.ToString();
+                    else { _assemblyVersion = "v" + version.ToString(); }
                 }
                 return _assemblyVersion;
             }

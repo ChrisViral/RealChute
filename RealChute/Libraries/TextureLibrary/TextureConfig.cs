@@ -119,19 +119,22 @@ namespace RealChute.Libraries
 
             this._cases = node.GetNodes("CASE_TEXTURE").Select(n => new CaseConfig(n)).ToDictionary(c => c.name, c => c);
             this._caseNames = this._cases.Keys.ToArray();
-            this._cases.Values.SelectMany(c => c.types).Distinct().ForEach(t => this._types
-                .Add(t, this._cases.Values.Where(c => c.types.Contains(t)).Select(c => c.name).ToArray()));
+            this._types = this._cases.Values.SelectMany(c => c.types).Distinct()
+                .ToDictionary(t => t, t => this._cases.Values.Where(c => c.types.Contains(t)).Select(c => c.name).ToArray());
 
             this._canopies = node.GetNodes("CANOPY_TEXTURE").Select(n => new CanopyConfig(n)).ToDictionary(c => c.name, c => c);
             this._canopyNames = this._canopies.Keys.ToArray();
 
             this._models = node.GetNodes("CANOPY_MODEL").Select(n => new ModelConfig(n)).ToDictionary(m => m.name, m => m);
             this._modelNames = this._models.Keys.ToArray();
-            this._models.Values.Select(m => m.parameters.Count).Distinct().ForEach(c => this._parameters
-                .Add(c, this.models.Values.Where(m => m.parameters.Count == c).Select(m => m.name).ToArray()));
-            foreach (ModelConfig model in models.Values)
+            int max = this._models.Values.Select(m => m.parameters.Count).Max();
+            for (int i = 1; i <= max; i++)
             {
-                model.parameters.ForEach(p => _transforms.Add(p.transformName, model));
+                this._parameters.Add(i, this.models.Values.Where(m => m.parameters.Count >= i).Select(m => m.name).ToArray());
+            }
+            foreach (ModelConfig model in this._models.Values)
+            {
+                model.parameters.ForEach(p => this._transforms.Add(p.transformName, model));
             }
         }
         #endregion
@@ -166,16 +169,6 @@ namespace RealChute.Libraries
         }
 
         /// <summary>
-        /// Returns all the CaseConfigs of the given parachute type
-        /// </summary>
-        /// <param name="type">Type of the parachute</param>
-        public string[] GetCasesOfType(string type)
-        {
-            if (!ContainsType(type)) { throw new KeyNotFoundException("Could not find \"" + type + " parachute type in the library"); }
-            return this._types[type];
-        }
-
-        /// <summary>
         /// Returns the case config at this index and type
         /// </summary>
         /// <param name="index">Index of the case config</param>
@@ -199,7 +192,7 @@ namespace RealChute.Libraries
                 parachuteCase = this._cases[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the CaseConfig  \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this._cases.Count > 0) { Debug.LogError("[RealChute]: Could not find the CaseConfig  \"" + name + "\" in the library"); }
             return false;
         }
 
@@ -216,11 +209,37 @@ namespace RealChute.Libraries
                 string[] names = this._types[type];
                 if (names.IndexInRange(index))
                 {
-                    parachuteCase = this.cases[names[index]];
+                    parachuteCase = this._cases[names[index]];
                     return true;
                 }
             }
-            if (!string.IsNullOrEmpty(type)) { Debug.LogError("[RealChute]: Could not find the CaseConfig of \"" + type + "\" type at the [" + index + "] index in the library"); }
+            if (!string.IsNullOrEmpty(type) && this._types.Count > 0 && this._cases.Count > 0) { Debug.LogError("[RealChute]: Could not find the CaseConfig of \"" + type + "\" type at the [" + index + "] index in the library"); }
+            return false;
+        }
+        
+        /// <summary>
+        /// Returns all the CaseConfigs of the given parachute type
+        /// </summary>
+        /// <param name="type">Type of the parachute</param>
+        public string[] GetCasesOfType(string type)
+        {
+            if (!ContainsType(type)) { throw new KeyNotFoundException("Could not find \"" + type + " parachute type in the library"); }
+            return this._types[type];
+        }
+
+        /// <summary>
+        /// Tries to get all the case names of the given type
+        /// </summary>
+        /// <param name="type">Type of the cases to find</param>
+        /// <param name="cases">Value to store the results into</param>
+        public bool TryGetCasesOfType(string type, ref string[] cases)
+        {
+            if (ContainsType(type))
+            {
+                cases = this._types[type];
+                return true;
+            }
+            if (!string.IsNullOrEmpty(type) && this._types.Count > 0) { Debug.LogError("[RealChute]: Could not find the CaseConfigs of  \"" + type + "\" type in the library"); }
             return false;
         }
 
@@ -274,7 +293,7 @@ namespace RealChute.Libraries
                 canopy = this._canopies[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the CanopyConfig \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this._canopies.Count > 0) { Debug.LogError("[RealChute]: Could not find the CanopyConfig \"" + name + "\" in the library"); }
             return false;
         }
 
@@ -294,7 +313,7 @@ namespace RealChute.Libraries
                     return true;
                 }
             }
-            Debug.LogError("[RealChute]: Could not find the CanopyConfig at the [" + index + "] index in the library");
+            if (this._canopies.Count > 0) { Debug.LogError("[RealChute]: Could not find the CanopyConfig at the [" + index + "] index in the library"); }
             return false;
         }
 
@@ -348,18 +367,8 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the config to get</param>
         public ModelConfig GetModel(int index)
         {
-            if (this._modelNames.IndexInRange(index)) { throw new IndexOutOfRangeException("ModelConfig index [" + index + "] is out of range"); }
+            if (!this._modelNames.IndexInRange(index)) { throw new IndexOutOfRangeException("ModelConfig index [" + index + "] is out of range"); }
             return GetModel(this._modelNames[index]);
-        }
-
-        /// <summary>
-        /// Returns all the ModelConfig names who have the given amount of parameters
-        /// </summary>
-        /// <param name="count">Number of parameters in the ModelConfig</param>
-        public string[] GetParameterModels(int count)
-        {
-            if (ContainsParameters(count)) { throw new KeyNotFoundException("Could not find Model config with " + name + " parameters in the library"); }
-            return this._parameters[count];
         }
 
         /// <summary>
@@ -376,7 +385,7 @@ namespace RealChute.Libraries
                     model = this._transforms[name];
                     return true;
                 }
-                if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the transform \"" + name + "\" in the library"); }
+                if (!string.IsNullOrEmpty(name) && this._transforms.Count > 0) { Debug.LogError("[RealChute]: Could not find the transform \"" + name + "\" in the library"); }
                 return false;
             }
 
@@ -385,7 +394,7 @@ namespace RealChute.Libraries
                 model = this._models[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name)) { Debug.LogError("[RealChute]: Could not find the ModelConfig \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this._models.Count > 0) { Debug.LogError("[RealChute]: Could not find the ModelConfig \"" + name + "\" in the library"); }
             return false;
         }
 
@@ -405,7 +414,33 @@ namespace RealChute.Libraries
                     return true;
                 }
             }
-            Debug.LogError("[RealChute]: Could not find the ModelConfig at the index [" + index + "] in the library");
+            if (this._models.Count > 0) { Debug.LogError("[RealChute]: Could not find the ModelConfig at the index [" + index + "] in the library"); }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns all the ModelConfig names who have the given amount of parameters
+        /// </summary>
+        /// <param name="count">Number of parameters in the ModelConfig</param>
+        public string[] GetParameterModels(int count)
+        {
+            if (!ContainsParameters(count)) { throw new KeyNotFoundException("Could not find Model config with " + count + " parameters in the library"); }
+            return this._parameters[count];
+        }
+
+        /// <summary>
+        /// Tries to get the ModelConfig names with the given amount of parameters
+        /// </summary>
+        /// <param name="count">Amount of parameters</param>
+        /// <param name="models">Value to store the results into</param>
+        public bool TryGetParameterModels(int count, ref string[] models)
+        {
+            if (ContainsParameters(count))
+            {
+                models = this._parameters[count];
+                return true;
+            }
+            if (this._parameters.Count > 0) { Debug.LogError("[RealChute]: Could not find the ModelConfig with " + count + " parameters in the library"); }
             return false;
         }
 
