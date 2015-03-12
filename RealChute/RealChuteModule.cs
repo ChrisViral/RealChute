@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -347,7 +347,7 @@ namespace RealChute
         //Copies stats from the info window to the symmetry counterparts
         private void CopyToCouterparts()
         {
-            foreach(Part part in this.part.symmetryCounterparts)
+            foreach (Part part in this.part.symmetryCounterparts)
             {
                 RealChuteModule module = part.Modules["RealChuteModule"] as RealChuteModule;
                 for (int i = 0; i < parachutes.Count; i++)
@@ -497,7 +497,7 @@ namespace RealChute
                 }
                 else if (this.launched && this.vessel.horizontalSrfSpeed >= cutSpeed && this.vessel.LandedOrSplashed) { ActivateRC(); }
             }
-            
+
             if (this.staged)
             {
                 //Checks if the parachute must disarm
