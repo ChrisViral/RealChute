@@ -89,7 +89,7 @@ namespace RealChute
             get
             {
                 return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !this.settings.mustBeEngineer || (FlightGlobals.ActiveVessel.IsEngineer()
-                        && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= this.settings.engineerLevel);
+                        && FlightGlobals.ActiveVessel.GetVesselCrew()[0].experienceLevel >= this.settings.engineerLevel);
             }
         }
 

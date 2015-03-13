@@ -51,6 +51,7 @@
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
     <Compile Include="GUIUtils.cs" />
+    <Compile Include="KerbalDumper.cs" />
     <Compile Include="RCFilterManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="SizeManager.cs" />

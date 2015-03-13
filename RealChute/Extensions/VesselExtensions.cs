@@ -25,12 +25,11 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
-        /// If the given vessel is a Kerbal engineer
+        /// If the given vessel is a Kerbal engineer (assumes the vessel is a KerbalEVA)
         /// </summary>
         public static bool IsEngineer(this Vessel vessel)
         {
-            return FlightGlobals.ActiveVessel.parts[0].Modules["KerbalEVA"].part.protoModuleCrew[0]
-                .experienceTrait.Title == "Engineer";
+            return FlightGlobals.ActiveVessel.GetVesselCrew()[0].experienceTrait.Title == "Engineer";
         }
         #endregion
     }
