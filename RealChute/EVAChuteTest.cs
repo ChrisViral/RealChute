@@ -44,9 +44,7 @@ namespace RealChute
         {
             if (!HighLogic.LoadedSceneIsFlight) { return; }
             this.parachute = this.part.FindModelTransform(this.transformName);
-            this.pilot = this.part.FindModelTransform("pilot_chute");
             this.parachute.gameObject.SetActive(false);
-            this.pilot.gameObject.SetActive(false);
             this.part.InitiateAnimation(this.animationName);
         }
 
@@ -59,7 +57,6 @@ namespace RealChute
                 if (!this.parachute.gameObject.activeSelf)
                 {
                     this.parachute.gameObject.SetActive(true);
-                    this.pilot.gameObject.SetActive(true);
                 }
                 this.part.PlayAnimation(this.animationName, 0.25f);
             }
@@ -67,7 +64,6 @@ namespace RealChute
             if (this.hidePressed && this.parachute.gameObject.activeSelf)
             {
                 this.parachute.gameObject.SetActive(false);
-                this.pilot.gameObject.SetActive(false);
             }
         }
     }
