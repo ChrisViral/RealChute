@@ -46,14 +46,17 @@
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="EnumUtils.cs" />
+    <Compile Include="EVAChuteTest.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
     <Compile Include="GUIUtils.cs" />
     <Compile Include="KerbalDumper.cs" />
+    <Compile Include="ParachuteStorageModule.cs" />
     <Compile Include="RCFilterManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
+    <Compile Include="RealChuteEVA.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />

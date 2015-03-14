@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
@@ -207,6 +208,33 @@ namespace RealChute
 
                 default:
                     return "Chute #" + (id + 1);
+            }
+        }
+
+        /// <summary>
+        /// Prints all the children transforms of a given transform and appends them to a StringBuilder
+        /// </summary>
+        /// <param name="transform">Transform to get the children of</param>
+        /// <param name="builder">StringBuilder to append the text to</param>
+        public static void PrintChildren(Transform transform, StringBuilder builder)
+        {
+            if (builder == null) { builder = new StringBuilder(); }
+            PrintChildren(transform, builder, 0, "\n");
+        }
+
+        /// <summary>
+        /// Prints all the children of a transform recursively
+        /// </summary>
+        /// <param name="transform">Transform to get the children from</param>
+        /// <param name="builder">StringBuider to store the text into</param>
+        /// <param name="index">Index of the current transform in the tree</param>
+        /// <param name="offset">Tab offset for tree structure</param>
+        private static void PrintChildren(Transform transform, StringBuilder builder, int index, string offset)
+        {
+            builder.Append(offset).AppendFormat("{0}: {1}", index, transform.name);
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                PrintChildren(transform.GetChild(i), builder, i, offset + "\t");
             }
         }
         #endregion

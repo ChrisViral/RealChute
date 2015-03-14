@@ -16,7 +16,7 @@ namespace RealChute
     [KSPAddon(KSPAddon.Startup.Flight, false)]
     public class KerbalDumper : MonoBehaviour
     {
-        private bool keysPressed
+        private bool printPressed
         {
             get
             {
@@ -25,14 +25,23 @@ namespace RealChute
             }
         }
 
+        private bool hidePressed
+        {
+            get
+            {
+                return (Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKey(KeyCode.O))
+                    || (Input.GetKeyDown(KeyCode.O) && Input.GetKey(KeyCode.LeftShift));
+            }
+        }
+
         private void Update()
         {
-            if (this.keysPressed)
+            if (this.printPressed)
             {
                 PrintKerbalModel();
             }
 
-            if (Input.GetKeyDown(KeyCode.O))
+            if (this.hidePressed)
             {
                 DisableJetpack();
             }
@@ -44,41 +53,20 @@ namespace RealChute
             Part part = FlightGlobals.ActiveVessel.Parts[0];
             if (part == null || part.transform == null || part.gameObject == null) { return; }
             ProtoCrewMember kerbal = part.protoModuleCrew[0];
-            Transform parent = part.transform;
             StringBuilder b = new StringBuilder("[KerbalDumper]: Dumping Kerbal data\n\n");
             b.Append("Kerbal name: ").AppendLine(kerbal.name);
             b.Append("Kerbal profession: ").AppendLine(kerbal.experienceTrait.Title);
             b.Append("Profession level: ").AppendLine(kerbal.experienceLevel.ToString());
             b.AppendLine("\nTransform tree:");
-            PrintChildren(parent, b, 0, 0);
+            RCUtils.PrintChildren(part.transform, b);
             print(b.ToString());
-        }
-
-        private void PrintChildren(Transform transform, StringBuilder builder, int index, int offset)
-        {
-            string tab = "\n";
-            for (int i = 0; i < offset; i++)
-            {
-                tab += "\t";
-            }
-            builder.Append(tab).AppendFormat("{0}: {1}", index, transform.name);
-            /*builder.Append(tab).Append("Components:");
-            Component[] c = transform.GetComponents(typeof(Component));
-            for (int i = 0; i < c.Length; i++)
-            {
-                builder.Append(tab).AppendFormat("{0}: {1}, {2}", i, c[i].name, c[i].GetType().Name);
-            }*/
-            for (int i = 0; i < transform.childCount; i++)
-            {
-                PrintChildren(transform.GetChild(i), builder, i, offset + 1);
-            }
         }
 
         private void DisableJetpack()
         {
             Transform parent = FlightGlobals.ActiveVessel.Parts[0].transform;
             Transform jetpack = parent.GetChild(5).GetChild(3);
-            //EVA decals
+            //Flag decals
             parent.GetChild(1).GetChild(0).gameObject.SetActive(false);
             //Jetpack base
             jetpack.GetChild(2).gameObject.SetActive(false);
