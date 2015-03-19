@@ -111,6 +111,12 @@ namespace RealChute
             get { return this.parachutes.Count > 1; }
         }
 
+        //Total chute mass
+        private float chuteMass
+        {
+            get { return this.parachutes.Sum(p => p.chuteMass); }
+        }
+
         //Quick access to the part GUI events
         private BaseEvent _deploy = null, _arm = null, _disarm = null, _cut = null, _repack = null;
         private BaseEvent deploy
@@ -550,16 +556,13 @@ namespace RealChute
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
             if (!CompatibilityChecker.IsAllCompatible())
             {
-                foreach (BaseAction a in Actions)
-                {
-                    a.active = false;
-                }
-                foreach (BaseEvent e in Events)
-                {
-                    e.active = false;
-                    e.guiActive = false;
-                    e.guiActiveEditor = false;
-                }
+                Actions.ForEach(a => a.active = false);
+                Events.ForEach(e =>
+                    {
+                        e.active = false;
+                        e.guiActive = false;
+                        e.guiActiveEditor = false;
+                    });
                 Fields["chuteCount"].guiActive = false;
                 return;
             }
@@ -616,8 +619,7 @@ namespace RealChute
             //Gets the materials
             this.node = node;
             LoadParachutes();
-            float chuteMass = this.parachutes.Sum(p => p.chuteMass);
-            this.part.mass = this.caseMass + chuteMass;
+            this.part.mass = this.caseMass + this.chuteMass;
         }
 
         public override string GetInfo()

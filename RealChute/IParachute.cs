@@ -1,6 +1,4 @@
-﻿using System;
-using UnityEngine;
-
+﻿
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
@@ -12,11 +10,30 @@ using UnityEngine;
 
 namespace RealChute
 {
-    public class ParachuteStorageModule : PartModule
+    public interface IParachute
     {
-        #region KSPFields
-        [KSPField]
-        public float storageSpace = 100;
+        #region Properties
+        /// <summary>
+        /// Parachute fully deployed area
+        /// </summary>
+        float deployedArea { get; }
+
+        /// <summary>
+        /// Total canopy mass
+        /// </summary>
+        float chuteMass { get; }
+
+        /// <summary>
+        /// If this is an EVA parachute
+        /// </summary>
+        bool isEVA { get; }
+        #endregion
+
+        #region Methods
+        /// <summary>
+        /// The info Confignode to save to the persistance
+        /// </summary>
+        ConfigNode Save();
         #endregion
     }
 }

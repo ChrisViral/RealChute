@@ -122,6 +122,7 @@ namespace RealChute
                     Vector3 follow = this.forcePosition - this.module.pos;
                     float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
                     this.forced = follow.normalized * length;
+                    this.check = false;
                 }
                 return this.forced;
             }
@@ -153,13 +154,13 @@ namespace RealChute
         //Parachute
         public string material = "Nylon";
         public float preDeployedDiameter = 1, deployedDiameter = 25;
-        public bool minIsPressure = false, capOff = false;
+        public bool minIsPressure = false;
         public float minDeployment = 25000, minPressure = 0.01f;
         public float deploymentAlt = 700, cutAlt = -1;
         public float preDeploymentSpeed = 2, deploymentSpeed = 6;
         public double time = 0;
-        public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
-        public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
+        public string preDeploymentAnimation = string.Empty, deploymentAnimation = string.Empty;
+        public string parachuteName = string.Empty, capName = string.Empty, baseParachuteName = string.Empty;
         public float forcedOrientation = 0;
         public string depState = "STOWED";
 
@@ -236,7 +237,6 @@ namespace RealChute
         public void LowDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            this.capOff = true;
             this.part.Effect("rcdeploy");
             this.deploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -250,7 +250,6 @@ namespace RealChute
         public void PreDeploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
-            this.capOff = true;
             this.part.Effect("rcpredeploy");
             this.deploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -294,7 +293,6 @@ namespace RealChute
             this.randomTimer.Reset();
             this.dragTimer.Reset();
             this.time = 0;
-            this.capOff = false;
             this.cap.gameObject.SetActive(true);
         }
 
@@ -309,7 +307,7 @@ namespace RealChute
                 float deploymentTime = (float)(Math.Exp(this.time - time) * (this.time / time));
                 return Mathf.Lerp(debutArea, endArea, deploymentTime);
             }
-            else { return endArea; }
+            return endArea;
         }
 
         //Drag force vector
@@ -376,7 +374,10 @@ namespace RealChute
         //Initializes the chute
         public void Initialize()
         {
-            this.module.materials.TryGetMaterial(this.material, ref this.mat);
+            if (!this.module.materials.TryGetMaterial(this.material, ref this.mat))
+            {
+                this.mat = this.module.materials.GetMaterial("Nylon");
+            }
 
             //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
             this.anim = this.part.FindModelAnimators(this.capName).FirstOrDefault();
@@ -402,7 +403,7 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsFlight)
             {
                 if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
-                if (this.capOff)
+                if (this.deploymentState != DeploymentStates.STOWED)
                 {
                     this.part.stackIcon.SetIconColor(XKCDColors.Red);
                     this.cap.gameObject.SetActive(false);
@@ -527,7 +528,6 @@ namespace RealChute
             node.TryGetValue("preDeployedDiameter", ref this.preDeployedDiameter);
             node.TryGetValue("deployedDiameter", ref this.deployedDiameter);
             node.TryGetValue("minIsPressure", ref this.minIsPressure);
-            node.TryGetValue("capOff", ref this.capOff);
             node.TryGetValue("minDeployment", ref this.minDeployment);
             node.TryGetValue("minPressure", ref this.minPressure);
             node.TryGetValue("deploymentAlt", ref this.deploymentAlt);
@@ -561,7 +561,6 @@ namespace RealChute
             node.AddValue("preDeployedDiameter", this.preDeployedDiameter);
             node.AddValue("deployedDiameter", this.deployedDiameter);
             node.AddValue("minIsPressure", this.minIsPressure);
-            node.AddValue("capOff", this.capOff);
             node.AddValue("minDeployment", this.minDeployment);
             node.AddValue("minPressure", this.minPressure);
             node.AddValue("deploymentAlt", this.deploymentAlt);

@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using RealChute.Libraries;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -12,11 +13,30 @@ using UnityEngine;
 
 namespace RealChute
 {
-    public class ParachuteStorageModule : PartModule
+    public class SpareChute : IParachute
     {
-        #region KSPFields
-        [KSPField]
-        public float storageSpace = 100;
-        #endregion
+        public float deployedArea
+        {
+            get { return RCUtils.GetArea(this.deployedDiameter); }
+        }
+
+        public float chuteMass
+        {
+            get { return this.deployedArea * this.material.areaDensity; }
+        }
+
+        public bool isEVA
+        {
+            get { return false; }
+        }
+
+        private MaterialDefinition material = new MaterialDefinition();
+        private float deployedDiameter = 50;
+
+        public ConfigNode Save()
+        {
+            ConfigNode node = new ConfigNode("SPARE");
+            return node;
+        }
     }
 }

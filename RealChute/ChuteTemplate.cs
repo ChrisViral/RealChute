@@ -278,10 +278,10 @@ namespace RealChute
 
                 GameObject obj = GameObject.Instantiate(test) as GameObject;
                 GameObject.Destroy(test);
-                Transform toDestroy = this.parachute.parachute;
-                obj.transform.parent = toDestroy.parent;
-                obj.transform.position = toDestroy.position;
-                obj.transform.rotation = toDestroy.rotation;
+                Transform toDestroy = this.parachute.parachute, t = obj.transform;
+                t.parent = toDestroy.parent;
+                t.position = toDestroy.position;
+                t.rotation = toDestroy.rotation;
                 GameObject.DestroyImmediate(toDestroy.gameObject);
                 this.parachute.parachute = this.part.FindModelTransform(this.parameters.transformName);
                 this.parachute.parachuteName = this.parameters.transformName;
