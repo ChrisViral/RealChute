@@ -54,6 +54,8 @@
     <Compile Include="GUIUtils.cs" />
     <Compile Include="IParachute.cs" />
     <Compile Include="KerbalDumper.cs" />
+    <Compile Include="Libraries\EVAChutes\EVAChute.cs" />
+    <Compile Include="Libraries\EVAChutes\EVAChuteLibrary.cs" />
     <Compile Include="ParachuteStorageModule.cs" />
     <Compile Include="RCFilterManager.cs" />
     <Compile Include="PhysicsWatch.cs" />

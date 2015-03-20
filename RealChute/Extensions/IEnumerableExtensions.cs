@@ -66,6 +66,15 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// Removes the last element of the given list
+        /// </summary>
+        /// <typeparam name="T">Type of the list</typeparam>
+        public static void RemoveLast<T>(this List<T> list)
+        {
+            list.RemoveAt(list.Count - 1);
+        }
+
+        /// <summary>
         /// Executes the given action on each member of the IEnumerable
         /// </summary>
         /// <typeparam name="T">Type of the elements</typeparam>

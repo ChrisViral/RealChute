@@ -79,7 +79,7 @@ namespace RealChute
             get
             {
                 return (this.groundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.deploymentState == DeploymentStates.CUT)
-                    && this.parachutes.TrueForAll(p => !p.isDeployed) && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
+                    && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
             }
         }
 
@@ -585,7 +585,7 @@ namespace RealChute
             //Initiates the Parachutes
             LoadParachutes();
             this.parachutes.ForEach(p => p.Initialize());
-
+            this.part.mass = this.caseMass + this.chuteMass;
             //First initiation of the part
             if (!this.initiated)
             {
@@ -619,7 +619,6 @@ namespace RealChute
             //Gets the materials
             this.node = node;
             LoadParachutes();
-            this.part.mass = this.caseMass + this.chuteMass;
         }
 
         public override string GetInfo()

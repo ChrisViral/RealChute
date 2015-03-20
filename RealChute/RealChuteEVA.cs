@@ -15,7 +15,7 @@ using Random = System.Random;
 
 namespace RealChute
 {
-    public class RealChuteEVA : PartModule, IParachute
+    public class RealChuteEVA : PartModule
     {
         #region KSPFields
         [KSPField(isPersistant = true)]
@@ -68,12 +68,6 @@ namespace RealChute
         public float chuteMass
         {
             get { return this.deployedArea * this.mat.areaDensity; }
-        }
-
-        //Is EVA parachute
-        public bool isEVA
-        {
-            get { return true; }
         }
 
         //If the random deployment timer has been spent
@@ -205,18 +199,22 @@ namespace RealChute
             this.deploymentState = DeploymentStates.CUT;
             this.cut.active = false;
             this.dispose.active = true;
+            this.dragTimer.Reset();
+            this.randomTimer.Reset();
             DeactivateChute();
         }
 
         [KSPEvent(guiActive = true, active = false, guiActiveUnfocused = false, guiName = "Dispose chute")]
         public void GUIDisposeChute()
         {
-            GameObject.Destroy(this.parachute.gameObject);
             if (this.backpackAnchor != null)
             {
                 GameObject.Destroy(this.backpackAnchor.parent.gameObject);
             }
+            else { GameObject.Destroy(this.parachute.gameObject); }
+
             ShowJetpack();
+            this.part.RemoveModule(this);
         }
         #endregion
 
@@ -443,6 +441,7 @@ namespace RealChute
         #region Functions
         private void FixedUpdate()
         {
+
             if (!CompatibilityChecker.IsAllCompatible() || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             this.ASL = FlightGlobals.getAltitudeAtPos(this.part.transform.position);
             this.trueAlt = this.vessel.GetTrueAlt(ASL);
@@ -495,19 +494,17 @@ namespace RealChute
                 Events.ForEach(e => e.guiActive = false);
                 return;
             }
-            if (!materials.TryGetMaterial(this.material, ref this.mat))
-            {
-                this.mat = materials.GetMaterial("Nylon");
-            }
+            materials.TryGetMaterial(this.material, ref this.mat);
+
+            //0.09t is the mass of a Kerbal, prevents accidental mass increase
+            this.part.mass = 0.09f + this.chuteMass;
             this.settings = RealChuteSettings.fetch;
-            this.randomX = (float)(new Random().NextDouble());
+            this.randomTime = (float)(new Random().NextDouble());
         }
 
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
-            //0.09t is the mass of a Kerbal, prevents accidental mass increase
-            this.part.mass = 0.09f + this.chuteMass;
 
             ConfigNode effects = new ConfigNode();
             if (node.TryGetNode("EFFECTS", ref effects))

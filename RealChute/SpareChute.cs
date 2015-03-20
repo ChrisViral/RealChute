@@ -15,6 +15,8 @@ namespace RealChute
 {
     public class SpareChute : IParachute
     {
+        //Spoiler: incredibely incomplete.
+
         public float deployedArea
         {
             get { return RCUtils.GetArea(this.deployedDiameter); }
@@ -32,6 +34,11 @@ namespace RealChute
 
         private MaterialDefinition material = new MaterialDefinition();
         private float deployedDiameter = 50;
+
+        public SpareChute(ConfigNode node)
+        {
+
+        }
 
         public ConfigNode Save()
         {
