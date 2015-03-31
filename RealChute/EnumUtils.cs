@@ -2,6 +2,15 @@
 using System.Collections.Generic;
 using RealChute.Extensions;
 
+/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
+ * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
+ * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
+ * piece of work, you must get my explicit permission on the matter through a private channel, and must also distribute
+ * it through the attribution clause, and must make it clear to anyone using your modification of my work that they
+ * must report any problem related to this usage to you, and not to me. This clause expires if I happen to be
+ * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
+ * back to CC-BY-NC-SA 4.0 INTL.*/
+
 namespace RealChute
 {
     public abstract class EnumConstraint<TEnum> where TEnum : class
@@ -95,9 +104,10 @@ namespace RealChute
         /// Returns the converter of the given type or creates one if there are none
         /// </summary>
         /// <param name="enumType">Type of the enum conversion</param>
-        private static EnumConverter GetConverter(Type enumType)
+        private static EnumConverter GetConverter<T>() where T : struct, TEnum
         {
             EnumConverter converter;
+            Type enumType = typeof(T);
             if (!converters.TryGetValue(enumType, out converter))
             {
                 converter = new EnumConverter(enumType);
@@ -113,7 +123,7 @@ namespace RealChute
         public static string GetName<T>(T value) where T : struct, TEnum
         {
             string result;
-            GetConverter(typeof(T)).TryGetName(value, out result);
+            GetConverter<T>().TryGetName(value, out result);
             return result;
         }
 
@@ -125,7 +135,7 @@ namespace RealChute
         public static T GetValue<T>(string name) where T : struct, TEnum
         {
             T result;
-            GetConverter(typeof(T)).TryGetValue(name, out result);
+            GetConverter<T>().TryGetValue(name, out result);
             return result;
         }
 
@@ -136,7 +146,7 @@ namespace RealChute
         /// <param name="index">Index of the element to get</param>
         public static T GetValueAt<T>(int index) where T : struct, TEnum
         {
-            EnumConverter converter = GetConverter(typeof(T));
+            EnumConverter converter = GetConverter<T>();
             if (!converter.orderedNames.IndexInRange(index)) { return default(T); }
             T result;
             converter.TryGetValue(converter.orderedNames[index], out result);
@@ -150,7 +160,7 @@ namespace RealChute
         /// <param name="index">Index of the name to find</param>
         public static string GetNameAt<T>(int index) where T : struct, TEnum
         {
-            EnumConverter converter = GetConverter(typeof(T));
+            EnumConverter converter = GetConverter<T>();
             if (!converter.orderedNames.IndexInRange(index)) { return null; }
             return converter.orderedNames[index];
         }
@@ -161,7 +171,7 @@ namespace RealChute
         /// <typeparam name="T">Type of the enum</typeparam>
         public static string[] GetNames<T>() where T : struct, TEnum
         {
-            return GetConverter(typeof(T)).orderedNames;
+            return GetConverter<T>().orderedNames;
         }
 
         /// <summary>
@@ -170,7 +180,7 @@ namespace RealChute
         /// <typeparam name="T">Type of the Enum</typeparam>
         public static T[] GetValues<T>() where T : struct, TEnum
         {
-            return Array.ConvertAll(GetConverter(typeof(T)).orderedValues, v => (T)v);
+            return Array.ConvertAll(GetConverter<T>().orderedValues, v => (T)v);
         }
 
         /// <summary>
