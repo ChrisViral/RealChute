@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -38,30 +39,44 @@ namespace RealChute
         {
             get { return this.parachutes.Sum(p => p.chuteMass); }
         }
+
+        private List<IParachute> _parachutes = new List<IParachute>();
+        public List<IParachute> parachutes
+        {
+            get { return this._parachutes; }
+        }
         #endregion
 
         #region Fields
-        public List<IParachute> parachutes = new List<IParachute>();
+        //General
+        private EVAChuteLibrary lib = EVAChuteLibrary.instance;
         public ConfigNode node = new ConfigNode();
+
+        //GUI
+        private GUISkin skins = HighLogic.Skin;
+        private Rect window = new Rect(), drag = new Rect();
+        private Vector2 scrollAvailable = new Vector2(), scrollStored = new Vector2();
+        private int id = Guid.NewGuid().GetHashCode();
+        private bool visible = false;
         #endregion
 
         #region Methods
         private void LoadParachutes()
         {
             if (this.parachutes.Count > 0 && !this.node.HasNode()) { return; }
-            this.parachutes = new List<IParachute>();
+            this._parachutes = new List<IParachute>();
             foreach (ConfigNode n in this.node.nodes)
             {
                 switch(n.name)
                 {
                     case "EVA":
                         {
-                            this.parachutes.Add(new EVAChute(n));
+                            this._parachutes.Add(new EVAChute(n));
                             break;
                         }
                     case "SPARE":
                         {
-                            this.parachutes.Add(new SpareChute(n));
+                            this._parachutes.Add(new SpareChute(n));
                             break;
                         }
                     default:
@@ -69,7 +84,7 @@ namespace RealChute
                 }
                 if (this.availableSpace < 0)
                 {
-                    this.parachutes.RemoveLast();
+                    this._parachutes.RemoveLast();
                     continue;
                 }
             }
@@ -116,6 +131,43 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.parachutes.ForEach(p => node.AddNode(p.Save()));
+        }
+        #endregion
+
+        #region GUI
+        private void OnGUI()
+        {
+            if (this.visible)
+            {
+                GUILayout.Window(this.id, this.window, Window, "Storage Module Selection", this.skins.window);
+            }
+        }
+
+        private void Window(int id)
+        {
+            GUI.DragWindow(drag);
+            GUILayout.BeginVertical();
+
+            StringBuilder b = new StringBuilder();
+            b.AppendFormat("Total storage space: {0}m²", this.storageSpace);
+
+            GUILayout.BeginHorizontal();
+            this.scrollAvailable = GUILayout.BeginScrollView(this.scrollAvailable, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box);
+
+            //Availble chutes
+
+            GUILayout.EndScrollView();
+
+            this.scrollStored = GUILayout.BeginScrollView(this.scrollStored, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box);
+
+            //Stored chutes
+
+            GUILayout.EndScrollView();
+            GUILayout.EndHorizontal();
+
+            //Buttons
+
+            GUILayout.EndVertical();
         }
         #endregion
     }
