@@ -466,7 +466,12 @@ namespace RealChute
             this.materialsID = GUILayout.SelectionGrid(this.materialsID, this.pChute.materials.materialNames, 1, this.skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
-            MaterialDefinition material = this.pChute.materials.GetMaterial(this.materialsID);
+            MaterialDefinition material = new MaterialDefinition();
+            if (this.pChute.materials.materialNames.IndexInRange(this.materialsID))
+            {
+                string name = this.pChute.materials.materialNames[this.materialsID];
+                this.pChute.materials.TryGetMaterial(name, ref material);
+            }
             StringBuilder builder = new StringBuilder();
             builder.Append("Description:  ").AppendLine(material.description);
             builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));
