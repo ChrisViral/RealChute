@@ -138,13 +138,13 @@ namespace RealChute
         {
             get
             {
-                if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetState(this.depState); }
+                if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
                 return this.state;
             }
             set
             {
                 this.state = value;
-                this.depState = EnumUtils.GetStateString(this.state);
+                this.depState = EnumUtils.GetName(this.state);
             }
         }
         #endregion
