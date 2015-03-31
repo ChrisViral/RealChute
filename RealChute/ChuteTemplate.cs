@@ -136,19 +136,19 @@ namespace RealChute
                 double alt = 0, acc = 0;
                 switch (this.templateGUI.type)
                 {
-                    case ParachuteType.MAIN:
+                    case ParachuteType.Main:
                         {
                             alt = double.Parse(this.pChute.landingAlt);
                             acc = (this.body.GeeASL * RCUtils.geeToAcc);
                             break;
                         }
-                    case ParachuteType.DROGUE:
+                    case ParachuteType.Drogue:
                         {
                             alt = double.Parse(this.templateGUI.refDepAlt);
                             acc = (this.body.GeeASL * RCUtils.geeToAcc);
                             break;
                         }
-                    case ParachuteType.DRAG:
+                    case ParachuteType.Drag:
                         {
                             alt = double.Parse(this.pChute.landingAlt);
                             acc = double.Parse(this.templateGUI.deceleration);
@@ -172,7 +172,7 @@ namespace RealChute
                     this.editorGUI.warning = true;
                 }
                 else { this.editorGUI.warning = false; }
-                this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.type == ParachuteType.MAIN ? (this.parachute.deployedDiameter / 20) : (this.parachute.deployedDiameter / 2));
+                this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.type == ParachuteType.Main ? (this.parachute.deployedDiameter / 20) : (this.parachute.deployedDiameter / 2));
                 Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
             }
 
@@ -372,12 +372,10 @@ namespace RealChute
                         else { this.templateGUI.modelID = 0; }
                     }
 
-                    if (this.templateGUI.type == ParachuteType.NONE)
+                    if (this.templateGUI.typeID == -1)
                     {
-                        if (EnumUtils.ContainsType(this.currentType))
-                        {
-                            this.templateGUI.typeID = EnumUtils.IndexOfType(this.currentType);
-                        }
+                        int index = EnumUtils.IndexOf<ParachuteType>(this.currentType);
+                        if (index != -1) { this.templateGUI.typeID = index; }
                         else { this.templateGUI.typeID = 0; }
                     }
                 }
