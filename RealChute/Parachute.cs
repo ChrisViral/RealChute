@@ -542,11 +542,7 @@ namespace RealChute
             node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
             node.TryGetValue("depState", ref this.depState);
-            if (!MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat))
-            {
-                this.material = "Nylon"; 
-                this.mat = MaterialsLibrary.instance.GetMaterial("Nylon");
-            }
+            MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
         }
