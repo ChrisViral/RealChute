@@ -302,7 +302,7 @@ namespace RealChute
         //Materials selector GUI code
         internal void MaterialsSelector()
         {
-            if (this.pChute.materials.count > 1)
+            if (this.pChute.materials.count >= 1)
             {
                 GUILayout.BeginHorizontal(GUILayout.Height(20));
                 GUILayout.BeginVertical();
