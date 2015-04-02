@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -12,124 +13,201 @@ using RealChute.Extensions;
 
 namespace RealChute
 {
-    public static class EnumUtils
+    public abstract class EnumConstraint<TEnum> where TEnum : class
     {
-        #region Dictionaries
         /// <summary>
-        /// quick string -> DeploymentStates conversion dictionary
+        /// Generic enum conversion utility class
         /// </summary>
-        private static readonly Dictionary<string, DeploymentStates> states = new Dictionary<string, DeploymentStates>    
-        #region States
+        private class EnumConverter
         {
-            { string.Empty, DeploymentStates.NONE },
-            { "STOWED", DeploymentStates.STOWED },
-            { "PREDEPLOYED", DeploymentStates.PREDEPLOYED },
-            { "LOWDEPLOYED", DeploymentStates.LOWDEPLOYED },
-            { "DEPLOYED", DeploymentStates.DEPLOYED },
-            { "CUT", DeploymentStates.CUT }
-        };
-        #endregion
+            #region Fields
+            /// <summary>
+            /// Stores the string -> enum conversion
+            /// </summary>
+            private Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
 
+            /// <summary>
+            /// Stores the enum -> string conversion
+            /// </summary>
+            private Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+
+            /// <summary>
+            /// The name of the enum values correctly ordered for index search
+            /// </summary>
+            public string[] orderedNames = new string[0];
+
+            /// <summary>
+            /// The values of the Enum correctly ordered for index search
+            /// </summary>
+            public TEnum[] orderedValues = new TEnum[0];
+            #endregion
+
+            #region Constructor
+            /// <summary>
+            /// Creates a new EnumConvertor from the given type
+            /// </summary>
+            /// <param name="enumType">Type of converter. Must be an enum type.</param>
+            public EnumConverter(Type enumType)
+            {
+                if (enumType == null) { throw new ArgumentNullException("enumType", "Enum conversion type cannot be null"); }
+                Array values = Enum.GetValues(enumType);
+                this.orderedNames = new string[values.Length];
+                this.orderedValues = new TEnum[values.Length];
+                for (int i = 0; i < values.Length; i++)
+                {
+                    TEnum value = (TEnum)values.GetValue(i);
+                    string name = Enum.GetName(enumType, value);
+                    this.orderedNames[i] = name;
+                    this.orderedValues[i] = value;
+                    this.values.Add(name, value);
+                    this.names.Add(value, name);
+                }
+            }
+            #endregion
+
+            #region Methods
+            /// <summary>
+            /// Tries to parse the given Enum member and stores the result in the out parameter. Returns false if it fails.
+            /// </summary>
+            /// <param name="name">String to parse</param>
+            /// <param name="value">Value to store the result into</param>
+            public bool TryGetValue<T>(string name, out T value) where T : struct, TEnum
+            {
+                TEnum result;
+                bool success = values.TryGetValue(name, out result);
+                value = (T)result;
+                return success;
+
+            }
+
+            /// <summary>
+            /// Tries to get the string name of the Enum value and stores it in the out parameter. Returns false if it fails.
+            /// </summary>
+            /// <param name="value">Enum to get the string for</param>
+            /// <param name="name">Value to store the result into</param>
+            public bool TryGetName<T>(T value, out string name) where T : struct, TEnum
+            {
+                return this.names.TryGetValue(value, out name);
+            }
+            #endregion
+        }
+
+        #region Fields
         /// <summary>
-        /// Quick DeploymentStates -> string conversion dictionary
+        /// Holds all the known enum converters
         /// </summary>
-        private static readonly Dictionary<DeploymentStates, string> stateStrings = new Dictionary<DeploymentStates, string>    
-        #region States
-        {
-            { DeploymentStates.NONE, string.Empty },
-            { DeploymentStates.STOWED, "STOWED" },
-            { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
-            { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
-            { DeploymentStates.DEPLOYED, "DEPLOYED" },
-            { DeploymentStates.CUT, "CUT" }
-        };
-        #endregion
-
-        /// <summary>
-        /// Quick string -> ParachuteType conversion dictionary
-        /// </summary>
-        private static readonly Dictionary<int, ParachuteType> typesDict = new Dictionary<int, ParachuteType>
-        #region Types
-        {
-            { -1, ParachuteType.NONE},
-            { 0, ParachuteType.MAIN},
-            { 1, ParachuteType.DROGUE},
-            { 2, ParachuteType.DRAG}
-        };
-        #endregion
-
-        /// <summary>
-        /// Quick ParachuteState -> string conversion dictionary
-        /// </summary>
-        private static readonly Dictionary<ParachuteType, int> typeStrings = new Dictionary<ParachuteType, int>
-        #region Types
-        {
-            { ParachuteType.NONE, -1 },
-            { ParachuteType.MAIN, 0 },
-            { ParachuteType.DROGUE, 1 },
-            { ParachuteType.DRAG, 2 }
-        };
-        #endregion
-        #endregion
-
-        #region Arrays
-        public static readonly string[] types = { "Main", "Drogue", "Drag" };
+        private static Dictionary<Type, EnumConverter> converters = new Dictionary<Type, EnumConverter>();
         #endregion
 
         #region Methods
         /// <summary>
-        /// Gets the DeploymentStates equivalent to the given string
+        /// Returns the converter of the given type or creates one if there are none
         /// </summary>
-        /// <param name="state">String element to get the DeploymentStates from</param>
-        public static DeploymentStates GetState(string state)
+        /// <param name="enumType">Type of the enum conversion</param>
+        private static EnumConverter GetConverter<T>() where T : struct, TEnum
         {
-            return states[state];
+            EnumConverter converter;
+            Type enumType = typeof(T);
+            if (!converters.TryGetValue(enumType, out converter))
+            {
+                converter = new EnumConverter(enumType);
+                converters.Add(enumType, converter);
+            }
+            return converter;
         }
 
         /// <summary>
-        /// Gets the string equivalent to the given DeploymentStates
+        /// Returns the string value of an Enum
         /// </summary>
-        /// <param name="state">DeploymentState element to get the string from</param>
-        public static string GetStateString(DeploymentStates state)
+        /// <param name="value">Enum value to convert to string</param>
+        public static string GetName<T>(T value) where T : struct, TEnum
         {
-            return stateStrings[state];
+            string result;
+            GetConverter<T>().TryGetName(value, out result);
+            return result;
         }
 
         /// <summary>
-        /// If there exists a type of the given name
+        /// Parses the given string to the given Enum type 
         /// </summary>
-        /// <param name="type">Name of the type</param>
-        public static bool ContainsType(string type)
+        /// <typeparam name="T">Type of the enum</typeparam>
+        /// <param name="name">String to parse</param>
+        public static T GetValue<T>(string name) where T : struct, TEnum
         {
-            return types.Contains(type);
+            T result;
+            GetConverter<T>().TryGetValue(name, out result);
+            return result;
         }
 
         /// <summary>
-        /// The int index of the ParachuteType of the given name
+        /// Gets the enum value at the given index
         /// </summary>
-        /// <param name="type">String representation of the ParachuteType</param>
-        public static int IndexOfType(string type)
+        /// <typeparam name="T">Type of the enum</typeparam>
+        /// <param name="index">Index of the element to get</param>
+        public static T GetValueAt<T>(int index) where T : struct, TEnum
         {
-            return types.IndexOf(type);
+            EnumConverter converter = GetConverter<T>();
+            if (!converter.orderedNames.IndexInRange(index)) { return default(T); }
+            T result;
+            converter.TryGetValue(converter.orderedNames[index], out result);
+            return result;
         }
 
         /// <summary>
-        /// Get the ParachuteType equivalent to the given index
+        /// Finds the string name of the enum value at the given index
         /// </summary>
-        /// <param name="type">Interget index to get the ParachuteType from</param>
-        public static ParachuteType GetType(int type)
+        /// <typeparam name="T">Type of the enum</typeparam>
+        /// <param name="index">Index of the name to find</param>
+        public static string GetNameAt<T>(int index) where T : struct, TEnum
         {
-            return typesDict[type];
+            EnumConverter converter = GetConverter<T>();
+            if (!converter.orderedNames.IndexInRange(index)) { return null; }
+            return converter.orderedNames[index];
         }
 
         /// <summary>
-        /// Get the index equivalent to the given ParachuteType
+        /// Returns the string representation of each enum member in order
         /// </summary>
-        /// <param name="type">ParachuteType to get the string from</param>
-        public static int GetTypeID(ParachuteType type)
+        /// <typeparam name="T">Type of the enum</typeparam>
+        public static string[] GetNames<T>() where T : struct, TEnum
         {
-            return typeStrings[type];
+            return GetConverter<T>().orderedNames;
+        }
+
+        /// <summary>
+        /// Gets an array of all the values of the Enum
+        /// </summary>
+        /// <typeparam name="T">Type of the Enum</typeparam>
+        public static T[] GetValues<T>() where T : struct, TEnum
+        {
+            return Array.ConvertAll(GetConverter<T>().orderedValues, v => (T)v);
+        }
+
+        /// <summary>
+        /// Returns the index of the Enum value of the given name
+        /// </summary>
+        /// <typeparam name="T">Type of the Enum</typeparam>
+        /// <param name="name">Name of the element to find</param>
+        public static int IndexOf<T>(string name) where T : struct, TEnum
+        {
+            return GetNames<T>().IndexOf(name);
+        }
+
+        /// <summary>
+        /// Returns the index of the Enum member of the given value
+        /// </summary>
+        /// <typeparam name="T">Type of the Enum</typeparam>
+        /// <param name="value">Value to find the index of</param>
+        public static int IndexOf<T>(T value) where T : struct, TEnum
+        {
+            return GetValues<T>().IndexOf(value);
         }
         #endregion
+    }
+
+    public class EnumUtils : EnumConstraint<Enum>
+    {
+        /* Nothing to see here, this is just a dummy class to force T to be an Enum.
+         * The actual implementation is in EnumConstraint */
     }
 }

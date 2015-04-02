@@ -23,10 +23,9 @@ namespace RealChute
     /// </summary>
     public enum ParachuteType
     {
-        NONE,
-        MAIN,
-        DROGUE,
-        DRAG
+        Main,
+        Drogue,
+        Drag
     }
 
     public class TemplateGUI
@@ -79,18 +78,18 @@ namespace RealChute
                     if (!this.getMass && (!float.TryParse(this.mass, out f) || !GUIUtils.CheckRange(f, 0.1f, 10000))) { errors.Add("Craft mass"); }
                     switch (this.type)
                     {
-                        case ParachuteType.MAIN:
+                        case ParachuteType.Main:
                             {
                                 if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
                                 break;
                             }
-                        case ParachuteType.DROGUE:
+                        case ParachuteType.Drogue:
                             {
                                 if (!float.TryParse(this.landingSpeed, out f) && !GUIUtils.CheckRange(f, 0.1f, 5000)) { errors.Add("Landing speed"); }
                                 if ((!float.TryParse(this.refDepAlt, out f) || !GUIUtils.CheckRange(f, 10, max))) { errors.Add("Mains planned deployment alt"); }
                                 break;
                             }
-                        case ParachuteType.DRAG:
+                        case ParachuteType.Drag:
                             {
                                 if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
                                 if (!float.TryParse(this.deceleration, out f) || !GUIUtils.CheckRange(f, 0.1f, 100)) { errors.Add("Wanted deceleration"); }
@@ -129,7 +128,7 @@ namespace RealChute
             set
             {
                 this.tID = value;
-                this.t= EnumUtils.GetType(value);
+                this.t= EnumUtils.GetValueAt<ParachuteType>(value);
             }
         }
 
@@ -143,7 +142,7 @@ namespace RealChute
             set
             {
                 this.ltID = value;
-                this.lt = EnumUtils.GetType(value);
+                this.lt = EnumUtils.GetValueAt<ParachuteType>(value);
             }
         }
 
@@ -166,7 +165,7 @@ namespace RealChute
         internal bool materialsVisible = false;
         internal Vector2 parachuteScroll = new Vector2(), materialsScroll = new Vector2();
         public int chuteID = -1, modelID = -1, materialsID = 0;
-        private ParachuteType t = ParachuteType.NONE, lt = ParachuteType.MAIN;
+        private ParachuteType t = ParachuteType.Main, lt = ParachuteType.Main;
         private int tID = -1, ltID = 0;
         public bool isPressure = false, calcSelect = true;
         public bool getMass = true, useDry = true;
@@ -200,7 +199,7 @@ namespace RealChute
             {
                 switch (this.type)
                 {
-                    case ParachuteType.MAIN:
+                    case ParachuteType.Main:
                         {
                             this.landingSpeed = "6";
                             this.deploymentAlt = "700";
@@ -210,7 +209,7 @@ namespace RealChute
                             break;
                         }
 
-                    case ParachuteType.DROGUE:
+                    case ParachuteType.Drogue:
                         {
                             this.landingSpeed = "80";
                             this.deploymentAlt = "2500";
@@ -220,7 +219,7 @@ namespace RealChute
                             break;
                         }
 
-                    case ParachuteType.DRAG:
+                    case ParachuteType.Drag:
                         {
                             this.landingSpeed = "100";
                             this.deploymentAlt = "10";
@@ -334,7 +333,7 @@ namespace RealChute
             #region Automatic
             if (this.calcSelect)
             {
-                this.typeID = GUILayout.SelectionGrid(this.typeID, EnumUtils.types, 3, this.skins.button);
+                this.typeID = GUILayout.SelectionGrid(this.typeID, EnumUtils.GetNames<ParachuteType>(), 3, this.skins.button);
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Toggle(this.getMass, "Use current craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = true; }
@@ -356,23 +355,23 @@ namespace RealChute
                 max = 300;
                 switch (this.type)
                 {
-                    case ParachuteType.MAIN:
+                    case ParachuteType.Main:
                         label = "Wanted touchdown speed (m/s):"; break;
-                    case ParachuteType.DROGUE:
+                    case ParachuteType.Drogue:
                         label = "Wanted speed at target alt (m/s):"; max = 5000; break;
-                    case ParachuteType.DRAG:
+                    case ParachuteType.Drag:
                         label = "Planned landing speed (m/s):"; break;
                     default:
                         label = string.Empty; break;
                 }
                 GUIUtils.CreateEntryArea(label, ref this.landingSpeed, 0.1f, max, 100);
 
-                if (this.type == ParachuteType.DROGUE)
+                if (this.type == ParachuteType.Drogue)
                 {
                     GUIUtils.CreateEntryArea("Target altitude (m):", ref this.refDepAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
                 }
 
-                if (this.type == ParachuteType.DRAG)
+                if (this.type == ParachuteType.Drag)
                 {
                     GUIUtils.CreateEntryArea("Wanted deceleration (m/s²):", ref this.deceleration, 0.1f, 100, 100);
                 }
