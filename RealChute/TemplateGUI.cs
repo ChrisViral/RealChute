@@ -23,9 +23,9 @@ namespace RealChute
     /// </summary>
     public enum ParachuteType
     {
-        Main,
-        Drogue,
-        Drag
+        Main = 1,
+        Drogue = 2,
+        Drag = 3
     }
 
     public class TemplateGUI

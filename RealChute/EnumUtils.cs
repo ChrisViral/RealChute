@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using RealChute.Extensions;
+using UnityEngine;
 
 namespace RealChute
 {
@@ -21,6 +22,26 @@ namespace RealChute
             /// Stores the enum -> string conversion
             /// </summary>
             private Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+
+            /// <summary>
+            /// Stores the index of each member with it's string representation
+            /// </summary>
+            private Dictionary<string, int> nameIndexes = new Dictionary<string, int>();
+
+            /// <summary>
+            /// Stores the index of each member with the member as the key
+            /// </summary>
+            private Dictionary<TEnum, int> indexes = new Dictionary<TEnum, int>();
+
+            /// <summary>
+            /// Stores the index of each member as the key with the string representation of it as the value
+            /// </summary>
+            private Dictionary<int, string> atNames = new Dictionary<int, string>();
+
+            /// <summary>
+            /// Stores the index of each member as the key with the member as the value
+            /// </summary>
+            private Dictionary<int, TEnum> atValues = new Dictionary<int, TEnum>();
 
             /// <summary>
             /// The name of the enum values correctly ordered for index search
@@ -52,6 +73,10 @@ namespace RealChute
                     this.orderedValues[i] = value;
                     this.values.Add(name, value);
                     this.names.Add(value, name);
+                    this.indexes.Add(value, i);
+                    this.nameIndexes.Add(name, i);
+                    this.atValues.Add(i, value);
+                    this.atNames.Add(i, name);
                 }
             }
             #endregion
@@ -80,6 +105,55 @@ namespace RealChute
             {
                 return this.names.TryGetValue(value, out name);
             }
+
+            /// <summary>
+            /// Tries to get the Enum value at the given index
+            /// </summary>
+            /// <typeparam name="T">Type of the Enum</typeparam>
+            /// <param name="index">Index of the value to get</param>
+            /// <param name="value">Value to store the result into</param>
+            public bool TryGetValueAt<T>(int index, out T value) where T : struct, TEnum
+            {
+                TEnum result;
+                bool success = this.atValues.TryGetValue(index, out result);
+                value = (T)result;
+                return success;
+            }
+
+            /// <summary>
+            /// Tries to get the Enum member name at the given index
+            /// </summary>
+            /// <typeparam name="T">Type of the Enum</typeparam>
+            /// <param name="index">Index of the name to find</param>
+            /// <param name="name">Value to store the result into</param>
+            public bool TryGetNameAt<T>(int index, out string name) where T : struct, TEnum
+            {
+                return this.atNames.TryGetValue(index, out name);
+            }
+
+            /// <summary>
+            /// Finds the index of a given enum name
+            /// </summary>
+            /// <typeparam name="T">Type of the Enum</typeparam>
+            /// <param name="name">Enum member name to find the index of</param>
+            public int IndexOf<T>(string name) where T : struct, TEnum
+            {
+                int index;
+                if (!this.nameIndexes.TryGetValue(name, out index)) { return -1; }
+                return index;
+            }
+
+            /// <summary>
+            /// Finds the index of a given Enum member
+            /// </summary>
+            /// <typeparam name="T">Type of the Enum</typeparam>
+            /// <param name="value">Enum value to find the index of</param>
+            public int IndexOf<T>(T value) where T : struct, TEnum
+            {
+                int index;
+                if (!this.indexes.TryGetValue(value, out index)) { return -1; }
+                return index;
+            }
             #endregion
         }
 
@@ -94,10 +168,12 @@ namespace RealChute
         /// <summary>
         /// Returns the converter of the given type or creates one if there are none
         /// </summary>
+        /// <typeparam name="T">Type of the enum</typeparam>
         /// <param name="enumType">Type of the enum conversion</param>
-        private static EnumConverter GetConverter(Type enumType)
+        private static EnumConverter GetConverter<T>()
         {
             EnumConverter converter;
+            Type enumType = typeof(T);
             if (!converters.TryGetValue(enumType, out converter))
             {
                 converter = new EnumConverter(enumType);
@@ -109,11 +185,12 @@ namespace RealChute
         /// <summary>
         /// Returns the string value of an Enum
         /// </summary>
+        /// <typeparam name="T">Type of the enum</typeparam>
         /// <param name="value">Enum value to convert to string</param>
         public static string GetName<T>(T value) where T : struct, TEnum
         {
             string result;
-            GetConverter(typeof(T)).TryGetName(value, out result);
+            GetConverter<T>().TryGetName(value, out result);
             return result;
         }
 
@@ -125,21 +202,7 @@ namespace RealChute
         public static T GetValue<T>(string name) where T : struct, TEnum
         {
             T result;
-            GetConverter(typeof(T)).TryGetValue(name, out result);
-            return result;
-        }
-
-        /// <summary>
-        /// Gets the enum value at the given index
-        /// </summary>
-        /// <typeparam name="T">Type of the enum</typeparam>
-        /// <param name="index">Index of the element to get</param>
-        public static T GetValueAt<T>(int index) where T : struct, TEnum
-        {
-            EnumConverter converter = GetConverter(typeof(T));
-            if (!converter.orderedNames.IndexInRange(index)) { return default(T); }
-            T result;
-            converter.TryGetValue(converter.orderedNames[index], out result);
+            GetConverter<T>().TryGetValue(name, out result);
             return result;
         }
 
@@ -150,9 +213,21 @@ namespace RealChute
         /// <param name="index">Index of the name to find</param>
         public static string GetNameAt<T>(int index) where T : struct, TEnum
         {
-            EnumConverter converter = GetConverter(typeof(T));
-            if (!converter.orderedNames.IndexInRange(index)) { return null; }
-            return converter.orderedNames[index];
+            string name;
+            GetConverter<T>().TryGetNameAt<T>(index, out name);
+            return name;
+        }
+
+        /// <summary>
+        /// Gets the enum value at the given index
+        /// </summary>
+        /// <typeparam name="T">Type of the enum</typeparam>
+        /// <param name="index">Index of the element to get</param>
+        public static T GetValueAt<T>(int index) where T : struct, TEnum
+        {
+            T result;
+            GetConverter<T>().TryGetValueAt(index, out result);
+            return result;
         }
 
         /// <summary>
@@ -161,7 +236,7 @@ namespace RealChute
         /// <typeparam name="T">Type of the enum</typeparam>
         public static string[] GetNames<T>() where T : struct, TEnum
         {
-            return GetConverter(typeof(T)).orderedNames;
+            return GetConverter<T>().orderedNames;
         }
 
         /// <summary>
@@ -170,7 +245,7 @@ namespace RealChute
         /// <typeparam name="T">Type of the Enum</typeparam>
         public static T[] GetValues<T>() where T : struct, TEnum
         {
-            return Array.ConvertAll(GetConverter(typeof(T)).orderedValues, v => (T)v);
+            return GetConverter<T>().orderedValues.ConvertAll(v => (T)v);
         }
 
         /// <summary>
@@ -180,7 +255,7 @@ namespace RealChute
         /// <param name="name">Name of the element to find</param>
         public static int IndexOf<T>(string name) where T : struct, TEnum
         {
-            return GetNames<T>().IndexOf(name);
+            return GetConverter<T>().IndexOf<T>(name);
         }
 
         /// <summary>
@@ -190,12 +265,30 @@ namespace RealChute
         /// <param name="value">Value to find the index of</param>
         public static int IndexOf<T>(T value) where T : struct, TEnum
         {
-            return GetValues<T>().IndexOf(value);
+            return GetConverter<T>().IndexOf(value);
+        }
+
+        /// <summary>
+        /// Creates a GUILayout SelectionGrid which shows the names of all the members of an Enum an returns the selected value
+        /// </summary>
+        /// <typeparam name="T">Type of the Enum</typeparam>
+        /// <param name="selected">Currently selected Enum member</param>
+        /// <param name="xCount">Amount of boxes on one line</param>
+        /// <param name="style">GUIStyle of th boxes</param>
+        /// <param name="options">GUILayout options</param>
+        public static T SelectionGrid<T>(T selected, int xCount, GUIStyle style, params GUILayoutOption[] options) where T : struct, TEnum
+        {
+            EnumConverter converter = GetConverter<T>();
+            int index = converter.IndexOf(selected);
+            index = GUILayout.SelectionGrid(index, converter.orderedNames, xCount, options);
+            converter.TryGetValueAt(index, out selected);
+            return selected;
         }
         #endregion
+
     }
 
-    public class EnumUtils : EnumConstraint<Enum>
+    public sealed class EnumUtils : EnumConstraint<Enum>
     {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */

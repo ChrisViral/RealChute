@@ -66,6 +66,17 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// Converts all the elements of the array using the provided converter
+        /// </summary>
+        /// <typeparam name="TIn">Original type</typeparam>
+        /// <typeparam name="TOut">Output type</typeparam>
+        /// <param name="converter">Converter to transform the array members</param>
+        public static TOut[] ConvertAll<TIn, TOut>(this TIn[] array, Converter<TIn, TOut> converter)
+        {
+            return Array.ConvertAll(array, converter);
+        }
+
+        /// <summary>
         /// Removes the last element of the given list
         /// </summary>
         /// <typeparam name="T">Type of the list</typeparam>
