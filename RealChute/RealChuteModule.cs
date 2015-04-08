@@ -24,7 +24,6 @@ namespace RealChute
     /// </summary>
     public enum DeploymentStates
     {
-        NONE,
         STOWED,
         LOWDEPLOYED,
         PREDEPLOYED,

@@ -28,6 +28,15 @@ namespace RealChute
         Drag = 3
     }
 
+    /// <summary>
+    /// Which mode parachute calculations are in
+    /// </summary>
+    public enum CalculationsMode
+    {
+        Automatic = 1,
+        Manual = 2
+    }
+
     public class TemplateGUI
     {
         #region Properties
@@ -73,39 +82,49 @@ namespace RealChute
             {
                 List<string> errors = new List<string>();
                 float f, max = (float)this.body.GetMaxAtmosphereAltitude();
-                if (this.calcSelect)
+                switch (this.mode)
                 {
-                    if (!this.getMass && (!float.TryParse(this.mass, out f) || !GUIUtils.CheckRange(f, 0.1f, 10000))) { errors.Add("Craft mass"); }
-                    switch (this.type)
-                    {
-                        case ParachuteType.Main:
+                    case CalculationsMode.Automatic:
+                        {
+                            if (!this.getMass && (!float.TryParse(this.mass, out f) || !GUIUtils.CheckRange(f, 0.1f, 10000))) { errors.Add("Craft mass"); }
+                            switch (this.type)
                             {
-                                if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
-                                break;
+                                case ParachuteType.Main:
+                                    {
+                                        if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
+                                        break;
+                                    }
+                                case ParachuteType.Drogue:
+                                    {
+                                        if (!float.TryParse(this.landingSpeed, out f) && !GUIUtils.CheckRange(f, 0.1f, 5000)) { errors.Add("Landing speed"); }
+                                        if ((!float.TryParse(this.refDepAlt, out f) || !GUIUtils.CheckRange(f, 10, max))) { errors.Add("Mains planned deployment alt"); }
+                                        break;
+                                    }
+                                case ParachuteType.Drag:
+                                    {
+                                        if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
+                                        if (!float.TryParse(this.deceleration, out f) || !GUIUtils.CheckRange(f, 0.1f, 100)) { errors.Add("Wanted deceleration"); }
+                                        break;
+                                    }
                             }
-                        case ParachuteType.Drogue:
-                            {
-                                if (!float.TryParse(this.landingSpeed, out f) && !GUIUtils.CheckRange(f, 0.1f, 5000)) { errors.Add("Landing speed"); }
-                                if ((!float.TryParse(this.refDepAlt, out f) || !GUIUtils.CheckRange(f, 10, max))) { errors.Add("Mains planned deployment alt"); }
-                                break;
-                            }
-                        case ParachuteType.Drag:
-                            {
-                                if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
-                                if (!float.TryParse(this.deceleration, out f) || !GUIUtils.CheckRange(f, 0.1f, 100)) { errors.Add("Wanted deceleration"); }
-                                break;
-                            }
-                    }
-                    if (!float.TryParse(this.chuteCount, out f) || !GUIUtils.CheckRange(f, 1, 100)) { errors.Add("Parachute count"); }
+                            if (!float.TryParse(this.chuteCount, out f) || !GUIUtils.CheckRange(f, 1, 100)) { errors.Add("Parachute count"); }
+                            break;
+                        }
+
+                    case CalculationsMode.Manual:
+                        {
+                            float p, d;
+                            if (!float.TryParse(this.preDepDiam, out p)) { p = 0; }
+                            if (!float.TryParse(this.depDiam, out d)) { d = 0; }
+                            if (!GUIUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
+                            if (!GUIUtils.CheckRange(d, 1, this.pChute.textures == null ? 70 : this.model.maxDiam)) { errors.Add("Deployed diameter"); }
+                            break;
+                        }
+
+                    default:
+                        break;
                 }
-                else
-                {
-                    float p, d;
-                    if (!float.TryParse(this.preDepDiam, out p)) { p = 0; }
-                    if (!float.TryParse(this.depDiam, out d)) { d = 0; }
-                    if (!GUIUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
-                    if (!GUIUtils.CheckRange(d, 1, this.pChute.textures == null ? 70 : this.model.maxDiam)) { errors.Add("Deployed diameter"); }
-                }
+
                 if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GUIUtils.CheckRange(f, 0.0001f, (float)body.GetPressureASL()) : !GUIUtils.CheckRange(f, 10, max)))
                 {
                     errors.Add(this.isPressure ? "Predeployment pressure" : "Predeployment altitude");
@@ -117,44 +136,6 @@ namespace RealChute
                 return errors;
             }
         }
-
-        public int typeID
-        {
-            get
-            {
-                if (this.tID == -1) { this.typeID = 0; }
-                return tID;
-            }
-            set
-            {
-                this.tID = value;
-                this.t= EnumUtils.GetValueAt<ParachuteType>(value);
-            }
-        }
-
-        public int lastTypeID
-        {
-            get
-            {
-                if (this.ltID == -1) { this.lastTypeID = 0; }
-                return ltID;
-            }
-            set
-            {
-                this.ltID = value;
-                this.lt = EnumUtils.GetValueAt<ParachuteType>(value);
-            }
-        }
-
-        public ParachuteType type
-        {
-            get { return this.t; }
-        }
-
-        public ParachuteType lastType
-        {
-            get { return this.lt; }
-        }
         #endregion
 
         #region Fields
@@ -165,9 +146,10 @@ namespace RealChute
         internal bool materialsVisible = false;
         internal Vector2 parachuteScroll = new Vector2(), materialsScroll = new Vector2();
         public int chuteID = -1, modelID = -1, materialsID = 0;
-        private ParachuteType t = ParachuteType.Main, lt = ParachuteType.Main;
-        private int tID = -1, ltID = 0;
-        public bool isPressure = false, calcSelect = true;
+        public ParachuteType type = ParachuteType.Main, lastType = ParachuteType.Main;
+        private string typeString = string.Empty, lastTypeString = string.Empty;
+        public CalculationsMode mode = CalculationsMode.Automatic;
+        public bool isPressure = false;
         public bool getMass = true, useDry = true;
         public string preDepDiam = string.Empty, depDiam = string.Empty, predepClause = string.Empty;
         public string mass = "10", landingSpeed = "6", deceleration = "10", refDepAlt = "700", chuteCount = "1";
@@ -231,7 +213,7 @@ namespace RealChute
                     default:
                         break;
                 }
-                this.lastTypeID = this.typeID;
+                this.lastType = this.type;
             }
         }
 
@@ -322,82 +304,93 @@ namespace RealChute
         {
             #region Calculations
             //Selection mode
-            GUIUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300, new string[] { "Automatic", "Manual" });
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Calculations mode:", this.skins.label);
+            this.mode = EnumUtils.SelectionGrid(this.mode, 2, this.skins.button);
+            GUILayout.EndHorizontal();
             GUILayout.Space(5);
 
             //Calculations
             this.parachuteScroll = GUILayout.BeginScrollView(this.parachuteScroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.Height(160));
+
             string label;
             float max, min;
-
-            #region Automatic
-            if (this.calcSelect)
+            switch (this.mode)
             {
-                this.typeID = GUILayout.SelectionGrid(this.typeID, EnumUtils.GetNames<ParachuteType>(), 3, this.skins.button);
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.getMass, "Use current craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = true; }
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(!this.getMass, "Input craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = false; }
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
+                #region Automatic
+                case CalculationsMode.Automatic:
+                    {
+                        this.type = EnumUtils.SelectionGrid(this.type, 3, this.skins.button);
+                        GUILayout.BeginHorizontal();
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Toggle(this.getMass, "Use current craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = true; }
+                        GUILayout.FlexibleSpace();
+                        if (GUILayout.Toggle(!this.getMass, "Input craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = false; }
+                        GUILayout.FlexibleSpace();
+                        GUILayout.EndHorizontal();
 
-                if (this.getMass)
-                {
-                    GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"), skins.label);
-                    if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), this.skins.button, GUILayout.Width(125))) { this.useDry = !this.useDry; }
-                }
+                        if (this.getMass)
+                        {
+                            GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"), skins.label);
+                            if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), this.skins.button, GUILayout.Width(125))) { this.useDry = !this.useDry; }
+                        }
 
-                else
-                {
-                    GUIUtils.CreateEntryArea("Mass to use (t):", ref mass, 0.1f, 10000, 100);
-                }
-                max = 300;
-                switch (this.type)
-                {
-                    case ParachuteType.Main:
-                        label = "Wanted touchdown speed (m/s):"; break;
-                    case ParachuteType.Drogue:
-                        label = "Wanted speed at target alt (m/s):"; max = 5000; break;
-                    case ParachuteType.Drag:
-                        label = "Planned landing speed (m/s):"; break;
-                    default:
-                        label = string.Empty; break;
-                }
-                GUIUtils.CreateEntryArea(label, ref this.landingSpeed, 0.1f, max, 100);
+                        else
+                        {
+                            GUIUtils.CreateEntryArea("Mass to use (t):", ref mass, 0.1f, 10000, 100);
+                        }
+                        max = 300;
+                        switch (this.type)
+                        {
+                            case ParachuteType.Main:
+                                label = "Wanted touchdown speed (m/s):"; break;
+                            case ParachuteType.Drogue:
+                                label = "Wanted speed at target alt (m/s):"; max = 5000; break;
+                            case ParachuteType.Drag:
+                                label = "Planned landing speed (m/s):"; break;
+                            default:
+                                label = string.Empty; break;
+                        }
+                        GUIUtils.CreateEntryArea(label, ref this.landingSpeed, 0.1f, max, 100);
 
-                if (this.type == ParachuteType.Drogue)
-                {
-                    GUIUtils.CreateEntryArea("Target altitude (m):", ref this.refDepAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
-                }
+                        if (this.type == ParachuteType.Drogue)
+                        {
+                            GUIUtils.CreateEntryArea("Target altitude (m):", ref this.refDepAlt, 10, (float)body.GetMaxAtmosphereAltitude(), 100);
+                        }
 
-                if (this.type == ParachuteType.Drag)
-                {
-                    GUIUtils.CreateEntryArea("Wanted deceleration (m/s²):", ref this.deceleration, 0.1f, 100, 100);
-                }
+                        if (this.type == ParachuteType.Drag)
+                        {
+                            GUIUtils.CreateEntryArea("Wanted deceleration (m/s²):", ref this.deceleration, 0.1f, 100, 100);
+                        }
 
-                GUIUtils.CreateEntryArea("Parachutes used (parachutes):", ref this.chuteCount, 1, 100, 100);
+                        GUIUtils.CreateEntryArea("Parachutes used (parachutes):", ref this.chuteCount, 1, 100, 100);
+                        break;
+                    }
+                #endregion
+
+                #region Manual
+                case CalculationsMode.Manual:
+                    {
+                        float p, d;
+                        if (!float.TryParse(this.preDepDiam, out p)) { p = -1; }
+                        if (!float.TryParse(this.depDiam, out d)) { d = -1; }
+
+                        //Predeployed diameter
+                        GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100);
+                        if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", this.skins.label); }
+                        else { GUILayout.Label("Resulting predeployed area: --- m²", this.skins.label); }
+
+                        //Deployed diameter
+                        GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1, (this.pChute.textures == null ? 70 : this.model.maxDiam), 100);
+                        if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", this.skins.label); }
+                        else { GUILayout.Label("Resulting deployed area: --- m²", this.skins.label); }
+                        break;
+                    }
+                #endregion
+
+                default:
+                    break;
             }
-            #endregion
-
-            #region Manual
-            else
-            {
-                float p, d;
-                if (!float.TryParse(this.preDepDiam, out p)) { p = -1; }
-                if (!float.TryParse(this.depDiam, out d)) { d = -1; }
-
-                //Predeployed diameter
-                GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100);
-                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", this.skins.label); }
-                else { GUILayout.Label("Resulting predeployed area: --- m²", this.skins.label); }
-
-                //Deployed diameter
-                GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1, (this.pChute.textures == null ? 70 : this.model.maxDiam), 100);
-                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", this.skins.label); }
-                else { GUILayout.Label("Resulting deployed area: --- m²", this.skins.label); }
-            }
-            #endregion
 
             GUILayout.EndScrollView();
             #endregion

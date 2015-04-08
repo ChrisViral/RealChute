@@ -49,21 +49,6 @@ namespace RealChute
             get { return RCUtils.GetArea(this.deployedDiameter); }
         }
 
-        //Gets/sets the DeploymentState correctly
-        public DeploymentStates deploymentState
-        {
-            get
-            {
-                if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
-                return this.state;
-            }
-            set
-            {
-                this.state = value;
-                this.depState = EnumUtils.GetName(this.state);
-            }
-        }
-
         //Mass of the chute
         public float chuteMass
         {
@@ -153,7 +138,7 @@ namespace RealChute
         private Transform backpackAnchor = null, backpackCap = null;
         private MaterialsLibrary materials = MaterialsLibrary.instance;
         private MaterialDefinition mat = new MaterialDefinition();
-        public DeploymentStates state = DeploymentStates.NONE;
+        public DeploymentStates deploymentState = DeploymentStates.STOWED;
         private PhysicsWatch dragTimer = new PhysicsWatch(), randomTimer = new PhysicsWatch();
         public Vector3 dragVector = new Vector3();
         internal double ASL, trueAlt, atmDensity;
@@ -511,6 +496,12 @@ namespace RealChute
             {
                 this.part.LoadEffects(effects);
             }
+            this.deploymentState = EnumUtils.GetValue<DeploymentStates>(this.depState);
+        }
+
+        public override void OnSave(ConfigNode node)
+        {
+            this.depState = EnumUtils.GetName(this.deploymentState);
         }
         #endregion
     }

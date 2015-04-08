@@ -133,21 +133,6 @@ namespace RealChute
         {
             get { return this.module.parachutes; }
         }
-
-        //Gets/sets the DeploymentState correctly
-        public DeploymentStates deploymentState
-        {
-            get
-            {
-                if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
-                return this.state;
-            }
-            set
-            {
-                this.state = value;
-                this.depState = EnumUtils.GetName(this.state);
-            }
-        }
         #endregion
 
         #region Fields
@@ -162,7 +147,6 @@ namespace RealChute
         public string preDeploymentAnimation = string.Empty, deploymentAnimation = string.Empty;
         public string parachuteName = string.Empty, capName = string.Empty, baseParachuteName = string.Empty;
         public float forcedOrientation = 0;
-        public string depState = "STOWED";
 
         //Flight
         internal RealChuteModule module = null;
@@ -173,11 +157,11 @@ namespace RealChute
         internal Vector3 phase = Vector3.zero;
         internal bool played = false, randomized = false;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
-        internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
         private bool check = true;
         private Vector3 forced = new Vector3();
+        public DeploymentStates deploymentState = DeploymentStates.STOWED;
         #endregion
 
         #region Constructor
@@ -541,12 +525,10 @@ namespace RealChute
             node.TryGetValue("preDeploymentAnimation", ref this.preDeploymentAnimation);
             node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
-            node.TryGetValue("depState", ref this.depState);
-            if (!MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat))
-            {
-                this.material = "Nylon"; 
-                this.mat = MaterialsLibrary.instance.GetMaterial("Nylon");
-            }
+            string state = "STOWED";
+            node.TryGetValue("depState", ref state);
+            this.deploymentState = EnumUtils.GetValue<DeploymentStates>(state);
+            MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
         }
@@ -574,7 +556,7 @@ namespace RealChute
             node.AddValue("preDeploymentAnimation", this.preDeploymentAnimation);
             node.AddValue("deploymentAnimation", this.deploymentAnimation);
             node.AddValue("forcedOrientation", this.forcedOrientation);
-            node.AddValue("depState", this.depState);
+            node.AddValue("depState", EnumUtils.GetName(this.deploymentState));
             return node;
         }
         #endregion

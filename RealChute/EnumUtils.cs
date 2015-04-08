@@ -280,17 +280,21 @@ namespace RealChute
         {
             EnumConverter converter = GetConverter<T>();
             int index = converter.IndexOf(selected);
-            index = GUILayout.SelectionGrid(index, converter.orderedNames, xCount, options);
+            index = GUILayout.SelectionGrid(index, converter.orderedNames, xCount, style, options);
             converter.TryGetValueAt(index, out selected);
             return selected;
         }
         #endregion
-
     }
 
     public sealed class EnumUtils : EnumConstraint<Enum>
     {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */
+
+        /// <summary>
+        /// Prevents object instantiation
+        /// </summary>
+        private EnumUtils() { }
     }
 }

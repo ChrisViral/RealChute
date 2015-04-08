@@ -126,22 +126,22 @@ namespace RealChute.Libraries
                 get { return this._modelName; }
             }
 
-            private int _type = 0;
+            private string _type = "Main";
             /// <summary>
             /// ID of the parachute type
             /// </summary>
-            public int type
+            public string type
             {
                 get { return this._type; }
             }
 
-            private bool _calcSelect = false;
+            private string _mode = "Automatic";
             /// <summary>
             /// GUI calculations mode
             /// </summary>
-            public bool calcSelect
+            public string mode
             {
-                get { return this._calcSelect; }
+                get { return this._mode; }
             }
 
             private bool _getMass = true;
@@ -228,7 +228,7 @@ namespace RealChute.Libraries
                 node.TryGetValue("chuteTexture", ref _chuteTexture);
                 node.TryGetValue("modelName", ref _modelName);
                 node.TryGetValue("type", ref _type);
-                node.TryGetValue("calcSelect", ref _calcSelect);
+                node.TryGetValue("calcSelect", ref _mode);
                 node.TryGetValue("getMass", ref _getMass);
                 node.TryGetValue("useDry", ref _useDry);
                 node.TryGetValue("mass", ref _mass);
@@ -261,8 +261,8 @@ namespace RealChute.Libraries
                     if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(templateGUI.chuteID).name; }
                     if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(templateGUI.modelID).name; }
                 }
-                this._type = templateGUI.typeID;
-                this._calcSelect = templateGUI.calcSelect;
+                this._type = EnumUtils.GetName(templateGUI.type);
+                this._mode = EnumUtils.GetName(templateGUI.mode);
                 this._getMass = templateGUI.getMass;
                 this._useDry = templateGUI.useDry;
                 this._mass = templateGUI.mass;
@@ -294,7 +294,7 @@ namespace RealChute.Libraries
                 node.AddValue("chuteTexture", chuteTexture);
                 node.AddValue("modelName", modelName);
                 node.AddValue("type", type);
-                node.AddValue("calcSelect", calcSelect);
+                node.AddValue("mode", mode);
                 node.AddValue("getMass", getMass);
                 node.AddValue("useDry", useDry);
                 node.AddValue("mass", mass);
