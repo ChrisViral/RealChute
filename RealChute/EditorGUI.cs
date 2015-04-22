@@ -266,14 +266,14 @@ namespace RealChute
             GUILayout.Space(5);
             if (GUILayout.Button("Apply settings", this.skins.button))
             {
-                this.pChute.Apply(false);
+                this.pChute.Apply(false, this.part.partInfo.title);
             }
 
             if (this.part.symmetryCounterparts.Count > 0)
             {
                 if (GUILayout.Button("Apply to all symmetry counterparts", this.skins.button))
                 {
-                    this.pChute.Apply(true);
+                    this.pChute.Apply(true, this.part.partInfo.title);
                 }
             }
             #endregion

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using RealChute.Extensions;
 
@@ -57,6 +58,24 @@ namespace RealChute
                     _boldLabel = style;
                 }
                 return _boldLabel;
+            }
+        }
+
+        private static GUIStyle _toggleButton = null;
+        /// <summary>
+        /// A toggle style that uses button format
+        /// </summary>
+        public static GUIStyle toggleButton
+        {
+            get
+            {
+                if (_toggleButton == null)
+                {
+                    GUIStyle button = new GUIStyle(HighLogic.Skin.button);
+                    button.normal.background = button.active.background;
+                    button.fontStyle = FontStyle.Bold;
+                }
+                return _toggleButton;
             }
         }
         #endregion

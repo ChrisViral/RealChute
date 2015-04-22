@@ -135,15 +135,6 @@ namespace RealChute.Extensions
                 animation.Play(animationName);
             }
         }
-
-        /// <summary>
-        /// Returns if the animation is playing
-        /// </summary>
-        /// <param name="animationName">Name of the animation to check</param>
-        public static bool CheckAnimationPlaying(this Part part, string animationName)
-        {
-            return part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
-        }
         #endregion
     }
 }

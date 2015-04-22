@@ -25,7 +25,6 @@ namespace RealChute
     public enum DeploymentStates
     {
         STOWED,
-        LOWDEPLOYED,
         PREDEPLOYED,
         DEPLOYED,
         CUT
@@ -172,6 +171,7 @@ namespace RealChute
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node = new ConfigNode();
+        public SpareChute spare = null;
 
         //GUI
         protected bool visible = false, hid = false;
@@ -431,6 +431,12 @@ namespace RealChute
         {
             this.hid = false;
         }
+
+        //Updates the SpareChute template
+        internal void UpdateSpare(string spareName)
+        {
+            this.spare = new SpareChute(this, spareName);
+        }
         #endregion
 
         #region Functions
@@ -585,6 +591,8 @@ namespace RealChute
             LoadParachutes();
             this.parachutes.ForEach(p => p.Initialize());
             this.part.mass = this.caseMass + this.chuteMass;
+            if (this.spare == null) { UpdateSpare(this.part.partInfo.title); }
+
             //First initiation of the part
             if (!this.initiated)
             {

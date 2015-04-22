@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using RealChute.Libraries;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -15,35 +18,101 @@ namespace RealChute
 {
     public class SpareChute : IParachute
     {
-        //Spoiler: incredibely incomplete.
+        public struct Canopy
+        {
+            #region Properties
+            public float deployedArea
+            {
+                get { return RCUtils.GetArea(this.deployedDiameter); }
+            }
 
+            public float mass
+            {
+                get { return this.material.areaDensity * this.deployedArea; }
+            }
+            #endregion
+
+            #region Fields
+            public float deployedDiameter;
+            private MaterialDefinition material;
+            #endregion
+
+            #region Constructor
+            public Canopy (ConfigNode node)
+            {
+                float d = 50;
+                string m = string.Empty;
+                MaterialDefinition mat = new MaterialDefinition();
+                node.TryGetValue("deployedDiameter", ref d);
+                node.TryGetValue("material", ref m);
+                MaterialsLibrary.instance.TryGetMaterial(m, ref mat);
+                this.deployedDiameter = d;
+                this.material = mat;
+            }
+
+            public Canopy(Parachute parachute)
+            {
+                this.deployedDiameter = parachute.deployedDiameter;
+                this.material = parachute.mat;
+            }
+            #endregion
+
+            #region Methods
+            public ConfigNode Save()
+            {
+                ConfigNode node = new ConfigNode("CANOPY");
+                node.AddValue("deployedDiameter", this.deployedDiameter);
+                node.AddValue("material", material.name);
+                return node;
+            }
+            #endregion
+        }
+
+        #region Properties
         public float deployedArea
         {
-            get { return RCUtils.GetArea(this.deployedDiameter); }
+            get { return canopies.Sum(c => c.deployedArea); }
         }
 
         public float chuteMass
         {
-            get { return this.deployedArea * this.material.areaDensity; }
+            get { return this.canopies.Sum(c => c.mass); }
         }
 
-        public bool isEVA
+        private string _name = string.Empty;
+        public string name
         {
-            get { return false; }
+            get { return this._name + " spare"; }
+            set { this._name = value; }
         }
+        #endregion
 
-        private MaterialDefinition material = new MaterialDefinition();
-        private float deployedDiameter = 50;
+        #region Fields
+        private List<Canopy> canopies = new List<Canopy>();
+        #endregion
 
+        #region Constructors
         public SpareChute(ConfigNode node)
         {
-
+            node.TryGetValue("name", ref this._name);
+            node.GetNodes("CANOPY").ForEach(n => this.canopies.Add(new Canopy(n)));
         }
 
+        public SpareChute(RealChuteModule module, string spareName)
+        {
+            this._name = spareName;
+            module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
+        }
+        #endregion
+
+        #region Methods
         public ConfigNode Save()
         {
             ConfigNode node = new ConfigNode("SPARE");
+            node.AddValue("name", this._name);
+            this.canopies.ForEach(c => node.AddNode(c.Save()));
             return node;
         }
+        #endregion
     }
 }

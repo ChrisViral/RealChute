@@ -24,9 +24,9 @@ namespace RealChute
         float chuteMass { get; }
 
         /// <summary>
-        /// If this is an EVA parachute
+        /// Name of the parachute
         /// </summary>
-        bool isEVA { get; }
+        string name { get; }
         #endregion
 
         #region Methods

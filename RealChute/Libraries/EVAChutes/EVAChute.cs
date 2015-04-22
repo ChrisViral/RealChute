@@ -58,14 +58,6 @@ namespace RealChute.Libraries
         {
             get { throw new System.NotImplementedException(); }
         }
-
-        /// <summary>
-        /// Is an EVA chute
-        /// </summary>
-        public bool isEVA
-        {
-            get { return true; }
-        }
         #endregion
 
         #region Constructor

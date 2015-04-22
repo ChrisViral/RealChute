@@ -102,7 +102,7 @@ namespace RealChute
         {
             this.size++;
             if (this.size > this.sizes.Count - 1) { this.size = 0; }
-            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, false); }
+            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, this.part.partInfo.title, false); }
         }
 
         [KSPEvent(active = true, guiActiveEditor = true, guiName = "Previous size")]
@@ -110,7 +110,7 @@ namespace RealChute
         {
             this.size--;
             if (this.size < 0) { this.size = this.sizes.Count - 1; }
-            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, false); }
+            if (RealChuteSettings.fetch.guiResizeUpdates) { this.Apply(false, this.part.partInfo.title, false); }
         }
         #endregion
 
@@ -173,7 +173,7 @@ namespace RealChute
         }
 
         //Applies the parameters to the parachute
-        internal void Apply(bool toSymmetryCounterparts, bool showMessage = true)
+        internal void Apply(bool toSymmetryCounterparts, string spareName, bool showMessage = true)
         {
             if (!showMessage && (GetErrors(true).Count > 0 || GetErrors(false).Count > 0)) { this.editorGUI.failedVisible = true; return; }
             this.rcModule.mustGoDown = this.mustGoDown;
@@ -217,6 +217,7 @@ namespace RealChute
                 if (!this.editorGUI.warning) { this.editorGUI.successfulWindow.height = 50; }
             }
             GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            this.rcModule.UpdateSpare(spareName);
         }
 
         //Checks if th given AttachNode has the parent part
@@ -377,7 +378,7 @@ namespace RealChute
                 this.caseID = this.textures.GetCaseIndex(preset.caseName);
             }
             this.chutes.ForEach(c => c.ApplyPreset(preset));
-            Apply(false);
+            Apply(false, preset.name);
             print("[RealChute]: Applied the " + preset.name + " preset on " + this.part.partInfo.title);
         }
 

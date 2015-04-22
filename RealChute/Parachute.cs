@@ -101,7 +101,6 @@ namespace RealChute
                 switch (this.deploymentState)
                 {
                     case DeploymentStates.PREDEPLOYED:
-                    case DeploymentStates.LOWDEPLOYED:
                     case DeploymentStates.DEPLOYED:
                         return true;
 
@@ -116,15 +115,10 @@ namespace RealChute
         {
             get
             {
-                if (this.check)
-                {
-                    if (forcedOrientation >= 90 || forcedOrientation <= 0) { this.forced = Vector3.zero; }
-                    Vector3 follow = this.forcePosition - this.module.pos;
-                    float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
-                    this.forced = follow.normalized * length;
-                    this.check = false;
-                }
-                return this.forced;
+                if (forcedOrientation >= 90 || forcedOrientation <= 0) { return Vector3.zero; }
+                Vector3 follow = this.forcePosition - this.module.pos;
+                float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
+                return  follow.normalized * length;
             }
         }
 
@@ -155,12 +149,10 @@ namespace RealChute
         internal Transform parachute = null, cap = null;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
-        internal bool played = false, randomized = false;
+        internal bool randomized = false;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
-        private bool check = true;
-        private Vector3 forced = new Vector3();
         public DeploymentStates deploymentState = DeploymentStates.STOWED;
         #endregion
 
@@ -211,28 +203,15 @@ namespace RealChute
             Vector3 follow = this.module.dragVector + orient;
             if (follow.sqrMagnitude > 0)
             {
-                Quaternion drag = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, this.parachute.up) : Quaternion.LookRotation(follow.normalized, this.parachute.up);
-                this.parachute.rotation = drag;
+                this.parachute.rotation = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, this.parachute.up) : Quaternion.LookRotation(follow.normalized, this.parachute.up);
             }
             ParachuteNoise();
-        }
-
-        //Parachute low deployment
-        public void LowDeploy()
-        {
-            this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            this.part.Effect("rcdeploy");
-            this.deploymentState = DeploymentStates.LOWDEPLOYED;
-            this.parachute.gameObject.SetActive(true);
-            this.cap.gameObject.SetActive(false);
-            if (this.dragTimer.elapsedMilliseconds != 0) { this.part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
-            else { this.part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
-            this.dragTimer.Start();
         }
 
         //Parachute predeployment
         public void PreDeploy()
         {
+            this.module.oneWasDeployed = true;
             this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.part.Effect("rcpredeploy");
             this.deploymentState = DeploymentStates.PREDEPLOYED;
@@ -249,13 +228,8 @@ namespace RealChute
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.part.Effect("rcdeploy");
             this.deploymentState = DeploymentStates.DEPLOYED;
-            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation))
-            {
-                this.dragTimer.Restart();
-                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                this.played = true;
-            }
-            else { this.played = false; }
+            this.dragTimer.Restart();
+            this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
         }
 
         //Parachute cutting
@@ -264,7 +238,6 @@ namespace RealChute
             this.part.Effect("rccut");
             this.deploymentState = DeploymentStates.CUT;
             this.parachute.gameObject.SetActive(false);
-            this.played = false;
             if (!this.module.secondaryChute || this.parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
             else if (this.module.secondaryChute && this.parachutes.Exists(p => p.deploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             this.dragTimer.Reset();
@@ -281,23 +254,34 @@ namespace RealChute
         }
 
         //Calculates parachute deployed area
-        private float DragDeployment(float time, float debutArea, float endArea)
+        private float DragDeployment(float time, float debutDiameter, float endDiameter)
         {
             if (!this.dragTimer.isRunning) { this.dragTimer.Start(); }
 
             this.time = this.dragTimer.elapsed.TotalSeconds;
             if (this.time <= time)
             {
-                float deploymentTime = (float)(Math.Exp(this.time - time) * (this.time / time));
-                return Mathf.Lerp(debutArea, endArea, deploymentTime);
+                //While this looks linear, area scales with the square of the diameter, and therefore
+                //Deployment will be quadratic. The previous exponential function was too slow at first and rough at the end
+                float currentDiam = Mathf.Lerp(debutDiameter, endDiameter, (float)(this.time / time));
+                return RCUtils.GetArea(currentDiam);
             }
-            return endArea;
+            this.dragTimer.Stop();
+            return RCUtils.GetArea(endDiameter);
         }
 
-        //Drag force vector
-        private Vector3 DragForce(float startArea, float targetArea, float time)
+        //Drag force vector with deployment
+        private Vector3 DragForce(float debutDiameter, float endDiameter, float time)
         {
-            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.dragCoefficient) * this.module.dragVector * (RealChuteSettings.fetch.jokeActivated ? -1 : 1);
+            return this.module.DragCalculation(DragDeployment(time, debutDiameter, endDiameter), this.mat.dragCoefficient) * this.module.dragVector
+                * (RealChuteSettings.fetch.jokeActivated ? -1 : 1); //April Fool's Prank '13
+        }
+
+        //Drag force static
+        private Vector3 DragForce(float area)
+        {
+            return this.module.DragCalculation(area, this.mat.dragCoefficient) * this.module.dragVector
+                * (RealChuteSettings.fetch.jokeActivated ? -1 : 1); //April Fool's Prank '13
         }
 
         //Parachute function
@@ -305,7 +289,6 @@ namespace RealChute
         {
             if (this.canDeploy)
             {
-                this.module.oneWasDeployed = true;
                 if (this.isDeployed) { FollowDragDirection(); }
 
                 switch (this.deploymentState)
@@ -313,40 +296,31 @@ namespace RealChute
                     case DeploymentStates.STOWED:
                         {
                             this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                            if (this.module.trueAlt > this.deploymentAlt && this.deploymentClause && this.randomDeployment) { PreDeploy(); }
-                            else if (this.module.trueAlt <= this.deploymentAlt && this.randomDeployment) { LowDeploy(); }
+                            if (this.deploymentClause && this.randomDeployment) { PreDeploy(); }
                             break;
                         }
 
                     case DeploymentStates.PREDEPLOYED:
                         {
-                            this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedArea, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force);
-                            if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
-                            break;
-                        }
-                    case DeploymentStates.LOWDEPLOYED:
-                        {
-                            this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.deployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.forcePosition, ForceMode.Force);
-                            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
+                            if (!this.dragTimer.isRunning)
                             {
-                                this.dragTimer.Restart();
-                                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                                this.played = true;
+                                this.part.Rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea), this.forcePosition, ForceMode.Force);
+                                if (this.module.trueAlt <= this.deploymentAlt && this.dragTimer.elapsed.TotalSeconds >= this.preDeploymentSpeed) { Deploy(); }
                             }
+                            else { this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedDiameter, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force); }
                             break;
                         }
 
                     case DeploymentStates.DEPLOYED:
                         {
-                            this.part.rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
-                            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
+                            if (!this.dragTimer.isRunning)
                             {
-                                this.dragTimer.Restart();
-                                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                                this.played = true;
+                                this.part.Rigidbody.AddForceAtPosition(DragForce(this.deployedArea), this.forcePosition, ForceMode.Force);
                             }
+                            else { this.part.rigidbody.AddForceAtPosition(DragForce(this.preDeployedDiameter, this.deployedDiameter, this.deploymentSpeed), this.forcePosition, ForceMode.Force); }
                             break;
                         }
+
                     default:
                         break;
                 }
@@ -381,7 +355,6 @@ namespace RealChute
 
             if (!this.module.initiated)
             {
-                this.played = false;
                 this.cap.gameObject.SetActive(true);
             }
             if (HighLogic.LoadedSceneIsFlight)
