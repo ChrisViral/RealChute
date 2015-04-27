@@ -424,8 +424,8 @@ namespace RealChute
             StringBuilder builder = new StringBuilder();
             builder.Append("Material: ").AppendLine(this.mat.name);
             builder.Append("Drag coefficient: ").AppendLine(this.mat.dragCoefficient.ToString("0.00#"));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\t\tarea: ").Append(this.preDeployedArea.ToString("0.###")).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\t\tarea: ").Append(this.deployedArea.ToString("0.###")).Append("m²");
+            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.preDeployedArea.ToString("0.###")).AppendLine("m²");
+            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.deployedArea.ToString("0.###")).Append("m²");
             GUILayout.Label(builder.ToString(), this.skins.label);
 
             if (HighLogic.LoadedSceneIsFlight)

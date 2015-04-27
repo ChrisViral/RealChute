@@ -131,9 +131,9 @@ namespace RealChute
             builder.Append("Selected part: ").AppendLine(this.part.partInfo.title);
             builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
             builder.Append("Case mass: ").Append(this.rcModule.caseMass.ToString("0.000")).Append("t");
-            if (this.sizes.Count > 0) { builder.Append("\t\t\t\t\tCase cost: ").Append(this.sizes[this.pChute.size].cost.ToString()).Append("F"); }
+            if (this.sizes.Count > 0) { builder.Append("\t\tCase cost: ").Append(this.sizes[this.pChute.size].cost.ToString("0.#")).Append("F"); }
             builder.Append("\nTotal part mass: ").Append(this.part.TotalMass().ToString("0.000")).Append("t");
-            builder.Append("\t\t\tTotal part cost: ").Append(this.part.TotalCost().ToString("0.#")).Append("F");
+            builder.Append("\tTotal part cost: ").Append(this.part.TotalCost().ToString("0.#")).Append("F");
             GUILayout.Label(builder.ToString(), this.skins.label);
             #endregion
 
