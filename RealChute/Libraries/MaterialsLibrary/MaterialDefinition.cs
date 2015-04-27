@@ -58,6 +58,15 @@ namespace RealChute.Libraries
         {
             get { return this._areaCost; }
         }
+
+        private float _maxTemp = 150;
+        /// <summary>
+        /// Maximum temperature this material can withstand
+        /// </summary>
+        public float maxTemp
+        {
+            get { return this._maxTemp; }
+        }
         #endregion
 
         #region Constructor
@@ -72,11 +81,12 @@ namespace RealChute.Libraries
         /// <param name="node">Node to initiate the material from</param>
         public MaterialDefinition(ConfigNode node)
         {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("description", ref _description);
-            node.TryGetValue("areaDensity", ref _areaDensity);
-            node.TryGetValue("dragCoefficient", ref _dragCoefficient);
-            node.TryGetValue("areaCost", ref _areaCost);
+            node.TryGetValue("name", ref this._name);
+            node.TryGetValue("description", ref this._description);
+            node.TryGetValue("areaDensity", ref this._areaDensity);
+            node.TryGetValue("dragCoefficient", ref this._dragCoefficient);
+            node.TryGetValue("areaCost", ref this._areaCost);
+            node.TryGetValue("maxTemp", ref this._maxTemp);
         }
         #endregion
     }

@@ -4,6 +4,7 @@ using System.Reflection;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Version = System.Version;
 
@@ -208,6 +209,67 @@ namespace RealChute
                 default:
                     return "Chute #" + (id + 1);
             }
+        }
+
+        /// <summary>
+        /// Prints relevant info about an AvaialablePart object
+        /// </summary>
+        /// <param name="partInfo">AvaialablePart object to print</param>
+        public static void PrintPartInfo(AvailablePart partInfo)
+        {
+            bool tmp;
+            System.Text.StringBuilder b = new System.Text.StringBuilder("[RealChute]: Printing PartInfo stats\n");
+            b.AppendLine("Part name: " + partInfo.name);
+            b.AppendLine("Part title: " + partInfo.title);
+            tmp = partInfo.partPrefab == null;
+            b.AppendLine("PartPrefab null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("PartPrefab module count: " + partInfo.partPrefab.Modules.Count);
+            }
+            tmp = partInfo.internalConfig == null;
+            b.AppendLine("Internal config null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Internal config values count: " + partInfo.internalConfig.values.Count);
+                b.AppendLine("Internal config nodes count: " + partInfo.internalConfig.nodes.Count);
+            }
+            tmp = partInfo.partConfig == null;
+            b.AppendLine("Part config null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Part config values count: " + partInfo.partConfig.values.Count);
+                b.AppendLine("Part config nodes count: " + partInfo.partConfig.nodes.Count);
+            }
+            tmp = partInfo.moduleInfos == null;
+            b.AppendLine("ModuleInfos null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("ModuleInfos count: " + partInfo.moduleInfos.Count);
+            }
+            tmp = partInfo.resourceInfos == null;
+            b.AppendLine("ResourceInfos null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("ResourceInfos count: " + partInfo.resourceInfos.Count);
+            }
+            b.AppendLine("Part path: " + partInfo.partPath);
+            b.AppendLine("Part URL: " + partInfo.partUrl);
+            b.AppendLine("Config full name: " + partInfo.configFileFullName);
+            tmp = partInfo.partUrlConfig == null;
+            b.AppendLine("Part URLConfig null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Part URLConfig URL: " + partInfo.partUrlConfig.url);
+                tmp = partInfo.partUrlConfig.config == null;
+                b.AppendLine("Part URLConfig config null: " + tmp);
+                if (!tmp)
+                {
+                    b.AppendLine("Part URLConfig values count: " + partInfo.partUrlConfig.config.values.Count);
+                    b.AppendLine("Part URLConfig nodes count: " + partInfo.partUrlConfig.config.nodes.Count);
+                }
+            }
+            UnityEngine.Debug.Log(b.ToString());
         }
         #endregion
     }

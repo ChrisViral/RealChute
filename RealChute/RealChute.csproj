@@ -34,12 +34,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\ksp-win-experimental (1)\KSP_win\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\Game\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\..\..\..\Desktop\ksp-win-experimental (1)\KSP_win\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -51,7 +51,7 @@
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
     <Compile Include="GUIUtils.cs" />
-    <Compile Include="RCFilterManager.cs" />
+    <Compile Include="RCToolbarManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="SizeManager.cs" />
     <Compile Include="SettingsWindow.cs" />

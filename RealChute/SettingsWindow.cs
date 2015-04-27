@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -13,43 +12,19 @@ using UnityEngine;
 
 namespace RealChute
 {
-    [KSPAddon(KSPAddon.Startup.SpaceCentre, false)]
     public class SettingsWindow : MonoBehaviour
     {
         #region Fields
         private GUISkin skins = HighLogic.Skin;
         private int id = Guid.NewGuid().GetHashCode();
-        private bool visible = false, showing = true, destroying = false;
+        private bool showing = true, destroying = false;
         private string level = string.Empty;
         private Rect window = new Rect(), drag = new Rect();
         private Texture2D buttonTexture = new Texture2D(38, 38);
-        private ApplicationLauncherButton button = new ApplicationLauncherButton();
         private RealChuteSettings settings = RealChuteSettings.fetch;
         #endregion
 
         #region Methods
-        private void AddButton()
-        {
-            if (ApplicationLauncher.Ready)
-            {
-                this.button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
-                    Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
-                    (Texture)this.buttonTexture);
-            }
-        }
-
-        private void Show()
-        {
-            this.visible = true;
-        }
-
-        private void Hide()
-        {
-            this.visible = false;
-        }
-
-        private void Empty() { }
-
         private void HideUI()
         {
             this.showing = false;
@@ -64,7 +39,7 @@ namespace RealChute
         {
             int i = 1;
             if (int.TryParse(level, out i)) { this.settings.engineerLevel = i; }
-            if (!this.destroying) { this.button.SetFalse(); }
+            if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
         }
         #endregion
 
@@ -75,9 +50,7 @@ namespace RealChute
             this.window = new Rect(100, 100, 330, 200);
             this.drag = new Rect(0, 0, 330, 20);
             this.level = this.settings.engineerLevel.ToString();
-            this.buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
 
-            GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
             GameEvents.onShowUI.Add(ShowUI);
             GameEvents.onHideUI.Add(HideUI);
             GameEvents.onGUIAstronautComplexSpawn.Add(HideUI);
@@ -97,7 +70,6 @@ namespace RealChute
             CloseWindow();
             RealChuteSettings.SaveSettings();
 
-            GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onGUIAstronautComplexSpawn.Remove(HideUI);
@@ -108,8 +80,6 @@ namespace RealChute
             GameEvents.onGUIMissionControlDespawn.Remove(ShowUI);
             GameEvents.onGUIAdministrationFacilitySpawn.Remove(HideUI);
             GameEvents.onGUIAdministrationFacilityDespawn.Remove(ShowUI);
-
-            ApplicationLauncher.Instance.RemoveModApplication(button);
         }
         #endregion
 
@@ -117,7 +87,7 @@ namespace RealChute
         private void OnGUI()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
-            if (this.showing && this.visible)
+            if (this.showing)
             {
                 this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.assemblyVersion, this.skins.window);
             }

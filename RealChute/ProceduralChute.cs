@@ -84,16 +84,18 @@ namespace RealChute
         private TextureLibrary textureLib = TextureLibrary.instance;
         internal TextureConfig textures = null;
         internal CaseConfig parachuteCase = new CaseConfig();
-        internal List<ChuteTemplate> chutes = new List<ChuteTemplate>();
         internal PresetsLibrary presets = PresetsLibrary.instance;
         internal CelestialBody body = null;
         internal EditorGUI editorGUI = new EditorGUI();
+        internal List<ChuteTemplate> chutes = new List<ChuteTemplate>();
+        [SerializeField]
+        private byte[] serializedChutes = new byte[0];
+        public ConfigNode node = null;
 
         //Sizes
         private SizeManager sizeLib = SizeManager.instance;
         public List<SizeNode> sizes = new List<SizeNode>();
         public Transform parent = null;
-        public ConfigNode node = null;
         #endregion
 
         #region Part GUI
@@ -311,9 +313,10 @@ namespace RealChute
             }
 
             //Parachute transforms
-            float scaleX = root.localScale.x / Vector3.Scale(originalSize, lastSize.size).x;
-            float scaleY = root.localScale.y / Vector3.Scale(originalSize, lastSize.size).y;
-            float scaleZ = root.localScale.z / Vector3.Scale(originalSize, lastSize.size).z;
+            Vector3 scale = Vector3.Scale(this.originalSize, lastSize.size);
+            float scaleX = root.localScale.x / scale.x;
+            float scaleY = root.localScale.y / scale.y;
+            float scaleZ = root.localScale.z / scale.z;
             foreach (Parachute chute in this.rcModule.parachutes)
             {
                 Vector3 pos = chute.forcePosition - this.part.transform.position;
@@ -336,6 +339,7 @@ namespace RealChute
                 }
             }
             this.lastSize = this.size;
+            this.part.SendMessage("RC_Rescale", new Vector3(scaleX, scaleY, scaleZ));
         }
 
         //Modifies the case texture of a part
@@ -395,18 +399,19 @@ namespace RealChute
         {
             if (this.chutes.Count <= 0)
             {
-                if (this.node.HasNode("CHUTE"))
+                if (this.node != null && this.node.HasNode("CHUTE"))
                 {
                     this.chutes = new List<ChuteTemplate>(this.node.GetNodes("CHUTE").Select((n, i) => new ChuteTemplate(this, n, i)));
                 }
                 else
                 {
-                    this.chutes.Clear();
                     RealChuteModule module = this.rcModule ?? this.part.Modules["RealChuteModule"] as RealChuteModule;
-                    if (module.parachutes.Count <= 0) { return; }
-                    for (int i = 0; i < module.parachutes.Count; i++)
+                    if (module.parachutes.Count > 0)
                     {
-                        this.chutes.Add(new ChuteTemplate(this, null, i));
+                        for (int i = 0; i < module.parachutes.Count; i++)
+                        {
+                            this.chutes.Add(new ChuteTemplate(this, null, i));
+                        }
                     }
                 }
             }
@@ -469,7 +474,6 @@ namespace RealChute
         public override void OnStart(PartModule.StartState state)
         {
             if ((!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) || !CompatibilityChecker.IsAllCompatible()) { return; }
-
             //Identification of the RealChuteModule
             if (this.part.Modules.Contains("RealChuteModule")) { this.rcModule = this.part.Modules["RealChuteModule"] as RealChuteModule; }
             else { return; }
@@ -479,7 +483,11 @@ namespace RealChute
             this.body = this.bodies.GetBody(this.planets);
 
             //Initializes ChuteTemplates
-            LoadChutes();
+            if (this.chutes.Count <= 0)
+            {
+                if (this.node == null && !this.part.TryGetModuleNode<ProceduralChute>(ref this.node)) { return; }
+                LoadChutes();
+            }
             this.chutes.ForEach(c => c.Initialize());
             if (this.sizes.Count <= 0) { this.sizes = this.sizeLib.GetSizes(this.part.partInfo.name); }
 

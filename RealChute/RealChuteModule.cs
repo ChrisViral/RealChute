@@ -166,7 +166,7 @@ namespace RealChute
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
-        public ConfigNode node = new ConfigNode();
+        public ConfigNode node = null;
 
         //GUI
         protected bool visible = false, hid = false;
@@ -387,8 +387,11 @@ namespace RealChute
         //Loads all the parachutes into the list
         private void LoadParachutes()
         {
-            if (this.parachutes.Count > 0 || !this.node.HasNode("PARACHUTE")) { return; }
-            this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
+            if (this.parachutes.Count <= 0 && this.node != null && this.node.HasNode("PARACHUTE"))
+            {
+                this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
+                print("Parachutes count: " + this.parachutes.Count);
+            }
         }
 
         //Gives the cost for this parachute
@@ -442,7 +445,8 @@ namespace RealChute
                     if (!this.displayed)
                     {
                         ScreenMessages.PostScreenMessage("Parachute deployment failed.", 2.5f, ScreenMessageStyle.UPPER_CENTER);
-                        if (groundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        if (this.part.ShieldedFromAirstream) { ScreenMessages.PostScreenMessage("Reason: parachute is in fairings", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else if (groundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         else if (atmPressure == 0) { ScreenMessages.PostScreenMessage("Reason: in space.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         else { ScreenMessages.PostScreenMessage("Reason: too high.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         this.displayed = true;
@@ -473,8 +477,8 @@ namespace RealChute
             this.pos = this.part.transform.position;
             this.ASL = FlightGlobals.getAltitudeAtPos(this.pos);
             this.trueAlt = this.vessel.GetTrueAlt(ASL);
-            this.atmPressure = this.vessel.mainBody.GetPressureAtAlt(ASL);
-            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL);
+            this.atmPressure = this.vessel.mainBody.GetPressureAtAlt(this.ASL);
+            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(this.ASL, this.vessel.atmosphericTemperature);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
             this.dragVector = -velocity.normalized;
@@ -563,12 +567,11 @@ namespace RealChute
                 Fields["chuteCount"].guiActive = false;
                 return;
             }
-
             //Staging icon
             this.part.stagingIcon = "PARACHUTES";
 
             //Autoarming checkup
-            settings = RealChuteSettings.fetch;
+            this.settings = RealChuteSettings.fetch;
 
             //Part GUI
             if (spareChutes < 0) { Fields["chuteCount"].guiActive = false; }
@@ -580,7 +583,12 @@ namespace RealChute
             Actions["ActionArm"].active = !settings.autoArm;
 
             //Initiates the Parachutes
-            LoadParachutes();
+            if (this.parachutes.Count <= 0)
+            {
+                RealChuteModule m = this;
+                if (this.node == null && !this.part.TryGetModuleNode<RealChuteModule>(ref this.node)) { return; }
+                LoadParachutes();
+            }
             this.parachutes.ForEach(p => p.Initialize());
 
             //First initiation of the part
@@ -612,8 +620,6 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
-
-            //Gets the materials
             this.node = node;
             LoadParachutes();
             float chuteMass = this.parachutes.Sum(p => p.chuteMass);
