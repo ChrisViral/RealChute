@@ -179,16 +179,11 @@ namespace RealChute
                         break;
                     }
 
-                case CalculationsMode.Manual:
-                    {
-                        this.parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam));
-                        this.parachute.deployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.depDiam));
-                        Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
-                        break;
-                    }
+                }
+                double density = this.body.GetDensityAtAlt(alt, this.body.GetMaxTemperatureAtAlt(alt));
+                double speed = double.Parse(this.templateGUI.landingSpeed);
+                speed *= speed;
 
-                default:
-                    break;
             }
 
             this.parachute.minIsPressure = this.templateGUI.isPressure;

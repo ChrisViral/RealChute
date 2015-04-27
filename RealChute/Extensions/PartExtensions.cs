@@ -135,6 +135,39 @@ namespace RealChute.Extensions
                 animation.Play(animationName);
             }
         }
+
+        /// <summary>
+        /// Tries to get the ModuleNode of the desired type for a given part. Returns false if could not find it
+        /// </summary>
+        /// <typeparam name="T">Type of the PartModule to find</typeparam>>
+        /// <param name="node">ConfigNode to store the result into</param>
+        public static bool TryGetModuleNode<T>(this Part part, ref ConfigNode node) where T: PartModule
+        {
+            string name = string.Empty;
+            ConfigNode[] parts = ConfigNode.Load(part.partInfo.configFileFullName).GetNodes("PART");
+            foreach (ConfigNode p in parts)
+            {
+                if (p.TryGetValue("name", ref name))
+                {
+                    name = name.Replace('_', '.');
+                    if (name == part.partInfo.name)
+                    {
+                        foreach (ConfigNode m in p.GetNodes("MODULE"))
+                        {
+                            if (m.TryGetValue("name", ref name))
+                            {
+                                if (name == typeof(T).Name)
+                                {
+                                    node = m;
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
         #endregion
     }
 }
