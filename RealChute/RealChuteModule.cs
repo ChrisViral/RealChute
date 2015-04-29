@@ -395,7 +395,6 @@ namespace RealChute
             if (this.parachutes.Count <= 0 && this.node != null && this.node.HasNode("PARACHUTE"))
             {
                 this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
-                print("Parachutes count: " + this.parachutes.Count);
             }
         }
 
@@ -594,7 +593,7 @@ namespace RealChute
             if (this.parachutes.Count <= 0)
             {
                 RealChuteModule m = this;
-                if (this.node == null && !this.part.TryGetModuleNode<RealChuteModule>(ref this.node)) { return; }
+                if (this.node == null && !PersistentManager.instance.TryGetNode<RealChuteModule>(this.part.name, ref this.node)) { return; }
                 LoadParachutes();
             }
             this.parachutes.ForEach(p => p.Initialize());
@@ -632,6 +631,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
+            this.part.mass = this.caseMass + this.chuteMass;
             if (HighLogic.LoadedScene == GameScenes.LOADING)
             {
                 PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
@@ -642,46 +642,44 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
             //Info in the editor part window
-            float chuteMass = this.parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
-            this.part.mass = this.caseMass + chuteMass;
 
             StringBuilder builder = new StringBuilder();
-            builder.AppendFormat("Case mass: {0}\n", this.caseMass);
-            if (this.timer > 0) { builder.AppendFormat("Deployment timer: {0}s\n", this.timer); }
-            if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy: true"); }
-            if (this.deployOnGround) { builder.AppendLine("Deploys on ground contact: true"); }
-            if (this.spareChutes >= 0) { builder.AppendFormat("Spare chutes: {0}\n", this.spareChutes); }
-            builder.AppendFormat("Autocut speed: {0}m/s\n", this.cutSpeed);
+            builder.AppendFormat("<b>Case mass</b>: {0}\n", this.caseMass);
+            if (this.timer > 0) { builder.AppendFormat("<b>Deployment timer</b>: {0}s\n", this.timer); }
+            if (this.mustGoDown) { builder.AppendLine("<b>Must go downwards to deploy</b>: true"); }
+            if (this.deployOnGround) { builder.AppendLine("<b>Deploys on ground contact</b>: true"); }
+            if (this.spareChutes >= 0) { builder.AppendFormat("<b>Spare chutes</b>: {0}\n", this.spareChutes); }
+            builder.AppendFormat("<b>Autocut speed</b>: {0}m/s\n", this.cutSpeed);
 
             if (!secondaryChute)
             {
                 Parachute parachute = parachutes[0];
-                builder.AppendFormat("Parachute material: {0}\n", parachute.material);
-                builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.dragCoefficient);
-                builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
-                builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
-                if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }
-                else { builder.AppendFormat("Minimum deployment pressure: {0}atm\n", parachute.minPressure); }
-                builder.AppendFormat("Deployment altitude: {0}m\n", parachute.deploymentAlt);
-                builder.AppendFormat("Predeployment speed: {0}s\n", parachute.preDeploymentSpeed);
-                builder.AppendFormat("Deployment speed: {0}s\n", parachute.deploymentSpeed);
-                if (parachute.cutAlt >= 0) { builder.AppendFormat("Autocut altitude: {0}m", parachute.cutAlt); }
+                builder.AppendFormat("<b>Parachute material</b>: {0}\n", parachute.material);
+                builder.AppendFormat("<b>Drag coefficient</b>: {0:0.00}\n", parachute.mat.dragCoefficient);
+                builder.AppendFormat("<b>Predeployed diameter</b>: {0}m\n", parachute.preDeployedDiameter);
+                builder.AppendFormat("<b>Deployed diameter</b>: {0}m\n", parachute.deployedDiameter);
+                if (!parachute.minIsPressure) { builder.AppendFormat("<b>Minimum deployment altitude</b>: {0}m\n", parachute.minDeployment); }
+                else { builder.AppendFormat("<b>Minimum deployment pressure</b>: {0}atm\n", parachute.minPressure); }
+                builder.AppendFormat("<b>Deployment altitude</b>: {0}m\n", parachute.deploymentAlt);
+                builder.AppendFormat("<b>Predeployment speed</b>: {0}s\n", parachute.preDeploymentSpeed);
+                builder.AppendFormat("<b>Deployment speed</b>: {0}s\n", parachute.deploymentSpeed);
+                if (parachute.cutAlt >= 0) { builder.AppendFormat("<b>Autocut altitude</b>: {0}m", parachute.cutAlt); }
             }
 
             //In case of more than one chute
             else
             {
-                builder.Append("Parachute materials: ").AppendJoin(parachutes.Select(p => p.material), ", ").AppendLine();
-                builder.Append("Drag coefficients: ").AppendJoin(parachutes.Select(p => p.mat.dragCoefficient.ToString("0.00")), ", ").AppendLine();
-                builder.Append("Predeployed diameters: ").AppendJoin(parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
-                builder.Append("Deployed diameters: ").AppendJoin(parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
-                builder.Append("Minimum deployment clauses: ").AppendJoin(parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();
-                builder.Append("Deployment altitudes: ").AppendJoin(parachutes.Select(p => p.deploymentAlt.ToString()), "m, ").AppendLine("m");
-                builder.Append("Predeployment speeds: ").AppendJoin(parachutes.Select(p => p.preDeploymentSpeed.ToString()), "s, ").AppendLine("s");
-                builder.Append("Deployment speeds: ").AppendJoin(parachutes.Select(p => p.deploymentSpeed.ToString()), "s, ").Append("s");
+                builder.Append("<b>Parachute materials</b>: ").AppendJoin(parachutes.Select(p => p.material), ", ").AppendLine();
+                builder.Append("<b>Drag coefficients</b>: ").AppendJoin(parachutes.Select(p => p.mat.dragCoefficient.ToString("0.00")), ", ").AppendLine();
+                builder.Append("<b>Predeployed diameters</b>: ").AppendJoin(parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
+                builder.Append("<b>Deployed diameters</b>: ").AppendJoin(parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
+                builder.Append("<b>Minimum deployment clauses</b>: ").AppendJoin(parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();
+                builder.Append("<b>Deployment altitudes</b>: ").AppendJoin(parachutes.Select(p => p.deploymentAlt.ToString()), "m, ").AppendLine("m");
+                builder.Append("<b>Predeployment speeds</b>: ").AppendJoin(parachutes.Select(p => p.preDeploymentSpeed.ToString()), "s, ").AppendLine("s");
+                builder.Append("<b>Deployment speeds</b>: ").AppendJoin(parachutes.Select(p => p.deploymentSpeed.ToString()), "s, ").Append("s");
                 if (parachutes.Exists(p => p.cutAlt != -1))
                 {
-                    builder.Append("\nAutocut altitudes: ").AppendJoin(parachutes.Select(p => p.cutAlt == -1 ? "-- " : p.cutAlt + "m"), ", ");
+                    builder.Append("\n<b>Autocut altitudes</b>: ").AppendJoin(parachutes.Select(p => p.cutAlt == -1 ? "-- " : p.cutAlt + "m"), ", ");
                 }
             }
             return builder.ToString();

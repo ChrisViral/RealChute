@@ -160,9 +160,9 @@ namespace RealChute
                                 break;
 
                         }
-                        double density = this.body.GetDensityAtAlt(alt);
+                        double density = this.body.GetDensityAtAlt(alt, this.body.GetMaxTemperatureAtAlt(alt));
                         double speed = double.Parse(this.templateGUI.landingSpeed);
-                        speed = speed * speed;
+                        speed *= speed;
 
                         Debug.Log(String.Format("[RealChute]: {0} {1} - m: {2}t, alt: {3}m, ρ: {4}kg/m³, v²: {5}m²/s², a: {6}m/s²", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), m, alt, density, speed, acc));
 
@@ -178,12 +178,6 @@ namespace RealChute
                         Debug.Log(String.Format("[RealChute]: {0} {1} - depDiam: {2}m, preDepDiam: {3}m", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), this.parachute.deployedDiameter, this.parachute.preDeployedDiameter));
                         break;
                     }
-
-                }
-                double density = this.body.GetDensityAtAlt(alt, this.body.GetMaxTemperatureAtAlt(alt));
-                double speed = double.Parse(this.templateGUI.landingSpeed);
-                speed *= speed;
-
             }
 
             this.parachute.minIsPressure = this.templateGUI.isPressure;
@@ -203,7 +197,7 @@ namespace RealChute
                     sym.mat = this.material;
                     sym.deployedDiameter = this.parachute.deployedDiameter;
                     sym.preDeployedDiameter = this.parachute.preDeployedDiameter;
-                    sym.minIsPressure = this.templateGUI.isPressure; 
+                    sym.minIsPressure = this.templateGUI.isPressure;
                     sym.minPressure = this.parachute.minPressure;
                     sym.minDeployment = this.parachute.minDeployment;
                     sym.deploymentAlt = this.parachute.deploymentAlt;

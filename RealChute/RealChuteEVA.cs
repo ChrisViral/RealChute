@@ -430,7 +430,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible() || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             this.ASL = FlightGlobals.getAltitudeAtPos(this.part.transform.position);
             this.trueAlt = this.vessel.GetTrueAlt(ASL);
-            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL);
+            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(ASL, this.vessel.atmosphericTemperature);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
             this.dragVector = -velocity.normalized;

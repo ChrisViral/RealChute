@@ -92,18 +92,19 @@ namespace RealChute
         /// </summary>
         /// <typeparam name="T">PartModule type</typeparam>
         /// <param name="name">Part name to get the node for</param>
-        public ConfigNode GetNode<T>(string name) where T : PartModule
+        public bool TryGetNode<T>(string name, ref ConfigNode node) where T : PartModule
         {
             Dictionary<string, ConfigNode> dict;
             if (nodes.TryGetValue(typeof(T), out dict))
             {
-                ConfigNode node;
-                if (dict.TryGetValue(name, out node))
+                ConfigNode n;
+                if (dict.TryGetValue(name, out n))
                 {
-                    return node;
+                    node = n;
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
         #endregion
     }
