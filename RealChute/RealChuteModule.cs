@@ -626,6 +626,10 @@ namespace RealChute
             //Gets the materials
             this.node = node;
             LoadParachutes();
+            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            {
+                PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
+            }
         }
 
         public override string GetInfo()

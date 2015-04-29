@@ -90,7 +90,7 @@ namespace RealChute
         internal EditorGUI editorGUI = new EditorGUI();
 
         //Sizes
-        private SizeManager sizeLib = SizeManager.instance;
+        private PersistentManager sizeLib = PersistentManager.instance;
         public List<SizeNode> sizes = new List<SizeNode>();
         public Transform parent = null;
         public ConfigNode node = null;

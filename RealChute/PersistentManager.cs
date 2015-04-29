@@ -14,17 +14,18 @@ using UnityEngine;
 namespace RealChute
 {
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
-    public class SizeManager : MonoBehaviour
+    public class PersistentManager : MonoBehaviour
     {
         #region Instance
         /// <summary>
         /// The current instance of the SizeManager
         /// </summary>
-        public static SizeManager instance { get; private set; }
+        public static PersistentManager instance { get; private set; }
         #endregion
 
         #region Fields
         private static Dictionary<string, List<SizeNode>> sizes = new Dictionary<string, List<SizeNode>>();
+        private static Dictionary<Type, Dictionary<string, ConfigNode>> nodes = new Dictionary<Type, Dictionary<string, ConfigNode>>();
         #endregion
 
         #region Functions
@@ -39,7 +40,7 @@ namespace RealChute
 
         #region Methods
         /// <summary>
-        /// Adds the given key/value pair to the dictionary
+        /// Adds the given list of SizeNodes to a persistent dictionary with the given Part name as Key
         /// </summary>
         /// <param name="name">Part name to associate the sizes with</param>
         /// <param name="nodes">Size nodes for the given part</param>
@@ -52,13 +53,57 @@ namespace RealChute
         }
 
         /// <summary>
-        /// Returns the given list of SizeNode for the wanted part
+        /// Returns the given list of SizeNode for the wanted Part name
         /// </summary>
-        /// <param name="name">PartName to get the sizes for</param>
+        /// <param name="name">Part name to get the sizes for</param>
         public List<SizeNode> GetSizes(string name)
         {
-            if (sizes.ContainsKey(name)) { return sizes[name]; }
+            List<SizeNode> list;
+            if (sizes.TryGetValue(name, out list))
+            {
+                return list;
+            }
             return new List<SizeNode>();
+        }
+
+        /// <summary>
+        /// Stores a ConfigNode value in a persistent dictionary, sorted by PartModule type and Part name
+        /// </summary>
+        /// <typeparam name="T">PartModule type</typeparam>
+        /// <param name="name">Part name to use as Key</param>
+        /// <param name="node">ConfigNode to store</param>
+        public void AddNode<T>(string name, ConfigNode node) where T : PartModule
+        {
+            Dictionary<string, ConfigNode> dict;
+            Type type = typeof(T);
+            if (!nodes.TryGetValue(type, out dict))
+            {
+                dict = new Dictionary<string, ConfigNode>();
+                nodes.Add(type, dict);
+            }
+            if (!dict.ContainsKey(name))
+            {
+                dict.Add(name, node);
+            }
+        }
+
+        /// <summary>
+        /// Retreives a ConfigNode for the given PartModule type and Part name
+        /// </summary>
+        /// <typeparam name="T">PartModule type</typeparam>
+        /// <param name="name">Part name to get the node for</param>
+        public ConfigNode GetNode<T>(string name) where T : PartModule
+        {
+            Dictionary<string, ConfigNode> dict;
+            if (nodes.TryGetValue(typeof(T), out dict))
+            {
+                ConfigNode node;
+                if (dict.TryGetValue(name, out node))
+                {
+                    return node;
+                }
+            }
+            return null;
         }
         #endregion
     }
