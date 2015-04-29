@@ -390,7 +390,6 @@ namespace RealChute
             if (this.parachutes.Count <= 0 && this.node != null && this.node.HasNode("PARACHUTE"))
             {
                 this.parachutes = new List<Parachute>(this.node.GetNodes("PARACHUTE").Select(n => new Parachute(this, n)));
-                print("Parachutes count: " + this.parachutes.Count);
             }
         }
 
@@ -586,7 +585,7 @@ namespace RealChute
             if (this.parachutes.Count <= 0)
             {
                 RealChuteModule m = this;
-                if (this.node == null && !this.part.TryGetModuleNode<RealChuteModule>(ref this.node)) { return; }
+                if (this.node == null && !PersistentManager.instance.TryGetNode<RealChuteModule>(this.part.name, ref this.node)) { return; }
                 LoadParachutes();
             }
             this.parachutes.ForEach(p => p.Initialize());
@@ -610,6 +609,22 @@ namespace RealChute
                 GameEvents.onShowUI.Add(ShowUI);
 
                 if (this.canRepack) { SetRepack(); }
+
+                foreach(DragCube cube in this.part.DragCubes.Cubes)
+                {
+                    switch (cube.Name)
+                    {
+                        case "PACKED":
+                            this.part.DragCubes.SetCubeWeight("PACKED", 1); break;
+
+                        case "SEMIDEPLOYED":
+                        case "DEPLOYED":
+                            this.part.DragCubes.SetCubeWeight(cube.Name, 0); break;
+
+                        default:
+                            break;
+                    }
+                }
             }
 
             //GUI
@@ -624,6 +639,10 @@ namespace RealChute
             LoadParachutes();
             float chuteMass = this.parachutes.Sum(p => p.chuteMass);
             this.part.mass = this.caseMass + chuteMass;
+            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            {
+                PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
+            }
         }
 
         public override string GetInfo()

@@ -93,7 +93,7 @@ namespace RealChute
         public ConfigNode node = null;
 
         //Sizes
-        private SizeManager sizeLib = SizeManager.instance;
+        private PersistentManager sizeLib = PersistentManager.instance;
         public List<SizeNode> sizes = new List<SizeNode>();
         public Transform parent = null;
         #endregion
@@ -485,7 +485,7 @@ namespace RealChute
             //Initializes ChuteTemplates
             if (this.chutes.Count <= 0)
             {
-                if (this.node == null && !this.part.TryGetModuleNode<ProceduralChute>(ref this.node)) { return; }
+                if (this.node == null && !PersistentManager.instance.TryGetNode<ProceduralChute>(this.part.name, ref this.node)) { return; }
                 LoadChutes();
             }
             this.chutes.ForEach(c => c.Initialize());
@@ -606,6 +606,11 @@ namespace RealChute
 
             //Original part size
             if (this.debut == 0) { this.debut = this.part.transform.GetChild(0).localScale.y; }
+
+            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            {
+                PersistentManager.instance.AddNode<ProceduralChute>(this.part.name, node);
+            }
         }
 
         public override string GetInfo()
