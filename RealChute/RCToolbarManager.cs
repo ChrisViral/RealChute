@@ -3,6 +3,7 @@ using System.Linq;
 using System.IO;
 using UnityEngine;
 using RealChute.Extensions;
+using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -16,8 +17,15 @@ using RealChute.Extensions;
 namespace RealChute
 {
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
-    public class RCFilterManager : MonoBehaviour
+    public class RCToolbarManager : MonoBehaviour
     {
+        #region Fields
+        private static ApplicationLauncherButton button = new ApplicationLauncherButton();
+        private static bool add = true;
+        private static bool visible = false;
+        private static GameObject settings;
+        #endregion
+
         #region Methods
         private void AddFilter()
         {
@@ -25,7 +33,7 @@ namespace RealChute
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
             normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon.png")));
             selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon_selected.png")));
-            PartCategorizer.Icon icon = new PartCategorizer.Icon("RC_Parachutes", normal, selected);
+            Icon icon = new Icon("RC_Parachutes", normal, selected);
 
             //Adds the Parachutes filter to the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
@@ -44,6 +52,45 @@ namespace RealChute
             button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCED);
             button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCED);
         }
+
+        private void AddButton()
+        {
+            if (ApplicationLauncher.Ready && add)
+            {
+                Texture2D buttonTexture = new Texture2D(38, 38);
+                buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
+                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
+                    Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
+                    (Texture)buttonTexture);
+                add = false;
+            }
+        }
+
+        private void RemoveButton()
+        {
+            ApplicationLauncher.Instance.RemoveModApplication(button);
+        }
+
+        private void Show()
+        {
+            if (!visible)
+            {
+                settings = new GameObject("SettingsWindow", typeof(SettingsWindow));
+            }
+        }
+
+        private void Hide()
+        {
+            Destroy(settings);
+            visible = false;
+        }
+
+        private void Empty() { }
+
+        public static void SetApplauncherButtonFalse()
+        {
+            button.SetFalse();
+        }
         #endregion
 
         #region Initialization
@@ -58,6 +105,8 @@ namespace RealChute
             else
             {
                 GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
+                GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
+                GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
             }
         }
         #endregion

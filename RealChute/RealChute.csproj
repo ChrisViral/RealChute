@@ -51,9 +51,9 @@
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
     <Compile Include="GUIUtils.cs" />
-    <Compile Include="RCFilterManager.cs" />
+    <Compile Include="RCToolbarManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
-    <Compile Include="SizeManager.cs" />
+    <Compile Include="PersistentManager.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />
     <Compile Include="Extensions\CelestialBodyExtensions.cs" />

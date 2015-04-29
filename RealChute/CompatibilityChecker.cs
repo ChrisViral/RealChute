@@ -64,7 +64,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users 
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 0 && Versioning.version_minor == 90;
+            return Versioning.version_major == 1 && Versioning.version_minor == 0;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -79,7 +79,7 @@ namespace RealChute
 
             // TODO: Implement your own Unity compatibility check.
             //
-            return Application.unityVersion.Equals("4.5.5f1");
+            return Application.unityVersion.Equals("4.6.4f1");
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |

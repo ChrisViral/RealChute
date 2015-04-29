@@ -158,9 +158,9 @@ namespace RealChute
                         break;
 
                 }
-                double density = this.body.GetDensityAtAlt(alt);
+                double density = this.body.GetDensityAtAlt(alt, this.body.GetMaxTemperatureAtAlt(alt));
                 double speed = double.Parse(this.templateGUI.landingSpeed);
-                speed = speed * speed;
+                speed *= speed;
 
                 Debug.Log(String.Format("[RealChute]: {0} {1} - m: {2}t, alt: {3}m, ρ: {4}kg/m³, v²: {5}m²/s², a: {6}m/s²", this.part.partInfo.title, RCUtils.ParachuteNumber(this.id), m, alt, density, speed, acc));
 

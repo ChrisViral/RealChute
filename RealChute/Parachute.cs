@@ -83,12 +83,15 @@ namespace RealChute
         {
             get
             {
-                if (this.module.groundStop || this.module.atmPressure == 0) { return false; }
+                if (this.module.groundStop || this.module.atmPressure == 0 || this.part.ShieldedFromAirstream) { return false; }
                 else if (this.deploymentState == DeploymentStates.CUT) { return false; }
-                else if (this.deploymentClause && this.cutAlt == -1) { return true; }
-                else if (this.deploymentClause && this.module.trueAlt > this.cutAlt) { return true; }
-                else if (this.module.secondaryChute && !this.deploymentClause && this.parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
-                else if (!this.deploymentClause && this.isDeployed) { return true; }
+                else if (this.deploymentClause)
+                {
+                    if (this.cutAlt == -1) { return true; }
+                    else if (this.module.trueAlt > this.cutAlt) { return true; }
+                }
+                else if (this.module.secondaryChute && this.parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
+                else if (this.isDeployed) { return true; }
                 return false;
             }
         }
@@ -170,8 +173,9 @@ namespace RealChute
         internal Transform parachute = null, cap = null;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
-        internal bool played = false, randomized = false;
+        internal bool played = false;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
+        private Random random = new Random();
         internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
@@ -196,14 +200,6 @@ namespace RealChute
         //Adds a random noise to the parachute movement
         private void ParachuteNoise()
         {
-            if (!this.randomized)
-            {
-                Random random = new Random();
-                this.randomX = (float)random.NextDouble() * 100;
-                this.randomY = (float)random.NextDouble() * 100;
-                this.randomized = true;
-            }
-
             float time = Time.time;
             this.parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(time, this.randomX + Mathf.Sin(time)) - 0.5f), 5 * (Mathf.PerlinNoise(time, this.randomY + Mathf.Sin(time)) - 0.5f), 0));
         }
@@ -292,6 +288,7 @@ namespace RealChute
         {
             this.deploymentState = DeploymentStates.STOWED;
             this.randomTimer.Reset();
+            this.randomTime = (float)this.random.NextDouble();
             this.dragTimer.Reset();
             this.time = 0;
             this.capOff = false;
@@ -401,6 +398,9 @@ namespace RealChute
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
+                this.randomX = (float)((this.random.NextDouble() - 0.5) * 200);
+                this.randomY = (float)((this.random.NextDouble() - 0.5) * 200);
+                this.randomTime = (float)this.random.NextDouble();
                 if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
                 if (this.capOff)
                 {
@@ -424,8 +424,8 @@ namespace RealChute
             StringBuilder builder = new StringBuilder();
             builder.Append("Material: ").AppendLine(this.mat.name);
             builder.Append("Drag coefficient: ").AppendLine(this.mat.dragCoefficient.ToString("0.00#"));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\t\tarea: ").Append(this.preDeployedArea.ToString("0.###")).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\t\tarea: ").Append(this.deployedArea.ToString("0.###")).Append("m²");
+            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.preDeployedArea.ToString("0.###")).AppendLine("m²");
+            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.deployedArea.ToString("0.###")).Append("m²");
             GUILayout.Label(builder.ToString(), this.skins.label);
 
             if (HighLogic.LoadedSceneIsFlight)
