@@ -21,6 +21,7 @@ namespace RealChute
     {
         #region Fields
         private static ApplicationLauncherButton button = new ApplicationLauncherButton();
+        private static bool add = true;
         private static bool visible = false;
         private static GameObject settings;
         #endregion
@@ -54,13 +55,14 @@ namespace RealChute
 
         private void AddButton()
         {
-            if (ApplicationLauncher.Ready)
+            if (ApplicationLauncher.Ready && add)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
                     Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
                     (Texture)buttonTexture);
+                add = false;
             }
         }
 
