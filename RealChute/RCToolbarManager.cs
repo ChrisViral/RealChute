@@ -69,6 +69,7 @@ namespace RealChute
         private void RemoveButton()
         {
             ApplicationLauncher.Instance.RemoveModApplication(button);
+            add = true;
         }
 
         private void Show()
@@ -76,6 +77,7 @@ namespace RealChute
             if (!visible)
             {
                 settings = new GameObject("SettingsWindow", typeof(SettingsWindow));
+                visible = true;
             }
         }
 
@@ -87,7 +89,7 @@ namespace RealChute
 
         private void Empty() { }
 
-        public static void SetApplauncherButtonFalse()
+        public static void SetAppLauncherButtonFalse()
         {
             button.SetFalse();
         }

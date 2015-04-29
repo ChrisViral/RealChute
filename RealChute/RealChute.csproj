@@ -60,10 +60,7 @@
     <Compile Include="LinkedToggles.cs" />
     <Compile Include="ParachuteStorageModule.cs" />
     <Compile Include="PhysicsWatch.cs" />
-<<<<<<< HEAD
     <Compile Include="RealChuteEVA.cs" />
-=======
->>>>>>> d93858a... More AppLauncher fix
     <Compile Include="PersistentManager.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />

@@ -39,7 +39,7 @@ namespace RealChute
         {
             int i = 1;
             if (int.TryParse(level, out i)) { this.settings.engineerLevel = i; }
-            if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
+            if (!this.destroying) { RCToolbarManager.SetAppLauncherButtonFalse(); }
         }
         #endregion
 
