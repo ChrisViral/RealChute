@@ -1,4 +1,7 @@
-﻿using RealChute.Extensions;
+﻿using RealChute.Libraries.Materials;
+using RealChute.Utils;
+using RealChute.Spares;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -9,7 +12,7 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.EVA
 {
     public class EVAChute : IParachute
     {

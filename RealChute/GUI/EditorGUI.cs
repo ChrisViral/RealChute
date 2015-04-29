@@ -2,9 +2,10 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.Libraries.Presets;
+using RealChute.Utils;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -15,7 +16,7 @@ using RealChute.Libraries;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.GUI
 {
     public class EditorGUI
     {

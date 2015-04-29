@@ -5,7 +5,10 @@ using System.Text;
 using UnityEngine;
 using Experience;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.Libraries.Materials;
+using RealChute.Spares;
+using RealChute.Utils;
+using RealChute.Managers;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -712,7 +715,7 @@ namespace RealChute
         private void Window(int id)
         {
             //Header
-            GUI.DragWindow(this.drag);
+            UnityEngine.GUI.DragWindow(this.drag);
             GUILayout.BeginVertical();
 
             //Top info labels

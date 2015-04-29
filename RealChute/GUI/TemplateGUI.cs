@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
-using RealChute.Libraries;
+using RealChute.Libraries.Materials;
 using RealChute.Extensions;
+using RealChute.Libraries.Textures;
+using RealChute.Utils;
+using UnityEngine;
 using SelectorType = RealChute.ProceduralChute.SelectorType;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -16,18 +18,8 @@ using SelectorType = RealChute.ProceduralChute.SelectorType;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.GUI
 {
-    /// <summary>
-    /// Parachute calculation type
-    /// </summary>
-    public enum ParachuteType
-    {
-        Main = 1,
-        Drogue = 2,
-        Drag = 3
-    }
-
     /// <summary>
     /// Which mode parachute calculations are in
     /// </summary>
@@ -451,7 +443,7 @@ namespace RealChute
         //Materials window GUI code
         internal void MaterialsWindow(int id)
         {
-            GUI.DragWindow(drag);
+            UnityEngine.GUI.DragWindow(drag);
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
             this.materialsScroll = GUILayout.BeginScrollView(this.materialsScroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxHeight(200), GUILayout.Width(140));

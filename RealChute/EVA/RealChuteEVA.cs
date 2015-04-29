@@ -1,7 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.Utils;
+using RealChute.Libraries.Materials;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -13,7 +14,7 @@ using Random = System.Random;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.EVA
 {
     public class RealChuteEVA : PartModule
     {

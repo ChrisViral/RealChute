@@ -9,32 +9,23 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.Textures
 {
-    public class CaseConfig
+    public class CanopyConfig
     {
         #region Propreties
         private string _name = string.Empty;
         /// <summary>
-        /// Name of the texture
+        /// The name of the texture
         /// </summary>
         public string name
         {
             get { return this._name; }
         }
 
-        private string[] _types = new string[0];
-        /// <summary>
-        /// Types of parachute this texture applies to
-        /// </summary>
-        public string[] types
-        {
-            get { return this._types; }
-        }
-
         private string _textureURL = string.Empty;
         /// <summary>
-        /// URL of the texture
+        /// The URL of the texture
         /// </summary>
         public string textureURL
         {
@@ -44,18 +35,17 @@ namespace RealChute.Libraries
 
         #region Constructor
         /// <summary>
-        /// Creates an empty CaseConfig
+        /// Creates an empty CanopyConfig
         /// </summary>
-        public CaseConfig() { }
+        public CanopyConfig() { }
 
         /// <summary>
-        /// Creates a new CaseConfig from the given ConfigNode
+        /// Creates a new CanopyConfig from the given ConfigNode
         /// </summary>
-        /// <param name="node">ConfigNode to get the values from</param>
-        public CaseConfig(ConfigNode node)
+        /// <param name="node">ConfigNode to make the config from</param>
+        public CanopyConfig(ConfigNode node)
         {
             node.TryGetValue("name", ref _name);
-            node.TryGetValue("types", ref _types);
             node.TryGetValue("textureURL", ref _textureURL);
         }
         #endregion

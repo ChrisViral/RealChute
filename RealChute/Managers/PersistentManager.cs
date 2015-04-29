@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using RealChute.Utils;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -11,7 +12,7 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.Managers
 {
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class PersistentManager : MonoBehaviour

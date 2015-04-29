@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.IO;
-using UnityEngine;
 using RealChute.Extensions;
+using RealChute.Utils;
+using RealChute.GUI;
+using UnityEngine;
 using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -14,7 +16,7 @@ using Icon = RUI.Icons.Selectable.Icon;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.Managers
 {
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     public class RCToolbarManager : MonoBehaviour

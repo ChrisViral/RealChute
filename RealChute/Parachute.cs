@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.Utils;
+using RealChute.Libraries.Materials;
+using UnityEngine;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -18,6 +19,16 @@ using Random = System.Random;
 
 namespace RealChute
 {
+    /// <summary>
+    /// Parachute calculation type
+    /// </summary>
+    public enum ParachuteType
+    {
+        Main = 1,
+        Drogue = 2,
+        Drag = 3
+    }
+
     public class Parachute
     {
         #region Propreties

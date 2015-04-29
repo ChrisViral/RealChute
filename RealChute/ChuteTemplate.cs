@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.GUI;
+using RealChute.Libraries.Materials;
+using RealChute.Libraries.Presets;
+using RealChute.Libraries.Textures;
+using RealChute.Utils;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.

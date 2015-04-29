@@ -1,5 +1,4 @@
-﻿using RealChute.Extensions;
-
+﻿
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
@@ -9,45 +8,32 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Spares
 {
-    public class CanopyConfig
+    public interface IParachute
     {
-        #region Propreties
-        private string _name = string.Empty;
+        #region Properties
         /// <summary>
-        /// The name of the texture
+        /// Parachute fully deployed area
         /// </summary>
-        public string name
-        {
-            get { return this._name; }
-        }
+        float deployedArea { get; }
 
-        private string _textureURL = string.Empty;
         /// <summary>
-        /// The URL of the texture
+        /// Total canopy mass
         /// </summary>
-        public string textureURL
-        {
-            get { return this._textureURL; }
-        }
+        float chuteMass { get; }
+
+        /// <summary>
+        /// Name of the parachute
+        /// </summary>
+        string name { get; }
         #endregion
 
-        #region Constructor
+        #region Methods
         /// <summary>
-        /// Creates an empty CanopyConfig
+        /// The info Confignode to save to the persistance
         /// </summary>
-        public CanopyConfig() { }
-
-        /// <summary>
-        /// Creates a new CanopyConfig from the given ConfigNode
-        /// </summary>
-        /// <param name="node">ConfigNode to make the config from</param>
-        public CanopyConfig(ConfigNode node)
-        {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("textureURL", ref _textureURL);
-        }
+        ConfigNode Save();
         #endregion
     }
 }

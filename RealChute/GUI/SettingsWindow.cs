@@ -1,4 +1,6 @@
 ﻿using System;
+using RealChute.Managers;
+using RealChute.Utils;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -10,7 +12,7 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.GUI
 {
     public class SettingsWindow : MonoBehaviour
     {
@@ -95,14 +97,14 @@ namespace RealChute
 
         private void Window(int id)
         {
-            GUI.DragWindow(drag);
+            UnityEngine.GUI.DragWindow(drag);
             this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when staging", this.skins.toggle);
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
             this.settings.mustBeEngineer = GUILayout.Toggle(this.settings.mustBeEngineer, "Only engineers can repack in career", this.skins.toggle);
-            if (!this.settings.mustBeEngineer) { GUI.enabled = false; }
+            if (!this.settings.mustBeEngineer) { UnityEngine.GUI.enabled = false; }
             GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
-            if (!this.settings.mustBeEngineer) { GUI.enabled = true; }
+            if (!this.settings.mustBeEngineer) { UnityEngine.GUI.enabled = true; }
 
             GUIUtils.CenteredButton("Close", CloseWindow, 100);
         }

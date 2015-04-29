@@ -17,7 +17,7 @@ using Version = System.Version;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.Utils
 {
     public static class RCUtils
     {

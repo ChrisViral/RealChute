@@ -2,9 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RealChute.Extensions;
-using UnityEngine;
 using RealChute.Libraries;
+using RealChute.Libraries.Materials;
+using RealChute.Libraries.Textures;
+using RealChute.Libraries.Presets;
+using RealChute.Extensions;
+using RealChute.GUI;
+using RealChute.Managers;
+using RealChute.Utils;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -93,7 +99,6 @@ namespace RealChute
         public ConfigNode node = null;
 
         //Sizes
-        private PersistentManager sizeLib = PersistentManager.instance;
         public List<SizeNode> sizes = new List<SizeNode>();
         public Transform parent = null;
         #endregion
@@ -490,7 +495,7 @@ namespace RealChute
                 LoadChutes();
             }
             this.chutes.ForEach(c => c.Initialize());
-            if (this.sizes.Count <= 0) { this.sizes = this.sizeLib.GetSizes(this.part.partInfo.name); }
+            if (this.sizes.Count <= 0) { this.sizes = PersistentManager.instance.GetSizes(this.part.partInfo.name); }
 
             //Creates an instance of the texture library
             this.editorGUI = new EditorGUI(this);
@@ -589,7 +594,7 @@ namespace RealChute
             if (this.node.HasNode("SIZE"))
             {
                 this.sizes = new List<SizeNode>(this.node.GetNodes("SIZE").Select(n => new SizeNode(n)));
-                this.sizeLib.AddSizes(this.part.name, this.sizes);
+                PersistentManager.instance.AddSizes(this.part.name, this.sizes);
             }
 
             //Top node original location
