@@ -665,6 +665,7 @@ namespace RealChute
                 Parachute parachute = parachutes[0];
                 builder.AppendFormat("Parachute material: {0}\n", parachute.material);
                 builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.dragCoefficient);
+                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.maxTemp + RCUtils.absoluteZero);
                 builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
                 builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
                 if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }
@@ -680,6 +681,7 @@ namespace RealChute
             {
                 builder.Append("Parachute materials: ").AppendJoin(parachutes.Select(p => p.material), ", ").AppendLine();
                 builder.Append("Drag coefficients: ").AppendJoin(parachutes.Select(p => p.mat.dragCoefficient.ToString("0.00")), ", ").AppendLine();
+                builder.Append("Chute max temperatures: ").AppendJoin(parachutes.Select(p => (p.mat.maxTemp + RCUtils.absoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
                 builder.Append("Predeployed diameters: ").AppendJoin(parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Deployed diameters: ").AppendJoin(parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Minimum deployment clauses: ").AppendJoin(parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();

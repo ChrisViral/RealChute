@@ -39,10 +39,26 @@ namespace RealChute
             get { return this.deployedArea * this.mat.areaDensity; }
         }
 
+        //The inverse of the thermal mass of the parachute
+        private double invThermalMass
+        {
+            get
+            {
+                if (this.thermMass == 0) { this.thermMass = 1d / (this.mat.specificHeat * this.chuteMass); }
+                return this.thermMass;
+            }
+        }
+
         //Part this chute is associated with
         private Part part
         {
             get { return this.module.part; }
+        }
+
+        //Vessel this chute is associated with
+        private Vessel vessel
+        {
+            get { return this.module.vessel; }
         }
 
         //Position to apply the force to
@@ -165,6 +181,7 @@ namespace RealChute
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
         public float forcedOrientation = 0;
         public string depState = "STOWED";
+        public double currentArea = 0, chuteTemperature = 300, thermMass = 0;
 
         //Flight
         internal RealChuteModule module = null;
@@ -281,6 +298,8 @@ namespace RealChute
             if (!this.module.secondaryChute || this.parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
             else if (this.module.secondaryChute && this.parachutes.Exists(p => p.deploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             this.dragTimer.Reset();
+            this.currentArea = 0;
+            this.chuteTemperature = RCUtils.startTemp;
         }
 
         //Repack actions
@@ -304,9 +323,11 @@ namespace RealChute
             if (this.time <= time)
             {
                 float deploymentTime = (float)(Math.Exp(this.time - time) * (this.time / time));
-                return Mathf.Lerp(debutArea, endArea, deploymentTime);
+                this.currentArea =  Mathf.Lerp(debutArea, endArea, deploymentTime);
+                return (float)this.currentArea;
             }
-            else { return endArea; }
+            this.currentArea = endArea;
+            return (float)this.currentArea;
         }
 
         //Drag force vector
@@ -321,7 +342,11 @@ namespace RealChute
             if (this.canDeploy)
             {
                 this.module.oneWasDeployed = true;
-                if (this.isDeployed) { FollowDragDirection(); }
+                if (this.isDeployed)
+                {
+                    if (!this.CalculateChuteTemp()) { return; }
+                    FollowDragDirection();
+                }
 
                 switch (this.deploymentState)
                 {
@@ -368,6 +393,38 @@ namespace RealChute
             }
             //Deactivation
             else if (!this.canDeploy && this.isDeployed) { Cut(); }
+        }
+
+        //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
+        private bool CalculateChuteTemp()
+        {
+            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.startTemp; }
+
+            double flux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + this.vessel.mach * this.vessel.mach * this.vessel.mach,
+                    (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
+                    * (this.vessel.externalTemperature - this.chuteTemperature);
+
+            if (this.vessel.mach > PhysicsGlobals.MachConvectionStart)
+            {
+                double machLerp = (this.part.machNumber - PhysicsGlobals.MachConvectionStart) / (PhysicsGlobals.MachConvectionEnd - PhysicsGlobals.MachConvectionStart);
+                machLerp = Math.Pow(machLerp, PhysicsGlobals.MachConvectionExponent);
+                flux = UtilMath.Lerp(flux, this.vessel.convectiveMachFlux, machLerp);
+            }
+            this.chuteTemperature += 0.001 * this.invThermalMass * flux * this.currentArea * TimeWarp.fixedDeltaTime;
+            if (chuteTemperature > 0)
+            {
+                this.chuteTemperature -= 0.001 * this.invThermalMass * PhysicsGlobals.StefanBoltzmanConstant * this.currentArea * this.mat.emissivity
+                    * PhysicsGlobals.RadiationFactor * TimeWarp.fixedDeltaTime
+                    * Math.Pow(this.chuteTemperature, PhysicsGlobals.PartEmissivityExponent);
+            }
+            this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature, this.chuteTemperature);
+            if (this.chuteTemperature > this.mat.maxTemp)
+            {
+                ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+                Cut();
+                return false;
+            }
+            return true;
         }
 
         //Initializes the chute
@@ -430,6 +487,13 @@ namespace RealChute
 
             if (HighLogic.LoadedSceneIsFlight)
             {
+                //Temperature info
+                builder = new StringBuilder();
+                builder.Append("Chute max temperature: ").Append(this.mat.maxTemp + RCUtils.absoluteZero).AppendLine("°C");
+                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.absoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
+                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.maxTemp > 0.85 ? GUIUtils.redLabel : this.skins.label);
+
+
                 //Pressure/altitude predeployment toggle
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Predeployment:", this.skins.label);

@@ -28,6 +28,16 @@ namespace RealChute
         public const double geeToAcc = 9.80665;
 
         /// <summary>
+        /// Parachute starting temperature
+        /// </summary>
+        public const double startTemp = 300;
+
+        /// <summary>
+        /// Absolute zero in °C
+        /// </summary>
+        public const double absoluteZero = -273.15;
+
+        /// <summary>
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
         public const string localSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
