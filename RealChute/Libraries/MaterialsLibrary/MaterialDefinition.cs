@@ -70,7 +70,7 @@ namespace RealChute.Libraries
 
         private double _specificHeat = 1700;
         /// <summary>
-        /// The specific heat of the material (J/kg*K)
+        /// The specific heat of the material (J/kg∙K)
         /// </summary>
         public double specificHeat
         {
