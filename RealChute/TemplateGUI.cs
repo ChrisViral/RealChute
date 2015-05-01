@@ -474,8 +474,11 @@ namespace RealChute
             StringBuilder builder = new StringBuilder();
             builder.Append("Description:  ").AppendLine(material.description);
             builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));
-            builder.Append("\nArea density:  ").Append(material.areaDensity * 1000).AppendLine("kg/m²\n");
-            builder.Append("Area cost:  ").Append(material.areaCost.ToString()).Append("F/m²");
+            builder.Append("\nArea density:  ").Append(material.areaDensity * 1000).AppendLine("kg/m²");
+            builder.Append("\nArea cost:  ").Append(material.areaCost.ToString()).Append("F/m²");
+            builder.Append("\nMax temperature: ").Append((material.maxTemp + RCUtils.absoluteZero).ToString()).Append("°C");
+            builder.Append("\nSpecific heat: ").Append(material.specificHeat.ToString()).Append("J/kg∙K");
+            builder.Append("\nEmissivity constant: ").Append(material.emissivity.ToString());
             GUILayout.Label(builder.ToString(), this.skins.label);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
