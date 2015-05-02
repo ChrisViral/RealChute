@@ -49,6 +49,19 @@ namespace RealChute
             }
         }
 
+        //The current useful convection area
+        private double convectionArea
+        {
+            get
+            {
+                if (this.deploymentState == DeploymentStates.PREDEPLOYED && this.dragTimer.elapsed.Seconds < this.preDeploymentSpeed)
+                {
+                    return UtilMath.Lerp(0, this.deployedArea, this.dragTimer.elapsed.Seconds / this.preDeploymentSpeed);
+                }
+                return this.deployedArea;
+            }
+        }
+
         //Part this chute is associated with
         private Part part
         {
@@ -400,6 +413,7 @@ namespace RealChute
         {
             if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.startTemp; }
 
+            double area = this.convectionArea;
             double flux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + this.vessel.mach * this.vessel.mach * this.vessel.mach,
                     (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
                     * (this.vessel.externalTemperature - this.chuteTemperature);
@@ -410,10 +424,10 @@ namespace RealChute
                 machLerp = Math.Pow(machLerp, PhysicsGlobals.MachConvectionExponent);
                 flux = UtilMath.Lerp(flux, this.vessel.convectiveMachFlux, machLerp);
             }
-            this.chuteTemperature += 0.001 * this.invThermalMass * flux * this.currentArea * TimeWarp.fixedDeltaTime;
+            this.chuteTemperature += 0.001 * this.invThermalMass * flux * area *TimeWarp.fixedDeltaTime;
             if (chuteTemperature > 0)
             {
-                this.chuteTemperature -= 0.001 * this.invThermalMass * PhysicsGlobals.StefanBoltzmanConstant * this.currentArea * this.mat.emissivity
+                this.chuteTemperature -= 0.001 * this.invThermalMass * PhysicsGlobals.StefanBoltzmanConstant * area * this.mat.emissivity
                     * PhysicsGlobals.RadiationFactor * TimeWarp.fixedDeltaTime
                     * Math.Pow(this.chuteTemperature, PhysicsGlobals.PartEmissivityExponent);
             }
