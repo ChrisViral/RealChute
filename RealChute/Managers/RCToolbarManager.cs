@@ -41,12 +41,12 @@ namespace RealChute.Managers
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == "Filter by Function");
             PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon,
-                p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
+                p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
             //Sets the buttons in the Filter by Module category
             List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == "Filter by Module").subcategories;
-            modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
+            modules.Remove(m => m.button.categoryName == "Procedural Chute");
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
@@ -70,8 +70,11 @@ namespace RealChute.Managers
 
         private void RemoveButton()
         {
-            ApplicationLauncher.Instance.RemoveModApplication(button);
-            add = true;
+            if (!add)
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(button);
+                add = true;
+            }
         }
 
         private void Show()
@@ -85,15 +88,18 @@ namespace RealChute.Managers
 
         private void Hide()
         {
-            Destroy(settings);
-            visible = false;
+            if (visible)
+            {
+                Destroy(settings);
+                visible = false;
+            }
         }
 
         private void Empty() { }
 
         public static void SetAppLauncherButtonFalse()
         {
-            button.SetFalse();
+            if (!add) { button.SetFalse(); }
         }
         #endregion
 

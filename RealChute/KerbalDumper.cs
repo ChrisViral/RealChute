@@ -57,6 +57,7 @@ namespace RealChute
             StringBuilder b = new StringBuilder("[KerbalDumper]: Dumping Kerbal data\n\n");
             b.Append("Kerbal name: ").AppendLine(kerbal.name);
             b.Append("Kerbal profession: ").AppendLine(kerbal.experienceTrait.Title);
+            b.Append("Kerbal gender: ").AppendLine(EnumUtils.GetName(kerbal.gender));
             b.Append("Profession level: ").AppendLine(kerbal.experienceLevel.ToString());
             b.AppendLine("\nTransform tree:");
             RCUtils.PrintChildren(part.transform, b);

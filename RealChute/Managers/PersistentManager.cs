@@ -80,9 +80,10 @@ namespace RealChute.Managers
             if (!nodes.TryGetValue(type, out dict))
             {
                 dict = new Dictionary<string, ConfigNode>();
+                dict.Add(name, node);
                 nodes.Add(type, dict);
             }
-            if (!dict.ContainsKey(name))
+            else if (!dict.ContainsKey(name))
             {
                 dict.Add(name, node);
             }

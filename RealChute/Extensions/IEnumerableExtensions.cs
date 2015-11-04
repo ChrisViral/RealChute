@@ -86,6 +86,25 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
+        /// Removes the first item that matches the given predicate in the list
+        /// </summary>
+        /// <typeparam name="T">Type of the list</typeparam>
+        /// <param name="match">Item to match</param>
+        public static void Remove<T>(this List<T> list, Predicate<T> match)
+        {
+            if (match == null) { throw new ArgumentNullException("match"); }
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (match(list[i]))
+                {
+                    list.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Executes the given action on each member of the IEnumerable
         /// </summary>
         /// <typeparam name="T">Type of the elements</typeparam>

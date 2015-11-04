@@ -19,10 +19,12 @@ using UnityEngine;
 
 namespace RealChute.Spares
 {
-    public enum StorageTab
+    //Parachute storage type
+    public enum StorageType
     {
-        EVA = 1,
-        Spares = 2
+        Spares,
+        EVA,
+        Both
     }
 
     public class ParachuteStorageModule : PartModule, IModuleInfo
@@ -72,7 +74,7 @@ namespace RealChute.Spares
         private Vector2 scrollAvailable = new Vector2(), scrollStored = new Vector2();
         private int id = Guid.NewGuid().GetHashCode();
         private bool visible = false;
-        private StorageTab tab = StorageTab.EVA;
+        private StorageType type = StorageType.Both;
         private LinkedToggles<EVAChute> chutes = null;
         private LinkedToggles<SpareChute> spares = null;
         private LinkedToggles<IParachute> stored = null;
@@ -231,10 +233,10 @@ namespace RealChute.Spares
 
         private void Window(int id)
         {
+            UnityEngine.GUI.DragWindow(drag);
             EVAChute c = null;
             SpareChute s = null;
             IParachute p = null;
-            UnityEngine.GUI.DragWindow(drag);
             GUILayout.BeginVertical();
 
             StringBuilder b = new StringBuilder();
