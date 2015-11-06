@@ -50,7 +50,7 @@ namespace RealChute.EVA
         /// </summary>
         public float deployedArea
         {
-            get { throw new System.NotImplementedException(); }
+            get { return this._deployedArea; }
         }
 
         private float _chuteMass = 0.1f;
@@ -59,7 +59,15 @@ namespace RealChute.EVA
         /// </summary>
         public float chuteMass
         {
-            get { throw new System.NotImplementedException(); }
+            get { return this._chuteMass; }
+        }
+
+        /// <summary>
+        /// Indicates this is an EVA chute
+        /// </summary>
+        public Category category
+        {
+            get { return Category.EVA; }
         }
         #endregion
 
@@ -86,6 +94,19 @@ namespace RealChute.EVA
                     this._chuteMass = mat.areaDensity * this._deployedArea;
                 }
             }
+        }
+
+        /// <summary>
+        /// Clones an EVAChute
+        /// </summary>
+        /// <param name="chute"></param>
+        public EVAChute(EVAChute chute)
+        {
+            this._name = chute._name;
+            this._description = chute._description;
+            this._module = chute._module;
+            this._deployedArea = chute._deployedArea;
+            this._chuteMass = chute._chuteMass;
         }
         #endregion
 

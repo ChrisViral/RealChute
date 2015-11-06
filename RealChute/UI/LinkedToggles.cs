@@ -10,7 +10,7 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.GUI
+namespace RealChute.UI
 {
     public class LinkedToggles<T>
     {
@@ -47,11 +47,11 @@ namespace RealChute.GUI
         #region Constructor
         public LinkedToggles(IEnumerable<T> collection, string[] names, GUIStyle normalStyle, GUIStyle activeStyle)
         {
-            int i = -1;
-            foreach(T value in collection)
+            int i = 0;
+            IEnumerator<T> e = collection.GetEnumerator();
+            while(e.MoveNext())
             {
-                i++;
-                this.toggles.Add(new Toggle(value, names[i]));
+                this.toggles.Add(new Toggle(e.Current, names[i++]));
             }
             this.normal = normalStyle;
             this.active = activeStyle;
@@ -80,11 +80,7 @@ namespace RealChute.GUI
                         value = t.value;
                     }
                 }
-                else if (this.toggled == t)
-                {
-                    t.toggled = false;
-                    this.toggled = null;
-                }
+                else if (this.toggled == t) { ClearToggle(); }
             }
             GUILayout.EndVertical();
             return value;

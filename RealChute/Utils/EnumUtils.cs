@@ -33,14 +33,14 @@ namespace RealChute.Utils
             private Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
 
             /// <summary>
-            /// Stores the index of each member with it's string representation
-            /// </summary>
-            private Dictionary<string, int> nameIndexes = new Dictionary<string, int>();
-
-            /// <summary>
             /// Stores the index of each member with the member as the key
             /// </summary>
             private Dictionary<TEnum, int> indexes = new Dictionary<TEnum, int>();
+
+            /// <summary>
+            /// Stores the index of each member with it's string representation
+            /// </summary>
+            private Dictionary<string, int> sIndexes = new Dictionary<string, int>();
 
             /// <summary>
             /// Stores the index of each member as the key with the string representation of it as the value
@@ -71,6 +71,7 @@ namespace RealChute.Utils
             public EnumConverter(Type enumType)
             {
                 if (enumType == null) { throw new ArgumentNullException("enumType", "Enum conversion type cannot be null"); }
+
                 Array values = Enum.GetValues(enumType);
                 this.orderedNames = new string[values.Length];
                 this.orderedValues = new TEnum[values.Length];
@@ -83,7 +84,7 @@ namespace RealChute.Utils
                     this.values.Add(name, value);
                     this.names.Add(value, name);
                     this.indexes.Add(value, i);
-                    this.nameIndexes.Add(name, i);
+                    this.sIndexes.Add(name, i);
                     this.atValues.Add(i, value);
                     this.atNames.Add(i, name);
                 }
@@ -148,7 +149,7 @@ namespace RealChute.Utils
             public int IndexOf<T>(string name) where T : struct, TEnum
             {
                 int index;
-                if (!this.nameIndexes.TryGetValue(name, out index)) { return -1; }
+                if (!this.sIndexes.TryGetValue(name, out index)) { return -1; }
                 return index;
             }
 
@@ -198,7 +199,7 @@ namespace RealChute.Utils
         /// <param name="value">Enum value to convert to string</param>
         public static string GetName<T>(T value) where T : struct, TEnum
         {
-            string result;
+            string result = string.Empty;
             GetConverter<T>().TryGetName(value, out result);
             return result;
         }
@@ -297,7 +298,7 @@ namespace RealChute.Utils
     }
 
     public sealed class EnumUtils : EnumConstraint<Enum>
-    {
+    { 
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */
 

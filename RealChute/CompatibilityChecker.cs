@@ -92,13 +92,9 @@ namespace RealChute
         public void Start()
         {
             // Checkers are identified by the type name and version field name.
-            FieldInfo[] fields =
-                getAllTypes()
-                .Where(t => t.Name == "CompatibilityChecker")
+            FieldInfo[] fields = GetAllTypes().Where(t => t.Name == "CompatibilityChecker")
                 .Select(t => t.GetField("_version", BindingFlags.Static | BindingFlags.NonPublic))
-                .Where(f => f != null)
-                .Where(f => f.FieldType == typeof(int))
-                .ToArray();
+                .Where(f => f != null && f.FieldType == typeof(int)).ToArray();
 
             // Let the latest version of the checker execute.
             if (_version != fields.Max(f => (int)f.GetValue(null))) { return; }
@@ -110,11 +106,8 @@ namespace RealChute
             _version = int.MaxValue;
 
             // A mod is incompatible if its compatibility checker has an IsCompatible method which returns false.
-            String[] incompatible =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
+            String[] incompatible = fields.Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
+                .Where(m => m.IsStatic && m.ReturnType == typeof(bool))
                 .Where(m =>
                 {
                     try
@@ -128,16 +121,12 @@ namespace RealChute
                         return true;
                     }
                 })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
+                .Select(m => m.DeclaringType.Assembly.GetName().Name).ToArray();
 
             // A mod is incompatible with Unity if its compatibility checker has an IsUnityCompatible method which returns false.
-            String[] incompatibleUnity =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
+            String[] incompatibleUnity = fields.Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
                 .Where(m => m != null)  // Mods without IsUnityCompatible() are assumed to be compatible.
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
+                .Where(m => m.IsStatic && m.ReturnType == typeof(bool))
                 .Where(m =>
                 {
                     try
@@ -151,13 +140,12 @@ namespace RealChute
                         return true;
                     }
                 })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
+                .Select(m => m.DeclaringType.Assembly.GetName().Name).ToArray();
 
             Array.Sort(incompatible);
             Array.Sort(incompatibleUnity);
 
-            String message = String.Empty;
+            string message = string.Empty;
 
             if (SixtyFourBitsMustDie())
             {
@@ -166,7 +154,7 @@ namespace RealChute
 
             if ((incompatible.Length > 0) || (incompatibleUnity.Length > 0))
             {
-                message += ((message == String.Empty) ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
+                message += ((message == string.Empty) ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
 
                 if (incompatible.Length > 0)
                 {
@@ -185,7 +173,7 @@ namespace RealChute
 
             if ((incompatible.Length > 0) || (incompatibleUnity.Length > 0) || SixtyFourBitsMustDie())
             {
-                PopupDialog.SpawnPopupDialog("Compatibility Checker", message, "OK", true, HighLogic.Skin);
+                PopupDialog.SpawnPopupDialog("Compatibility Checker", message, "Ok", true, HighLogic.Skin);
             }
         }
 
@@ -199,9 +187,9 @@ namespace RealChute
             return IsCompatible() && !SixtyFourBitsMustDie();
         }
 
-        private static IEnumerable<Type> getAllTypes()
+        private static IEnumerable<Type> GetAllTypes()
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Type[] types;
                 try
@@ -213,7 +201,7 @@ namespace RealChute
                     types = Type.EmptyTypes;
                 }
 
-                foreach (var type in types)
+                foreach (Type type in types)
                 {
                     yield return type;
                 }

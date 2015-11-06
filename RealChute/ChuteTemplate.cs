@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using RealChute.Extensions;
-using RealChute.GUI;
+using RealChute.UI;
 using RealChute.Libraries.Materials;
 using RealChute.Libraries.Presets;
 using RealChute.Libraries.Textures;
@@ -302,8 +302,9 @@ namespace RealChute
                 {
                     this.editorGUI.matX = (int)templateGUI.materialsWindow.x;
                     this.editorGUI.matY = (int)templateGUI.materialsWindow.y;
-                    this.pChute.chutes.Find(c => c.templateGUI.materialsVisible).templateGUI.materialsWindow.x = this.editorGUI.matX;
-                    this.pChute.chutes.Find(c => c.templateGUI.materialsVisible).templateGUI.materialsWindow.y = this.editorGUI.matY;
+                    TemplateGUI gui = this.pChute.chutes.Find(c => c.templateGUI.materialsVisible).templateGUI;
+                    gui.materialsWindow.x = this.editorGUI.matX;
+                    gui.materialsWindow.y = this.editorGUI.matY;
                 }
             }
 

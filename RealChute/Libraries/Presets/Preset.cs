@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using RealChute.Extensions;
-using RealChute.GUI;
+using RealChute.UI;
 using RealChute.Utils;
 using RealChute.Libraries.Materials;
 

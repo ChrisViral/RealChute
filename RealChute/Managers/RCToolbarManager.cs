@@ -3,7 +3,7 @@ using System.Linq;
 using System.IO;
 using RealChute.Extensions;
 using RealChute.Utils;
-using RealChute.GUI;
+using RealChute.UI;
 using UnityEngine;
 using Icon = RUI.Icons.Selectable.Icon;
 

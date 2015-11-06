@@ -35,7 +35,7 @@ namespace RealChute.Spares
 
             #region Fields
             public float deployedDiameter;
-            private MaterialDefinition material;
+            public MaterialDefinition material;
             #endregion
 
             #region Constructor
@@ -43,7 +43,7 @@ namespace RealChute.Spares
             {
                 float d = 50;
                 string m = string.Empty;
-                MaterialDefinition mat = new MaterialDefinition();
+                MaterialDefinition mat = MaterialsLibrary.defaultMaterial;
                 node.TryGetValue("deployedDiameter", ref d);
                 node.TryGetValue("material", ref m);
                 MaterialsLibrary.instance.TryGetMaterial(m, ref mat);
@@ -55,6 +55,12 @@ namespace RealChute.Spares
             {
                 this.deployedDiameter = parachute.deployedDiameter;
                 this.material = parachute.mat;
+            }
+
+            public Canopy(ParachuteStorageModule.CustomSpare spare)
+            {
+                this.deployedDiameter = float.Parse(spare.diameter);
+                this.material = spare.material;
             }
             #endregion
 
@@ -84,7 +90,17 @@ namespace RealChute.Spares
         public string name
         {
             get { return this._name + " spare"; }
-            set { this._name = value; }
+        }
+
+        private Part _part = null;
+        public Part part
+        {
+            get { return this._part; }
+        }
+
+        public Category category
+        {
+            get { return Category.Spare; }
         }
         #endregion
 
@@ -99,10 +115,24 @@ namespace RealChute.Spares
             node.GetNodes("CANOPY").ForEach(n => this.canopies.Add(new Canopy(n)));
         }
 
-        public SpareChute(RealChuteModule module, string spareName)
+        public SpareChute(RealChuteModule module)
         {
-            this._name = spareName;
+            this._part = module.part;
+            this._name = this._part.partInfo.title;
             module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
+        }
+
+        public SpareChute(SpareChute chute)
+        {
+            this._name = chute._name; ;
+            this.canopies = new List<Canopy>(chute.canopies);
+            this._part = chute.part;
+        }
+
+        public SpareChute(string name, List<ParachuteStorageModule.CustomSpare> canopies)
+        {
+            this._name = name;
+            canopies.ForEach(c => this.canopies.Add(new Canopy(c)));
         }
         #endregion
 

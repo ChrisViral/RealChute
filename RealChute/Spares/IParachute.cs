@@ -10,6 +10,12 @@
 
 namespace RealChute.Spares
 {
+    public enum Category
+    {
+        Spare,
+        EVA
+    }
+
     public interface IParachute
     {
         #region Properties
@@ -27,6 +33,11 @@ namespace RealChute.Spares
         /// Name of the parachute
         /// </summary>
         string name { get; }
+
+        /// <summary>
+        /// Type of parachute (Spare or EVA)
+        /// </summary>
+        Category category { get; }
         #endregion
 
         #region Methods

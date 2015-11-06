@@ -274,6 +274,21 @@ namespace RealChute.Utils
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
+
+        /// <summary>
+        /// Creates a vertical label and text area of the specified parameters
+        /// </summary>
+        /// <param name="label">Label string</param>
+        /// <param name="value">Value to store</param>
+        /// <param name="min">Minimum possible value</param>
+        /// <param name="max">Maximum possible value</param>
+        public static void CreateVerticalEntryArea(string label, string unit, ref string value, float min, float max)
+        {
+            float f;
+            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            else { GUILayout.Label(label, redLabel); }
+            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(150));
+        }
         #endregion
     }
 }

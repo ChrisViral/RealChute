@@ -59,6 +59,15 @@ namespace RealChute.Libraries.Materials
         {
             get { return this._count; }
         }
+
+        private static MaterialDefinition _defaultMaterial = null;
+        /// <summary>
+        /// The defaulkt material for unknown sources
+        /// </summary>
+        public static MaterialDefinition defaultMaterial
+        {
+            get { return _defaultMaterial; }
+        }
         #endregion
 
         #region Constructor
@@ -71,6 +80,8 @@ namespace RealChute.Libraries.Materials
                 .ToDictionary(m => m.name, m => m);
             this._materialNames = this._materials.Keys.ToArray();
             this._count = this._materialNames.Length;
+            
+            if(!TryGetMaterial("Nylon", ref _defaultMaterial)) { _defaultMaterial = materials[materialNames[0]]; }
         }
         #endregion
 

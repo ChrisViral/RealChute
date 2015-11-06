@@ -45,24 +45,25 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
+    <Compile Include="Managers\SparesManager.cs" />
     <Compile Include="Utils\EnumUtils.cs" />
     <Compile Include="EVA\EVAChuteTest.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
-    <Compile Include="GUI\EditorGUI.cs" />
+    <Compile Include="UI\EditorGUI.cs" />
     <Compile Include="Utils\GUIUtils.cs" />
     <Compile Include="Managers\RCToolbarManager.cs" />
     <Compile Include="Spares\IParachute.cs" />
     <Compile Include="KerbalDumper.cs" />
     <Compile Include="EVA\EVAChute.cs" />
     <Compile Include="EVA\EVAChuteLibrary.cs" />
-    <Compile Include="GUI\LinkedToggles.cs" />
+    <Compile Include="UI\LinkedToggles.cs" />
     <Compile Include="Spares\ParachuteStorageModule.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="EVA\RealChuteEVA.cs" />
     <Compile Include="Managers\PersistentManager.cs" />
-    <Compile Include="GUI\SettingsWindow.cs" />
+    <Compile Include="UI\SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />
     <Compile Include="Extensions\CelestialBodyExtensions.cs" />
     <Compile Include="Libraries\Presets\Preset.cs" />
@@ -85,7 +86,7 @@
     <Compile Include="RealChuteSettings.cs" />
     <Compile Include="SizeNode.cs" />
     <Compile Include="Spares\SpareChute.cs" />
-    <Compile Include="GUI\TemplateGUI.cs" />
+    <Compile Include="UI\TemplateGUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

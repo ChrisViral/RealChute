@@ -7,7 +7,7 @@ using RealChute.Libraries.Materials;
 using RealChute.Libraries.Textures;
 using RealChute.Libraries.Presets;
 using RealChute.Extensions;
-using RealChute.GUI;
+using RealChute.UI;
 using RealChute.Managers;
 using RealChute.Utils;
 using UnityEngine;
