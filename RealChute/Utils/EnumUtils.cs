@@ -284,7 +284,7 @@ namespace RealChute.Utils
         /// <typeparam name="T">Type of the Enum</typeparam>
         /// <param name="selected">Currently selected Enum member</param>
         /// <param name="xCount">Amount of boxes on one line</param>
-        /// <param name="style">GUIStyle of th boxes</param>
+        /// <param name="style">GUIStyle of the boxes</param>
         /// <param name="options">GUILayout options</param>
         public static T SelectionGrid<T>(T selected, int xCount, GUIStyle style, params GUILayoutOption[] options) where T : struct, TEnum
         {
@@ -293,6 +293,28 @@ namespace RealChute.Utils
             index = GUILayout.SelectionGrid(index, converter.orderedNames, xCount, style, options);
             converter.TryGetValueAt(index, out selected);
             return selected;
+        }
+
+        /// <summary>
+        /// Creates a GUILayout SelectionGrid with the given array of Enum members and returns the selected value
+        /// </summary>
+        /// <typeparam name="T"><Type of the Enum/typeparam>
+        /// <param name="selected">Currently selected Enum member</param>
+        /// <param name="elements">Enum members array to select through</param>
+        /// <param name="xCount">Amount of selection boxes on one line</param>
+        /// <param name="style">GUIStyle of the boxes</param>
+        /// <param name="options">GUILayout option</param>
+        public static T SelectionGrid<T>(T selected, T[] elements, int xCount, GUIStyle style, params GUILayoutOption[] options) where T : struct, TEnum
+        {
+            EnumConverter converter = GetConverter<T>();
+            string[] names = new string[elements.Length];
+            for (int i = 0; i < elements.Length; i++)
+            {
+                converter.TryGetName(elements[i], out names[i]);
+            }
+            int index = elements.IndexOf(selected);
+            index = GUILayout.SelectionGrid(index, names, xCount, style, options);
+            return elements[index];
         }
         #endregion
     }

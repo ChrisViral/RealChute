@@ -57,7 +57,7 @@ namespace RealChute.Spares
                 this.material = parachute.mat;
             }
 
-            public Canopy(ParachuteStorageModule.CustomSpare spare)
+            public Canopy(SparesStorageModule.CustomSpare spare)
             {
                 this.deployedDiameter = float.Parse(spare.diameter);
                 this.material = spare.material;
@@ -89,7 +89,7 @@ namespace RealChute.Spares
         private string _name = string.Empty;
         public string name
         {
-            get { return this._name + " spare"; }
+            get { return this._name; }
         }
 
         private Part _part = null;
@@ -115,10 +115,10 @@ namespace RealChute.Spares
             node.GetNodes("CANOPY").ForEach(n => this.canopies.Add(new Canopy(n)));
         }
 
-        public SpareChute(RealChuteModule module)
+        public SpareChute(RealChuteModule module, string name)
         {
             this._part = module.part;
-            this._name = this._part.partInfo.title;
+            this._name = name + " spare";
             module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
         }
 
@@ -129,7 +129,7 @@ namespace RealChute.Spares
             this._part = chute.part;
         }
 
-        public SpareChute(string name, List<ParachuteStorageModule.CustomSpare> canopies)
+        public SpareChute(string name, List<SparesStorageModule.CustomSpare> canopies)
         {
             this._name = name;
             canopies.ForEach(c => this.canopies.Add(new Canopy(c)));

@@ -36,7 +36,7 @@ namespace RealChute.Spares
         Stored = 2
     }
 
-    public class ParachuteStorageModule : PartModule, IModuleInfo
+    public class SparesStorageModule : PartModule, IModuleInfo
     {
         public class CustomSpare
         {
@@ -46,9 +46,21 @@ namespace RealChute.Spares
             public CustomSpare() { }
         }
 
+        #region Static fields
+        private static readonly StorageTab[] sparesTabs = { StorageTab.Spares, StorageTab.Stored };
+
+        private static readonly StorageTab[] EVATabs = { StorageTab.EVA, StorageTab.Stored };
+        #endregion
+
         #region KSPFields
         [KSPField]
         public float storageSpace = 250;
+
+        [KSPField(isPersistant = true)]
+        public float baseMass = 0;
+
+        [KSPField(isPersistant = true)]
+        public bool initiated = false;
         #endregion
 
         #region Properties
@@ -84,13 +96,14 @@ namespace RealChute.Spares
         //General
         private EVAChuteLibrary EVAlib = EVAChuteLibrary.instance;
         public ConfigNode node = new ConfigNode();
+        private KerbalEVA kerbal = null;
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
-        private Rect window = new Rect(), drag = new Rect();
+        private Rect window = new Rect(), drag = new Rect(), flightWindow = new Rect(), flightDrag = new Rect();
         private Vector2 scrollAvailable = new Vector2(), scrollStored = new Vector2();
-        private int id = Guid.NewGuid().GetHashCode();
-        private bool visible = false;
+        private int id = Guid.NewGuid().GetHashCode(), flightID = Guid.NewGuid().GetHashCode();
+        private bool visible = false, flightVisible = false;
         private StorageType type = StorageType.Spares;
         private StorageTab tab = StorageTab.Spares;
         private LinkedToggles<IParachute> stored = null;
@@ -104,12 +117,37 @@ namespace RealChute.Spares
         private bool inputCustom = false;
         #endregion
 
+        #region Part GUI
+        [KSPEvent(guiActive = false, active = true, guiActiveEditor = true, guiName = "Edit contents")]
+        public void ToggleWintow()
+        {
+            this.visible = !this.visible;
+        }
+
+        [KSPEvent(guiActive = false, active = true, guiActiveEditor = false, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "See contents", unfocusedRange = 5)]
+        public void ToggleFlightWindow()
+        {
+            if (!this.flightVisible)
+            {
+                PartModuleList modules = FlightGlobals.ActiveVessel.parts[0].Modules;
+                if (modules.Contains("KerbalEVA"))
+                {
+                    this.kerbal = modules["KerbalEVA"] as KerbalEVA;
+                    this.flightVisible = true;
+                }
+                else { ScreenMessages.PostScreenMessage("Only a kerbal can access the container.", 5, ScreenMessageStyle.UPPER_CENTER); }
+            }
+            else { this.visible = false; }
+        }
+        #endregion
+
         #region Methods
         public bool TryAddParachute(IParachute parachute)
         {
             if (this.availableSpace > parachute.deployedArea)
             {
                 this._storedChutes.Add(parachute);
+                UpdateMass();
                 return true;
             }
             return false;
@@ -145,14 +183,14 @@ namespace RealChute.Spares
             }
         }
 
-        private void ChangeTabs()
-        {
-
-        }
-
         private string GetStoredString(IParachute parachute)
         {
             return parachute.name + "\n\t<b><color=#f05800ff>" + EnumUtils.GetName(parachute.category) + "\t" + parachute.deployedArea + "m²</color></b>"; 
+        }
+
+        private void UpdateMass()
+        {
+            this.part.mass = this.baseMass + this._storedChutes.Sum(p => p.chuteMass);
         }
 
         public Callback<Rect> GetDrawModulePanelCallback()
@@ -162,7 +200,7 @@ namespace RealChute.Spares
 
         public string GetModuleTitle()
         {
-            return "Parachute Storage";
+            return "Spares Storage";
         }
 
         public string GetPrimaryField()
@@ -176,6 +214,22 @@ namespace RealChute.Spares
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.stored = new LinkedToggles<IParachute>(this._storedChutes, this._storedChutes.Select(s => s.name).ToArray(), skins.button, GUIUtils.toggleButton);
+            this.window = new Rect((Screen.width / 2) - 300, (Screen.height / 2) - 400, 600, 800);
+            switch (this.type)
+            {
+                case StorageType.Spares:
+                case StorageType.Both:
+                    this.tab = StorageTab.Spares; break;
+
+                case StorageType.EVA:
+                    this.tab = StorageTab.EVA; break;
+            }
+            if (!this.initiated)
+            {
+                this.baseMass = this.part.mass;
+                this.initiated = true;
+            }
+            UpdateMass();
         }
 
         public override void OnLoad(ConfigNode node)
@@ -200,12 +254,21 @@ namespace RealChute.Spares
         #region GUI
         private void OnGUI()
         {
-            if (this.visible)
+            if (HighLogic.LoadedSceneIsEditor && this.visible)
             {
-                GUILayout.Window(this.id, this.window, Window, "Storage Module Selection", this.skins.window);
+                this.window = GUILayout.Window(this.id, this.window, Window, "Storage Module Selection", this.skins.window);
+            }
+
+            else if (HighLogic.LoadedSceneIsFlight && this.flightVisible)
+            {
+                this.flightWindow = GUILayout.Window(this.flightID, this.flightWindow, FlightWindow, "Storage", this.skins.window);
             }
         }
 
+        /*
+         * WARNING: HELL AHEAD
+         * I tried. I swear.
+         */
         private void Window(int id)
         {
             //Init fields
@@ -220,9 +283,17 @@ namespace RealChute.Spares
             {
                 //Tabs
                 GUILayout.BeginHorizontal(skins.box);
-                StorageTab t = EnumUtils.SelectionGrid(this.tab, 3, this.skins.button);
-                if (this.tab != t) { ChangeTabs(); }
-                this.tab = t;
+                switch (this.type)
+                {
+                    case StorageType.Spares:
+                        this.tab = EnumUtils.SelectionGrid(this.tab, sparesTabs, 2, this.skins.button); break;
+
+                    case StorageType.EVA:
+                        this.tab = EnumUtils.SelectionGrid(this.tab, EVATabs, 2, this.skins.button); break;
+
+                    case StorageType.Both:
+                        this.tab = EnumUtils.SelectionGrid(this.tab, 3, this.skins.button); break;
+                }
                 GUILayout.EndHorizontal();
 
                 //Selection windows
@@ -331,6 +402,8 @@ namespace RealChute.Spares
                         }
                 }
 
+                GUILayout.Label(String.Format("Maximum space: {0}m²     Used space: {1}m²     Available space: {2}m²", this.storageSpace, this.usedSpace, this.availableSpace), skins.label);
+
                 //Close button
                 if (GUILayout.Button("Close", skins.button))
                 {
@@ -429,6 +502,11 @@ namespace RealChute.Spares
                 GUILayout.EndHorizontal();
             }
             GUILayout.EndVertical();
+        }
+
+        private void FlightWindow(int id)
+        {
+
         }
         #endregion
     }

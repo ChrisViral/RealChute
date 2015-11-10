@@ -59,7 +59,7 @@
     <Compile Include="EVA\EVAChute.cs" />
     <Compile Include="EVA\EVAChuteLibrary.cs" />
     <Compile Include="UI\LinkedToggles.cs" />
-    <Compile Include="Spares\ParachuteStorageModule.cs" />
+    <Compile Include="Spares\SparesStorageModule.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="EVA\RealChuteEVA.cs" />
     <Compile Include="Managers\PersistentManager.cs" />

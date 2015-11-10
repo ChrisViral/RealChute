@@ -50,7 +50,7 @@ namespace RealChute.EVA
         #region Constructor
         public EVAChuteLibrary()
         {
-            IEnumerator<EVAChute> e = GameDatabase.Instance.GetConfigNodes("EVA_CHUTES").Select(n => new EVAChute(n)).
+            this._chutes = GameDatabase.Instance.GetConfigNodes("EVA_CHUTES").Select(n => new EVAChute(n))
                 .ToDictionary(c => c.name, c => c);
             this._chuteList = this._chutes.Values.ToArray();
             this._names = this._chutes.Keys.ToArray();
