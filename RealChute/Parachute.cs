@@ -195,6 +195,8 @@ namespace RealChute
         public float forcedOrientation = 0;
         public string depState = "STOWED";
         public double currentArea = 0, chuteTemperature = 300, thermMass = 0;
+        private double convectiveFlux = 0;
+        private SafeState safeState = SafeState.SAFE;
 
         //Flight
         internal RealChuteModule module = null;
@@ -408,30 +410,28 @@ namespace RealChute
             else if (!this.canDeploy && this.isDeployed) { Cut(); }
         }
 
+        //Gets convective flux
+        public void CalculateConvectiveFlux()
+        {
+            this.convectiveFlux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + this.vessel.mach * this.vessel.mach * this.vessel.mach,
+                (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
+                * (this.vessel.externalTemperature - this.chuteTemperature);
+        }
+
         //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
         private bool CalculateChuteTemp()
         {
             if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.startTemp; }
 
-            double area = this.convectionArea;
-            double flux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + this.vessel.mach * this.vessel.mach * this.vessel.mach,
-                    (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
-                    * (this.vessel.externalTemperature - this.chuteTemperature);
+            double emissiveFlux = 0;
+            if (this.chuteTemperature > 0)
+            {
+                double temp2 = this.chuteTemperature * this.chuteTemperature;
+                emissiveFlux = 2 * PhysicsGlobals.StefanBoltzmanConstant * this.mat.emissivity * PhysicsGlobals.RadiationFactor * temp2 * temp2;
+            }
 
-            if (this.vessel.mach > PhysicsGlobals.MachConvectionStart)
-            {
-                double machLerp = (this.part.machNumber - PhysicsGlobals.MachConvectionStart) / (PhysicsGlobals.MachConvectionEnd - PhysicsGlobals.MachConvectionStart);
-                machLerp = Math.Pow(machLerp, PhysicsGlobals.MachConvectionExponent);
-                flux = UtilMath.Lerp(flux, this.vessel.convectiveMachFlux, machLerp);
-            }
-            this.chuteTemperature += 0.001 * this.invThermalMass * flux * area *TimeWarp.fixedDeltaTime;
-            if (chuteTemperature > 0)
-            {
-                this.chuteTemperature -= 0.001 * this.invThermalMass * PhysicsGlobals.StefanBoltzmanConstant * area * this.mat.emissivity
-                    * PhysicsGlobals.RadiationFactor * TimeWarp.fixedDeltaTime
-                    * Math.Pow(this.chuteTemperature, PhysicsGlobals.PartEmissivityExponent);
-            }
-            this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature, this.chuteTemperature);
+            this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature,
+                this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.invThermalMass * this.convectionArea * TimeWarp.fixedDeltaTime * 0.001));
             if (this.chuteTemperature > this.mat.maxTemp)
             {
                 ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
@@ -439,6 +439,18 @@ namespace RealChute
                 return false;
             }
             return true;
+        }
+
+        //Returns if the parachute can safely open or not
+        public SafeState GetSafeState()
+        {
+            if (this.vessel.externalTemperature <= this.mat.maxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
+            else
+            {
+                if (this.chuteTemperature + (0.00035 * this.invThermalMass * this.convectiveFlux * this.deployedArea) <= this.mat.maxTemp) { this.safeState = SafeState.RISKY; }
+                else { this.safeState = SafeState.DANGEROUS; }
+            }
+            return this.safeState;
         }
 
         //Initializes the chute
@@ -501,6 +513,19 @@ namespace RealChute
 
             if (HighLogic.LoadedSceneIsFlight)
             {
+                //DeploymentSafety
+                switch (this.safeState)
+                {
+                    case SafeState.SAFE:
+                        GUILayout.Label("Deployment safety: safe", skins.label); break;
+
+                    case SafeState.RISKY:
+                        GUILayout.Label("Deployment safety: risky", GUIUtils.yellowLabel); break;
+
+                    case SafeState.DANGEROUS:
+                        GUILayout.Label("Deployment safety: dangerous", GUIUtils.redLabel); break;
+                }
+
                 //Temperature info
                 builder = new StringBuilder();
                 builder.Append("Chute max temperature: ").Append(this.mat.maxTemp + RCUtils.absoluteZero).AppendLine("°C");
