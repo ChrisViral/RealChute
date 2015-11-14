@@ -33,13 +33,15 @@ namespace RealChute.Extensions
         /// <param name="separator">String separating each element</param>
         public static StringBuilder AppendJoin(this StringBuilder builder, IEnumerable<string> seq, string separator)
         {
-            IEnumerator<string> e = seq.GetEnumerator();
-            if (e.MoveNext())
+            using (IEnumerator<string> e = seq.GetEnumerator())
             {
-                builder.Append(e.Current);
-                while (e.MoveNext())
+                if (e.MoveNext())
                 {
-                    builder.Append(separator).Append(e.Current);
+                    builder.Append(e.Current);
+                    while (e.MoveNext())
+                    {
+                        builder.Append(separator).Append(e.Current);
+                    }
                 }
             }
             return builder;

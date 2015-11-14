@@ -248,17 +248,18 @@ namespace RealChute
             if (!this.visible)
             {
                 List<RealChuteModule> parachutes = new List<RealChuteModule>();
-                if (HighLogic.LoadedSceneIsEditor) { parachutes.AddRange(EditorLogic.SortedShipList.Where(p => p.Modules.Contains("RealChuteModule")).Select(p => (RealChuteModule)p.Modules["RealChuteModule"])); }
-                else if (HighLogic.LoadedSceneIsFlight) { parachutes.AddRange(this.vessel.FindPartModulesImplementing<RealChuteModule>()); }
-                if (parachutes.Count > 1 && parachutes.Exists(p => p.visible))
+                if (HighLogic.LoadedSceneIsEditor) { parachutes = EditorLogic.SortedShipList.FindPartModulesImplementing<RealChuteModule>(); }
+                else if (HighLogic.LoadedSceneIsFlight) { parachutes = this.vessel.FindPartModulesImplementing<RealChuteModule>(); }
+                RealChuteModule m = null;
+                if (parachutes.Count > 1 && parachutes.TryFind(p => p.visible, ref m))
                 {
-                    RealChuteModule module = parachutes.Find(p => p.visible);
-                    this.window.x = module.window.x;
-                    this.window.y = module.window.y;
-                    module.visible = false;
+                    this.window.x = m.window.x;
+                    this.window.y = m.window.y;
+                    m.visible = false;
                 }
+                this.visible = true;
             }
-            this.visible = !this.visible;
+            else { this.visible = false; }
         }
         #endregion
 

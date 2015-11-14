@@ -16,67 +16,41 @@ namespace RealChute.Utils
 {
     public static class GUIUtils
     {
-        #region Fields
+        #region Properties
+        private static readonly GUISkin _skins;
         /// <summary>
         /// The KSP GUISkins
         /// </summary>
-        private static GUISkin skins = HighLogic.Skin;
-        #endregion
+        public static GUISkin skins
+        {
+            get { return _skins; }
+        }
 
-        #region Properties
-        private static GUIStyle _redLabel = null;
+        private static readonly GUIStyle _redLabel;
         /// <summary>
         /// A red KSP label for ProceduralChute
         /// </summary>
         public static GUIStyle redLabel
         {
-            get
-            {
-                if (_redLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(skins.label);
-                    style.normal.textColor = XKCDColors.Red;
-                    style.hover.textColor = XKCDColors.Red;
-                    _redLabel = style;
-                }
-                return _redLabel;
-            }
+            get { return _redLabel; }
         }
 
-        private static GUIStyle _boldLabel = null;
+        private static readonly GUIStyle _boldLabel;
         /// <summary>
         /// A bold KSP style label for RealChute GUI
         /// </summary>
         public static GUIStyle boldLabel
         {
-            get
-            {
-                if (_boldLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(skins.label);
-                    style.fontStyle = FontStyle.Bold;
-                    _boldLabel = style;
-                }
-                return _boldLabel;
-            }
+            get { return _boldLabel; }
         }
 
-        private static GUIStyle _toggleButton = null;
+        private static readonly GUIStyle _toggleButton;
         /// <summary>
         /// A toggle style that uses button format
         /// </summary>
         public static GUIStyle toggleButton
         {
-            get
-            {
-                if (_toggleButton == null)
-                {
-                    GUIStyle button = new GUIStyle(HighLogic.Skin.button);
-                    button.normal.background = button.active.background;
-                    button.fontStyle = FontStyle.Bold;
-                }
-                return _toggleButton;
-            }
+            get { return _toggleButton; }
         }
         #endregion
 
@@ -84,12 +58,50 @@ namespace RealChute.Utils
         /// <summary>
         /// Represents the time suffixes
         /// </summary>
-        private static readonly char[] timeSuffixes = { 's', 'm' };
+        private static readonly char[] timeSuffixes;
 
         /// <summary>
         /// Default toggle labels
         /// </summary>
-        private static readonly string[] toggles = { "True", "False" };
+        private static readonly string[] toggles;
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initiates the static values of the class
+        /// </summary>
+        static GUIUtils()
+        {
+            //Skins
+            _skins = HighLogic.Skin;
+
+            //Red label
+            GUIStyle style = new GUIStyle(_skins.label);
+            style.normal.textColor = XKCDColors.Red;
+            style.hover.textColor = XKCDColors.Red;
+            _redLabel = style;
+
+            //Yellow label
+            style = new GUIStyle(_skins.label);
+            style.normal.textColor = XKCDColors.BrightYellow;
+            style.hover.textColor = XKCDColors.BrightYellow;
+            _redLabel = style;
+
+            //Bold label
+            style = new GUIStyle(_skins.label);
+            style.fontStyle = FontStyle.Bold;
+            _boldLabel = style;
+
+            //Toggle button
+            style = new GUIStyle(_skins.button);
+            style.normal.background = style.active.background;
+            style.fontStyle = FontStyle.Bold;
+            _toggleButton = style;
+
+            //Arrays
+            timeSuffixes = new char[2] { 's', 'm' };
+            toggles = new string[2] { "True", "False" };
+        }
         #endregion
 
         #region Methods
@@ -190,10 +202,10 @@ namespace RealChute.Utils
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, _skins.label); }
             else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, _skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -210,10 +222,10 @@ namespace RealChute.Utils
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, _skins.label); }
             else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, _skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -230,10 +242,10 @@ namespace RealChute.Utils
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, _skins.label); }
             else { GUILayout.Label(label, redLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, _skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -249,10 +261,10 @@ namespace RealChute.Utils
             if (buttons == null) { buttons = toggles; }
             GUILayout.Space(5);
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(maxWidth));
-            GUILayout.Label(label, skins.label);
-            if (GUILayout.Toggle(value, buttons[0], skins.toggle)) { value = true; }
+            GUILayout.Label(label, _skins.label);
+            if (GUILayout.Toggle(value, buttons[0], _skins.toggle)) { value = true; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!value, buttons[1], skins.toggle)) { value = false; }
+            if (GUILayout.Toggle(!value, buttons[1], _skins.toggle)) { value = false; }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
@@ -285,9 +297,9 @@ namespace RealChute.Utils
         public static void CreateVerticalEntryArea(string label, string unit, ref string value, float min, float max)
         {
             float f;
-            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, _skins.label); }
             else { GUILayout.Label(label, redLabel); }
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(150));
+            value = GUILayout.TextField(value, 10, _skins.textField, GUILayout.Width(150));
         }
         #endregion
     }

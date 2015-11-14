@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
     <Compile Include="Managers\SparesManager.cs" />
+    <Compile Include="Spares\SpareCarrierModule.cs" />
     <Compile Include="Utils\EnumUtils.cs" />
     <Compile Include="EVA\EVAChuteTest.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />

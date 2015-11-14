@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
@@ -20,6 +21,11 @@ namespace RealChute.Spares
     {
         #region Properties
         /// <summary>
+        /// Name of the parachute
+        /// </summary>
+        string name { get; }
+
+        /// <summary>
         /// Parachute fully deployed area
         /// </summary>
         float deployedArea { get; }
@@ -30,9 +36,9 @@ namespace RealChute.Spares
         float chuteMass { get; }
 
         /// <summary>
-        /// Name of the parachute
+        /// Cost of the chute
         /// </summary>
-        string name { get; }
+        float chuteCost { get; }
 
         /// <summary>
         /// Type of parachute (Spare or EVA)
@@ -42,9 +48,24 @@ namespace RealChute.Spares
 
         #region Methods
         /// <summary>
+        /// Loads the parachute into the memory from a ConfigNode
+        /// </summary>
+        void Load(ConfigNode node);
+
+        /// <summary>
         /// The info Confignode to save to the persistance
         /// </summary>
         ConfigNode Save();
+
+        /// <summary>
+        /// Creates a copy of the object
+        /// </summary>
+        IParachute Clone();
+
+        /// <summary>
+        /// Gets parachute info
+        /// </summary>
+        string GetInfo();
         #endregion
     }
 }

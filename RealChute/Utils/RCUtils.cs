@@ -3,8 +3,8 @@ using System.Text;
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
+using RealChute.Extensions;
 using UnityEngine;
 using Version = System.Version;
 
@@ -30,86 +30,93 @@ namespace RealChute.Utils
         /// <summary>
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
-        public const string localSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
+        public const string localSettingsURL = @"GameData\RealChute\Plugins\PluginData\RealChute_Settings.cfg";
 
         /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
-        public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
+        public const string localPluginDataURL = @"GameData\RealChute\Plugins\PluginData";
         #endregion
 
         #region Propreties
+        private static readonly string _settingsURL;
         /// <summary>
         /// String URL to the RealChute settings config
         /// </summary>
         public static string settingsURL
         {
-            get { return Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
+            get { return _settingsURL; }
         }
 
+        private static readonly string _pluginDataURL;
         /// <summary>
         /// Returns the RealChute PluginData folder
         /// </summary>
         public static string pluginDataURL
         {
-            get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
+            get { return _pluginDataURL; }
         }
 
-        private static string _assemblyVersion = string.Empty;
+        private static readonly string _assemblyVersion;
         /// <summary>
         /// Gets the current version of the assembly
         /// </summary>
         public static string assemblyVersion
         {
-            get
-            {
-                if (string.IsNullOrEmpty(_assemblyVersion))
-                {
-                    Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
-                    if (version.Revision == 0)
-                    {
-                        _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
-                    }
-                    else { _assemblyVersion = "v" + version.ToString(); }
-                }
-                return _assemblyVersion;
-            }
+            get { return _assemblyVersion; }
         }
 
-        private static bool _FARLoaded = false, check = true;
+        private static readonly bool _FARLoaded = false;
         /// <summary>
         /// Returns if FAR is currently loaded in the game
         /// </summary>
         public static bool FARLoaded
         {
-            get 
-            {
-                if (check)
-                {
-                    _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
-                    check = false;
-                }
-                return _FARLoaded;
-            }
+            get { return _FARLoaded; }
         }
 
-        private static MethodInfo _densityMethod = null;
+        private static MethodInfo _densityMethod;
         /// <summary>
         /// A delegate to the FAR GetCurrentDensity method
         /// </summary>
         public static MethodInfo densityMethod
         {
-            get
+            get { return _densityMethod; }
+        }
+        #endregion
+
+        #region Constructor
+        /// <summary>
+        /// Initiates the static values of the class
+        /// </summary>
+        static RCUtils()
+        {
+            //URLs
+            string root = KSPUtil.ApplicationRootPath;
+            _settingsURL = Path.Combine(root, localSettingsURL);
+            _pluginDataURL = Path.Combine(root, localPluginDataURL);
+
+            //Version string
+            Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
+            if (version.Revision == 0)
             {
-                if (_densityMethod == null)
-                {
-                    _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
-                        .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
-                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
-                        .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
-                }
-                return _densityMethod;
+                _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
             }
+            else { _assemblyVersion = "v" + version.ToString(); }
+
+            try
+            {
+                _densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
+                    .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
+                    .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
+                    .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
+                _FARLoaded = true;
+            }
+            catch (Exception e)
+            {
+                UnityEngine.Debug.LogWarning("FAR is not loaded or incorrectly set up, using stock density calculations.\n" + e.ToString() + "\n" + e.StackTrace);
+            }
+            
         }
         #endregion
 
@@ -120,7 +127,9 @@ namespace RealChute.Utils
         /// <param name="text">Array to parse</param>
         public static string[] ParseArray(string text)
         {
-            return text.Split(',').Select(s => s.Trim()).ToArray();
+            string[] array = text.Split(',');
+            array.ForEach(s => s.Trim());
+            return array;
         }
 
         /// <summary>
@@ -180,7 +189,7 @@ namespace RealChute.Utils
                 minutes++;
             }
 
-            return String.Concat(minutes, "m ", seconds.ToString("0.0"), "s");
+            return String.Format("{0}m {1}s", minutes, seconds.ToString("0.0"));
         }
 
         /// <summary>
@@ -189,7 +198,7 @@ namespace RealChute.Utils
         /// <param name="f">Float to check</param>
         public static bool IsWholeNumber(float f)
         {
-            return Math.Truncate(f) == f;
+            return f % 1 == 0;
         }
 
         /// <summary>
@@ -219,7 +228,7 @@ namespace RealChute.Utils
         public static void PrintChildren(Transform transform, StringBuilder builder)
         {
             if (builder == null) { builder = new StringBuilder(); }
-            PrintChildren(transform, builder, 0, "\n");
+            PrintChildrenRecursive(transform, builder, 0, "\n");
         }
 
         /// <summary>
@@ -229,12 +238,12 @@ namespace RealChute.Utils
         /// <param name="builder">StringBuider to store the text into</param>
         /// <param name="index">Index of the current transform in the tree</param>
         /// <param name="offset">Tab offset for tree structure</param>
-        private static void PrintChildren(Transform transform, StringBuilder builder, int index, string offset)
+        private static void PrintChildrenRecursive(Transform transform, StringBuilder builder, int index, string offset)
         {
             builder.Append(offset).AppendFormat("{0}: {1}", index, transform.name);
             for (int i = 0; i < transform.childCount; i++)
             {
-                PrintChildren(transform.GetChild(i), builder, i, offset + "\t");
+                PrintChildrenRecursive(transform.GetChild(i), builder, i, offset + "\t");
             }
         }
         #endregion

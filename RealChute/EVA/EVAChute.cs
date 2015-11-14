@@ -2,6 +2,7 @@
 using RealChute.Utils;
 using RealChute.Spares;
 using RealChute.Extensions;
+using System;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -44,7 +45,16 @@ namespace RealChute.EVA
             get { return this._module; }
         }
 
-        private float _deployedArea = 10;
+        private float _deployedDiameter = 0;
+        /// <summary>
+        /// Deployed diameter of the EVA chute
+        /// </summary>
+        public float deployedDiameter
+        {
+            get { return this._deployedDiameter; }
+        }
+
+        private float _deployedArea = 0;
         /// <summary>
         /// Deployed area of the EVA chute
         /// </summary>
@@ -53,13 +63,31 @@ namespace RealChute.EVA
             get { return this._deployedArea; }
         }
 
-        private float _chuteMass = 0.1f;
+        private MaterialDefinition _material = null;
+        /// <summary>
+        /// Material of the EVA chute
+        /// </summary>
+        public MaterialDefinition material
+        {
+            get { return this._material; }
+        }
+
+        private float _chuteMass = 0;
         /// <summary>
         /// Mass of the parachute canopy
         /// </summary>
         public float chuteMass
         {
             get { return this._chuteMass; }
+        }
+
+        private float _chuteCost = 0;
+        /// <summary>
+        /// Cost of the parachute canopy
+        /// </summary>
+        public float chuteCost
+        {
+            get { return this._chuteCost; }
         }
 
         /// <summary>
@@ -78,39 +106,48 @@ namespace RealChute.EVA
         /// <param name="node">ConfigNode to create the object from</param>
         public EVAChute(ConfigNode node)
         {
-            node.TryGetValue("name", ref this._name);
-            node.TryGetValue("description", ref this._description);
-            if (node.TryGetNode("MODULE", ref this._module))
-            {
-                float diameter = 0;
-                if (module.TryGetValue("deployedDiameter", ref diameter))
-                {
-                    this._deployedArea = RCUtils.GetArea(diameter);
-                }
-                MaterialDefinition mat = new MaterialDefinition();
-                string material = string.Empty;
-                if (module.TryGetValue("material", ref material) && MaterialsLibrary.instance.TryGetMaterial(material, ref mat))
-                {
-                    this._chuteMass = mat.areaDensity * this._deployedArea;
-                }
-            }
+            Load(node);
         }
 
         /// <summary>
         /// Clones an EVAChute
         /// </summary>
         /// <param name="chute"></param>
-        public EVAChute(EVAChute chute)
+        private EVAChute(EVAChute chute)
         {
             this._name = chute._name;
             this._description = chute._description;
             this._module = chute._module;
+            this._deployedDiameter = chute._deployedDiameter;
             this._deployedArea = chute._deployedArea;
+            this._material = chute._material;
             this._chuteMass = chute._chuteMass;
+            this._chuteCost = chute._chuteCost;
         }
         #endregion
 
         #region Methods
+        public void Load(ConfigNode node)
+        {
+            node.TryGetValue("name", ref this._name);
+            node.TryGetValue("description", ref this._description);
+
+            if (node.TryGetNode("MODULE", ref this._module))
+            {
+                if (module.TryGetValue("deployedDiameter", ref this._deployedDiameter))
+                {
+                    this._deployedArea = RCUtils.GetArea(this._deployedDiameter);
+                }
+                string material = string.Empty;
+                if (module.TryGetValue("material", ref material))
+                {
+                    MaterialsLibrary.instance.TryGetMaterial(material, ref this._material);
+                    this._chuteMass = this._deployedArea * this._material.areaDensity;
+                    this._chuteCost = this._deployedArea * this._material.areaCost;
+                }
+            }
+        }
+
         public ConfigNode Save()
         {
             ConfigNode node = new ConfigNode("EVA");
@@ -118,6 +155,16 @@ namespace RealChute.EVA
             node.AddValue("description", this._description);
             node.AddNode(this.module);
             return node;
+        }
+
+        public IParachute Clone()
+        {
+            return new EVAChute(this);
+        }
+
+        public string GetInfo()
+        {
+            return String.Format("Name: {0}\nType: EVA\nDiameter: {1}m   Area: {2}m²\nMaterial: {3}\nMass: {4}t\nCost: {5}F\nDescription: {6}", this._name, this._deployedDiameter, this._deployedArea, this._material.name, this.chuteMass, this._chuteCost, this.description);
         }
         #endregion
     }

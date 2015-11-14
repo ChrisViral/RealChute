@@ -22,45 +22,69 @@ namespace RealChute.Spares
         public struct Canopy
         {
             #region Properties
+            private float _deployedDiameter;
+            public float deployedDiameter
+            {
+                get { return this._deployedDiameter; }
+            }
+
+            private float _deployedArea;
             public float deployedArea
             {
-                get { return RCUtils.GetArea(this.deployedDiameter); }
+                get { return this._deployedArea; }
             }
 
+            private MaterialDefinition _material;
+            public MaterialDefinition material
+            {
+                get { return this._material; }
+            }
+
+            private float _mass;
             public float mass
             {
-                get { return this.material.areaDensity * this.deployedArea; }
+                get { return this._mass; }
             }
-            #endregion
 
-            #region Fields
-            public float deployedDiameter;
-            public MaterialDefinition material;
+            private float _cost;
+            public float cost
+            {
+                get { return this._cost; }
+            }
             #endregion
 
             #region Constructor
             public Canopy (ConfigNode node)
             {
                 float d = 50;
-                string m = string.Empty;
+                string m = "Nylon";
                 MaterialDefinition mat = MaterialsLibrary.defaultMaterial;
                 node.TryGetValue("deployedDiameter", ref d);
                 node.TryGetValue("material", ref m);
                 MaterialsLibrary.instance.TryGetMaterial(m, ref mat);
-                this.deployedDiameter = d;
-                this.material = mat;
+                this._deployedDiameter = d;
+                this._material = mat;
+                this._deployedArea = RCUtils.GetArea(this._deployedDiameter);
+                this._mass = this._deployedArea * this._material.areaDensity;
+                this._cost = this._deployedArea * this._material.areaCost;
             }
 
             public Canopy(Parachute parachute)
             {
-                this.deployedDiameter = parachute.deployedDiameter;
-                this.material = parachute.mat;
+                this._deployedDiameter = parachute.deployedDiameter;
+                this._deployedArea = parachute.deployedArea;
+                this._material = parachute.mat;
+                this._mass = parachute.chuteMass;
+                this._cost = this._deployedArea * this._material.areaCost;
             }
 
             public Canopy(SparesStorageModule.CustomSpare spare)
             {
-                this.deployedDiameter = float.Parse(spare.diameter);
-                this.material = spare.material;
+                this._deployedDiameter = float.Parse(spare.diameter);
+                this._material = spare.material;
+                this._deployedArea = RCUtils.GetArea(this._deployedDiameter);
+                this._mass = this._deployedArea * this._material.areaDensity;
+                this._cost = this._deployedArea * this._material.areaCost;
             }
             #endregion
 
@@ -76,6 +100,12 @@ namespace RealChute.Spares
         }
 
         #region Properties
+        private string _name = string.Empty;
+        public string name
+        {
+            get { return this._name; }
+        }
+
         public float deployedArea
         {
             get { return canopies.Sum(c => c.deployedArea); }
@@ -86,10 +116,9 @@ namespace RealChute.Spares
             get { return this.canopies.Sum(c => c.mass); }
         }
 
-        private string _name = string.Empty;
-        public string name
+        public float chuteCost
         {
-            get { return this._name; }
+            get { return this.canopies.Sum(c => c.cost); }
         }
 
         private Part _part = null;
@@ -105,14 +134,14 @@ namespace RealChute.Spares
         #endregion
 
         #region Fields
+        private string diameters = string.Empty;
         private List<Canopy> canopies = new List<Canopy>();
         #endregion
 
         #region Constructors
         public SpareChute(ConfigNode node)
         {
-            node.TryGetValue("name", ref this._name);
-            node.GetNodes("CANOPY").ForEach(n => this.canopies.Add(new Canopy(n)));
+            Load(node);
         }
 
         public SpareChute(RealChuteModule module, string name)
@@ -120,29 +149,49 @@ namespace RealChute.Spares
             this._part = module.part;
             this._name = name + " spare";
             module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
+            this.diameters = this.canopies.Select(c => c.deployedDiameter.ToString()).Join("m, ");
         }
 
-        public SpareChute(SpareChute chute)
+        private SpareChute(SpareChute chute)
         {
             this._name = chute._name; ;
             this.canopies = new List<Canopy>(chute.canopies);
             this._part = chute.part;
+            this.diameters = chute.diameters;
         }
 
         public SpareChute(string name, List<SparesStorageModule.CustomSpare> canopies)
         {
             this._name = name;
             canopies.ForEach(c => this.canopies.Add(new Canopy(c)));
+            this.diameters = this.canopies.Select(c => c.deployedDiameter.ToString()).Join("m, ");
         }
         #endregion
 
         #region Methods
+        public void Load(ConfigNode node)
+        {
+            node.TryGetValue("name", ref this._name);
+            node.GetNodes("CANOPY").ForEach(n => this.canopies.Add(new Canopy(n)));
+            this.diameters = this.canopies.Select(c => c.deployedDiameter.ToString()).Join("m, ");
+        }
+
         public ConfigNode Save()
         {
             ConfigNode node = new ConfigNode("SPARE");
             node.AddValue("name", this._name);
             this.canopies.ForEach(c => node.AddNode(c.Save()));
             return node;
+        }
+
+        public IParachute Clone()
+        {
+            return new SpareChute(this);
+        }
+
+        public string GetInfo()
+        {
+            return String.Format("Name: {0}\nType: Spare\nDiameters: {1}m\nTotal area: {2}m²\nTotal mass: {3}t\nTotal cost: {4}F", this._name, this.diameters, this.deployedArea, this.chuteMass, this.chuteCost);
         }
         #endregion
     }

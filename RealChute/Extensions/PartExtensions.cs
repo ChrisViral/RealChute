@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
@@ -134,6 +135,23 @@ namespace RealChute.Extensions
                 state.enabled = true;
                 animation.Play(animationName);
             }
+        }
+
+        /// <summary>
+        /// Finds all the PartModules implementing the T interface or module
+        /// </summary>
+        /// <typeparam name="T">Interface or PartModule type</typeparam>
+        public static List<T> FindPartModulesImplementing<T>(this List<Part> parts) where T : class
+        {
+            List<T> list = new List<T>();
+            foreach (Part p in parts)
+            {
+                foreach (PartModule m in p.Modules)
+                {
+                    if (m is T) { list.Add(m as T); }
+                }
+            }
+            return list;
         }
         #endregion
     }

@@ -36,6 +36,13 @@ namespace RealChute.Spares
         Stored = 2
     }
 
+    //Flight GUI tabs
+    public enum EquippedTab
+    {
+        Stored = 0,
+        Equipped = 1
+    }
+
     public class SparesStorageModule : PartModule, IModuleInfo
     {
         public class CustomSpare
@@ -96,7 +103,9 @@ namespace RealChute.Spares
         //General
         private EVAChuteLibrary EVAlib = EVAChuteLibrary.instance;
         public ConfigNode node = new ConfigNode();
-        private KerbalEVA kerbal = null;
+        private Part kerbal = null;
+        private KerbalEVA kerbalEVA = null;
+        private bool holdsSpare = false, holdsEVA = false;
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
@@ -106,6 +115,7 @@ namespace RealChute.Spares
         private bool visible = false, flightVisible = false;
         private StorageType type = StorageType.Spares;
         private StorageTab tab = StorageTab.Spares;
+        private EquippedTab eTab = EquippedTab.Stored;
         private LinkedToggles<IParachute> stored = null;
         private List<string> storedNames = new List<string>();
 
@@ -121,7 +131,21 @@ namespace RealChute.Spares
         [KSPEvent(guiActive = false, active = true, guiActiveEditor = true, guiName = "Edit contents")]
         public void ToggleWintow()
         {
-            this.visible = !this.visible;
+            if (!this.visible)
+            {
+                List<SparesStorageModule> storages = new List<SparesStorageModule>();
+                if (HighLogic.LoadedSceneIsEditor) { storages = EditorLogic.SortedShipList.FindPartModulesImplementing<SparesStorageModule>(); }
+                else if (HighLogic.LoadedSceneIsFlight) { storages = this.vessel.FindPartModulesImplementing<SparesStorageModule>(); }
+                SparesStorageModule m = null;
+                if (storages.Count > 1 && storages.TryFind(p => p.visible, ref m))
+                {
+                    this.window.x = m.window.x;
+                    this.window.y = m.window.y;
+                    m.visible = false;
+                }
+                this.visible = true;
+            }
+            else { this.visible = false; }
         }
 
         [KSPEvent(guiActive = false, active = true, guiActiveEditor = false, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "See contents", unfocusedRange = 5)]
@@ -129,28 +153,48 @@ namespace RealChute.Spares
         {
             if (!this.flightVisible)
             {
-                PartModuleList modules = FlightGlobals.ActiveVessel.parts[0].Modules;
+                Part p = FlightGlobals.ActiveVessel.parts[0];
+                PartModuleList modules = p.Modules;
                 if (modules.Contains("KerbalEVA"))
                 {
-                    this.kerbal = modules["KerbalEVA"] as KerbalEVA;
+                    List<SparesStorageModule> storages = this.vessel.FindPartModulesImplementing<SparesStorageModule>();
+                    SparesStorageModule m = null;
+                    if (storages.Count > 1 && storages.TryFind(s => s.flightVisible, ref m))
+                    {
+                        this.flightWindow.x = m.flightWindow.x;
+                        this.flightWindow.y = m.flightWindow.y;
+                        m.flightVisible = false;
+                    }
+                    this.kerbal = p;
+                    this.kerbalEVA = modules["KerbalEVA"] as KerbalEVA;
                     this.flightVisible = true;
+                    foreach (PartModule module in modules)
+                    {
+                        if (module is SpareCarrierModule) { this.holdsSpare = true; break; }
+                        if (module is RealChuteEVA) { this.holdsEVA = true; break; }
+                    }
+                    
                 }
                 else { ScreenMessages.PostScreenMessage("Only a kerbal can access the container.", 5, ScreenMessageStyle.UPPER_CENTER); }
             }
-            else { this.visible = false; }
+            else
+            {
+                this.kerbal = null;
+                this.kerbalEVA = null;
+                this.flightVisible = false;
+                this.holdsSpare = false;
+                this.holdsEVA = false;
+            }
         }
         #endregion
 
         #region Methods
-        public bool TryAddParachute(IParachute parachute)
+        public void AddParachute(IParachute parachute)
         {
-            if (this.availableSpace > parachute.deployedArea)
-            {
-                this._storedChutes.Add(parachute);
-                UpdateMass();
-                return true;
-            }
-            return false;
+            IParachute clone = parachute.Clone();
+            this._storedChutes.Add(clone);
+            this.stored.AddToggle(clone, clone.name);
+            UpdateMass();
         }
 
         private void LoadParachutes()
@@ -265,17 +309,28 @@ namespace RealChute.Spares
             }
         }
 
-        /*
-         * WARNING: HELL AHEAD
-         * I tried. I swear.
-         */
+        public IParachute StoredView()
+        {
+            //Stored chutes selection
+            this.scrollAvailable = GUILayout.BeginScrollView(this.scrollAvailable, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(400));
+            IParachute p = this.stored.RenderToggles();
+            GUILayout.EndScrollView();
+
+            //Selected chutes details
+            this.scrollStored = GUILayout.BeginScrollView(this.scrollStored, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(200));
+            string info = "No chutes selected";
+            if (p != null) { info = p.GetInfo(); }
+            GUILayout.Label(info, skins.label, GUILayout.Width(190));
+            GUILayout.EndScrollView();
+            return p;
+        }
+
+        /* WARNING: HELL AHEAD
+         * I tried. I swear.*/
         private void Window(int id)
         {
-            //Init fields
-            GUI.DragWindow(drag);
-            SpareChute s = null;
-            EVAChute c = null;
-            IParachute p = null;
+            //Init window
+            GUI.DragWindow(this.drag);
             GUILayout.BeginVertical();
 
             //Normal window
@@ -305,10 +360,10 @@ namespace RealChute.Spares
                         {
                             //Available spares selection
                             this.scrollAvailable = GUILayout.BeginScrollView(this.scrollAvailable, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(400));
-                            s = SparesManager.spares.RenderToggles();
+                            SpareChute s = SparesManager.spares.RenderToggles();
                             GUILayout.EndScrollView();
 
-                            //STored chutes list
+                            //Stored chutes list
                             this.scrollStored = GUILayout.BeginScrollView(this.scrollStored, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(200));
                             GUILayout.Label(this.storedNames.Count > 0 ? this.storedNames.Join("\n\n") : "No chutes stored", skins.label);
                             GUILayout.EndScrollView();
@@ -319,9 +374,7 @@ namespace RealChute.Spares
                             //Adds selected spare
                             if (GUILayout.Button("Add selected", skins.button, GUILayout.Width(400)))
                             {
-                                SpareChute spare = new SpareChute(s);
-                                this._storedChutes.Add(spare);
-                                this.stored.AddToggle(spare, spare.name);
+                                AddParachute(s);
                             }
                             GUI.enabled = true;
                             
@@ -342,7 +395,7 @@ namespace RealChute.Spares
                         {
                             //EVA chutes selection
                             this.scrollAvailable = GUILayout.BeginScrollView(this.scrollAvailable, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(400));
-                            c = SparesManager.chutes.RenderToggles();
+                            EVAChute c = SparesManager.chutes.RenderToggles();
                             GUILayout.EndScrollView();
 
                             //Stored chutes list
@@ -356,9 +409,7 @@ namespace RealChute.Spares
                             //Adds selected EVA chute
                             if (GUILayout.Button("Add selected", skins.button, GUILayout.Width(400)))
                             {
-                                EVAChute chute = new EVAChute(c);
-                                this._storedChutes.Add(chute);
-                                this.stored.AddToggle(chute, chute.name);
+                                AddParachute(c);
                             }
                             GUI.enabled = true;
                             GUILayout.FlexibleSpace();
@@ -369,22 +420,7 @@ namespace RealChute.Spares
                     //Stored chutes tab
                     case StorageTab.Stored:
                         {
-                            //Stored chutes selection
-                            this.scrollAvailable = GUILayout.BeginScrollView(this.scrollAvailable, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(400));
-                            p = this.stored.RenderToggles();
-                            GUILayout.EndScrollView();
-
-                            //Selected chutes details
-                            this.scrollStored = GUILayout.BeginScrollView(this.scrollStored, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxWidth(200));
-                            string info;
-                            if (p == null) { info = "No chute selected"; }
-                            else
-                            {
-                                info = String.Format("Name: {0}\nArea: {1}m²\nMass: {2}t", p.name, p.deployedArea, p.chuteMass);
-                                if (p.category == Category.EVA) { info += "\nDescription: " + ((EVAChute)p).description; }
-                            }
-                            GUILayout.Label(info, skins.label, GUILayout.Width(190));
-                            GUILayout.EndScrollView();
+                            IParachute p = StoredView();
                             GUILayout.EndHorizontal();
 
                             //Removes selected chute
@@ -506,7 +542,27 @@ namespace RealChute.Spares
 
         private void FlightWindow(int id)
         {
+            //Init window
+            GUI.DragWindow(this.flightDrag);
+            GUILayout.BeginVertical();
 
+            GUILayout.BeginHorizontal(skins.box);
+            this.eTab = EnumUtils.SelectionGrid(this.eTab, 2, skins.button);
+
+            switch (this.eTab)
+            {
+                case EquippedTab.Stored:
+                    {
+                        IParachute p = StoredView();
+                        break;
+                    }
+
+                case EquippedTab.Equipped:
+                    {
+
+                        break;
+                    }
+            }
         }
         #endregion
     }

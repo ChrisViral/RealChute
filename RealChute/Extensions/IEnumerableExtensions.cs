@@ -114,11 +114,37 @@ namespace RealChute.Extensions
             if (seq == null) { throw new ArgumentNullException("seq"); }
             if (action == null) { throw new ArgumentNullException("action"); }
 
-            IEnumerator<T> e = seq.GetEnumerator();
-            while (e.MoveNext())
+            using (IEnumerator<T> e = seq.GetEnumerator())
             {
-                action(e.Current);
+                while (e.MoveNext())
+                {
+                    action(e.Current);
+                }
             }
+        }
+
+        /// <summary>
+        /// Tries to find a value in the sequence. Returns true if it does and stores the result in the ref value
+        /// </summary>
+        /// <typeparam name="T">Type of the sequence</typeparam>
+        /// <param name="match">Match for the element to find</param>
+        /// <param name="result">Value to store the result into</param>
+        public static bool TryFind<T>(this IEnumerable<T> seq, Predicate<T> match, ref T result)
+        {
+            if (match == null) { throw new ArgumentNullException("match"); }
+            using (IEnumerator<T> e = seq.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    T c = e.Current;
+                    if (match(c))
+                    {
+                        result = c;
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
         #endregion
     }
