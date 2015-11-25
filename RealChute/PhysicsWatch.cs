@@ -14,7 +14,7 @@ namespace RealChute
     /// <summary>
     /// A generic Stopwatch clone which runs on KSP's internal clock
     /// </summary>
-    public class WarpWatch
+    public class PhysicsWatch
     {
         #region Constants
         /// <summary>
@@ -32,7 +32,7 @@ namespace RealChute
         /// <summary>
         /// UT of the last frame
         /// </summary>
-        protected double lastFrame = 0d;
+        protected double lastCheck = 0d;
 
         /// <summary>
         /// Total elapsed time calculated by the watch in seconds
@@ -86,9 +86,18 @@ namespace RealChute
 
         #region Constructor
         /// <summary>
-        /// Creates a new WarpWatch
+        /// Creates a new PhysicsWatch
         /// </summary>
-        public WarpWatch() { }
+        public PhysicsWatch() { }
+
+        /// <summary>
+        /// Creates a new PhysicsWatch starting at a certain amount of time
+        /// </summary>
+        /// <param name="seconds">Time to start at, in seconds</param>
+        public PhysicsWatch(double seconds)
+        {
+            this.totalSeconds = seconds;
+        }
         #endregion
 
         #region Methods
@@ -97,8 +106,11 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            this.lastFrame = Planetarium.GetUniversalTime();
-            this._isRunning = true;
+            if (!this._isRunning)
+            {
+                this.lastCheck = Planetarium.GetUniversalTime();
+                this._isRunning = true;
+            }
         }
 
         /// <summary>
@@ -106,8 +118,11 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
-            if (this._isRunning) { UpdateWatch(); }
-            this._isRunning = false;
+            if (this._isRunning)
+            {
+                UpdateWatch();
+                this._isRunning = false;
+            }
         }
 
         /// <summary>
@@ -115,8 +130,8 @@ namespace RealChute
         /// </summary>
         public void Restart()
         {
-            this.totalSeconds = 0d;
-            this.lastFrame = Planetarium.GetUniversalTime();
+            this.totalSeconds = 0;
+            this.lastCheck = Planetarium.GetUniversalTime();
             this._isRunning = true;
         }
 
@@ -125,19 +140,21 @@ namespace RealChute
         /// </summary>
         public void Reset()
         {
-            this.totalSeconds = 0d;
-            this.lastFrame = 0d;
+            this.totalSeconds = 0;
+            this.lastCheck = 0;
             this._isRunning = false;
         }
+        #endregion
 
+        #region Virtual Methods
         /// <summary>
         /// Updates the time on the watch
         /// </summary>
         protected virtual void UpdateWatch()
         {
             double current = Planetarium.GetUniversalTime();
-            this.totalSeconds += current - this.lastFrame;
-            this.lastFrame = current;
+            this.totalSeconds += current - this.lastCheck;
+            this.lastCheck = current;
         }
         #endregion
 
@@ -153,11 +170,22 @@ namespace RealChute
 
         #region Static Methods
         /// <summary>
-        /// Creates a new WarpWatch, starts it, and returns the current instance
+        /// Creates a new PhysicsWatch, starts it, and returns the current instance
         /// </summary>
-        public static WarpWatch StartNew()
+        public static PhysicsWatch StartNew()
         {
-            WarpWatch watch = new WarpWatch();
+            PhysicsWatch watch = new PhysicsWatch();
+            watch.Start();
+            return watch;
+        }
+
+        /// <summary>
+        /// Creates a new PhysicsWatch from a certain amount of time, starts it, and returns the current instance
+        /// </summary>
+        /// <param name="seconds">Time to start the watch at, in seconds</param>
+        public static PhysicsWatch StartNewFromTime(double seconds)
+        {
+            PhysicsWatch watch = new PhysicsWatch(seconds);
             watch.Start();
             return watch;
         }

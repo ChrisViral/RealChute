@@ -80,7 +80,7 @@ namespace RealChute.Libraries
             get { return this._name; }
         }
 
-        private float _diameter = 10f;
+        private float _diameter = 10;
         /// <summary>
         /// Diameter of the parachutes at 1, 1, 1
         /// </summary>
@@ -133,7 +133,7 @@ namespace RealChute.Libraries
             node.TryGetValue("diameter", ref _diameter);
             node.TryGetValue("count", ref _count);
             node.TryGetValue("maxDiam", ref _maxDiam);
-            _parameters.AddRange(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
+            _parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
         }
         #endregion
     }

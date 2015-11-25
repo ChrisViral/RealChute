@@ -32,7 +32,7 @@ namespace RealChute.Libraries
             get { return this._description; }
         }
 
-        private float _areaDensity = 0.00005f;
+        private float _areaDensity = 5.65E-5f;
         /// <summary>
         /// Area density of this material
         /// </summary>
@@ -58,6 +58,33 @@ namespace RealChute.Libraries
         {
             get { return this._areaCost; }
         }
+
+        private double _maxTemp = 493.15;
+        /// <summary>
+        /// Maximum temperature this material can withstand (K)
+        /// </summary>
+        public double maxTemp
+        {
+            get { return this._maxTemp; }
+        }
+
+        private double _specificHeat = 1700;
+        /// <summary>
+        /// The specific heat of the material (J/kg∙K)
+        /// </summary>
+        public double specificHeat
+        {
+            get { return this._specificHeat; }
+        }
+
+        private double _emissivity = 0.72;
+        /// <summary>
+        /// The emissivity constant of the chute at (20°C)
+        /// </summary>
+        public double emissivity
+        {
+            get { return this._emissivity; }
+        }
         #endregion
 
         #region Constructor
@@ -72,11 +99,14 @@ namespace RealChute.Libraries
         /// <param name="node">Node to initiate the material from</param>
         public MaterialDefinition(ConfigNode node)
         {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("description", ref _description);
-            node.TryGetValue("areaDensity", ref _areaDensity);
-            node.TryGetValue("dragCoefficient", ref _dragCoefficient);
-            node.TryGetValue("areaCost", ref _areaCost);
+            node.TryGetValue("name", ref this._name);
+            node.TryGetValue("description", ref this._description);
+            node.TryGetValue("areaDensity", ref this._areaDensity);
+            node.TryGetValue("dragCoefficient", ref this._dragCoefficient);
+            node.TryGetValue("areaCost", ref this._areaCost);
+            node.TryGetValue("maxTemp", ref this._maxTemp);
+            node.TryGetValue("specificHeat", ref this._specificHeat);
+            node.TryGetValue("emissivity", ref this._emissivity);
         }
         #endregion
     }

@@ -14,8 +14,8 @@
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugSymbols>false</DebugSymbols>
+    <DebugType>none</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\Output\GameData\RealChute\Plugins\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
@@ -34,22 +34,26 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Kerbal Space Program\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\Game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\Kerbal Space Program\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\Game\KSP_Data\Managed\UnityEngine.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
+    <Compile Include="EnumUtils.cs" />
+    <Compile Include="Extensions\IEnumerableExtensions.cs" />
+    <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
-    <Compile Include="RCEditorGUI.cs" />
-    <Compile Include="WarpWatch.cs" />
-    <Compile Include="SizeManager.cs" />
-    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="EditorGUI.cs" />
+    <Compile Include="GUIUtils.cs" />
+    <Compile Include="RCToolbarManager.cs" />
+    <Compile Include="PhysicsWatch.cs" />
+    <Compile Include="PersistentManager.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />
     <Compile Include="Extensions\CelestialBodyExtensions.cs" />
@@ -72,8 +76,12 @@
     <Compile Include="Libraries\TextureLibrary\TextureLibrary.cs" />
     <Compile Include="RealChuteSettings.cs" />
     <Compile Include="SizeNode.cs" />
+    <Compile Include="TemplateGUI.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>xcopy "$(SolutionDir)Output\*" "$(SolutionDir)Game\*" /D /E /C /R /I /K /Y</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

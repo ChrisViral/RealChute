@@ -4,7 +4,9 @@ using System.Reflection;
 using System.IO;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
+using Version = System.Version;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -23,43 +25,27 @@ namespace RealChute
         /// <summary>
         /// Transforms from gees to m/s²
         /// </summary>
-        public const double geeToAcc = 9.80665d;
+        public const double geeToAcc = 9.80665;
+
+        /// <summary>
+        /// Parachute starting temperature
+        /// </summary>
+        public const double startTemp = 300;
+
+        /// <summary>
+        /// Absolute zero in °C
+        /// </summary>
+        public const double absoluteZero = -273.15;
 
         /// <summary>
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
-        public const string localSettingsURL = "GameData/RealChute/RealChute_Settings.cfg";
+        public const string localSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
 
         /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
         public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
-
-        /// <summary>
-        /// DeploymentStates with their string equivalent
-        /// </summary>
-        public static readonly Dictionary<DeploymentStates, string> states = new Dictionary<DeploymentStates, string>(5)
-        {
-            #region States
-            { DeploymentStates.STOWED, "STOWED" },
-            { DeploymentStates.PREDEPLOYED, "PREDEPLOYED" },
-            { DeploymentStates.LOWDEPLOYED, "LOWDEPLOYED" },
-            { DeploymentStates.DEPLOYED, "DEPLOYED" },
-            { DeploymentStates.CUT, "CUT" }
-           #endregion
-        };
-        #endregion
-
-        #region Arrays
-        /// <summary>
-        /// Represents the time suffixes
-        /// </summary>
-        public static readonly char[] timeSuffixes = { 's', 'm' };
-
-        /// <summary>
-        /// Represent the types of parachutes
-        /// </summary>
-        public static readonly string[] types = { "Main", "Drogue", "Drag" };
         #endregion
 
         #region Propreties
@@ -79,43 +65,7 @@ namespace RealChute
             get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
         }
 
-        private static GUIStyle _redLabel = null;
-        /// <summary>
-        /// A red KSP label for ProceduralChute
-        /// </summary>
-        public static GUIStyle redLabel
-        {
-            get
-            {
-                if (_redLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.normal.textColor = XKCDColors.Red;
-                    style.hover.textColor = XKCDColors.Red;
-                    _redLabel = style;
-                }
-                return _redLabel;
-            }
-        }
-
-        private static GUIStyle _boldLabel = null;
-        /// <summary>
-        /// A bold KSP style label for RealChute GUI
-        /// </summary>
-        public static GUIStyle boldLabel
-        {
-            get
-            {
-                if (_boldLabel == null)
-                {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.fontStyle = FontStyle.Bold;
-                    _boldLabel = style;
-                }
-                return _boldLabel;
-            }
-        }
-
+        private static string _assemblyVersion = string.Empty;
         /// <summary>
         /// Gets the current version of the assembly
         /// </summary>
@@ -123,28 +73,35 @@ namespace RealChute
         {
             get
             {
-                System.Version version = new System.Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
-                if (version.Revision == 0)
+                if (string.IsNullOrEmpty(_assemblyVersion))
                 {
-                    if (version.Build == 0) { return "v" + version.ToString(2); }
-                    return "v" + version.ToString(3);
+                    Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
+                    if (version.Revision == 0)
+                    {
+                        _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
+                    }
+                    else { _assemblyVersion = "v" + version.ToString(); }
                 }
-                return "v" + version.ToString();
+                return _assemblyVersion;
             }
         }
 
+        private static bool _FARLoaded = false, check = true;
         /// <summary>
         /// Returns if FAR is currently loaded in the game
         /// </summary>
         public static bool FARLoaded
         {
-            get { return AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch"); }
+            get 
+            {
+                if (check)
+                {
+                    _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
+                    check = false;
+                }
+                return _FARLoaded;
+            }
         }
-
-        /// <summary>
-        /// If the FAR detection is disabled
-        /// </summary>
-        public static bool disabled = false;
 
         private static MethodInfo _densityMethod = null;
         /// <summary>
@@ -158,8 +115,8 @@ namespace RealChute
                 {
                     _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
                         .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
-                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity" && m.GetParameters().Length == 2)
-                        .Single(m => m.GetParameters()[0].ParameterType == typeof(CelestialBody) && m.GetParameters()[1].ParameterType == typeof(double));
+                        .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
+                        .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
                 }
                 return _densityMethod;
             }
@@ -167,119 +124,6 @@ namespace RealChute
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Returns true if the time is parseable, returns false otherwise
-        /// </summary>
-        /// <param name="text">Time value to parse</param>
-        public static bool CanParseTime(string text)
-        {
-            float f = 0;
-            return TryParseTime(text, ref f);
-        }
-
-        /// <summary>
-        /// Parse a time value
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static float ParseTime(string text)
-        {
-            float result = 0;
-            TryParseTime(text, ref result);
-            return result;
-        }
-
-        /// <summary>
-        /// Tries to parse a float, taking into account the last character as a time indicator. If none, seconds are assumed.
-        /// </summary>
-        /// <param name="text">Time value to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParseTime(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            float multiplier = 1, test = 0;
-            char indicator = text[text.Length - 1];
-            if (timeSuffixes.Contains(indicator))
-            {
-                text = text.Remove(text.Length - 1);
-                if (indicator == 'm') { multiplier = 60; }
-            }
-            if (float.TryParse(text, out test))
-            {
-                result = test * multiplier;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if the value is parsable without actually parsing it
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static bool CanParse(string text)
-        {
-            float f = 0;
-            return TryParse(text, ref f);
-        }
-
-        /// <summary>
-        /// Tries parsing a float from text. IF it fails, the ref value is left unchanged.
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParse(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            float f = 0;
-            if (float.TryParse(text, out f))
-            {
-                result = f;
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if the spares can be parsed
-        /// </summary>
-        /// <param name="text">Value to parse</param>
-        public static bool CanParseWithEmpty(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { return true; }
-            float test;
-            return float.TryParse(text, out test);
-        }
-
-        /// <summary>
-        /// Parse the string and returns -1 if it's empty
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        public static float ParseWithEmpty(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { return -1; }
-            return float.Parse(text);
-        }
-
-        /// <summary>
-        /// Parses the spare chutes. If string is empty, returns true and value becomes -1.
-        /// </summary>
-        /// <param name="text">Value to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParseWithEmpty(string text, ref float result)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                result = -1;
-                return true;
-            }
-            float test;
-            if (float.TryParse(text, out test))
-            {
-                result = test;
-                return true;
-            }
-            return false;
-        }
-
         /// <summary>
         /// Returns the array of values contained within a string
         /// </summary>
@@ -297,12 +141,12 @@ namespace RealChute
         public static bool TryParseVector3(string text, ref Vector3 result)
         {
             if (string.IsNullOrEmpty(text)) { return false; }
-            string[] splits = ParseArray(text);
-            if (splits.Length != 3) { return false; }
+            string[] elements = ParseArray(text);
+            if (elements.Length != 3) { return false; }
             float x, y, z;
-            if (!float.TryParse(splits[0], out x)) { return false; }
-            if (!float.TryParse(splits[1], out y)) { return false; }
-            if (!float.TryParse(splits[2], out z)) { return false; }
+            if (!float.TryParse(elements[0], out x)) { return false; }
+            if (!float.TryParse(elements[1], out y)) { return false; }
+            if (!float.TryParse(elements[2], out z)) { return false; }
             result = new Vector3(x, y, z);
             return true;
         }
@@ -313,7 +157,7 @@ namespace RealChute
         /// <param name="diameter">Diameter of the chute</param>
         public static float GetArea(float diameter)
         {
-            return (diameter * diameter * Mathf.PI) / 4f;
+            return (float)((diameter * diameter * Math.PI) / 4d);
         }
 
         /// <summary>
@@ -322,32 +166,16 @@ namespace RealChute
         /// <param name="area">Area to determine dthe diameter of</param>
         public static float GetDiameter(float area)
         {
-            return Mathf.Sqrt(area / Mathf.PI) * 2f;
+            return (float)(Math.Sqrt(area / Math.PI) * 2);
         }
 
         /// <summary>
         /// Rounds the float to the closets half
         /// </summary>
         /// <param name="f">Number to round</param>
-        public static float Round(float f)
+        public static float Round(double d)
         {
-            string[] splits = f.ToString().Split('.').Select(s => s.Trim()).ToArray();
-            if (splits.Length != 2) { return f; }
-            float round = 0, decimals = float.Parse("0." + splits[1]);
-            if (decimals >= 0.25f && decimals < 0.75) { round = 0.5f; }
-            else if (decimals >= 0.75) { round = 1; }
-            return Mathf.Max(float.Parse(splits[0]) + round, 0.5f);
-        }
-
-        /// <summary>
-        /// Checks if the value is within the given range
-        /// </summary>
-        /// <param name="f">Value to check</param>
-        /// <param name="min">Bottom of the range to check</param>
-        /// <param name="max">Top of the range to check</param>
-        public static bool CheckRange(float f, float min, float max)
-        {
-            return f <= max && f >= min;
+            return (float)Math.Max(Math.Round(d, 1, MidpointRounding.AwayFromZero), 0.1);
         }
 
         /// <summary>
@@ -356,12 +184,12 @@ namespace RealChute
         /// <param name="time">Time value to transform</param>
         public static string ToMinutesSeconds(float time)
         {
-            float minutes = 0, seconds = time;
-            while (seconds >= 60)
+            float minutes = 0, seconds;
+            for (seconds = time; seconds >= 60; seconds -= 60)
             {
-                seconds -= 60;
                 minutes++;
             }
+
             return String.Concat(minutes, "m ", seconds.ToString("0.0"), "s");
         }
 
@@ -371,16 +199,7 @@ namespace RealChute
         /// <param name="f">Float to check</param>
         public static bool IsWholeNumber(float f)
         {
-            return !f.ToString().Contains('.');
-        }
-
-        /// <summary>
-        /// Removes any excess amount of "(Clone)" bits from part names
-        /// </summary>
-        /// <param name="part">Part to fix</param>
-        public static void RemoveClone(Part part)
-        {
-            part.name = part.partInfo.name + "(Clone)";
+            return Math.Truncate(f) == f;
         }
 
         /// <summary>
@@ -392,12 +211,75 @@ namespace RealChute
             switch (id)
             {
                 case 0:
-                    return "Main chute:";
+                    return "Main chute";
+
                 case 1:
-                    return "Secondary chute:";
+                    return "Secondary chute";
+
                 default:
-                    return String.Format("Chute #{0}:", id + 1);
+                    return "Chute #" + (id + 1);
             }
+        }
+
+        /// <summary>
+        /// Prints relevant info about an AvaialablePart object
+        /// </summary>
+        /// <param name="partInfo">AvaialablePart object to print</param>
+        public static void PrintPartInfo(AvailablePart partInfo)
+        {
+            bool tmp;
+            System.Text.StringBuilder b = new System.Text.StringBuilder("[RealChute]: Printing PartInfo stats\n");
+            b.AppendLine("Part name: " + partInfo.name);
+            b.AppendLine("Part title: " + partInfo.title);
+            tmp = partInfo.partPrefab == null;
+            b.AppendLine("PartPrefab null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("PartPrefab module count: " + partInfo.partPrefab.Modules.Count);
+            }
+            tmp = partInfo.internalConfig == null;
+            b.AppendLine("Internal config null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Internal config values count: " + partInfo.internalConfig.values.Count);
+                b.AppendLine("Internal config nodes count: " + partInfo.internalConfig.nodes.Count);
+            }
+            tmp = partInfo.partConfig == null;
+            b.AppendLine("Part config null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Part config values count: " + partInfo.partConfig.values.Count);
+                b.AppendLine("Part config nodes count: " + partInfo.partConfig.nodes.Count);
+            }
+            tmp = partInfo.moduleInfos == null;
+            b.AppendLine("ModuleInfos null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("ModuleInfos count: " + partInfo.moduleInfos.Count);
+            }
+            tmp = partInfo.resourceInfos == null;
+            b.AppendLine("ResourceInfos null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("ResourceInfos count: " + partInfo.resourceInfos.Count);
+            }
+            b.AppendLine("Part path: " + partInfo.partPath);
+            b.AppendLine("Part URL: " + partInfo.partUrl);
+            b.AppendLine("Config full name: " + partInfo.configFileFullName);
+            tmp = partInfo.partUrlConfig == null;
+            b.AppendLine("Part URLConfig null: " + tmp);
+            if (!tmp)
+            {
+                b.AppendLine("Part URLConfig URL: " + partInfo.partUrlConfig.url);
+                tmp = partInfo.partUrlConfig.config == null;
+                b.AppendLine("Part URLConfig config null: " + tmp);
+                if (!tmp)
+                {
+                    b.AppendLine("Part URLConfig values count: " + partInfo.partUrlConfig.config.values.Count);
+                    b.AppendLine("Part URLConfig nodes count: " + partInfo.partUrlConfig.config.nodes.Count);
+                }
+            }
+            UnityEngine.Debug.Log(b.ToString());
         }
         #endregion
     }

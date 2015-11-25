@@ -14,11 +14,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("RealChute")]
-[assembly: AssemblyDescription("RealChute Parachute Systems")]
+[assembly: AssemblyDescription("Realistic Parachutes for Kerbal Space Program")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Wenkel Corporation")]
+[assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2014")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -40,5 +40,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.2.*")]
-[assembly: AssemblyInformationalVersion("1.2.5.2")]
+[assembly: AssemblyVersion("1.3.*")]
+[assembly: AssemblyInformationalVersion("1.3.2.3")]

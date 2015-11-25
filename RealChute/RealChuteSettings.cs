@@ -51,6 +51,45 @@ namespace RealChute
             get { return this._jokeActivated; }
             set { this._jokeActivated = value; }
         }
+
+        private bool _guiResizeUpdates = false;
+        /// <summary>
+        /// Whether or not resizing the parachutes through part GUI updates the canopy diameter
+        /// </summary>
+        public bool guiResizeUpdates
+        {
+            get { return this._guiResizeUpdates; }
+            set { this._guiResizeUpdates = value; }
+        }
+
+        private bool _mustBeEngineer = true;
+        /// <summary>
+        /// If a Kerbal must be an engineer to repack a parachute in career
+        /// </summary>
+        public bool mustBeEngineer
+        {
+            get { return this._mustBeEngineer; }
+            set { this._mustBeEngineer = value; }
+        }
+
+        private int _engineerLevel = 1;
+        /// <summary>
+        /// The level at which an engineer must be to be able to repack a parachute
+        /// </summary>
+        public int engineerLevel
+        {
+            get { return this._engineerLevel; }
+            set { this._engineerLevel = value; }
+        }
+
+        private ConfigNode[] _presets = new ConfigNode[0];
+        /// <summary>
+        /// All the current preset nodes
+        /// </summary>
+        public ConfigNode[] presets
+        {
+            get { return this._presets; }
+        }
         #endregion
 
         #region Constructor
@@ -63,31 +102,27 @@ namespace RealChute
             Debug.Log("[RealChute]: Loading settings file.");
             if (!File.Exists(RCUtils.settingsURL))
             {
-                Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
-                settings.AddValue("autoArm", autoArm);
-                settings.AddValue("jokeActivated", jokeActivated);
+                Debug.LogError("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
+                settings.AddValue("autoArm", this._autoArm);
+                settings.AddValue("jokeActivated", this._jokeActivated);
+                settings.AddValue("guiResizeUpdates", this._guiResizeUpdates);
+                settings.AddValue("mustBeEngineer", this._mustBeEngineer);
+                settings.AddValue("engineerLevel", this._engineerLevel);
                 node.AddNode(settings);
                 node.Save(RCUtils.settingsURL);
             }
             else
             {
                 node = ConfigNode.Load(RCUtils.settingsURL);
-                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { goto missing; }
-                if (!settings.TryGetValue("autoArm", ref _autoArm)) { goto missing; }
-                if (!settings.TryGetValue("jokeActivated", ref _jokeActivated)) { goto missing; }
-                return;
-
-                missing:
-                {
-                    Debug.LogWarning("[RealChute]: RealChute_Settings.cfg is missing component. Fixing settings file.");
-                    settings.ClearValues();
-                    settings.AddValue("autoArm", autoArm);
-                    settings.AddValue("jokeActivated", jokeActivated);
-                    node.ClearData();
-                    node.AddNode(settings);
-                    node.Save(RCUtils.settingsURL);
-                    return;
-                }
+                bool mustSave = false;
+                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { SaveSettings(); return; }
+                if (!settings.TryGetValue("autoArm", ref this._autoArm)) { mustSave = true; return; }
+                if (!settings.TryGetValue("jokeActivated", ref this._jokeActivated)) { mustSave = true; return; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref this._guiResizeUpdates)) { mustSave = true; return; }
+                if (!settings.TryGetValue("mustBeEngineer", ref this._mustBeEngineer)) { mustSave = true; return; }
+                if (!settings.TryGetValue("engineerLevel", ref this._engineerLevel)) { mustSave = true; return; }
+                this._presets = settings.GetNodes("PRESET");
+                if (mustSave) { SaveSettings(); }
             }
         }
         #endregion
@@ -99,11 +134,17 @@ namespace RealChute
         public static void SaveSettings()
         {
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
-            settings.AddValue("autoArm", fetch.autoArm);
-            settings.AddValue("jokeActivated", fetch.jokeActivated);
+            settings.AddValue("autoArm", fetch._autoArm);
+            settings.AddValue("jokeActivated", fetch._jokeActivated);
+            settings.AddValue("guiResizeUpdates", fetch._guiResizeUpdates);
+            settings.AddValue("mustBeEngineer", fetch._mustBeEngineer);
+            settings.AddValue("engineerLevel", fetch._engineerLevel);
             if (PresetsLibrary.instance.presets.Count > 0)
             {
-                PresetsLibrary.instance.presets.ForEach(p => settings.AddNode(p.Save()));
+                foreach (Preset preset in PresetsLibrary.instance.presets.Values)
+                {
+                    settings.AddNode(preset.Save());
+                }
             }
             node.AddNode(settings);
             node.Save(RCUtils.settingsURL);

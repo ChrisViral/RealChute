@@ -98,8 +98,12 @@ TestResults
 ClientBin
 [Ss]tyle[Cc]op.*
 ~$*
-Thumbs.db
 *.dbmdl
+Thumbs.db
+ToDo.txt
+[Rr]elease/
+[Gg]ame/
+*.ini
 Generated_Code #added for RIA/Silverlight projects
 
 # Backup & report files from converting an old project file to a newer

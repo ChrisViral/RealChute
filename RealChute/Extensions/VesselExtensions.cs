@@ -20,8 +20,17 @@ namespace RealChute.Extensions
         {
             if (vessel.mainBody.pqsController == null) { return ASL; }
             double terrainAlt = vessel.pqsAltitude;
-            if (vessel.mainBody.ocean && terrainAlt < 0) { terrainAlt = 0; }
+            if (vessel.mainBody.ocean && terrainAlt <= 0) { return ASL; }
             return ASL - terrainAlt;
+        }
+
+        /// <summary>
+        /// If the given vessel is a Kerbal engineer
+        /// </summary>
+        public static bool IsEngineer(this Vessel vessel)
+        {
+            return FlightGlobals.ActiveVessel.parts[0].Modules["KerbalEVA"].part.protoModuleCrew[0]
+                .experienceTrait.Title == "Engineer";
         }
         #endregion
     }

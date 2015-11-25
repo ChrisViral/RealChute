@@ -26,7 +26,8 @@ namespace RealChute.Extensions
             List<Part> result = new List<Part>(part.children);
             for (int i = 0; i < result.Count; i++)
             {
-                if (result[i].children.Count > 0) { result.AddRange(result[i].children); }
+                Part p = result[i];
+                if (p.children.Count > 0) { result.AddRange(p.children); }
             }
             return result;
         }
@@ -45,12 +46,11 @@ namespace RealChute.Extensions
         /// <summary>
         /// Gets the children transforms of this specific part
         /// </summary>
-        public static List<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
+        public static IEnumerable<Renderer> GetPartRenderers(this Part part, RealChuteModule module)
         {
-            List<Renderer> toRemove = new List<Renderer>(part.children.Select(p => p.transform).SelectMany(t => t.GetComponentsInChildren<Renderer>()));
-            toRemove.AddRange(module.parachutes.Select(p => p.parachute).SelectMany(t => t.GetComponents<Renderer>()));
-            List<Renderer> renderers = part.transform.GetComponentsInChildren<Renderer>().Except(toRemove).ToList();
-            return renderers;
+            List<Renderer> toRemove = new List<Renderer>(part.children.SelectMany(p => p.transform.GetComponentsInChildren<Renderer>()));
+            toRemove.AddRange(module.parachutes.SelectMany(p => p.parachute.GetComponents<Renderer>()));
+            return part.transform.GetComponentsInChildren<Renderer>().Except(toRemove);
         }
 
         /// <summary>
@@ -58,7 +58,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static float TotalMass(this Part part)
         {
-            return part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0f;
+            return part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0;
         }
 
         /// <summary>
@@ -66,7 +66,8 @@ namespace RealChute.Extensions
         /// </summary>
         public static float TotalCost(this Part part)
         {
-            return part.GetModuleCosts() + part.partInfo.cost;
+            float cost = part.partInfo.cost;
+            return part.GetModuleCosts(cost) + cost;
         }
 
         /// <summary>
@@ -125,8 +126,7 @@ namespace RealChute.Extensions
         /// <param name="animationName">Name of the animation to check</param>
         public static bool CheckAnimationPlaying(this Part part, string animationName)
         {
-            foreach (Animation animation in part.FindModelAnimators(animationName)) { return animation[animationName].normalizedTime >= 1; }
-            return false;
+            return part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
         }
         #endregion
     }

@@ -33,6 +33,7 @@
             this.toolstripMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.grbInfo = new System.Windows.Forms.GroupBox();
+            this.lblParts = new System.Windows.Forms.Label();
             this.chkManualCd = new System.Windows.Forms.CheckBox();
             this.cmbMaterial = new System.Windows.Forms.ComboBox();
             this.lblm2 = new System.Windows.Forms.Label();
@@ -67,6 +68,7 @@
             this.txtDiameterDrag = new System.Windows.Forms.TextBox();
             this.lblDiameterDrag = new System.Windows.Forms.Label();
             this.grbInfoDrag = new System.Windows.Forms.GroupBox();
+            this.lblPartsDrag = new System.Windows.Forms.Label();
             this.cmbMaterialDrag = new System.Windows.Forms.ComboBox();
             this.chkManualCdDrag = new System.Windows.Forms.CheckBox();
             this.lblms2 = new System.Windows.Forms.Label();
@@ -88,8 +90,6 @@
             this.lblCdDrag = new System.Windows.Forms.Label();
             this.lblTDrag = new System.Windows.Forms.Label();
             this.lblMassDrag = new System.Windows.Forms.Label();
-            this.lblPartsDrag = new System.Windows.Forms.Label();
-            this.lblParts = new System.Windows.Forms.Label();
             this.mnuMenuBar.SuspendLayout();
             this.grbInfo.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numDeployment)).BeginInit();
@@ -166,6 +166,15 @@
             this.grbInfo.TabStop = false;
             this.grbInfo.Tag = "s";
             this.grbInfo.Text = "Values";
+            // 
+            // lblParts
+            // 
+            this.lblParts.AutoSize = true;
+            this.lblParts.Location = new System.Drawing.Point(136, 267);
+            this.lblParts.Name = "lblParts";
+            this.lblParts.Size = new System.Drawing.Size(30, 13);
+            this.lblParts.TabIndex = 25;
+            this.lblParts.Text = "parts";
             // 
             // chkManualCd
             // 
@@ -418,7 +427,7 @@
             // numMass
             // 
             this.numMass.Cursor = System.Windows.Forms.Cursors.Default;
-            this.numMass.DecimalPlaces = 1;
+            this.numMass.DecimalPlaces = 2;
             this.numMass.Location = new System.Drawing.Point(10, 109);
             this.numMass.Maximum = new decimal(new int[] {
             10000,
@@ -589,6 +598,15 @@
             this.grbInfoDrag.TabStop = false;
             this.grbInfoDrag.Tag = "s";
             this.grbInfoDrag.Text = "Values";
+            // 
+            // lblPartsDrag
+            // 
+            this.lblPartsDrag.AutoSize = true;
+            this.lblPartsDrag.Location = new System.Drawing.Point(132, 190);
+            this.lblPartsDrag.Name = "lblPartsDrag";
+            this.lblPartsDrag.Size = new System.Drawing.Size(30, 13);
+            this.lblPartsDrag.TabIndex = 22;
+            this.lblPartsDrag.Text = "parts";
             // 
             // cmbMaterialDrag
             // 
@@ -855,24 +873,6 @@
             this.lblMassDrag.Size = new System.Drawing.Size(56, 13);
             this.lblMassDrag.TabIndex = 0;
             this.lblMassDrag.Text = "Craft mass";
-            // 
-            // lblPartsDrag
-            // 
-            this.lblPartsDrag.AutoSize = true;
-            this.lblPartsDrag.Location = new System.Drawing.Point(132, 190);
-            this.lblPartsDrag.Name = "lblPartsDrag";
-            this.lblPartsDrag.Size = new System.Drawing.Size(30, 13);
-            this.lblPartsDrag.TabIndex = 22;
-            this.lblPartsDrag.Text = "parts";
-            // 
-            // lblParts
-            // 
-            this.lblParts.AutoSize = true;
-            this.lblParts.Location = new System.Drawing.Point(136, 267);
-            this.lblParts.Name = "lblParts";
-            this.lblParts.Size = new System.Drawing.Size(30, 13);
-            this.lblParts.TabIndex = 25;
-            this.lblParts.Text = "parts";
             // 
             // RCDragCalc
             // 
