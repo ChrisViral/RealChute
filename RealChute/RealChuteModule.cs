@@ -32,6 +32,13 @@ namespace RealChute
         CUT
     }
 
+    public enum SafeState
+    {
+        SAFE,
+        RISKY,
+        DANGEROUS
+    }
+
     public class RealChuteModule : PartModule, IPartCostModifier, IModuleInfo
     {
         #region Persistent fields
@@ -167,6 +174,7 @@ namespace RealChute
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node = null;
+        public SafeState safeState = SafeState.SAFE;
 
         //GUI
         protected bool visible = false, hid = false;
@@ -393,6 +401,37 @@ namespace RealChute
             }
         }
 
+        private void SetSafeToDeploy()
+        {
+            SafeState[] states = this.parachutes.Select(p => p.GetSafeState()).ToArray();
+            SafeState s = states[0];
+            //What this does is that if the first is not risky, and that all the following are all like the first one (safe or dangerous),
+            //Then the final state is the first one. If not, the final state is risky
+            if (states.Length != 1 && s != SafeState.RISKY)
+            {
+                //Only stay safe or dangerous if all are safe or dangerous
+                for (int i = 1; i < states.Length; i++)
+                {
+                    if (states[i] != s) { s = SafeState.RISKY; break; }
+                }
+            }
+            if (s != this.safeState)
+            {
+                this.safeState = s;
+                switch (this.safeState)
+                {
+                    case SafeState.SAFE:
+                        part.stackIcon.SetBgColor(XKCDColors.White); break;
+
+                    case SafeState.RISKY:
+                        part.stackIcon.SetBgColor(XKCDColors.BrightYellow); break;
+
+                    case SafeState.DANGEROUS:
+                        part.stackIcon.SetBgColor(XKCDColors.Red); break;
+                }
+            }
+        }
+
         //Gives the cost for this parachute
         public float GetModuleCost(float defaultCost)
         {
@@ -500,6 +539,9 @@ namespace RealChute
                 }
                 else if (this.launched && this.vessel.horizontalSrfSpeed >= cutSpeed && this.vessel.LandedOrSplashed) { ActivateRC(); }
             }
+
+            if (this.atmDensity > 0) { this.parachutes.ForEach(p => p.CalculateConvectiveFlux()); }
+            SetSafeToDeploy();
 
             if (this.staged)
             {

@@ -25,7 +25,7 @@ namespace RealChute
         #region Properties
         private static GUIStyle _redLabel = null;
         /// <summary>
-        /// A red KSP label for ProceduralChute
+        /// A red KSP label
         /// </summary>
         public static GUIStyle redLabel
         {
@@ -39,6 +39,25 @@ namespace RealChute
                     _redLabel = style;
                 }
                 return _redLabel;
+            }
+        }
+
+        private static GUIStyle _yellowLabel = null;
+        /// <summary>
+        /// A yellow KSP label
+        /// </summary>
+        public static GUIStyle yellowLabel
+        {
+            get
+            {
+                if (_yellowLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(skins.label);
+                    style.normal.textColor = XKCDColors.BrightYellow;
+                    style.hover.textColor = XKCDColors.BrightYellow;
+                    _yellowLabel = style;
+                }
+                return _yellowLabel;
             }
         }
 
