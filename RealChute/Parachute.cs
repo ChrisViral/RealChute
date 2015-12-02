@@ -413,7 +413,7 @@ namespace RealChute
         //Gets convective flux
         public void CalculateConvectiveFlux()
         {
-            this.convectiveFlux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + this.vessel.mach * this.vessel.mach * this.vessel.mach,
+            this.convectiveFlux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Pow(this.vessel.mach, 1.5) * (vessel.dynamicPressurekPa / 101.325)),
                 (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
                 * (this.vessel.externalTemperature - this.chuteTemperature);
         }
