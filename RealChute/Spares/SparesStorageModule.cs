@@ -106,6 +106,8 @@ namespace RealChute.Spares
         private Part kerbal = null;
         private KerbalEVA kerbalEVA = null;
         private bool holdsSpare = false, holdsEVA = false;
+        private SpareCarrierModule carrier = null;
+        private RealChuteEVA eva = null;
 
         //GUI
         private GUISkin skins = HighLogic.Skin;
@@ -170,8 +172,18 @@ namespace RealChute.Spares
                     this.flightVisible = true;
                     foreach (PartModule module in modules)
                     {
-                        if (module is SpareCarrierModule) { this.holdsSpare = true; break; }
-                        if (module is RealChuteEVA) { this.holdsEVA = true; break; }
+                        if (module is SpareCarrierModule)
+                        {
+                            this.carrier = module as SpareCarrierModule;
+                            this.holdsSpare = true;
+                            break;
+                        }
+                        if (module is RealChuteEVA)
+                        {
+                            this.eva = module as RealChuteEVA;
+                            this.holdsEVA = true;
+                            break;
+                        }
                     }
                     
                 }
@@ -194,6 +206,13 @@ namespace RealChute.Spares
             IParachute clone = parachute.Clone();
             this._storedChutes.Add(clone);
             this.stored.AddToggle(clone, clone.name);
+            UpdateMass();
+        }
+
+        public void RemoveParachute(IParachute parachute)
+        {
+            this._storedChutes.Remove(parachute);
+            this.stored.RemoveToggle(parachute);
             UpdateMass();
         }
 
@@ -235,6 +254,23 @@ namespace RealChute.Spares
         private void UpdateMass()
         {
             this.part.mass = this.baseMass + this._storedChutes.Sum(p => p.chuteMass);
+        }
+
+        public void AddParachuteToKerbal(IParachute parachute)
+        {
+            RemoveParachute(parachute);
+            if (parachute is SpareChute)
+            {
+                SpareChute spare = parachute as SpareChute;
+                SpareCarrierModule carrier = this.kerbal.AddModule("SpareCarrierModule") as SpareCarrierModule;
+                this.holdsSpare = true;
+            }
+            else if (parachute is EVAChute)
+            {
+                EVAChute chute = parachute as EVAChute;
+                RealChuteEVA eva = this.kerbal.AddModule(chute.module) as RealChuteEVA;
+                this.holdsEVA = true;
+            }
         }
 
         public Callback<Rect> GetDrawModulePanelCallback()
@@ -333,6 +369,7 @@ namespace RealChute.Spares
             GUI.DragWindow(this.drag);
             GUILayout.BeginVertical();
 
+            #region Tabs
             //Normal window
             if (!this.inputCustom)
             {
@@ -429,7 +466,7 @@ namespace RealChute.Spares
                             if (GUILayout.Button("Remove", skins.button, GUILayout.Width(400)))
                             {
                                 this._storedChutes.Remove(p);
-                                this.stored.RemoveToggle(p);
+                                RemoveParachute(p);
                             }
                             GUI.enabled = true;
                             GUILayout.FlexibleSpace();
@@ -446,6 +483,9 @@ namespace RealChute.Spares
                     this.visible = false;
                 }
             }
+            #endregion
+
+            #region Custom
             //Creating custom chute
             else
             {
@@ -537,6 +577,8 @@ namespace RealChute.Spares
                 }
                 GUILayout.EndHorizontal();
             }
+            #endregion
+
             GUILayout.EndVertical();
         }
 
@@ -548,20 +590,48 @@ namespace RealChute.Spares
 
             GUILayout.BeginHorizontal(skins.box);
             this.eTab = EnumUtils.SelectionGrid(this.eTab, 2, skins.button);
+            GUILayout.EndHorizontal();
 
             switch (this.eTab)
             {
                 case EquippedTab.Stored:
                     {
+                        GUILayout.BeginHorizontal();
                         IParachute p = StoredView();
+                        GUILayout.EndHorizontal();
+
+                        if (this.kerbal.Modules.Contains("SpareCarrierModule"))
+                        {
+                            GUILayout.Label("Kerbal already holds a parachute.", GUIUtils.redLabel);
+                            GUI.enabled = false;
+                        }
+                        else if (p == null) { GUI.enabled = false; }
+                        GUILayout.BeginHorizontal();
+                        if (GUILayout.Button("Take chute", skins.button, GUILayout.Width(400)))
+                        {
+                            AddParachuteToKerbal(p);
+                        }
+                        GUI.enabled = true;
+                        GUILayout.FlexibleSpace();
+                        GUILayout.EndHorizontal();
                         break;
                     }
 
                 case EquippedTab.Equipped:
                     {
-
+                        GUILayout.FlexibleSpace();
+                        GUILayout.Label("-- To Do --");
+                        GUILayout.FlexibleSpace();
                         break;
                     }
+            }
+
+            GUILayout.Label(String.Format("Maximum space: {0}m²     Used space: {1}m²     Available space: {2}m²", this.storageSpace, this.usedSpace, this.availableSpace), skins.label);
+
+            //Close button
+            if (GUILayout.Button("Close", skins.button))
+            {
+                this.visible = false;
             }
         }
         #endregion

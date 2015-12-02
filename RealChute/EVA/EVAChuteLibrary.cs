@@ -48,7 +48,7 @@ namespace RealChute.EVA
         #endregion
 
         #region Constructor
-        public EVAChuteLibrary()
+        private EVAChuteLibrary()
         {
             this._chutes = GameDatabase.Instance.GetConfigNodes("EVA_CHUTES").Select(n => new EVAChute(n))
                 .ToDictionary(c => c.name, c => c);
