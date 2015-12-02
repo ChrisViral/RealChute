@@ -1,15 +1,19 @@
 {
-  "NAME": "RealChute",
-  "URL": "https://raw.githubusercontent.com/StupidChris/RealChute/master/Output/GameData/RealChute/RealChute.version",
-  "VERSION": {
-    "MAJOR": 1,
-    "MINOR": 3,
-    "PATCH": 2,
-    "BUILD": 4
-  },
-  "KSP_VERSION": {
-      "MAJOR": 1,
-      "MINOR": 0,
-      "PATCH": 5
-  }
+	"NAME": "RealChute",
+	"URL": "https://raw.githubusercontent.com/StupidChris/RealChute/master/Output/GameData/RealChute/RealChute.version",
+
+	"VERSION":
+	{
+		"MAJOR": 1,
+		"MINOR": 3,
+		"PATCH": 2,
+		"BUILD": 5
+	},
+
+	"KSP_VERSION_MIN":
+	{
+		"MAJOR": 1,
+		"MINOR": 0,
+		"PATCH": 5
+	}
 }
