@@ -1,14 +1,13 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
-using Experience;
 using RealChute.Extensions;
 using RealChute.Libraries.Materials;
+using RealChute.Managers;
 using RealChute.Spares;
 using RealChute.Utils;
-using RealChute.Managers;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -441,7 +440,7 @@ namespace RealChute
         //Updates the SpareChute template
         internal void UpdateSpare(string spareName)
         {
-            this.spare = new SpareChute(this, spareName);
+            this.spare.Update(this, spareName);
         }
         #endregion
 
@@ -602,7 +601,7 @@ namespace RealChute
             }
             this.parachutes.ForEach(p => p.Initialize());
             this.part.mass = this.caseMass + this.chuteMass;
-            if (this.spare == null) { UpdateSpare(this.part.partInfo.title); }
+            if (this.spare == null) { this.spare = new SpareChute(this, this.part.partInfo.title); }
 
             //First initiation of the part
             if (!this.initiated)

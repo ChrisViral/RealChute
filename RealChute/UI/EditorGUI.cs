@@ -66,11 +66,6 @@ namespace RealChute.UI
 
         #region Constructor
         /// <summary>
-        /// Creates a new blank EditorGUI object
-        /// </summary>
-        public EditorGUI() { }
-
-        /// <summary>
         /// Creates a new RCEditorGUI
         /// </summary>
         /// <param name="pChute">ProceduralChute module to create the object from</param>

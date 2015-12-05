@@ -18,10 +18,14 @@ namespace RealChute.Managers
     public class PersistentManager : MonoBehaviour
     {
         #region Instance
+        private static PersistentManager _instance = null;
         /// <summary>
         /// The current instance of the SizeManager
         /// </summary>
-        public static PersistentManager instance { get; private set; }
+        public static PersistentManager instance
+        {
+            get { return _instance; }
+        }
         #endregion
 
         #region Fields
@@ -32,8 +36,8 @@ namespace RealChute.Managers
         #region Functions
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || instance != null) { Destroy(this); return; }
-            instance = this;
+            if (!CompatibilityChecker.IsAllCompatible() || _instance != null) { Destroy(this); return; }
+            _instance = this;
             DontDestroyOnLoad(this);
             print("[RealChute]: Running RealChute " + RCUtils.assemblyVersion);
         }

@@ -92,7 +92,7 @@ namespace RealChute
         internal CaseConfig parachuteCase = new CaseConfig();
         internal PresetsLibrary presets = PresetsLibrary.instance;
         internal CelestialBody body = null;
-        internal EditorGUI editorGUI = new EditorGUI();
+        internal EditorGUI editorGUI = null;
         internal List<ChuteTemplate> chutes = new List<ChuteTemplate>();
         [SerializeField]
         private byte[] serializedChutes = new byte[0];
@@ -487,7 +487,6 @@ namespace RealChute
             if (!string.IsNullOrEmpty(this.textureLibrary)) { this.textureLib.TryGetConfig(this.textureLibrary, ref this.textures); }
             this.bodies = AtmoPlanets.fetch;
             this.body = this.bodies.GetBody(this.planets);
-
             //Initializes ChuteTemplates
             if (this.chutes.Count <= 0)
             {
@@ -496,7 +495,6 @@ namespace RealChute
             }
             this.chutes.ForEach(c => c.Initialize());
             if (this.sizes.Count <= 0) { this.sizes = PersistentManager.instance.GetSizes(this.part.partInfo.name); }
-
             //Creates an instance of the texture library
             this.editorGUI = new EditorGUI(this);
             if (HighLogic.LoadedSceneIsEditor)
@@ -612,6 +610,11 @@ namespace RealChute
 
             //Original part size
             if (this.debut == 0) { this.debut = this.part.transform.GetChild(0).localScale.y; }
+
+            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            {
+                PersistentManager.instance.AddNode<ProceduralChute>(this.part.name, node);
+            }
         }
 
         public override string GetInfo()

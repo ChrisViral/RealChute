@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using RealChute.Extensions;
 using UnityEngine;
 
@@ -100,9 +101,14 @@ namespace RealChute.Utils
             public bool TryGetValue<T>(string name, out T value) where T : struct, TEnum
             {
                 TEnum result;
-                bool success = values.TryGetValue(name, out result);
-                value = (T)result;
-                return success;
+                if(values.TryGetValue(name, out result))
+                {
+                    value = (T)result;
+                    return true;
+                }
+
+                value = default(T);
+                return false;
 
             }
 
@@ -125,9 +131,13 @@ namespace RealChute.Utils
             public bool TryGetValueAt<T>(int index, out T value) where T : struct, TEnum
             {
                 TEnum result;
-                bool success = this.atValues.TryGetValue(index, out result);
-                value = (T)result;
-                return success;
+                if(this.atValues.TryGetValue(index, out result))
+                {
+                    value = (T)result;
+                    return true;
+                }
+                value = default(T);
+                return false;
             }
 
             /// <summary>
@@ -320,13 +330,15 @@ namespace RealChute.Utils
     }
 
     public sealed class EnumUtils : EnumConstraint<Enum>
-    { 
+    {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */
 
+        #region Constructor
         /// <summary>
         /// Prevents object instantiation
         /// </summary>
         private EnumUtils() { }
+        #endregion
     }
 }

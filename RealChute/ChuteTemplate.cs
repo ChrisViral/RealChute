@@ -76,7 +76,7 @@ namespace RealChute
             {
                 string[] chutes = RCUtils.ParseArray(this.pChute.currentTypes);
                 if (chutes.IndexInRange(this.id)) { return chutes[this.id]; }
-                return string.Empty;
+                return "Main";
             }
         }
 
@@ -354,6 +354,7 @@ namespace RealChute
             {
                 if (!this.pChute.initiated)
                 {
+                    Debug.Log("Type: '" + this.currentType + "'");
                     ParachuteType t = EnumUtils.GetValue<ParachuteType>(this.currentType);
                     if (t != this.templateGUI.type)
                     {

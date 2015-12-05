@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -12,7 +14,7 @@ using UnityEngine;
 
 namespace RealChute.UI
 {
-    public class LinkedToggles<T>
+    public class LinkedToggles<T> where T : class
     {
         private class Toggle
         {
@@ -39,19 +41,29 @@ namespace RealChute.UI
         #endregion
 
         #region Fields
-        private List<Toggle> toggles = new List<Toggle>();
+        private List<Toggle> toggles = null;
         private Toggle toggled = null;
         private GUIStyle normal = HighLogic.Skin.button, active = HighLogic.Skin.button;
         #endregion
 
         #region Constructor
+        public LinkedToggles(GUIStyle normalStyle, GUIStyle activeStyle)
+        {
+            this.toggles = new List<Toggle>();
+            this.normal = normalStyle;
+            this.active = activeStyle;
+        }
+
         public LinkedToggles(IEnumerable<T> collection, string[] names, GUIStyle normalStyle, GUIStyle activeStyle)
         {
+            this.toggles = new List<Toggle>();
             int i = 0;
-            IEnumerator<T> e = collection.GetEnumerator();
-            while(e.MoveNext())
+            using (IEnumerator<T> e = collection.GetEnumerator())
             {
-                this.toggles.Add(new Toggle(e.Current, names[i++]));
+                while (e.MoveNext())
+                {
+                    this.toggles.Add(new Toggle(e.Current, names[i++]));
+                }
             }
             this.normal = normalStyle;
             this.active = activeStyle;
@@ -91,11 +103,15 @@ namespace RealChute.UI
             this.toggles.Add(new Toggle(value, name));
         }
 
+        public void AddFirst(T value, string name)
+        {
+            this.toggles.Insert(0, new Toggle(value, name));
+        }
+
         public void RemoveToggle(T value)
         {
-            EqualityComparer<T> comparer = EqualityComparer<T>.Default;
-            Toggle toggle = this.toggles.Find(t => comparer.Equals(t.value, value));
-            this.toggles.Remove(toggle);
+            Toggle toggle = this.toggles.Find(t => t.value == value);
+            if (toggle != null) { this.toggles.Remove(toggle); }
         }
 
         private GUIStyle ToggleStyle(Toggle toggle)
@@ -107,6 +123,13 @@ namespace RealChute.UI
         {
             this.toggled.toggled = false;
             this.toggled = null;
+        }
+        #endregion
+
+        #region Overrides
+        public override string ToString()
+        {
+            return this.toggles.Select(t => t.name).Join("\n");
         }
         #endregion
     }

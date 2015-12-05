@@ -128,7 +128,10 @@ namespace RealChute.Utils
         public static string[] ParseArray(string text)
         {
             string[] array = text.Split(',');
-            array.ForEach(s => s.Trim());
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = array[i].Trim();
+            }
             return array;
         }
 

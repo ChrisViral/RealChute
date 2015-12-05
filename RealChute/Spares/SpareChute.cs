@@ -147,9 +147,7 @@ namespace RealChute.Spares
         public SpareChute(RealChuteModule module, string name)
         {
             this._part = module.part;
-            this._name = name + " spare";
-            module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
-            this.diameters = this.canopies.Select(c => c.deployedDiameter.ToString()).Join("m, ");
+            Update(module, name);
         }
 
         private SpareChute(SpareChute chute)
@@ -192,6 +190,13 @@ namespace RealChute.Spares
         public string GetInfo()
         {
             return String.Format("Name: {0}\nType: Spare\nDiameters: {1}m\nTotal area: {2}m²\nTotal mass: {3}t\nTotal cost: {4}F", this._name, this.diameters, this.deployedArea, this.chuteMass, this.chuteCost);
+        }
+
+        public void Update(RealChuteModule module, string name)
+        {
+            this._name = name + " spare";
+            module.parachutes.ForEach(p => this.canopies.Add(new Canopy(p)));
+            this.diameters = this.canopies.Select(c => c.deployedDiameter.ToString()).Join("m, ");
         }
         #endregion
     }
