@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Text;
 using System.Diagnostics;
-using System.Reflection;
 using System.IO;
 using System.Linq;
-using RealChute.Extensions;
+using System.Reflection;
+using System.Text;
 using UnityEngine;
 using Version = System.Version;
 
@@ -196,12 +195,14 @@ namespace RealChute.Utils
         }
 
         /// <summary>
-        /// Returns true if the number is a whole number (no decimals)
+        /// Returns true if the number is a whole number (no decimals).
+        /// Note: this is only true because the numbers processed through this are manually entered,
+        /// else we would need to check for floating point errors.
         /// </summary>
-        /// <param name="f">Float to check</param>
-        public static bool IsWholeNumber(float f)
+        /// <param name="n">Float to check</param>
+        public static bool IsWholeNumber(float n)
         {
-            return f % 1 == 0;
+            return (n % 1) == 0;
         }
 
         /// <summary>

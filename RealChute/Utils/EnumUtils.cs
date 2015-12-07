@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using RealChute.Extensions;
 using UnityEngine;
 
@@ -15,53 +14,47 @@ using UnityEngine;
 
 namespace RealChute.Utils
 {
+    /// <summary>
+    /// Various Enum utilities methods, featuring fast parsing/ToString. Should ONLY ever be called through EnumUtils.
+    /// </summary>
+    /// <typeparam name="TEnum">Type should be Enum. Really, it's gonna throw if you don't.</typeparam>
     public abstract class EnumConstraint<TEnum> where TEnum : class
     {
         /// <summary>
         /// Generic enum conversion utility class
         /// </summary>
-        private class EnumConverter
+        private struct EnumConverter
         {
             #region Fields
             /// <summary>
-            /// Stores the string -> enum conversion
-            /// </summary>
-            private Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
-
-            /// <summary>
             /// Stores the enum -> string conversion
             /// </summary>
-            private Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+            private Dictionary<TEnum, string> names;
+
+            /// <summary>
+            /// Stores the string -> enum conversion
+            /// </summary>
+            private Dictionary<string, TEnum> values;
 
             /// <summary>
             /// Stores the index of each member with the member as the key
             /// </summary>
-            private Dictionary<TEnum, int> indexes = new Dictionary<TEnum, int>();
+            private Dictionary<TEnum, int> valueIndexes;
 
             /// <summary>
             /// Stores the index of each member with it's string representation
             /// </summary>
-            private Dictionary<string, int> sIndexes = new Dictionary<string, int>();
-
-            /// <summary>
-            /// Stores the index of each member as the key with the string representation of it as the value
-            /// </summary>
-            private Dictionary<int, string> atNames = new Dictionary<int, string>();
-
-            /// <summary>
-            /// Stores the index of each member as the key with the member as the value
-            /// </summary>
-            private Dictionary<int, TEnum> atValues = new Dictionary<int, TEnum>();
+            private Dictionary<string, int> nameIndexes;
 
             /// <summary>
             /// The name of the enum values correctly ordered for index search
             /// </summary>
-            public string[] orderedNames = new string[0];
+            public string[] orderedNames;
 
             /// <summary>
             /// The values of the Enum correctly ordered for index search
             /// </summary>
-            public TEnum[] orderedValues = new TEnum[0];
+            public TEnum[] orderedValues;
             #endregion
 
             #region Constructor
@@ -73,21 +66,21 @@ namespace RealChute.Utils
             {
                 if (enumType == null) { throw new ArgumentNullException("enumType", "Enum conversion type cannot be null"); }
 
-                Array values = Enum.GetValues(enumType);
-                this.orderedNames = new string[values.Length];
-                this.orderedValues = new TEnum[values.Length];
-                for (int i = 0; i < values.Length; i++)
+                this.orderedValues = (TEnum[])Enum.GetValues(enumType);
+                this.orderedNames = Enum.GetNames(enumType);
+                int length = orderedValues.Length;
+                this.names = new Dictionary<TEnum, string>(length);
+                this.values = new Dictionary<string, TEnum>(length);
+                this.valueIndexes = new Dictionary<TEnum, int>(length);
+                this.nameIndexes = new Dictionary<string, int>(length);
+                for (int i = 0; i < length; i++)
                 {
-                    TEnum value = (TEnum)values.GetValue(i);
-                    string name = Enum.GetName(enumType, value);
-                    this.orderedNames[i] = name;
-                    this.orderedValues[i] = value;
+                    TEnum value = this.orderedValues[i];
+                    string name = this.orderedNames[i];
                     this.values.Add(name, value);
                     this.names.Add(value, name);
-                    this.indexes.Add(value, i);
-                    this.sIndexes.Add(name, i);
-                    this.atValues.Add(i, value);
-                    this.atNames.Add(i, name);
+                    this.valueIndexes.Add(value, i);
+                    this.nameIndexes.Add(name, i);
                 }
             }
             #endregion
@@ -130,10 +123,9 @@ namespace RealChute.Utils
             /// <param name="value">Value to store the result into</param>
             public bool TryGetValueAt<T>(int index, out T value) where T : struct, TEnum
             {
-                TEnum result;
-                if(this.atValues.TryGetValue(index, out result))
+                if(orderedValues.IndexInRange(index))
                 {
-                    value = (T)result;
+                    value = (T)orderedValues[index];
                     return true;
                 }
                 value = default(T);
@@ -148,7 +140,13 @@ namespace RealChute.Utils
             /// <param name="name">Value to store the result into</param>
             public bool TryGetNameAt<T>(int index, out string name) where T : struct, TEnum
             {
-                return this.atNames.TryGetValue(index, out name);
+                if (orderedNames.IndexInRange(index))
+                {
+                    name = orderedNames[index];
+                    return true;
+                }
+                name = string.Empty;
+                return false;
             }
 
             /// <summary>
@@ -159,7 +157,7 @@ namespace RealChute.Utils
             public int IndexOf<T>(string name) where T : struct, TEnum
             {
                 int index;
-                if (!this.sIndexes.TryGetValue(name, out index)) { return -1; }
+                if (!this.nameIndexes.TryGetValue(name, out index)) { return -1; }
                 return index;
             }
 
@@ -171,11 +169,18 @@ namespace RealChute.Utils
             public int IndexOf<T>(T value) where T : struct, TEnum
             {
                 int index;
-                if (!this.indexes.TryGetValue(value, out index)) { return -1; }
+                if (!this.valueIndexes.TryGetValue(value, out index)) { return -1; }
                 return index;
             }
             #endregion
         }
+
+        #region Constructor
+        /// <summary>
+        /// Prevents external instantiation
+        /// </summary>
+        internal EnumConstraint() { }
+        #endregion
 
         #region Fields
         /// <summary>
@@ -196,6 +201,7 @@ namespace RealChute.Utils
             Type enumType = typeof(T);
             if (!converters.TryGetValue(enumType, out converter))
             {
+                if (!enumType.IsEnum) { throw new ArgumentException("Type is not an Enum type", "T"); }
                 converter = new EnumConverter(enumType);
                 converters.Add(enumType, converter);
             }
@@ -329,6 +335,9 @@ namespace RealChute.Utils
         #endregion
     }
 
+    /// <summary>
+    /// Enum utility class, dummy to force parameters to be Enums. Cannot be instantiated.
+    /// </summary>
     public sealed class EnumUtils : EnumConstraint<Enum>
     {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
@@ -336,7 +345,7 @@ namespace RealChute.Utils
 
         #region Constructor
         /// <summary>
-        /// Prevents object instantiation
+        /// Prevents object instantiation, this should act as a static class
         /// </summary>
         private EnumUtils() { }
         #endregion
