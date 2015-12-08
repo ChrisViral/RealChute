@@ -19,21 +19,21 @@ namespace RealChute
     {
         private bool printPressed
         {
-            get
-            {
-                return (Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKey(KeyCode.P))
-                    || (Input.GetKeyDown(KeyCode.P) && Input.GetKey(KeyCode.LeftShift));
-            }
+            get { return Input.GetKeyDown(KeyCode.P) && Input.GetKey(KeyCode.LeftAlt); }
+
         }
 
         private bool hidePressed
         {
-            get
-            {
-                return (Input.GetKeyDown(KeyCode.LeftShift) && Input.GetKey(KeyCode.O))
-                    || (Input.GetKeyDown(KeyCode.O) && Input.GetKey(KeyCode.LeftShift));
-            }
+            get { return Input.GetKeyDown(KeyCode.H) && Input.GetKey(KeyCode.LeftAlt); }
         }
+
+        private bool addPressed
+        {
+            get { return Input.GetKeyDown(KeyCode.B) && Input.GetKey(KeyCode.LeftAlt); }
+        }
+
+        private Transform b = null;
 
         private void Update()
         {
@@ -45,6 +45,41 @@ namespace RealChute
             if (this.hidePressed)
             {
                 DisableJetpack();
+            }
+
+            if (this.addPressed)
+            {
+                AddChutePack();
+            }
+
+            if (Input.GetKey(KeyCode.Keypad5))
+            {
+                b.localPosition = b.localPosition - new Vector3(0, 0, -0.01f);
+            }
+            if (Input.GetKey(KeyCode.Keypad8))
+            {
+                b.localPosition = b.localPosition - new Vector3(0, 0, 0.01f);
+            }
+            if (Input.GetKey(KeyCode.Keypad6))
+            {
+                b.localPosition = b.localPosition - new Vector3(-0.01f, 0, 0);
+            }
+            if (Input.GetKey(KeyCode.Keypad4))
+            {
+                b.localPosition = b.localPosition - new Vector3(0.01f, 0, 0);
+            }
+            if (Input.GetKey(KeyCode.Keypad9))
+            {
+                b.localPosition = b.localPosition - new Vector3(0, 0.01f, 0);
+            }
+            if (Input.GetKey(KeyCode.Keypad7))
+            {
+                b.localPosition = b.localPosition - new Vector3(0, -0.01f, 0);
+            }
+
+            if (Input.GetKey(KeyCode.Keypad0))
+            {
+                print("Current local position: " + b.localPosition.ToString() + " Alt: " + FlightGlobals.getAltitudeAtPos(b.position));
             }
         }
 
@@ -67,15 +102,38 @@ namespace RealChute
         private void DisableJetpack()
         {
             Transform parent = FlightGlobals.ActiveVessel.Parts[0].transform;
-            Transform jetpack = parent.GetChild(5).GetChild(3);
+            Transform jetpack = parent.GetChild(2).GetChild(1);
             //Flag decals
-            parent.GetChild(1).GetChild(0).gameObject.SetActive(false);
+            parent.GetChild(5).GetChild(0).gameObject.SetActive(false);
             //Jetpack base
             jetpack.GetChild(2).gameObject.SetActive(false);
             //Jetpack tank 1
             jetpack.GetChild(3).gameObject.SetActive(false);
             //Jetpack tank 2
             jetpack.GetChild(4).gameObject.SetActive(false);
+        }
+
+        private void AddChutePack()
+        {
+            print("Trying to add backpack.");
+            Transform kerbal = FlightGlobals.ActiveVessel.parts[0].transform.GetChild(0);
+            GameObject test = GameDatabase.Instance.GetModel("RealChute/Parts/model_RC_backpack_EVA");
+            Texture texture = GameDatabase.Instance.GetTexture("RealChute/Parts/RC_backpack_EVA", false);
+            if (test != null && texture != null)
+            {
+                print("Loading backpack model...");
+                test.SetActive(true);
+                GameObject backpack = GameObject.Instantiate(test) as GameObject;
+                backpack.SetActive(true);
+                GameObject.Destroy(test);
+                b = backpack.transform;
+                b.parent = kerbal;
+                b.localScale = new Vector3(1, 1, 1);
+                b.localPosition = new Vector3(-1.5f, -26.1f, 8.6f);
+                b.Rotate(FlightGlobals.ActiveVessel.upAxis);
+                b.GetComponents<Renderer>().ForEach(r => r.material.mainTexture = texture);
+                b.gameObject.SetActive(true);
+            }
         }
     }
 }

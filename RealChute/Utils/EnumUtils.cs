@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using RealChute.Extensions;
+using System.Linq;
 using UnityEngine;
+using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -66,17 +67,19 @@ namespace RealChute.Utils
             {
                 if (enumType == null) { throw new ArgumentNullException("enumType", "Enum conversion type cannot be null"); }
 
-                this.orderedValues = (TEnum[])Enum.GetValues(enumType);
+                Array values = Enum.GetValues(enumType);
                 this.orderedNames = Enum.GetNames(enumType);
-                int length = orderedValues.Length;
+                int length = this.orderedNames.Length;
+                this.orderedValues = new TEnum[length];
                 this.names = new Dictionary<TEnum, string>(length);
                 this.values = new Dictionary<string, TEnum>(length);
                 this.valueIndexes = new Dictionary<TEnum, int>(length);
                 this.nameIndexes = new Dictionary<string, int>(length);
                 for (int i = 0; i < length; i++)
                 {
-                    TEnum value = this.orderedValues[i];
+                    TEnum value = (TEnum)values.GetValue(i);
                     string name = this.orderedNames[i];
+                    this.orderedValues[i] = value;
                     this.values.Add(name, value);
                     this.names.Add(value, name);
                     this.valueIndexes.Add(value, i);
