@@ -33,8 +33,6 @@ namespace RealChute
             get { return Input.GetKeyDown(KeyCode.B) && Input.GetKey(KeyCode.LeftAlt); }
         }
 
-        private Transform b = null;
-
         private void Update()
         {
             if (this.printPressed)
@@ -50,36 +48,6 @@ namespace RealChute
             if (this.addPressed)
             {
                 AddChutePack();
-            }
-
-            if (Input.GetKey(KeyCode.Keypad5))
-            {
-                b.localPosition = b.localPosition - new Vector3(0, 0, -0.01f);
-            }
-            if (Input.GetKey(KeyCode.Keypad8))
-            {
-                b.localPosition = b.localPosition - new Vector3(0, 0, 0.01f);
-            }
-            if (Input.GetKey(KeyCode.Keypad6))
-            {
-                b.localPosition = b.localPosition - new Vector3(-0.01f, 0, 0);
-            }
-            if (Input.GetKey(KeyCode.Keypad4))
-            {
-                b.localPosition = b.localPosition - new Vector3(0.01f, 0, 0);
-            }
-            if (Input.GetKey(KeyCode.Keypad9))
-            {
-                b.localPosition = b.localPosition - new Vector3(0, 0.01f, 0);
-            }
-            if (Input.GetKey(KeyCode.Keypad7))
-            {
-                b.localPosition = b.localPosition - new Vector3(0, -0.01f, 0);
-            }
-
-            if (Input.GetKey(KeyCode.Keypad0))
-            {
-                print("Current local position: " + b.localPosition.ToString() + " Alt: " + FlightGlobals.getAltitudeAtPos(b.position));
             }
         }
 
@@ -101,22 +69,30 @@ namespace RealChute
 
         private void DisableJetpack()
         {
-            Transform parent = FlightGlobals.ActiveVessel.Parts[0].transform;
-            Transform jetpack = parent.GetChild(2).GetChild(1);
+            //Kerbal transform
+            Transform kerbal = FlightGlobals.ActiveVessel.Parts[0].transform;
+            //Jetpack
+            Transform jetpack = kerbal.GetChild(2).GetChild(1);
+
             //Flag decals
-            parent.GetChild(5).GetChild(0).gameObject.SetActive(false);
+            kerbal.GetChild(5).GetChild(0).gameObject.SetActive(false);
+
             //Jetpack base
             jetpack.GetChild(2).gameObject.SetActive(false);
             //Jetpack tank 1
             jetpack.GetChild(3).gameObject.SetActive(false);
             //Jetpack tank 2
             jetpack.GetChild(4).gameObject.SetActive(false);
+            //Thrusters left
+            jetpack.GetChild(5).gameObject.SetActive(false);
+            //Thrusters right
+            jetpack.GetChild(6).gameObject.SetActive(false);
         }
 
         private void AddChutePack()
         {
             print("Trying to add backpack.");
-            Transform kerbal = FlightGlobals.ActiveVessel.parts[0].transform.GetChild(0);
+            Transform jetpack = FlightGlobals.ActiveVessel.parts[0].transform.GetChild(2).GetChild(1);
             GameObject test = GameDatabase.Instance.GetModel("RealChute/Parts/model_RC_backpack_EVA");
             Texture texture = GameDatabase.Instance.GetTexture("RealChute/Parts/RC_backpack_EVA", false);
             if (test != null && texture != null)
@@ -126,13 +102,12 @@ namespace RealChute
                 GameObject backpack = GameObject.Instantiate(test) as GameObject;
                 backpack.SetActive(true);
                 GameObject.Destroy(test);
-                b = backpack.transform;
-                b.parent = kerbal;
-                b.localScale = new Vector3(1, 1, 1);
-                b.localPosition = new Vector3(-1.5f, -26.1f, 8.6f);
-                b.Rotate(FlightGlobals.ActiveVessel.upAxis);
-                b.GetComponents<Renderer>().ForEach(r => r.material.mainTexture = texture);
-                b.gameObject.SetActive(true);
+                Transform b = backpack.transform;
+                b.parent = jetpack;
+                b.position = jetpack.position;
+                b.rotation = jetpack.rotation;
+                b.localScale = Vector3.one;
+                backpack.GetComponents<Renderer>().ForEach(r => r.material.mainTexture = texture);
             }
         }
     }
