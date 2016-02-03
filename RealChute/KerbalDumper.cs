@@ -87,6 +87,8 @@ namespace RealChute
             jetpack.GetChild(5).gameObject.SetActive(false);
             //Thrusters right
             jetpack.GetChild(6).gameObject.SetActive(false);
+            //Collider
+            //jetpack.GetChild(7).gameObject.SetActive(false);
         }
 
         private void AddChutePack()
@@ -94,20 +96,18 @@ namespace RealChute
             print("Trying to add backpack.");
             Transform jetpack = FlightGlobals.ActiveVessel.parts[0].transform.GetChild(2).GetChild(1);
             GameObject test = GameDatabase.Instance.GetModel("RealChute/Parts/model_RC_backpack_EVA");
-            Texture texture = GameDatabase.Instance.GetTexture("RealChute/Parts/RC_backpack_EVA", false);
-            if (test != null && texture != null)
+            if (test != null)
             {
                 print("Loading backpack model...");
                 test.SetActive(true);
                 GameObject backpack = GameObject.Instantiate(test) as GameObject;
                 backpack.SetActive(true);
                 GameObject.Destroy(test);
-                Transform b = backpack.transform;
-                b.parent = jetpack;
+                Transform b = backpack.transform.GetChild(0);
+                b.parent = jetpack.GetChild(7);
                 b.position = jetpack.position;
                 b.rotation = jetpack.rotation;
                 b.localScale = Vector3.one;
-                backpack.GetComponents<Renderer>().ForEach(r => r.material.mainTexture = texture);
             }
         }
     }

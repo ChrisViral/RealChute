@@ -97,7 +97,7 @@ namespace RealChute
         internal ProceduralChute pChute = null;
         internal Parachute parachute = null;
         internal TemplateGUI templateGUI = new TemplateGUI();
-        internal MaterialDefinition material = new MaterialDefinition();
+        internal ParachuteMaterial material = new ParachuteMaterial();
         internal CanopyConfig canopy = new CanopyConfig();
         internal ModelConfig model = new ModelConfig();
         public Vector3 position = Vector3.zero;
@@ -143,13 +143,13 @@ namespace RealChute
                             case ParachuteType.Main:
                                 {
                                     alt = double.Parse(this.pChute.landingAlt);
-                                    acc = (this.body.GeeASL * RCUtils.geeToAcc);
+                                    acc = (this.body.GeeASL * RCUtils.g);
                                     break;
                                 }
                             case ParachuteType.Drogue:
                                 {
                                     alt = double.Parse(this.templateGUI.refDepAlt);
-                                    acc = (this.body.GeeASL * RCUtils.geeToAcc);
+                                    acc = (this.body.GeeASL * RCUtils.g);
                                     break;
                                 }
                             case ParachuteType.Drag:
@@ -347,7 +347,7 @@ namespace RealChute
         public void Initialize()
         {
             this.parachute = this.pChute.rcModule.parachutes[this.id];
-            this.pChute.materials.TryGetMaterial(this.parachute.material, ref this.material);
+            this.pChute.materials.TryGetMaterial(this.parachute.material, out this.material);
             this.templateGUI.materialsID = this.pChute.materials.GetMaterialIndex(this.parachute.material);
 
             if (HighLogic.LoadedSceneIsEditor)

@@ -11,7 +11,7 @@
 
 namespace RealChute.Libraries.Materials
 {
-    public class MaterialDefinition
+    public class ParachuteMaterial
     {
         #region Propreties
         private string _name = string.Empty;
@@ -73,13 +73,13 @@ namespace RealChute.Libraries.Materials
         /// <summary>
         /// Creates an empty material definition
         /// </summary>
-        public MaterialDefinition() { }
+        public ParachuteMaterial() { }
 
         /// <summary>
         /// Creates a material definition from a config node
         /// </summary>
         /// <param name="node">Node to initiate the material from</param>
-        public MaterialDefinition(ConfigNode node)
+        public ParachuteMaterial(ConfigNode node)
         {
             node.TryGetValue("name", ref this._name);
             node.TryGetValue("description", ref this._description);

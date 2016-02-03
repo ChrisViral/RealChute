@@ -34,8 +34,8 @@ namespace RealChute.Spares
                 get { return this._deployedArea; }
             }
 
-            private MaterialDefinition _material;
-            public MaterialDefinition material
+            private ParachuteMaterial _material;
+            public ParachuteMaterial material
             {
                 get { return this._material; }
             }
@@ -58,10 +58,10 @@ namespace RealChute.Spares
             {
                 float d = 50;
                 string m = "Nylon";
-                MaterialDefinition mat = MaterialsLibrary.defaultMaterial;
+                ParachuteMaterial mat = MaterialsLibrary.defaultMaterial;
                 node.TryGetValue("deployedDiameter", ref d);
                 node.TryGetValue("material", ref m);
-                MaterialsLibrary.instance.TryGetMaterial(m, ref mat);
+                MaterialsLibrary.instance.TryGetMaterial(m, out mat);
                 this._deployedDiameter = d;
                 this._material = mat;
                 this._deployedArea = RCUtils.GetArea(this._deployedDiameter);

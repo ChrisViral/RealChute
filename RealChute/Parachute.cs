@@ -158,7 +158,7 @@ namespace RealChute
         internal bool secondary = false;
         private Animation anim = null;
         internal Transform parachute = null, cap = null;
-        internal MaterialDefinition mat = new MaterialDefinition();
+        internal ParachuteMaterial mat = new ParachuteMaterial();
         internal Vector3 phase = Vector3.zero;
         internal bool randomized = false;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
@@ -343,11 +343,6 @@ namespace RealChute
         //Initializes the chute
         public void Initialize()
         {
-            if (!this.module.materials.TryGetMaterial(this.material, ref this.mat))
-            {
-                this.mat = this.module.materials.GetMaterial("Nylon");
-            }
-
             //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
             this.anim = this.part.FindModelAnimators(this.capName).FirstOrDefault();
 
@@ -512,7 +507,7 @@ namespace RealChute
             string state = "STOWED";
             node.TryGetValue("depState", ref state);
             this.deploymentState = EnumUtils.GetValue<DeploymentStates>(state);
-            MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat);
+            MaterialsLibrary.instance.TryGetMaterial(this.material, out this.mat);
             Transform p = this.part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
         }

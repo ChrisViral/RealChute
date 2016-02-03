@@ -63,11 +63,11 @@ namespace RealChute.EVA
             get { return this._deployedArea; }
         }
 
-        private MaterialDefinition _material = null;
+        private ParachuteMaterial _material = null;
         /// <summary>
         /// Material of the EVA chute
         /// </summary>
-        public MaterialDefinition material
+        public ParachuteMaterial material
         {
             get { return this._material; }
         }
@@ -141,7 +141,7 @@ namespace RealChute.EVA
                 string material = string.Empty;
                 if (module.TryGetValue("material", ref material))
                 {
-                    MaterialsLibrary.instance.TryGetMaterial(material, ref this._material);
+                    MaterialsLibrary.instance.TryGetMaterial(material, out this._material);
                     this._chuteMass = this._deployedArea * this._material.areaDensity;
                     this._chuteCost = this._deployedArea * this._material.areaCost;
                 }

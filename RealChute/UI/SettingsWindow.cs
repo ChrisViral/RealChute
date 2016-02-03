@@ -97,14 +97,14 @@ namespace RealChute.UI
 
         private void Window(int id)
         {
-            UnityEngine.GUI.DragWindow(drag);
+            GUI.DragWindow(drag);
             this.settings.autoArm = GUILayout.Toggle(this.settings.autoArm, "Automatically arm when staging", this.skins.toggle);
             this.settings.jokeActivated = GUILayout.Toggle(this.settings.jokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
             this.settings.guiResizeUpdates = GUILayout.Toggle(this.settings.guiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
             this.settings.mustBeEngineer = GUILayout.Toggle(this.settings.mustBeEngineer, "Only engineers can repack in career", this.skins.toggle);
-            if (!this.settings.mustBeEngineer) { UnityEngine.GUI.enabled = false; }
+            if (!this.settings.mustBeEngineer) { GUI.enabled = false; }
             GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
-            if (!this.settings.mustBeEngineer) { UnityEngine.GUI.enabled = true; }
+            if (!this.settings.mustBeEngineer) { GUI.enabled = true; }
 
             GUIUtils.CenteredButton("Close", CloseWindow, 100);
         }

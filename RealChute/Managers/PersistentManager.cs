@@ -39,7 +39,7 @@ namespace RealChute.Managers
             if (!CompatibilityChecker.IsAllCompatible() || _instance != null) { Destroy(this); return; }
             _instance = this;
             DontDestroyOnLoad(this);
-            print("[RealChute]: Running RealChute " + RCUtils.assemblyVersion);
+            RCUtils.Log("Running RealChute " + RCUtils.assemblyVersion);
         }
         #endregion
 
@@ -86,6 +86,7 @@ namespace RealChute.Managers
                 dict = new Dictionary<string, ConfigNode>();
                 dict.Add(name, node);
                 nodes.Add(type, dict);
+                dict.Add(name, node);
             }
             else if (!dict.ContainsKey(name))
             {

@@ -48,7 +48,7 @@ namespace RealChute.Spares
         public class CustomSpare
         {
             public string diameter = "25";
-            public MaterialDefinition material = MaterialsLibrary.defaultMaterial;
+            public ParachuteMaterial material = MaterialsLibrary.defaultMaterial;
 
             public CustomSpare() { }
         }

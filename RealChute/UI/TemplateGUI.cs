@@ -52,7 +52,7 @@ namespace RealChute.UI
             get { return this.template.secondary; }
         }
 
-        private MaterialDefinition material
+        private ParachuteMaterial material
         {
             get { return this.template.material; }
             set { this.template.material = value; }
@@ -450,7 +450,7 @@ namespace RealChute.UI
             this.materialsID = GUILayout.SelectionGrid(this.materialsID, this.pChute.materials.materialNames, 1, this.skins.button);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
-            MaterialDefinition material = this.pChute.materials.GetMaterial(this.materialsID);
+            ParachuteMaterial material = this.pChute.materials.GetMaterial(this.materialsID);
             StringBuilder builder = new StringBuilder();
             builder.Append("Description:  ").AppendLine(material.description);
             builder.Append("\nDrag coefficient:  ").AppendLine(material.dragCoefficient.ToString("0.00#"));

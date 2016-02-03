@@ -5,6 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
+using Random = System.Random;
 using Version = System.Version;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -22,9 +24,9 @@ namespace RealChute.Utils
     {
         #region Constants
         /// <summary>
-        /// Transforms from gees to m/s²
+        /// Gravitational acceleration of Kerbin in m/s²
         /// </summary>
-        public const double geeToAcc = 9.80665;
+        public const double g = 9.80665;
 
         /// <summary>
         /// URL of the RealChute settings config from the GameData folder
@@ -35,6 +37,11 @@ namespace RealChute.Utils
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
         public const string localPluginDataURL = @"GameData\RealChute\Plugins\PluginData";
+
+        /// <summary>
+        /// Debug log header
+        /// </summary>
+        public const string logHeader = "[RealChute]: ";
         #endregion
 
         #region Propreties
@@ -82,6 +89,15 @@ namespace RealChute.Utils
         {
             get { return _densityMethod; }
         }
+
+        private static Random _random;
+        /// <summary>
+        /// Time seeded random number generator instance
+        /// </summary>
+        public static Random random
+        {
+            get { return _random; }
+        }
         #endregion
 
         #region Constructor
@@ -95,6 +111,9 @@ namespace RealChute.Utils
             _settingsURL = Path.Combine(root, localSettingsURL);
             _pluginDataURL = Path.Combine(root, localPluginDataURL);
 
+            //Random generator
+            _random = new Random();
+
             //Version string
             Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
             if (version.Revision == 0)
@@ -103,6 +122,7 @@ namespace RealChute.Utils
             }
             else { _assemblyVersion = "v" + version.ToString(); }
 
+            //FAR detection
             try
             {
                 _densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
@@ -113,7 +133,7 @@ namespace RealChute.Utils
             }
             catch (Exception e)
             {
-                UnityEngine.Debug.LogWarning("FAR is not loaded or incorrectly set up, using stock density calculations.\n" + e.ToString() + "\n" + e.StackTrace);
+                LogWarning("FAR not detected or incorrectly setup.\nError: " + e.Message);
             }
             
         }
@@ -229,7 +249,7 @@ namespace RealChute.Utils
         /// </summary>
         /// <param name="transform">Transform to get the children of</param>
         /// <param name="builder">StringBuilder to append the text to</param>
-        public static void PrintChildren(Transform transform, StringBuilder builder)
+        public static void PrintChildren(Transform transform, StringBuilder builder = null)
         {
             if (builder == null) { builder = new StringBuilder(); }
             PrintChildrenRecursive(transform, builder, 0, "\n");
@@ -249,6 +269,54 @@ namespace RealChute.Utils
             {
                 PrintChildrenRecursive(transform.GetChild(i), builder, i, offset + "\t");
             }
+        }
+
+        /// <summary>
+        /// Returns a random double value between zero and the specified maximum
+        /// </summary>
+        /// <param name="max">Maximum value</param>
+        public static double NextDouble(int max)
+        {
+            return _random.NextDouble() * max;
+        }
+
+        /// <summary>
+        /// Returns a random value between the specified minimum and maximum
+        /// </summary>
+        /// <param name="min">Minimum value</param>
+        /// <param name="max">Maximum value</param>
+        public static double NextDouble(int min, int max)
+        {
+            return (_random.NextDouble() * (max - min)) + min;
+        }
+        #endregion
+
+        #region Logging
+        /// <summary>
+        /// Prints a message to the debug log
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        public static void Log(string message)
+        {
+            Debug.Log(logHeader + message);
+        }
+
+        /// <summary>
+        /// Prints a warning to the debug log
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        public static void LogWarning(string message)
+        {
+            Debug.LogWarning(logHeader + message);
+        }
+
+        /// <summary>
+        /// Prints an error to the debug log
+        /// </summary>
+        /// <param name="message">Message to print</param>
+        public static void LogError(string message)
+        {
+            Debug.LogError(logHeader + message);
         }
         #endregion
     }

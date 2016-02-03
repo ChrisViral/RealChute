@@ -33,11 +33,11 @@ namespace RealChute.Libraries.Materials
         #endregion
 
         #region Propreties
-        private Dictionary<string, MaterialDefinition> _materials = new Dictionary<string, MaterialDefinition>();
+        private Dictionary<string, ParachuteMaterial> _materials = new Dictionary<string, ParachuteMaterial>();
         /// <summary>
         /// Dictionary containing the name of the materials and their associated MaterialDefinition
         /// </summary>
-        public Dictionary<string, MaterialDefinition> materials
+        public Dictionary<string, ParachuteMaterial> materials
         {
             get { return this._materials; }
         }
@@ -60,11 +60,11 @@ namespace RealChute.Libraries.Materials
             get { return this._count; }
         }
 
-        private static MaterialDefinition _defaultMaterial = null;
+        private static ParachuteMaterial _defaultMaterial = null;
         /// <summary>
         /// The defaulkt material for unknown sources
         /// </summary>
-        public static MaterialDefinition defaultMaterial
+        public static ParachuteMaterial defaultMaterial
         {
             get { return _defaultMaterial; }
         }
@@ -74,14 +74,17 @@ namespace RealChute.Libraries.Materials
         /// <summary>
         /// Creates a new instance of the MaterialsLibrary
         /// </summary>
-        public MaterialsLibrary()
+        private MaterialsLibrary()
         {
-            this._materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n))
+            this._materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new ParachuteMaterial(n))
                 .ToDictionary(m => m.name, m => m);
             this._materialNames = this._materials.Keys.ToArray();
             this._count = this._materialNames.Length;
             
-            if(!TryGetMaterial("Nylon", ref _defaultMaterial)) { _defaultMaterial = materials[materialNames[0]]; }
+            if(!TryGetMaterial("Nylon", out _defaultMaterial))
+            {
+                _defaultMaterial = this._count != 0 ? materials[materialNames[0]] : new ParachuteMaterial();
+            }
         }
         #endregion
 
@@ -99,7 +102,7 @@ namespace RealChute.Libraries.Materials
         /// Returns the MAterialDefinition of the given name
         /// </summary>
         /// <param name="name">Name of the material</param>
-        public MaterialDefinition GetMaterial(string name)
+        public ParachuteMaterial GetMaterial(string name)
         {
             if (!ContainsMaterial(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" MaterialDefinition in the library"); }
             return this._materials[name];
@@ -109,7 +112,7 @@ namespace RealChute.Libraries.Materials
         /// Returns the MaterialDefinition at the given index
         /// </summary>
         /// <param name="index">Index of the material</param>
-        public MaterialDefinition GetMaterial(int index)
+        public ParachuteMaterial GetMaterial(int index)
         {
             if (!this.materialNames.IndexInRange(index)) { throw new IndexOutOfRangeException("Material index [" + index + "] is out of range"); }
             return GetMaterial(this._materialNames[index]);
@@ -120,7 +123,7 @@ namespace RealChute.Libraries.Materials
         /// </summary>
         /// <param name="name">Name of the material to find</param>
         /// <param name="material">Value to store the result into</param>
-        public bool TryGetMaterial(string name, ref MaterialDefinition material)
+        public bool TryGetMaterial(string name, out ParachuteMaterial material)
         {
             if (ContainsMaterial(name))
             {
@@ -128,6 +131,7 @@ namespace RealChute.Libraries.Materials
                 return true;
             }
             if (!string.IsNullOrEmpty(name) && this._materials.Count > 0) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
+            material = _defaultMaterial;
             return false;
         }
 

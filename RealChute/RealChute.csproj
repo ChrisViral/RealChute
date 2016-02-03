@@ -72,7 +72,7 @@
     <Compile Include="Libraries\Textures\CanopyConfig.cs" />
     <Compile Include="Libraries\Textures\CaseConfig.cs" />
     <Compile Include="Extensions\ConfigNodeExtensions.cs" />
-    <Compile Include="Libraries\Materials\MaterialDefinition.cs" />
+    <Compile Include="Libraries\Materials\ParachuteMaterial.cs" />
     <Compile Include="Extensions\PartExtensions.cs" />
     <Compile Include="Libraries\Materials\MaterialsLibrary.cs" />
     <Compile Include="Libraries\AtmoPlanets.cs" />
