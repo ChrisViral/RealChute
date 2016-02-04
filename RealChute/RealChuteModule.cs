@@ -744,6 +744,11 @@ namespace RealChute
             //Saves the parachutes to the persistence
             this.parachutes.ForEach(p => node.AddNode(p.Save()));
         }
+
+        public override bool IsStageable()
+        {
+            return true;
+        }
         #endregion
 
         #region GUI
