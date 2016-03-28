@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RealChute.Extensions;
 using UnityEngine;
 using RealChute.Libraries;
+using KSP.UI.Screens;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -390,7 +390,7 @@ namespace RealChute
         {
             this.presets.AddPreset(new Preset(this));
             RealChuteSettings.SaveSettings();
-            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, this.skins);
+            PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, "Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, HighLogic.UISkin);
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 
@@ -496,7 +496,7 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsEditor)
             {
                 //Windows initiation
-                this.editorGUI.window = new Rect(5, 370, 420, Screen.height - 375);
+                this.editorGUI.window = new Rect(5, 390, 420, Screen.height - 395);
                 this.chutes.ForEach(c =>
                 {
                     c.templateGUI.materialsWindow = new Rect(this.editorGUI.matX, this.editorGUI.matY, 375, 275);
@@ -511,18 +511,19 @@ namespace RealChute
                 if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
                 {
                     float level = 0;
+                    bool isVAB = true;
                     switch (EditorDriver.editorFacility)
                     {
                         case EditorFacility.VAB:
                             level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding); break;
 
                         case EditorFacility.SPH:
-                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); break;
+                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); isVAB = false; break;
 
                         default:
                             break;
                     }
-                    if (GameVariables.Instance.UnlockedActionGroupsStock(level))
+                    if (GameVariables.Instance.UnlockedActionGroupsStock(level, isVAB))
                     {
                         Events.ForEach(e => e.guiActiveEditor = false);
                     }

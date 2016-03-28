@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
+using KSP.UI.Screens;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -374,7 +375,7 @@ namespace RealChute
             DeactivateRC();
             this.armed = false;
             if (this.part.inverseStage != 0) { this.part.inverseStage = this.part.inverseStage - 1; }
-            else { this.part.inverseStage = Staging.CurrentStage; }
+            else { this.part.inverseStage = StageManager.CurrentStage; }
         }
 
         //Allows the chute to be repacked if available
@@ -400,6 +401,7 @@ namespace RealChute
             }
         }
 
+        //Sets the part's staging icon background colour according to the safety to deploy
         private void SetSafeToDeploy()
         {
             SafeState[] states = this.parachutes.Select(p => p.GetSafeState()).ToArray();
@@ -420,13 +422,13 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        part.stackIcon.SetBgColor(XKCDColors.White); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.White); break;
 
                     case SafeState.RISKY:
-                        part.stackIcon.SetBgColor(XKCDColors.BrightYellow); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.BrightYellow); break;
 
                     case SafeState.DANGEROUS:
-                        part.stackIcon.SetBgColor(XKCDColors.Red); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.Red); break;
                 }
             }
         }
@@ -519,7 +521,7 @@ namespace RealChute
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
             this.dragVector = -velocity.normalized;
-            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == Staging.CurrentStage - 1 || Staging.CurrentStage == 0)) { ActivateRC(); }
+            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
                 if (!this.launched && !this.vessel.LandedOrSplashed)

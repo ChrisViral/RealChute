@@ -1,8 +1,7 @@
 ﻿using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). This specific file only is
- * licensed under CC-BY-SA 4.0 INTL.
- */
+ * licensed under CC-BY-SA 4.0 INTL. */
 
 namespace RealChute.Extensions
 {
