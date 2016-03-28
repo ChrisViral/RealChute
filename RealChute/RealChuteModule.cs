@@ -562,7 +562,7 @@ namespace RealChute
         #endregion
 
         #region Overrides
-        public override void OnStart(PartModule.StartState state)
+        public override void OnStart(StartState state)
         {
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
             if (!CompatibilityChecker.IsAllCompatible())
