@@ -203,6 +203,7 @@ namespace RealChute
         internal bool secondary = false;
         private Animation anim = null;
         internal Transform parachute = null, cap = null;
+        private Rigidbody rigidbody = null;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
         internal bool played = false;
@@ -363,6 +364,7 @@ namespace RealChute
                     FollowDragDirection();
                 }
 
+                this.part.GetComponentCached(ref this.rigidbody);
                 switch (this.deploymentState)
                 {
                     case DeploymentStates.STOWED:
@@ -375,13 +377,13 @@ namespace RealChute
 
                     case DeploymentStates.PREDEPLOYED:
                         {
-                            this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedArea, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force);
+                            this.rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedArea, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force);
                             if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
                             break;
                         }
                     case DeploymentStates.LOWDEPLOYED:
                         {
-                            this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.deployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.forcePosition, ForceMode.Force);
+                            this.rigidbody.AddForceAtPosition(DragForce(0, this.deployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.forcePosition, ForceMode.Force);
                             if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();
@@ -393,7 +395,7 @@ namespace RealChute
 
                     case DeploymentStates.DEPLOYED:
                         {
-                            this.part.rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
+                            this.rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
                             if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();

@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
+using KSP.UI.Screens;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -38,7 +39,7 @@ namespace RealChute
         DANGEROUS
     }
 
-    public class RealChuteModule : PartModule, IPartCostModifier, IModuleInfo
+    public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier, IModuleInfo
     {
         #region Persistent fields
         // Values from the .cfg file
@@ -168,7 +169,7 @@ namespace RealChute
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
-        internal float sqrSpeed;
+        internal float sqrSpeed, massDelta;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
@@ -181,6 +182,8 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         private Rect window = new Rect(), drag = new Rect();
         private Vector2 scroll = new Vector2();
+        private string screenMessage = string.Empty;
+        private bool showMessage = false;
         #endregion
 
         #region Part GUI
@@ -295,6 +298,7 @@ namespace RealChute
         public void CheckForWait()
         {
             bool timerSpent = true, goesDown = true;
+            this.screenMessage = string.Empty;
             //Timer
             if (this.timer > 0 && this.deploymentTimer.elapsed.TotalSeconds < this.timer)
             {
@@ -303,8 +307,7 @@ namespace RealChute
                 if (this.vessel.isActiveVessel)
                 {
                     float time = this.timer - (float)this.deploymentTimer.elapsed.TotalSeconds;
-                    if (time < 60) { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0:0.0}s", time), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
-                    else { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time)), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
+                    this.screenMessage = time < 60 ? String.Format("Deployment in {0:0.0}s", time) : String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time));
                 }
             }
             else if (this.deploymentTimer.isRunning) { this.deploymentTimer.Stop(); }
@@ -312,10 +315,11 @@ namespace RealChute
             //Goes down
             if (this.mustGoDown && this.vessel.verticalSpeed > 0)
             {
+                if (!timerSpent) { this.screenMessage += "\n"; }
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    ScreenMessages.PostScreenMessage(String.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
+                    this.screenMessage += String.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed);
                 }
             }
 
@@ -374,7 +378,7 @@ namespace RealChute
             DeactivateRC();
             this.armed = false;
             if (this.part.inverseStage != 0) { this.part.inverseStage = this.part.inverseStage - 1; }
-            else { this.part.inverseStage = Staging.CurrentStage; }
+            else { this.part.inverseStage = StageManager.CurrentStage; }
         }
 
         //Allows the chute to be repacked if available
@@ -400,6 +404,7 @@ namespace RealChute
             }
         }
 
+        //Sets the part's staging icon background colour according to the safety to deploy
         private void SetSafeToDeploy()
         {
             SafeState[] states = this.parachutes.Select(p => p.GetSafeState()).ToArray();
@@ -420,21 +425,36 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        part.stackIcon.SetBgColor(XKCDColors.White); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.White); break;
 
                     case SafeState.RISKY:
-                        part.stackIcon.SetBgColor(XKCDColors.BrightYellow); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.BrightYellow); break;
 
                     case SafeState.DANGEROUS:
-                        part.stackIcon.SetBgColor(XKCDColors.Red); break;
+                        this.part.stackIcon.SetBackgroundColor(XKCDColors.Red); break;
                 }
             }
+        }
+
+        //Sets the mass delta to the correct amount
+        public void UpdateMass()
+        {
+            Part prefab = this.part.partInfo.partPrefab;
+            //Temp while IPartMassModifier doesn't work in the editor
+            if (HighLogic.LoadedSceneIsEditor) { this.part.mass = this.caseMass + this.parachutes.Sum(p => p.chuteMass); }
+            this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.chuteMass) - prefab.mass;
         }
 
         //Gives the cost for this parachute
         public float GetModuleCost(float defaultCost)
         {
             return RCUtils.Round(this.parachutes.Sum(p => p.deployedArea * p.mat.areaCost));
+        }
+
+        //Sets the parts mass dynamically
+        public float GetModuleMass(float defaultMass)
+        {
+            return this.massDelta;
         }
 
         //Not needed
@@ -498,6 +518,11 @@ namespace RealChute
                     this.failedTimer.Reset();
                 }
             }
+            
+            if (this.showMessage)
+            {
+                ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime, ScreenMessageStyle.UPPER_CENTER);
+            }
 
             this.disarm.active = (this.armed || this.showDisarm);
             bool canDeploy = (!this.staged && this.parachutes.Exists(p => p.deploymentState != DeploymentStates.CUT));
@@ -519,7 +544,7 @@ namespace RealChute
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
             this.dragVector = -velocity.normalized;
-            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == Staging.CurrentStage - 1 || Staging.CurrentStage == 0)) { ActivateRC(); }
+            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
                 if (!this.launched && !this.vessel.LandedOrSplashed)
@@ -556,7 +581,12 @@ namespace RealChute
                     if (this.wait)
                     {
                         CheckForWait();
-                        if (this.wait) { return; }
+                        if (this.wait)
+                        {
+                            this.showMessage = true;
+                            return;
+                        }
+                        else { this.showMessage = false; }
                     }
 
                     //Parachutes
@@ -678,20 +708,18 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
-            float chuteMass = this.parachutes.Sum(p => p.chuteMass);
-            this.part.mass = this.caseMass + chuteMass;
             if (HighLogic.LoadedScene == GameScenes.LOADING)
             {
                 PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
             }
+            else { UpdateMass(); }
         }
 
         public override string GetInfo()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
             //Info in the editor part window
-            float chuteMass = this.parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
-            this.part.mass = this.caseMass + chuteMass;
+            this.part.mass = this.caseMass + this.parachutes.Sum(p => p.chuteMass);
 
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Case mass: {0}\n", this.caseMass);

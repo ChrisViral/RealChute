@@ -81,6 +81,9 @@ namespace RealChute
                         _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
                     }
                     else { _assemblyVersion = "v" + version.ToString(); }
+#if PRERELEASE
+                    _assemblyVersion += "x1";
+#endif
                 }
                 return _assemblyVersion;
             }
@@ -121,9 +124,9 @@ namespace RealChute
                 return _densityMethod;
             }
         }
-        #endregion
+#endregion
 
-        #region Methods
+#region Methods
         /// <summary>
         /// Returns the array of values contained within a string
         /// </summary>
@@ -281,6 +284,6 @@ namespace RealChute
             }
             UnityEngine.Debug.Log(b.ToString());
         }
-        #endregion
+#endregion
     }
 }
