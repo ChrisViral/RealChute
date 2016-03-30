@@ -212,8 +212,7 @@ namespace RealChute
                     pChute.spares = this.spares;
                 }
             }
-            Part prefab = this.part.partInfo.partPrefab;
-            this.rcModule.massDelta = prefab == null ? 0 : this.rcModule.caseMass + this.rcModule.parachutes.Sum(p => p.chuteMass) - prefab.mass;
+            this.rcModule.UpdateMass();
             if (showMessage)
             {
                 this.editorGUI.successfulVisible = true;
@@ -237,6 +236,7 @@ namespace RealChute
             Transform root = this.part.transform.GetChild(0);
             root.localScale = Vector3.Scale(this.originalSize, size.size);
             module.caseMass = size.caseMass;
+            module.UpdateMass();
             AttachNode topNode = null, bottomNode = null;
             bool hasTopNode = part.TryGetAttachNodeById("top", out topNode);
             bool hasBottomNode = part.TryGetAttachNodeById("bottom", out bottomNode);
@@ -341,6 +341,7 @@ namespace RealChute
             }
             this.lastSize = this.size;
             this.part.SendMessage("RC_Rescale", new Vector3(scaleX, scaleY, scaleZ));
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         //Modifies the case texture of a part

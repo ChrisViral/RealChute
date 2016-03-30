@@ -433,6 +433,13 @@ namespace RealChute
             }
         }
 
+        //Sets the mass delta to the correct amount
+        public void UpdateMass()
+        {
+            Part prefab = this.part.partInfo.partPrefab;
+            this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.chuteMass) - prefab.mass;
+        }
+
         //Gives the cost for this parachute
         public float GetModuleCost(float defaultCost)
         {
@@ -686,12 +693,11 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
-            Part prefab = this.part.partInfo.partPrefab;
-            this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.chuteMass) - prefab.mass;
             if (HighLogic.LoadedScene == GameScenes.LOADING)
             {
                 PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
             }
+            else { UpdateMass(); }
         }
 
         public override string GetInfo()
