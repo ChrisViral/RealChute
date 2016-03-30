@@ -437,6 +437,8 @@ namespace RealChute
         public void UpdateMass()
         {
             Part prefab = this.part.partInfo.partPrefab;
+            //Temp while IPartMassModifier doesn't work in the editor
+            if (HighLogic.LoadedSceneIsEditor) { this.part.mass = this.caseMass + this.parachutes.Sum(p => p.chuteMass); }
             this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.chuteMass) - prefab.mass;
         }
 
