@@ -39,7 +39,7 @@ namespace RealChute
         DANGEROUS
     }
 
-    public class RealChuteModule : PartModule, IPartCostModifier, IModuleInfo
+    public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier, IModuleInfo
     {
         #region Persistent fields
         // Values from the .cfg file
@@ -169,7 +169,7 @@ namespace RealChute
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
-        internal float sqrSpeed;
+        internal float sqrSpeed, massDelta;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
@@ -439,6 +439,12 @@ namespace RealChute
             return RCUtils.Round(this.parachutes.Sum(p => p.deployedArea * p.mat.areaCost));
         }
 
+        //Sets the parts mass dynamically
+        public float GetModuleMass(float defaultMass)
+        {
+            return this.massDelta;
+        }
+
         //Not needed
         public Callback<Rect> GetDrawModulePanelCallback()
         {
@@ -680,8 +686,8 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
-            float chuteMass = this.parachutes.Sum(p => p.chuteMass);
-            this.part.mass = this.caseMass + chuteMass;
+            Part prefab = this.part.partInfo.partPrefab;
+            this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.chuteMass) - prefab.mass;
             if (HighLogic.LoadedScene == GameScenes.LOADING)
             {
                 PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
@@ -692,8 +698,7 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
             //Info in the editor part window
-            float chuteMass = this.parachutes.Sum(p => p.mat.areaDensity * p.deployedArea);
-            this.part.mass = this.caseMass + chuteMass;
+            this.part.mass = this.caseMass + this.parachutes.Sum(p => p.chuteMass);
 
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("Case mass: {0}\n", this.caseMass);

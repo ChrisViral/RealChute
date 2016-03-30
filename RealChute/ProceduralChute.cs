@@ -212,7 +212,8 @@ namespace RealChute
                     pChute.spares = this.spares;
                 }
             }
-            this.part.mass = this.rcModule.caseMass + this.rcModule.parachutes.Sum(p => p.chuteMass);
+            Part prefab = this.part.partInfo.partPrefab;
+            this.rcModule.massDelta = prefab == null ? 0 : this.rcModule.caseMass + this.rcModule.parachutes.Sum(p => p.chuteMass) - prefab.mass;
             if (showMessage)
             {
                 this.editorGUI.successfulVisible = true;
