@@ -341,7 +341,7 @@ namespace RealChute
             }
             this.lastSize = this.size;
             this.part.SendMessage("RC_Rescale", new Vector3(scaleX, scaleY, scaleZ));
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
+            if (HighLogic.LoadedSceneIsEditor) { GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); }
         }
 
         //Modifies the case texture of a part
