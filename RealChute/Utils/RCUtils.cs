@@ -289,6 +289,17 @@ namespace RealChute.Utils
         {
             return (_random.NextDouble() * (max - min)) + min;
         }
+
+        /// <summary>
+        /// Posts a PopupDialog with the given title, message, and button text
+        /// </summary>
+        /// <param name="title">Title of the popup</param>
+        /// <param name="message">Message of the popup</param>
+        /// <param name="button">Button text of the popup</param>
+        public static void PostPopup(string title, string message, string button)
+        {
+            PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, title, message, button, false, HighLogic.UISkin);
+        }
         #endregion
 
         #region Logging

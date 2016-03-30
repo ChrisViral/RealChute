@@ -40,7 +40,7 @@ namespace RealChute.EVA
         private Transform parachute = null;
         private Transform pilot = null;
 
-        public override void OnStart(PartModule.StartState state)
+        public override void OnStart(StartState state)
         {
             if (!HighLogic.LoadedSceneIsFlight) { return; }
             this.parachute = this.part.FindModelTransform(this.transformName);

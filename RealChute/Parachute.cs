@@ -158,6 +158,7 @@ namespace RealChute
         internal bool secondary = false;
         private Animation anim = null;
         internal Transform parachute = null, cap = null;
+        private Rigidbody rigidbody = null;
         internal ParachuteMaterial mat = new ParachuteMaterial();
         internal Vector3 phase = Vector3.zero;
         internal bool randomized = false;
@@ -302,6 +303,7 @@ namespace RealChute
             {
                 if (this.isDeployed) { FollowDragDirection(); }
 
+                this.part.GetComponentCached(ref this.rigidbody);
                 switch (this.deploymentState)
                 {
                     case DeploymentStates.STOWED:
@@ -315,10 +317,10 @@ namespace RealChute
                         {
                             if (!this.dragTimer.isRunning)
                             {
-                                this.part.Rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea), this.forcePosition, ForceMode.Force);
+                                this.rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea), this.forcePosition, ForceMode.Force);
                                 if (this.module.trueAlt <= this.deploymentAlt && this.dragTimer.elapsed.TotalSeconds >= this.preDeploymentSpeed) { Deploy(); }
                             }
-                            else { this.part.Rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedDiameter, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force); }
+                            else { this.rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedDiameter, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force); }
                             break;
                         }
 
@@ -326,9 +328,9 @@ namespace RealChute
                         {
                             if (!this.dragTimer.isRunning)
                             {
-                                this.part.Rigidbody.AddForceAtPosition(DragForce(this.deployedArea), this.forcePosition, ForceMode.Force);
+                                this.rigidbody.AddForceAtPosition(DragForce(this.deployedArea), this.forcePosition, ForceMode.Force);
                             }
-                            else { this.part.rigidbody.AddForceAtPosition(DragForce(this.preDeployedDiameter, this.deployedDiameter, this.deploymentSpeed), this.forcePosition, ForceMode.Force); }
+                            else { this.rigidbody.AddForceAtPosition(DragForce(this.preDeployedDiameter, this.deployedDiameter, this.deploymentSpeed), this.forcePosition, ForceMode.Force); }
                             break;
                         }
 

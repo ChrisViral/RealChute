@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and

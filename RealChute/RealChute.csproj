@@ -34,12 +34,24 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
-      <HintPath>..\Game\KSP_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <HintPath>..\Game\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\Game\KSP_x64_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="KSPUtil">
+      <HintPath>..\Game\KSP_x64_Data\Managed\KSPUtil.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
-      <HintPath>..\Game\KSP_Data\Managed\UnityEngine.dll</HintPath>
+      <HintPath>..\Game\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>..\Game\KSP_x64_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
     </Reference>
   </ItemGroup>
@@ -61,7 +73,7 @@
     <Compile Include="EVA\EVAChuteLibrary.cs" />
     <Compile Include="UI\LinkedToggles.cs" />
     <Compile Include="Spares\SparesStorageModule.cs" />
-    <Compile Include="PhysicsWatch.cs" />
+    <Compile Include="Utils\PhysicsWatch.cs" />
     <Compile Include="EVA\RealChuteEVA.cs" />
     <Compile Include="Managers\PersistentManager.cs" />
     <Compile Include="UI\SettingsWindow.cs" />

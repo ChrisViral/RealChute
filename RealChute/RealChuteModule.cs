@@ -32,7 +32,7 @@ namespace RealChute
         CUT
     }
 
-    public class RealChuteModule : PartModule, IPartCostModifier, IModuleInfo
+    public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier, IModuleInfo
     {
         #region Persistent fields
         // Values from the .cfg file
@@ -168,7 +168,7 @@ namespace RealChute
         private bool displayed = false, showDisarm = false;
         internal double ASL, trueAlt;
         internal double atmPressure, atmDensity;
-        internal float sqrSpeed;
+        internal float sqrSpeed, massDelta;
         internal MaterialsLibrary materials = MaterialsLibrary.instance;
         private RealChuteSettings settings = null;
         public List<Parachute> parachutes = new List<Parachute>();
@@ -181,6 +181,8 @@ namespace RealChute
         private GUISkin skins = HighLogic.Skin;
         private Rect window = new Rect(), drag = new Rect();
         private Vector2 scroll = new Vector2();
+        private string screenMessage = string.Empty;
+        private bool showMessage = false;
         #endregion
 
         #region Part GUI
@@ -292,10 +294,11 @@ namespace RealChute
         #endregion
 
         #region Methods
-        //Checks if there is a timer and/or a mustGoDown clause active
+        //Checks for deployment retardment
         public void CheckForWait()
         {
             bool timerSpent = true, goesDown = true;
+            this.screenMessage = string.Empty;
             //Timer
             if (this.timer > 0 && this.deploymentTimer.elapsed.TotalSeconds < this.timer)
             {
@@ -304,8 +307,7 @@ namespace RealChute
                 if (this.vessel.isActiveVessel)
                 {
                     float time = this.timer - (float)this.deploymentTimer.elapsed.TotalSeconds;
-                    if (time < 60) { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0:0.0}s", time), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
-                    else { ScreenMessages.PostScreenMessage(String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time)), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER); }
+                    this.screenMessage = time < 60 ? String.Format("Deployment in {0:0.0}s", time) : String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time));
                 }
             }
             else if (this.deploymentTimer.isRunning) { this.deploymentTimer.Stop(); }
@@ -313,10 +315,11 @@ namespace RealChute
             //Goes down
             if (this.mustGoDown && this.vessel.verticalSpeed > 0)
             {
+                if (!timerSpent) { this.screenMessage += "\n"; }
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    ScreenMessages.PostScreenMessage(String.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed), Time.fixedDeltaTime, ScreenMessageStyle.UPPER_CENTER);
+                    this.screenMessage += String.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed);
                 }
             }
 
@@ -401,6 +404,19 @@ namespace RealChute
             }
         }
 
+        //Updates the parachute's mass
+        public void UpdateMass()
+        {
+            Part prefab = this.part.partInfo.partPrefab;
+            this.massDelta = prefab == null ? 0 : this.caseMass + this.chuteMass - prefab.mass;
+        }
+
+        //Sets the module's mass
+        public float GetModuleMass(float defaultMass)
+        {
+            return this.massDelta;
+        }
+
         //Gives the cost for this parachute
         public float GetModuleCost(float defaultCost)
         {
@@ -475,6 +491,11 @@ namespace RealChute
                 }
             }
 
+            if (this.showMessage)
+            {
+                ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime, ScreenMessageStyle.UPPER_CENTER);
+            }
+
             this.disarm.active = (this.armed || this.showDisarm);
             bool canDeploy = (!this.staged && this.parachutes.Exists(p => p.deploymentState != DeploymentStates.CUT));
             this.deploy.active = canDeploy;
@@ -529,7 +550,12 @@ namespace RealChute
                     if (this.wait)
                     {
                         CheckForWait();
-                        if (this.wait) { return; }
+                        if (this.wait)
+                        {
+                            this.showMessage = true;
+                            return;
+                        }
+                        else { this.showMessage = false; }
                     }
 
                     //Parachutes
@@ -634,18 +660,19 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
-            this.part.mass = this.caseMass + this.chuteMass;
             if (HighLogic.LoadedScene == GameScenes.LOADING)
             {
                 PersistentManager.instance.AddNode<RealChuteModule>(this.part.name, node);
             }
+            else { UpdateMass(); }
         }
 
         public override string GetInfo()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
-            //Info in the editor part window
 
+            //Info in the editor part window
+            this.part.mass = this.caseMass + this.chuteMass;
             StringBuilder builder = new StringBuilder();
             builder.AppendFormat("<b>Case mass</b>: {0}\n", this.caseMass);
             if (this.timer > 0) { builder.AppendFormat("<b>Deployment timer</b>: {0}s\n", this.timer); }
@@ -693,6 +720,11 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Saves the parachutes to the persistence
             this.parachutes.ForEach(p => node.AddNode(p.Save()));
+        }
+
+        public override bool IsStageable()
+        {
+            return true;
         }
         #endregion
 

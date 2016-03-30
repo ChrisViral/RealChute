@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RealChute.Libraries;
@@ -10,6 +9,7 @@ using RealChute.Extensions;
 using RealChute.UI;
 using RealChute.Managers;
 using RealChute.Utils;
+using KSP.UI.Screens;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -217,14 +217,14 @@ namespace RealChute
                     pChute.spares = this.spares;
                 }
             }
-            this.part.mass = this.rcModule.caseMass + this.rcModule.parachutes.Sum(p => p.chuteMass);
+            this.rcModule.UpdateMass();
             if (showMessage)
             {
                 this.editorGUI.successfulVisible = true;
                 if (!this.editorGUI.warning) { this.editorGUI.successfulWindow.height = 50; }
             }
-            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
             this.rcModule.UpdateSpare(spareName);
+            GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship);
         }
 
         //Checks if th given AttachNode has the parent part
@@ -242,6 +242,7 @@ namespace RealChute
             Transform root = this.part.transform.GetChild(0);
             root.localScale = Vector3.Scale(this.originalSize, size.size);
             module.caseMass = size.caseMass;
+            module.UpdateMass();
             AttachNode topNode = null, bottomNode = null;
             bool hasTopNode = part.TryGetAttachNodeById("top", out topNode);
             bool hasBottomNode = part.TryGetAttachNodeById("bottom", out bottomNode);
@@ -346,6 +347,7 @@ namespace RealChute
             }
             this.lastSize = this.size;
             this.part.SendMessage("RC_Rescale", new Vector3(scaleX, scaleY, scaleZ));
+            if (HighLogic.LoadedSceneIsEditor) { GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); }
         }
 
         //Modifies the case texture of a part
@@ -396,7 +398,7 @@ namespace RealChute
         {
             this.presets.AddPreset(new Preset(this));
             RealChuteSettings.SaveSettings();
-            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, this.skins);
+            RCUtils.PostPopup("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close");
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 
@@ -515,18 +517,19 @@ namespace RealChute
                 if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
                 {
                     float level = 0;
+                    bool isVAB = true;
                     switch (EditorDriver.editorFacility)
                     {
                         case EditorFacility.VAB:
                             level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding); break;
 
                         case EditorFacility.SPH:
-                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); break;
+                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); isVAB = false; break;
 
                         default:
                             break;
                     }
-                    if (GameVariables.Instance.UnlockedActionGroupsStock(level))
+                    if (GameVariables.Instance.UnlockedActionGroupsStock(level, isVAB))
                     {
                         Events.ForEach(e => e.guiActiveEditor = false);
                     }

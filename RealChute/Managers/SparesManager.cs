@@ -4,6 +4,7 @@ using RealChute.Spares;
 using RealChute.EVA;
 using RealChute.UI;
 using RealChute.Utils;
+using KSP.UI.Screens;
 
 namespace RealChute.Managers
 {
@@ -58,7 +59,7 @@ namespace RealChute.Managers
             }
         }
 
-        private void LoadShip(ShipConstruct ship, CraftBrowser.LoadType type)
+        private void LoadShip(ShipConstruct ship, CraftBrowserDialog.LoadType type)
         {
             print("load");
             Part part = ship.parts[0];

@@ -1,7 +1,6 @@
 ﻿﻿using System;
 using System.Text;
 using System.Collections.Generic;
-using System.Linq;
 using RealChute.Extensions;
 using RealChute.Libraries.Presets;
 using RealChute.Utils;
@@ -366,7 +365,7 @@ namespace RealChute.UI
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save...", this.skins.button))
             {
-                if (this.presetName == string.Empty) { PopupDialog.SpawnPopupDialog("Error!", "Preset name cannot be empty!", "Close", false, this.skins); }
+                if (this.presetName == string.Empty) { RCUtils.PostPopup("Error!", "Preset name cannot be empty!", "Close"); }
                 else if (this.presets.ContainsPreset(this.presetName))
                 {
                     this.presetWarningVisible = true;

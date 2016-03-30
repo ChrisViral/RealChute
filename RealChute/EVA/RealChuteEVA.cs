@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Utils;
@@ -33,6 +32,7 @@ namespace RealChute.EVA
             public float deploymentSpeed = 4, baseSize = 10;
             public float deployedDiameter = 10, deploymentAlt = 1000;
             public Transform parachute = null, cap = null;
+            private Rigidbody rigidbody = null;
             public PhysicsWatch dragTimer = new PhysicsWatch(), randomTimer = new PhysicsWatch();
             public Quaternion lastRot = Quaternion.identity;
             internal float randomX, randomY, randomTime, buffer = 0;
@@ -269,6 +269,7 @@ namespace RealChute.EVA
                 {
                     if (this.canDeploy)
                     {
+                        this.part.GetComponentCached(ref this.rigidbody);
                         switch (this.state)
                         {
                             case DeploymentStates.STOWED:
@@ -280,7 +281,7 @@ namespace RealChute.EVA
                             case DeploymentStates.DEPLOYED:
                                 {
                                     if (!CalculateDestruction()) { return; }
-                                    this.part.Rigidbody.AddForceAtPosition(this.module.DragForce(0, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
+                                    this.rigidbody.AddForceAtPosition(this.module.DragForce(0, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
                                     FollowDragDirection();
                                     break;
                                 }
@@ -437,11 +438,11 @@ namespace RealChute.EVA
         [KSPEvent(guiActive = true, active = true, guiActiveUnfocused = false, guiName = "Dispose pack")]
         public void GUIDisposeChute()
         {
-            PopupDialog.SpawnPopupDialog(new MultiOptionDialog("Are you sure you want to discard this EVA parachute backpack?",
-                "Dispose backpack?", GUIUtils.skins,
-                new DialogOption("Yes", DisposeBackpack, true),
-                new DialogOption("No", () => { }, true)),
-                false, GUIUtils.skins);
+            PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, new MultiOptionDialog("Are you sure you want to discard this EVA parachute backpack?",
+                "Dispose backpack?", HighLogic.UISkin,
+                new DialogGUIButton("Yes", DisposeBackpack, true),
+                new DialogGUIButton("No", () => { }, true)),
+                false, HighLogic.UISkin);
         }
         #endregion
 
