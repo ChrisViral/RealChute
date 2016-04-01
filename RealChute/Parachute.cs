@@ -366,7 +366,7 @@ namespace RealChute
                     FollowDragDirection();
                 }
 
-                this.part.GetComponentCached(ref this.rigidbody);
+                if (this.rigidbody == null) { this.rigidbody = this.part.rigidbody; }
                 switch (this.deploymentState)
                 {
                     case DeploymentStates.STOWED:

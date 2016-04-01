@@ -370,7 +370,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save...", this.skins.button))
             {
-                if (this.presetName == string.Empty) { PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, "Error!", "Preset name cannot be empty!", "Close", false, HighLogic.UISkin); }
+                if (this.presetName == string.Empty) { PopupDialog.SpawnPopupDialog("Error!", "Preset name cannot be empty!", "Close", false, HighLogic.Skin); }
                 else if (this.presets.ContainsPreset(this.presetName))
                 {
                     this.presetWarningVisible = true;

@@ -4,7 +4,6 @@ using System.Text;
 using RealChute.Extensions;
 using UnityEngine;
 using RealChute.Libraries;
-using KSP.UI.Screens;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -392,7 +391,7 @@ namespace RealChute
         {
             this.presets.AddPreset(new Preset(this));
             RealChuteSettings.SaveSettings();
-            PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, "Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, HighLogic.UISkin);
+            PopupDialog.SpawnPopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, HighLogic.Skin);
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 

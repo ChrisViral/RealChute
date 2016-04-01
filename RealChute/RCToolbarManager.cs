@@ -3,8 +3,6 @@ using System.Linq;
 using System.IO;
 using UnityEngine;
 using RealChute.Extensions;
-using KSP.UI;
-using KSP.UI.Screens;
 using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -50,9 +48,9 @@ namespace RealChute
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
-            UIRadioButton button = filterByFunction.button.activeButton;
-            button.SetState(UIRadioButton.State.False, UIRadioButton.CallType.APPLICATIONSILENT, null, false);
-            button.SetState(UIRadioButton.State.True, UIRadioButton.CallType.APPLICATIONSILENT, null, false);
+            RUIToggleButtonTyped button = filterByFunction.button.activeButton;
+            button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCEDSILENT);
+            button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCEDSILENT);
         }
 
         private void AddButton()
