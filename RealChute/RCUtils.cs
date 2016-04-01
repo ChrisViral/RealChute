@@ -82,7 +82,7 @@ namespace RealChute
                     }
                     else { _assemblyVersion = "v" + version.ToString(); }
 #if PRERELEASE
-                    _assemblyVersion += "x1";
+                    _assemblyVersion += "x2";
 #endif
                 }
                 return _assemblyVersion;
