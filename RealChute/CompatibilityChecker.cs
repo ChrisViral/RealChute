@@ -176,9 +176,9 @@ namespace RealChute
                 }
             }
 
-            if (incompatible.Length > 0 || incompatibleUnity.Length > 0) //|| IsWin64())
+            if (incompatible.Length > 0 || incompatibleUnity.Length > 0) //|| SixtyFourBitsMayHaveAChanceAtLife())
             {
-                PopupDialog.SpawnPopupDialog(new Vector2(0, 0), new Vector2(0, 0), "Incompatible Mods Detected", message, "OK", true, HighLogic.UISkin);
+                PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "Incompatible Mods Detected", message, "OK", true, HighLogic.UISkin);
             }
         }
 

@@ -392,7 +392,7 @@ namespace RealChute
         {
             this.presets.AddPreset(new Preset(this));
             RealChuteSettings.SaveSettings();
-            PopupDialog.SpawnPopupDialog(Vector2.zero, Vector2.zero, "Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close", false, HighLogic.UISkin);
+            RCUtils.PostPopup("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close");
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 

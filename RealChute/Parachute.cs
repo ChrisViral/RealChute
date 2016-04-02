@@ -266,8 +266,7 @@ namespace RealChute
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.capOff = true;
-            this.part.Effect("rcpredeploy", 1);
-            //this.part.Effect("rcdeploy");
+            this.part.Effect("rcdeploy");
             this.deploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
             this.cap.gameObject.SetActive(false);
@@ -281,7 +280,7 @@ namespace RealChute
         {
             this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.capOff = true;
-            this.part.Effect("rcpredeploy", 1);
+            this.part.Effect("rcpredeploy");
             this.deploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
             this.cap.gameObject.SetActive(false);
@@ -294,7 +293,7 @@ namespace RealChute
         public void Deploy()
         {
             this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            //this.part.Effect("rcdeploy");
+            this.part.Effect("rcdeploy");
             this.deploymentState = DeploymentStates.DEPLOYED;
             if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation))
             {
@@ -308,8 +307,7 @@ namespace RealChute
         //Parachute cutting
         public void Cut()
         {
-            this.part.Effect("rcpredeploy", 0);
-            //this.part.Effect("rccut");
+            this.part.Effect("rccut");
             this.deploymentState = DeploymentStates.CUT;
             this.parachute.gameObject.SetActive(false);
             this.played = false;
