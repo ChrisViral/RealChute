@@ -49,8 +49,8 @@ namespace RealChute
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
             RUIToggleButtonTyped button = filterByFunction.button.activeButton;
-            button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCEDSILENT);
-            button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCEDSILENT);
+            button.SetFalse(button, RUIToggleButtonTyped.ClickType.FORCED);
+            button.SetTrue(button, RUIToggleButtonTyped.ClickType.FORCED);
         }
 
         private void AddButton()
