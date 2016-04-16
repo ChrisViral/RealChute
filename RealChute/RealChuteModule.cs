@@ -97,8 +97,8 @@ namespace RealChute
         {
             get
             {
-                return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !RealChuteSettings.Fetch.MustBeEngineer || FlightGlobals.ActiveVessel.IsEngineer()
-                       && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= RealChuteSettings.Fetch.EngineerLevel;
+                return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !RealChuteSettings.Instance.MustBeEngineer || FlightGlobals.ActiveVessel.IsEngineer()
+                       && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= RealChuteSettings.Instance.EngineerLevel;
             }
         }
 
@@ -168,28 +168,28 @@ namespace RealChute
         #region Part GUI
         //Deploys the parachutes if possible
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Deploy Chute", unfocusedRange = 5)]
-        public void GuiDeploy()
+        public void GUIDeploy()
         {
             ActivateRC();
         }
 
         //Cuts main chute chute
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Cut main chute", unfocusedRange = 5)]
-        public void GuiCut()
+        public void GUICut()
         {
             this.parachutes.Where(p => p.IsDeployed).ForEach(p => p.Cut());
         }
 
         //Arms parachutes
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Arm parachute", unfocusedRange = 5)]
-        public void GuiArm()
+        public void GUIArm()
         {
             this.armed = true;
             ActivateRC();
         }
 
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Disarm parachute", unfocusedRange = 5)]
-        public void GuiDisarm()
+        public void GUIDisarm()
         {
             this.armed = false;
             this.showDisarm = false;
@@ -201,13 +201,13 @@ namespace RealChute
 
         //Repacks chute from EVA if in space or on the ground
         [KSPEvent(guiActive = false, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Repack chute", unfocusedRange = 5)]
-        public void GuiRepack()
+        public void GUIRepack()
         {
             if (this.CanRepack)
             {
                 if (!this.CanRepackCareer)
                 {
-                    int level = RealChuteSettings.Fetch.EngineerLevel;
+                    int level = RealChuteSettings.Instance.EngineerLevel;
                     string message = level > 0 ? "Only a level " + level + " and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
                     ScreenMessages.PostScreenMessage(message, 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
@@ -224,7 +224,7 @@ namespace RealChute
 
         //Shows the info window
         [KSPEvent(guiActive = true, active = true, guiActiveEditor = true, guiName = "Toggle info")]
-        public void GuiToggleWindow()
+        public void GUIToggleWindow()
         {
             if (!this.visible)
             {
@@ -255,20 +255,20 @@ namespace RealChute
         [KSPAction("Cut main chute")]
         public void ActionCut(KSPActionParam param)
         {
-            if (this.parachutes.Exists(p => p.IsDeployed)) { GuiCut(); }
+            if (this.parachutes.Exists(p => p.IsDeployed)) { GUICut(); }
         }
 
         //Arms parachutes
         [KSPAction("Arm parachute")]
         public void ActionArm(KSPActionParam param)
         {
-            GuiArm();
+            GUIArm();
         }
 
         [KSPAction("Disarm parachute")]
         public void ActionDisarm(KSPActionParam param)
         {
-            if (this.armed) { GuiDisarm(); }
+            if (this.armed) { GUIDisarm(); }
         }
         #endregion
 
@@ -321,7 +321,7 @@ namespace RealChute
         public void ActivateRC()
         {
             this.staged = true;
-            if (RealChuteSettings.Fetch.AutoArm) { this.armed = true; }
+            if (RealChuteSettings.Instance.AutoArm) { this.armed = true; }
             print("[RealChute]: " + this.part.partInfo.name + " was activated in stage " + this.part.inverseStage);
         }
 
@@ -419,7 +419,7 @@ namespace RealChute
         public void UpdateMass()
         {
             Part prefab = this.part.partInfo.partPrefab;
-            this.massDelta = prefab == null ? 0 : this.caseMass + this.parachutes.Sum(p => p.ChuteMass) - prefab.mass;
+            this.massDelta = prefab == null ? 0 : (this.caseMass + this.parachutes.Sum(p => p.ChuteMass)) - prefab.mass;
         }
 
         //Gives the cost for this parachute
@@ -514,7 +514,7 @@ namespace RealChute
             this.Disarm.active = this.armed || this.showDisarm;
             bool canDeploy = !this.staged && this.parachutes.Exists(p => p.DeploymentState != DeploymentStates.CUT);
             this.Deploy.active = canDeploy;
-            this.Arm.active = !RealChuteSettings.Fetch.AutoArm && canDeploy;
+            this.Arm.active = !RealChuteSettings.Instance.AutoArm && canDeploy;
             this.Repack.guiActiveUnfocused = this.CanRepack;
             this.Cut.active = this.AnyDeployed;
         }
@@ -573,7 +573,7 @@ namespace RealChute
                             this.showMessage = true;
                             return;
                         }
-                        else { this.showMessage = false; }
+                        this.showMessage = false;
                     }
 
                     //Parachutes
@@ -582,12 +582,12 @@ namespace RealChute
                     //If all parachutes must be cut
                     if (this.AllMustStop)
                     {
-                        GuiCut();
+                        GUICut();
                         SetRepack();
                     }
 
                     //If the parachute can't be deployed
-                    if (!this.oneWasDeployed && !RealChuteSettings.Fetch.AutoArm)
+                    if (!this.oneWasDeployed && !RealChuteSettings.Instance.AutoArm)
                     {
                         this.failedTimer.Start();
                         StagingReset();
@@ -634,7 +634,7 @@ namespace RealChute
                 this.Actions["ActionCut"].guiName = "Cut chute";
                 this.Cut.guiName = "Cut chute";
             }
-            this.Actions["ActionArm"].active = !RealChuteSettings.Fetch.AutoArm;
+            this.Actions["ActionArm"].active = !RealChuteSettings.Instance.AutoArm;
 
             //Initiates the Parachutes
             if (this.parachutes.Count <= 0)
@@ -803,7 +803,7 @@ namespace RealChute
                 GUILayout.Label("___________________________________________", GuiUtils.BoldLabel);
                 GUILayout.Space(3);
                 GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GuiUtils.BoldLabel, GUILayout.Width(120));
-                this.parachutes[i].UpdateGui();
+                this.parachutes[i].RenderGUI();
             }
 
             //End scroll

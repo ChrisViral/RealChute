@@ -45,8 +45,7 @@ namespace RealChute
             /*-----------------------------------------------*\
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
-
-            //TODO: Implement your own compatibility check.
+            
             //
             //If you want to disable some behavior when incompatible, other parts of the plugin
             //should query this method:
@@ -70,8 +69,7 @@ namespace RealChute
             /*-----------------------------------------------*\
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
-
-            //TODO: Implement your own Unity compatibility check.
+            
             return Application.unityVersion.Equals("5.2.4f1");
 
             /*-----------------------------------------------*\
@@ -96,7 +94,7 @@ namespace RealChute
             //Let the latest version of the checker execute.
             if (version != fields.Max(f => (int)f.GetValue(null))) { return; }
 
-            Debug.Log(String.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", version, Assembly.GetExecutingAssembly().GetName().Name));
+            Debug.Log(string.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", version, Assembly.GetExecutingAssembly().GetName().Name));
 
             //Other checkers will see this version and not run.
             //This accomplishes the same as an explicit "ran" flag with fewer moving parts.
@@ -117,7 +115,7 @@ namespace RealChute
                     catch (Exception e)
                     {
                         //If a mod throws an exception from IsCompatible, it's not compatible.
-                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
+                        Debug.LogWarning(string.Format("[CompatibilityChecker] Exception while invoking IsCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
                         return true;
                     }
                 })
@@ -140,7 +138,7 @@ namespace RealChute
                     catch (Exception e)
                     {
                         //If a mod throws an exception from IsUnityCompatible, it's not compatible.
-                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
+                        Debug.LogWarning(string.Format("[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
                         return true;
                     }
                 })
@@ -159,20 +157,20 @@ namespace RealChute
 
             if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
-                message += (message == String.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
+                message += (message == string.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
 
                 if (incompatible.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + String.Join(", ", incompatible));
-                    message += String.Format("\n\nThese mods are incompatible with KSP {0}.{1}.{2}:\n\n", Versioning.version_major, Versioning.version_minor, Versioning.Revision);
-                    message += String.Join("\n", incompatible);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + string.Join(", ", incompatible));
+                    message += string.Format("\n\nThese mods are incompatible with KSP {0}.{1}.{2}:\n\n", Versioning.version_major, Versioning.version_minor, Versioning.Revision);
+                    message += string.Join("\n", incompatible);
                 }
 
                 if (incompatibleUnity.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + String.Join(", ", incompatibleUnity));
-                    message += String.Format("\n\nThese mods are incompatible with Unity {0}:\n\n", Application.unityVersion);
-                    message += String.Join("\n", incompatibleUnity);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + string.Join(", ", incompatibleUnity));
+                    message += string.Format("\n\nThese mods are incompatible with Unity {0}:\n\n", Application.unityVersion);
+                    message += string.Join("\n", incompatibleUnity);
                 }
             }
 

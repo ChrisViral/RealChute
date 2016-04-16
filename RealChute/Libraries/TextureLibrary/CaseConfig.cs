@@ -1,4 +1,6 @@
-﻿/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
+﻿using System;
+
+/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
  * piece of work, you must get my explicit permission on the matter through a private channel, and must also distribute
@@ -7,12 +9,12 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.TextureLibrary
 {
     public class CaseConfig
     {
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// Name of the texture
         /// </summary>
@@ -21,7 +23,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private string[] types = new string[0];
+        private readonly string[] types = new string[0];
         /// <summary>
         /// Types of parachute this texture applies to
         /// </summary>
@@ -30,7 +32,7 @@ namespace RealChute.Libraries
             get { return this.types; }
         }
 
-        private string textureURL = string.Empty;
+        private readonly string textureURL = string.Empty;
         /// <summary>
         /// URL of the texture
         /// </summary>
@@ -53,7 +55,11 @@ namespace RealChute.Libraries
         public CaseConfig(ConfigNode node)
         {
             node.TryGetValue("name", ref this.name);
-            node.TryGetValue("types", ref this.types);
+            string array = string.Empty;
+            if (node.TryGetValue("types", ref array))
+            {
+                this.types = RCUtils.ParseArray(array);
+            }
             node.TryGetValue("textureURL", ref this.textureURL);
         }
         #endregion

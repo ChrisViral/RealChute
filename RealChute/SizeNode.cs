@@ -14,7 +14,7 @@ namespace RealChute
     public class SizeNode
     {
         #region Propreties
-        private Vector3 size = Vector3.one;
+        private readonly Vector3 size = Vector3.one;
         /// <summary>
         /// Size of the parachute
         /// </summary>
@@ -23,7 +23,7 @@ namespace RealChute
             get { return this.size; }
         }
 
-        private string sizeId = string.Empty;
+        private readonly string sizeId = string.Empty;
         /// <summary>
         /// Identifier for this size
         /// </summary>
@@ -32,7 +32,7 @@ namespace RealChute
             get { return this.sizeId; }
         }
 
-        private float caseMass = 0.1f;
+        private readonly float caseMass = 0.1f;
         /// <summary>
         /// Case mass for this size
         /// </summary>
@@ -41,7 +41,7 @@ namespace RealChute
             get { return this.caseMass; }
         }
 
-        private Vector3 topNode = Vector3.zero;
+        private readonly Vector3 topNode = Vector3.zero;
         /// <summary>
         /// Position of the top node if any
         /// </summary>
@@ -50,7 +50,7 @@ namespace RealChute
             get { return this.topNode; }
         }
 
-        private int topNodeSize = -1;
+        private readonly int topNodeSize = -1;
         /// <summary>
         /// Size of the top node if any
         /// </summary>
@@ -59,7 +59,7 @@ namespace RealChute
             get { return this.topNodeSize; }
         }
 
-        private Vector3 bottomNode = Vector3.zero;
+        private readonly Vector3 bottomNode = Vector3.zero;
         /// <summary>
         /// Position of the bottom node if any
         /// </summary>
@@ -68,7 +68,7 @@ namespace RealChute
             get { return this.bottomNode; }
         }
 
-        private int bottomNodeSize = -1;
+        private readonly int bottomNodeSize = -1;
         /// <summary>
         /// Size of the bottom node if any
         /// </summary>
@@ -77,7 +77,7 @@ namespace RealChute
             get { return this.bottomNodeSize; }
         }
 
-        private float cost = 400;
+        private readonly float cost = 400;
         /// <summary>
         /// The cost of this case
         /// </summary>

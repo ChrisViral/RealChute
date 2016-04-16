@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using RealChute.Extensions;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -13,7 +13,7 @@ using RealChute.Extensions;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.MaterialsLibrary
 {
     public class MaterialsLibrary
     {
@@ -24,16 +24,12 @@ namespace RealChute.Libraries
         /// </summary>
         public static MaterialsLibrary Instance
         {
-            get
-            {
-                if (instance == null) { instance = new MaterialsLibrary(); }
-                return instance;
-            }
+            get { return instance ?? (instance = new MaterialsLibrary()); }
         }
         #endregion
 
         #region Propreties
-        private Dictionary<string, MaterialDefinition> materials = new Dictionary<string, MaterialDefinition>();
+        private readonly Dictionary<string, MaterialDefinition> materials;
         /// <summary>
         /// Dictionary containing the name of the materials and their associated MaterialDefinition
         /// </summary>
@@ -42,7 +38,7 @@ namespace RealChute.Libraries
             get { return this.materials; }
         }
 
-        private string[] materialNames = new string[0];
+        private readonly string[] materialNames;
         /// <summary>
         /// String array of the materials' names
         /// </summary>
@@ -51,7 +47,7 @@ namespace RealChute.Libraries
             get { return this.materialNames; }
         }
 
-        private int count;
+        private readonly int count;
         /// <summary>
         /// The amount of materials currently stored
         /// </summary>

@@ -24,22 +24,22 @@ namespace RealChute
             /// <summary>
             /// Stores the string -> enum conversion
             /// </summary>
-            private Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
+            private readonly Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
 
             /// <summary>
             /// Stores the enum -> string conversion
             /// </summary>
-            private Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+            private readonly Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
 
             /// <summary>
             /// The name of the enum values correctly ordered for index search
             /// </summary>
-            public string[] orderedNames = new string[0];
+            public readonly string[] orderedNames;
 
             /// <summary>
             /// The values of the Enum correctly ordered for index search
             /// </summary>
-            public TEnum[] orderedValues = new TEnum[0];
+            public readonly TEnum[] orderedValues;
             #endregion
 
             #region Constructor
@@ -71,13 +71,11 @@ namespace RealChute
             /// </summary>
             /// <param name="name">String to parse</param>
             /// <param name="value">Value to store the result into</param>
-            public bool TryGetValue<T>(string name, out T value) where T : struct, TEnum
+            public void TryGetValue<T>(string name, out T value) where T : struct, TEnum
             {
                 TEnum result;
-                bool success = this.values.TryGetValue(name, out result);
+                this.values.TryGetValue(name, out result);
                 value = (T)result;
-                return success;
-
             }
 
             /// <summary>
@@ -85,9 +83,9 @@ namespace RealChute
             /// </summary>
             /// <param name="value">Enum to get the string for</param>
             /// <param name="name">Value to store the result into</param>
-            public bool TryGetName<T>(T value, out string name) where T : struct, TEnum
+            public void TryGetName<T>(T value, out string name) where T : struct, TEnum
             {
-                return this.names.TryGetValue(value, out name);
+                this.names.TryGetValue(value, out name);
             }
             #endregion
         }
@@ -96,14 +94,14 @@ namespace RealChute
         /// <summary>
         /// Holds all the known enum converters
         /// </summary>
-        private static Dictionary<Type, EnumConverter> converters = new Dictionary<Type, EnumConverter>();
+        private static readonly Dictionary<Type, EnumConverter> converters = new Dictionary<Type, EnumConverter>();
         #endregion
 
         #region Methods
         /// <summary>
         /// Returns the converter of the given type or creates one if there are none
         /// </summary>
-        /// <param name="enumType">Type of the enum conversion</param>
+        /// <typeparam name="T">Type of the enum</typeparam>
         private static EnumConverter GetConverter<T>() where T : struct, TEnum
         {
             EnumConverter converter;
@@ -119,6 +117,7 @@ namespace RealChute
         /// <summary>
         /// Returns the string value of an Enum
         /// </summary>
+        /// <typeparam name="T">Type of the enum</typeparam>
         /// <param name="value">Enum value to convert to string</param>
         public static string GetName<T>(T value) where T : struct, TEnum
         {
@@ -161,8 +160,7 @@ namespace RealChute
         public static string GetNameAt<T>(int index) where T : struct, TEnum
         {
             EnumConverter converter = GetConverter<T>();
-            if (!converter.orderedNames.IndexInRange(index)) { return null; }
-            return converter.orderedNames[index];
+            return !converter.orderedNames.IndexInRange(index) ? null : converter.orderedNames[index];
         }
 
         /// <summary>
@@ -209,5 +207,10 @@ namespace RealChute
     {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */
+
+        /// <summary>
+        /// Prevents object instantiation
+        /// </summary>
+        private EnumUtils() { }
     }
 }

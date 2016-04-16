@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
-using RealChute.Libraries;
+using RealChute.Libraries.MaterialsLibrary;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -102,8 +102,7 @@ namespace RealChute
             get
             {
                 if (this.minIsPressure) { return this.module.atmPressure >= this.minPressure; }
-                else if (this.minDeployment == 0) { return this.Part.vessel.LandedOrSplashed; }
-                return this.module.trueAlt <= this.minDeployment;
+                return this.minDeployment == 0 ? this.Part.vessel.LandedOrSplashed : this.module.trueAlt <= this.minDeployment;
             }
         }
 
@@ -113,11 +112,11 @@ namespace RealChute
             get
             {
                 if (this.module.GroundStop || this.module.atmPressure == 0 || this.Part.ShieldedFromAirstream) { return false; }
-                else if (this.DeploymentState == DeploymentStates.CUT) { return false; }
-                else if (this.DeploymentClause)
+                if (this.DeploymentState == DeploymentStates.CUT) { return false; }
+                if (this.DeploymentClause)
                 {
                     if (this.cutAlt == -1) { return true; }
-                    else if (this.module.trueAlt > this.cutAlt) { return true; }
+                    if (this.module.trueAlt > this.cutAlt) { return true; }
                 }
                 else if (this.module.SecondaryChute && this.Parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
                 else if (this.IsDeployed) { return true; }
@@ -144,6 +143,7 @@ namespace RealChute
         }
 
         //The added vector to drag to angle the parachute
+        private bool check = true;
         private Vector3 ForcedVector
         {
             get
@@ -154,6 +154,7 @@ namespace RealChute
                     Vector3 follow = this.ForcePosition - this.module.pos;
                     float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
                     this.forced = follow.normalized * length;
+                    this.check = false;
                 }
                 return this.forced;
             }
@@ -201,18 +202,15 @@ namespace RealChute
         //Flight
         internal RealChuteModule module;
         internal bool secondary = false;
-        private Animation anim;
         internal Transform parachute, cap;
         private Rigidbody rigidbody;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
         internal bool played;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
-        private Random random = new Random();
+        private readonly Random random = new Random();
         internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
-        private GUISkin skins = HighLogic.Skin;
-        private bool check = true;
         private Vector3 forced;
         #endregion
 
@@ -233,8 +231,7 @@ namespace RealChute
         //Adds a random noise to the parachute movement
         private void ParachuteNoise()
         {
-            float time = Time.time;
-            this.parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(time, this.randomX + Mathf.Sin(time)) - 0.5f), 5 * (Mathf.PerlinNoise(time, this.randomY + Mathf.Sin(time)) - 0.5f), 0));
+            this.parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5 * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0));
         }
 
         //Lerps the drag vector between upright and the forced angle
@@ -266,7 +263,7 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.capOff = true;
-            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -281,7 +278,7 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.capOff = true;
-            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcpredeploy"); }
             this.DeploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -295,7 +292,7 @@ namespace RealChute
         public void Deploy()
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            if (!RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("rcdeploy"); }
+            if (!RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.DEPLOYED;
             if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation))
             {
@@ -309,7 +306,7 @@ namespace RealChute
         //Parachute cutting
         public void Cut()
         {
-            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 0); }
+            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 0); }
             else { this.Part.Effect("rccut"); }
             this.DeploymentState = DeploymentStates.CUT;
             this.parachute.gameObject.SetActive(false);
@@ -352,7 +349,7 @@ namespace RealChute
         //Drag force vector
         private Vector3 DragForce(float startArea, float targetArea, float time)
         {
-            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient) * this.module.dragVector * (RealChuteSettings.Fetch.JokeActivated ? -1 : 1);
+            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient) * this.module.dragVector * (RealChuteSettings.Instance.JokeActivated ? -1 : 1);
         }
 
         //Parachute function
@@ -407,8 +404,6 @@ namespace RealChute
                             }
                             break;
                         }
-                    default:
-                        break;
                 }
             }
             //Deactivation
@@ -416,7 +411,7 @@ namespace RealChute
         }
 
         //Gets convective flux
-        //Thanks to Starwaster for an overheating bug fix here
+        //Thanks to Starwaster for an overheating fix here
         public void CalculateConvectiveFlux()
         {
             this.convectiveFlux = this.Vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
@@ -453,8 +448,7 @@ namespace RealChute
             if (this.Vessel.externalTemperature <= this.mat.MaxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
             else
             {
-                if (this.chuteTemperature + (0.00035 * this.InvThermalMass * this.convectiveFlux * this.DeployedArea) <= this.mat.MaxTemp) { this.safeState = SafeState.RISKY; }
-                else { this.safeState = SafeState.DANGEROUS; }
+                this.safeState = this.chuteTemperature + (0.00035 * this.InvThermalMass * this.convectiveFlux * this.DeployedArea) <= this.mat.MaxTemp ? SafeState.RISKY : SafeState.DANGEROUS;
             }
             return this.safeState;
         }
@@ -462,10 +456,10 @@ namespace RealChute
         //Initializes the chute
         public void Initialize()
         {
-            this.module.materials.TryGetMaterial(this.material, ref this.mat);
+            MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
 
             //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
-            this.anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
+            Animation anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
 
             this.cap = this.Part.FindModelTransform(this.capName);
             this.parachute = this.Part.FindModelTransform(this.parachuteName);
@@ -507,7 +501,7 @@ namespace RealChute
 
         #region GUI
         //Info window GUI
-        internal void UpdateGui()
+        internal void RenderGUI()
         {
             //Initial label
             StringBuilder builder = new StringBuilder();
@@ -515,7 +509,7 @@ namespace RealChute
             builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
             builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
             builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###")).Append("m²");
-            GUILayout.Label(builder.ToString(), this.skins.label);
+            GUILayout.Label(builder.ToString());
 
             if (HighLogic.LoadedSceneIsFlight)
             {
@@ -523,7 +517,7 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        GUILayout.Label("Deployment safety: safe", this.skins.label); break;
+                        GUILayout.Label("Deployment safety: safe"); break;
 
                     case SafeState.RISKY:
                         GUILayout.Label("Deployment safety: risky", GuiUtils.YellowLabel); break;
@@ -536,15 +530,15 @@ namespace RealChute
                 builder = new StringBuilder();
                 builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.absoluteZero).AppendLine("°C");
                 builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.absoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
-                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : this.skins.label);
+                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : GUI.skin.label);
 
 
                 //Pressure/altitude predeployment toggle
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Predeployment:", this.skins.label);
-                if (GUILayout.Toggle(!this.minIsPressure, "altitude", this.skins.toggle)) { this.minIsPressure = false; }
+                GUILayout.Label("Predeployment:");
+                if (GUILayout.Toggle(!this.minIsPressure, "altitude")) { this.minIsPressure = false; }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.minIsPressure, "pressure", this.skins.toggle)) { this.minIsPressure = true; }
+                if (GUILayout.Toggle(this.minIsPressure, "pressure")) { this.minIsPressure = true; }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
@@ -552,11 +546,11 @@ namespace RealChute
             //Predeployment pressure selection
             if (this.minIsPressure)
             {
-                GUILayout.Label("Predeployment pressure: " + this.minPressure + "atm", this.skins.label);
+                GUILayout.Label("Predeployment pressure: " + this.minPressure + "atm");
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment pressure slider
-                    this.minPressure = GUILayout.HorizontalSlider(this.minPressure, 0.005f, 1, this.skins.horizontalSlider, this.skins.horizontalSliderThumb);
+                    this.minPressure = GUILayout.HorizontalSlider(this.minPressure, 0.005f, 1);
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -570,11 +564,11 @@ namespace RealChute
             //Predeployment altitude selection
             else
             {
-                GUILayout.Label("Predeployment altitude: " + this.minDeployment + "m", this.skins.label);
+                GUILayout.Label("Predeployment altitude: " + this.minDeployment + "m");
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment altitude slider
-                    this.minDeployment = GUILayout.HorizontalSlider(this.minDeployment, 100, 20000, this.skins.horizontalSlider, this.skins.horizontalSliderThumb);
+                    this.minDeployment = GUILayout.HorizontalSlider(this.minDeployment, 100, 20000);
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -586,11 +580,11 @@ namespace RealChute
             }
 
             //Deployment altitude selection
-            GUILayout.Label("Deployment altitude: " + this.deploymentAlt + "m", this.skins.label);
+            GUILayout.Label("Deployment altitude: " + this.deploymentAlt + "m");
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Deployment altitude slider
-                this.deploymentAlt = GUILayout.HorizontalSlider(this.deploymentAlt, 50, 10000, this.skins.horizontalSlider, this.skins.horizontalSliderThumb);
+                this.deploymentAlt = GUILayout.HorizontalSlider(this.deploymentAlt, 50, 10000);
 
                 //Copy to symmetry counterparts button
                 CopyToOthers(p => p.deploymentAlt = this.deploymentAlt);
@@ -601,22 +595,22 @@ namespace RealChute
             if (this.cutAlt > 0) { builder.Append("Autocut altitude: ").Append(this.cutAlt).AppendLine("m"); }
             builder.Append("Predeployment speed: ").Append(this.preDeploymentSpeed).AppendLine("s");
             builder.Append("Deployment speed: ").Append(this.deploymentSpeed).Append("s");
-            GUILayout.Label(builder.ToString(), this.skins.label);
+            GUILayout.Label(builder.ToString());
         }
 
         //Copies the given values to the other parachutes
-        private void CopyToOthers(Action<Parachute> action)
+        private void CopyToOthers(Callback<Parachute> callback)
         {
             if (this.module.SecondaryChute)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Copy to symmetry counterparts", this.skins.button, GUILayout.Height(20), GUILayout.Width(100)))
+                if (GUILayout.Button("Copy to symmetry counterparts", GUILayout.Height(25), GUILayout.Width(250)))
                 {
                     foreach (Parachute p in this.Parachutes)
                     {
                         if (p == this) { continue; }
-                        action(p);
+                        callback(p);
                     }
                 }
                 GUILayout.FlexibleSpace();

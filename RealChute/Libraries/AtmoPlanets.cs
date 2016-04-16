@@ -18,22 +18,18 @@ namespace RealChute.Libraries
     public class AtmoPlanets
     {
         #region Fetch
-        private static AtmoPlanets fetch;
+        private static AtmoPlanets instance;
         /// <summary>
         /// Accesses the atmospheric planets library
         /// </summary>
-        public static AtmoPlanets Fetch
+        public static AtmoPlanets Instance
         {
-            get
-            {
-                if (fetch == null) { fetch = new AtmoPlanets(); }
-                return fetch;
-            }
+            get { return instance ?? (instance = new AtmoPlanets()); }
         }
         #endregion
 
         #region Propreties
-        private Dictionary<string, CelestialBody> bodies = new Dictionary<string, CelestialBody>();
+        private readonly Dictionary<string, CelestialBody> bodies = new Dictionary<string, CelestialBody>();
         /// <summary>
         /// Body name/body dictionary of all the CelestialBodies with an atmosphere and a surface for quick name lookup
         /// </summary>
@@ -42,7 +38,7 @@ namespace RealChute.Libraries
             get { return this.bodies; }
         }
 
-        private string[] bodyNames = new string[0];
+        private readonly string[] bodyNames = new string[0];
         /// <summary>
         /// CelestialBody list for quick index lookup
         /// </summary>
@@ -101,6 +97,7 @@ namespace RealChute.Libraries
         /// Returns the index of the CelestialBody within the dictionary
         /// </summary>
         /// <param name="name">CelestialBody searched for</param>
+        /// <param name="index">Index of the body</param>
         /// <returns></returns>
         public bool TryGetBodyIndex(string name, ref int index)
         {

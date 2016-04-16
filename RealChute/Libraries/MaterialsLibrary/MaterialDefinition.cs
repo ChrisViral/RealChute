@@ -7,12 +7,12 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.MaterialsLibrary
 {
     public class MaterialDefinition
     {
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// Name of the material
         /// </summary>
@@ -21,7 +21,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private string description = "We don't know much about this, it might as well be made of fishnets";
+        private readonly string description = "We don't know much about this, it might as well be made of fishnets";
         /// <summary>
         /// The description of this material
         /// </summary>
@@ -30,7 +30,7 @@ namespace RealChute.Libraries
             get { return this.description; }
         }
 
-        private float areaDensity = 5.65E-5f;
+        private readonly float areaDensity = 5.65E-5f;
         /// <summary>
         /// Area density of this material
         /// </summary>
@@ -39,7 +39,7 @@ namespace RealChute.Libraries
             get { return this.areaDensity; }
         }
 
-        private float dragCoefficient = 1;
+        private readonly float dragCoefficient = 1;
         /// <summary>
         /// Drag coefficient of this material
         /// </summary>
@@ -48,7 +48,7 @@ namespace RealChute.Libraries
             get { return this.dragCoefficient; }
         }
 
-        private float areaCost = 0.075f;
+        private readonly float areaCost = 0.075f;
         /// <summary>
         /// Cost of a square meter of this material
         /// </summary>
@@ -57,7 +57,7 @@ namespace RealChute.Libraries
             get { return this.areaCost; }
         }
 
-        private double maxTemp = 493.15;
+        private readonly double maxTemp = 493.15;
         /// <summary>
         /// Maximum temperature this material can withstand (K)
         /// </summary>
@@ -66,7 +66,7 @@ namespace RealChute.Libraries
             get { return this.maxTemp; }
         }
 
-        private double specificHeat = 1700;
+        private readonly double specificHeat = 1700;
         /// <summary>
         /// The specific heat of the material (J/kg∙K)
         /// </summary>
@@ -75,7 +75,7 @@ namespace RealChute.Libraries
             get { return this.specificHeat; }
         }
 
-        private double emissivity = 0.72;
+        private readonly double emissivity = 0.72;
         /// <summary>
         /// The emissivity constant of the chute at (20°C)
         /// </summary>

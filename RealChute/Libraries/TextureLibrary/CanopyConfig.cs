@@ -7,12 +7,12 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.TextureLibrary
 {
     public class CanopyConfig
     {
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// The name of the texture
         /// </summary>
@@ -21,7 +21,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private string textureURL = string.Empty;
+        private readonly string textureURL = string.Empty;
         /// <summary>
         /// The URL of the texture
         /// </summary>

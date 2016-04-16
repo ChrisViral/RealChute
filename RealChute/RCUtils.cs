@@ -135,6 +135,16 @@ namespace RealChute
 #endregion
 
         #region Methods
+        public static string[] ParseArray(string text)
+        {
+            string[] array = text.Split(',');
+            for (int i = 0; i < array.Length; i++)
+            {
+                array[i] = array[i].Trim();
+            }
+            return array;
+        }
+
         /// <summary>
         /// Returns the area of a circular parachute of the given diameter
         /// </summary>

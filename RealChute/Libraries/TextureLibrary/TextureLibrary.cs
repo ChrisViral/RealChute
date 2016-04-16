@@ -11,7 +11,7 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.TextureLibrary
 {
     public class TextureLibrary
     {
@@ -22,16 +22,12 @@ namespace RealChute.Libraries
         /// </summary>
         public static TextureLibrary Instance
         {
-            get
-            {
-                if (instance == null) { instance = new TextureLibrary(); }
-                return instance;
-            }
+            get { return instance ?? (instance = new TextureLibrary()); }
         }
         #endregion
 
         #region Propreties
-        private Dictionary<string, TextureConfig> configs = new Dictionary<string, TextureConfig>();
+        private readonly Dictionary<string, TextureConfig> configs;
         /// <summary>
         /// Name of all the TextureConfigs with the associated objects
         /// </summary>

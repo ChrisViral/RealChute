@@ -12,7 +12,7 @@ using RealChute.Extensions;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.Presets
 {
     public class PresetsLibrary
     {
@@ -23,16 +23,12 @@ namespace RealChute.Libraries
         /// </summary>
         public static PresetsLibrary Instance
         {
-            get
-            {
-                if (instance == null) { instance = new PresetsLibrary(); }
-                return instance;
-            }
+            get { return instance ?? (instance = new PresetsLibrary()); }
         }
         #endregion
 
         #region Propreties
-        private Dictionary<string, Preset> presets = new Dictionary<string, Preset>();
+        private readonly Dictionary<string, Preset> presets;
         /// <summary>
         /// Dictionary of the preset names with their associated presets
         /// </summary>
@@ -41,7 +37,7 @@ namespace RealChute.Libraries
             get { return this.presets; }
         }
 
-        private Dictionary<int, string[]> parameters = new Dictionary<int, string[]>();
+        private readonly Dictionary<int, string[]> parameters = new Dictionary<int, string[]>();
         /// <summary>
         /// A dictionary of the number of used chutes as keys and the associated preset names as values
         /// </summary>
@@ -57,7 +53,7 @@ namespace RealChute.Libraries
         /// </summary>
         public PresetsLibrary()
         {
-            this.presets = RealChuteSettings.Fetch.Presets.Select(n => new Preset(n)).ToDictionary(p => p.Name, p => p);
+            this.presets = RealChuteSettings.Instance.Presets.Select(n => new Preset(n)).ToDictionary(p => p.Name, p => p);
             RefreshData();
         }
         #endregion
@@ -118,7 +114,7 @@ namespace RealChute.Libraries
         /// <summary>
         /// Removes the preset of the given name from the library
         /// </summary>
-        /// <param name="name">Name of the preset to delete</param>
+        /// <param name="preset">Name of the preset to delete</param>
         public void DeletePreset(Preset preset)
         {
             this.presets.Remove(preset.Name);

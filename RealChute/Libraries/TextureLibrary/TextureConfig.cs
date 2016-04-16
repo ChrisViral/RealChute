@@ -13,12 +13,12 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.TextureLibrary
 {
     public class TextureConfig
     {
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// Name of the texture config
         /// </summary>
@@ -27,7 +27,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private Dictionary<string, CaseConfig> cases = new Dictionary<string, CaseConfig>();
+        private readonly Dictionary<string, CaseConfig> cases;
         /// <summary>
         /// List of all the case configs
         /// </summary>
@@ -36,16 +36,16 @@ namespace RealChute.Libraries
             get { return this.cases; }
         }
 
-        public Dictionary<string, string[]> types = new Dictionary<string, string[]>();
+        private readonly Dictionary<string, string[]> types;
         /// <summary>
         /// Dictionary of all the available parachute types associated with all the CaseConfigs which it apply it
         /// </summary>
-        private Dictionary<string, string[]> Types
+        public Dictionary<string, string[]> Types
         {
             get { return this.types; }
         }
 
-        private string[] caseNames = new string[0];
+        private readonly string[] caseNames;
         /// <summary>
         /// Array of the names of all the case configs available
         /// </summary>
@@ -54,7 +54,7 @@ namespace RealChute.Libraries
             get { return this.caseNames; }
         }
 
-        private Dictionary<string, CanopyConfig> canopies = new Dictionary<string, CanopyConfig>();
+        private readonly Dictionary<string, CanopyConfig> canopies;
         /// <summary>
         /// List of all the canopy configs
         /// </summary>
@@ -63,7 +63,7 @@ namespace RealChute.Libraries
             get { return this.canopies; }
         }
 
-        private string[] canopyNames = new string[0];
+        private readonly string[] canopyNames;
         /// <summary>
         /// Array of the name of all the canopy configs available
         /// </summary>
@@ -72,7 +72,7 @@ namespace RealChute.Libraries
             get { return this.canopyNames; }
         }
 
-        private Dictionary<string, ModelConfig> models = new Dictionary<string, ModelConfig>();
+        private readonly Dictionary<string, ModelConfig> models;
         /// <summary>
         /// List of all the model configs
         /// </summary>
@@ -81,7 +81,7 @@ namespace RealChute.Libraries
             get { return this.models; }
         }
 
-        private Dictionary<string, ModelConfig> transforms = new Dictionary<string, ModelConfig>();
+        private readonly Dictionary<string, ModelConfig> transforms = new Dictionary<string, ModelConfig>();
         /// <summary>
         /// Name of all the model transforms for parachutes with their associated ModelConfigs
         /// </summary>
@@ -90,7 +90,7 @@ namespace RealChute.Libraries
             get { return this.transforms; }
         }
 
-        private Dictionary<int, string[]> parameters = new Dictionary<int, string[]>();
+        private readonly Dictionary<int, string[]> parameters = new Dictionary<int, string[]>();
         /// <summary>
         /// Amount of parameters, and so avaiable chutes, with the names of the ModelConfigs which have the given amount
         /// </summary>
@@ -99,7 +99,7 @@ namespace RealChute.Libraries
             get { return this.parameters; }
         }
 
-        private string[] modelNames = new string[0];
+        private readonly string[] modelNames;
         /// <summary>
         /// Array of the names of all the model configs available
         /// </summary>
@@ -155,7 +155,7 @@ namespace RealChute.Libraries
         /// <param name="type">Type of the chute</param>
         public bool ContainsType(string type)
         {
-            return this.types.ContainsKey(type);
+            return this.Types.ContainsKey(type);
         }
 
         /// <summary>
@@ -376,6 +376,7 @@ namespace RealChute.Libraries
         /// </summary>
         /// <param name="name">Name of the config searched for</param>
         /// <param name="model">Value to store the result in</param>
+        /// <param name="isTransformName">If the name of the tranform is used for search</param>
         public bool TryGetModel(string name, ref ModelConfig model, bool isTransformName = false)
         {
             if (isTransformName)

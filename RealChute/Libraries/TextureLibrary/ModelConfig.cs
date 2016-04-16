@@ -10,14 +10,14 @@ using System.Linq;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.TextureLibrary
 {
     public class ModelConfig
     {
         public class ModelParameters
         {
             #region Propreties
-            private string modelURL = string.Empty;
+            private readonly string modelURL = string.Empty;
             /// <summary>
             /// The string URL of the GameObject
             /// </summary>
@@ -26,7 +26,7 @@ namespace RealChute.Libraries
                 get { return this.modelURL; }
             }
 
-            private string transformName = string.Empty;
+            private readonly string transformName = string.Empty;
             /// <summary>
             /// The name of the parachute transform
             /// </summary>
@@ -35,7 +35,7 @@ namespace RealChute.Libraries
                 get { return this.transformName; }
             }
 
-            private string preDepAnim = string.Empty;
+            private readonly string preDepAnim = string.Empty;
             /// <summary>
             /// The name of the predeployment animation
             /// </summary>
@@ -44,7 +44,7 @@ namespace RealChute.Libraries
                 get { return this.preDepAnim; }
             }
 
-            private string depAnim = string.Empty;
+            private readonly string depAnim = string.Empty;
             /// <summary>
             /// The name of the deployment animation
             /// </summary>
@@ -70,7 +70,7 @@ namespace RealChute.Libraries
         }
 
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// Name of the model
         /// </summary>
@@ -79,7 +79,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private float diameter = 10;
+        private readonly float diameter = 10;
         /// <summary>
         /// Diameter of the parachutes at 1, 1, 1
         /// </summary>
@@ -88,7 +88,7 @@ namespace RealChute.Libraries
             get { return this.diameter; }
         }
 
-        private int count = 1;
+        private readonly int count = 1;
         /// <summary>
         /// Number of parachutes visually per transform
         /// </summary>
@@ -97,7 +97,7 @@ namespace RealChute.Libraries
             get { return this.count; }
         }
 
-        private float maxDiam = 70;
+        private readonly float maxDiam = 70;
         /// <summary>
         /// Maximum diameter this parachute can have
         /// </summary>
@@ -106,7 +106,7 @@ namespace RealChute.Libraries
             get { return this.maxDiam; }
         }
 
-        private List<ModelParameters> parameters = new List<ModelParameters>();
+        private readonly List<ModelParameters> parameters = new List<ModelParameters>();
         /// <summary>
         /// Parameters for all potential chutes to be used with this model
         /// </summary>

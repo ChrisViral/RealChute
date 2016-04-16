@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
-using RealChute.Libraries;
 using RealChute.Extensions;
+using RealChute.Libraries.MaterialsLibrary;
+using RealChute.Libraries.TextureLibrary;
 using SelectorType = RealChute.ProceduralChute.SelectorType;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -27,7 +28,7 @@ namespace RealChute
         DRAG
     }
 
-    public class TemplateGui
+    public class TemplateGUI
     {
         #region Properties
         private ProceduralChute PChute
@@ -38,11 +39,6 @@ namespace RealChute
         private Parachute Parachute
         {
             get { return this.template.parachute; }
-        }
-
-        private EditorGui EditorGui
-        {
-            get { return this.template.EditorGui; }
         }
 
         private bool Secondary
@@ -117,11 +113,11 @@ namespace RealChute
             }
         }
 
-        public int TypeId
+        public int TypeID
         {
             get
             {
-                if (this.tId == -1) { this.TypeId = 0; }
+                if (this.tId == -1) { this.TypeID = 0; }
                 return this.tId;
             }
             set
@@ -131,11 +127,11 @@ namespace RealChute
             }
         }
 
-        public int LastTypeId
+        public int LastTypeID
         {
             get
             {
-                if (this.ltId == -1) { this.LastTypeId = 0; }
+                if (this.ltId == -1) { this.LastTypeID = 0; }
                 return this.ltId;
             }
             set
@@ -157,8 +153,7 @@ namespace RealChute
         #endregion
 
         #region Fields
-        private ChuteTemplate template;
-        private GUISkin skins = HighLogic.Skin;
+        private readonly ChuteTemplate template;
         internal Rect materialsWindow = new Rect(), drag = new Rect();
         internal int matId = Guid.NewGuid().GetHashCode();
         internal bool materialsVisible;
@@ -178,13 +173,13 @@ namespace RealChute
         /// <summary>
         /// Creates an empty Template GUI
         /// </summary>
-        public TemplateGui() { }
+        public TemplateGUI() { }
 
         /// <summary>
         /// Generates a new TemplateGUI from the given ChuteTemplate
         /// </summary>
         /// <param name="template"></param>
-        public TemplateGui(ChuteTemplate template)
+        public TemplateGUI(ChuteTemplate template)
         {
             this.template = template;
         }
@@ -227,10 +222,8 @@ namespace RealChute
                             this.depSpeed = "2";
                             break;
                         }
-                    default:
-                        break;
                 }
-                this.LastTypeId = this.TypeId;
+                this.LastTypeID = this.TypeID;
             }
         }
 
@@ -254,41 +247,41 @@ namespace RealChute
             if (a)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Case texture:", this.skins.label);
+                GUILayout.Label("Case texture:");
             }
             if (b)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Chute texture:", this.skins.label);
+                GUILayout.Label("Chute texture:");
             }
             if (c)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Chute model: ", this.skins.label);
+                GUILayout.Label("Chute model: ");
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             #endregion
 
             #region Selectors
-            GUILayout.BeginVertical(this.skins.box, GUILayout.Height(35 * h));
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Height(35 * h));
             //Boxes
             if (a)
             {
                 GUILayout.FlexibleSpace();
-                this.PChute.caseId = GUILayout.SelectionGrid(this.PChute.caseId, cases, cases.Length, this.skins.button);
+                this.PChute.caseId = GUILayout.SelectionGrid(this.PChute.caseId, cases, cases.Length);
             }
 
             if (b)
             {
                 GUILayout.FlexibleSpace();
-                this.chuteId = GUILayout.SelectionGrid(this.chuteId, chutes, chutes.Length, this.skins.button);
+                this.chuteId = GUILayout.SelectionGrid(this.chuteId, chutes, chutes.Length);
             }
 
             if (c)
             {
                 GUILayout.FlexibleSpace();
-                this.modelId = GUILayout.SelectionGrid(this.modelId, models, models.Length, this.skins.button);
+                this.modelId = GUILayout.SelectionGrid(this.modelId, models, models.Length);
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
@@ -300,15 +293,15 @@ namespace RealChute
         //Materials selector GUI code
         internal void MaterialsSelector()
         {
-            if (this.PChute.materials.Count >= 1)
+            if (MaterialsLibrary.Instance.Count >= 1)
             {
                 GUILayout.BeginHorizontal(GUILayout.Height(20));
                 GUILayout.BeginVertical();
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Current material: " + this.Material.Name, this.skins.label);
+                GUILayout.Label("Current material: " + this.Material.Name);
                 GUILayout.EndVertical();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Change material", this.skins.button, GUILayout.Width(150)))
+                if (GUILayout.Button("Change material", GUILayout.Width(150)))
                 {
                     this.materialsVisible = !this.materialsVisible;
                 }
@@ -325,26 +318,26 @@ namespace RealChute
             GUILayout.Space(5);
 
             //Calculations
-            this.parachuteScroll = GUILayout.BeginScrollView(this.parachuteScroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.Height(160));
+            this.parachuteScroll = GUILayout.BeginScrollView(this.parachuteScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(160));
             string label;
             float max, min;
 
             #region Automatic
             if (this.calcSelect)
             {
-                this.TypeId = GUILayout.SelectionGrid(this.TypeId, EnumUtils.GetNames<ParachuteType>(), 3, this.skins.button);
+                this.TypeID = GUILayout.SelectionGrid(this.TypeID, EnumUtils.GetNames<ParachuteType>(), 3);
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.getMass, "Use current craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = true; }
+                if (GUILayout.Toggle(this.getMass, "Use current craft mass", GUILayout.Width(150))) { this.getMass = true; }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(!this.getMass, "Input craft mass", this.skins.button, GUILayout.Width(150))) { this.getMass = false; }
+                if (GUILayout.Toggle(!this.getMass, "Input craft mass", GUILayout.Width(150))) { this.getMass = false; }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
                 if (this.getMass)
                 {
-                    GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"), this.skins.label);
-                    if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), this.skins.button, GUILayout.Width(125))) { this.useDry = !this.useDry; }
+                    GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"));
+                    if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), GUILayout.Width(125))) { this.useDry = !this.useDry; }
                 }
 
                 else
@@ -388,13 +381,13 @@ namespace RealChute
 
                 //Predeployed diameter
                 GuiUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100);
-                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", this.skins.label); }
-                else { GUILayout.Label("Resulting predeployed area: --- m²", this.skins.label); }
+                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²"); }
+                else { GUILayout.Label("Resulting predeployed area: --- m²"); }
 
                 //Deployed diameter
                 GuiUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam, 100);
-                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", this.skins.label); }
-                else { GUILayout.Label("Resulting deployed area: --- m²", this.skins.label); }
+                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²"); }
+                else { GUILayout.Label("Resulting deployed area: --- m²"); }
             }
             #endregion
 
@@ -405,7 +398,7 @@ namespace RealChute
             //Pressure/alt toggle
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Toggle(this.isPressure, "Pressure predeployment", this.skins.toggle))
+            if (GUILayout.Toggle(this.isPressure, "Pressure predeployment"))
             {
                 if (!this.isPressure)
                 {
@@ -414,7 +407,7 @@ namespace RealChute
                 }
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!this.isPressure, "Altitude predeployment", this.skins.toggle))
+            if (GUILayout.Toggle(!this.isPressure, "Altitude predeployment"))
             {
                 if (this.isPressure)
                 {
@@ -460,15 +453,15 @@ namespace RealChute
             GUI.DragWindow(this.drag);
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            this.materialsScroll = GUILayout.BeginScrollView(this.materialsScroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.MaxHeight(200), GUILayout.Width(140));
-            this.materialsId = GUILayout.SelectionGrid(this.materialsId, this.PChute.materials.MaterialNames, 1, this.skins.button);
+            this.materialsScroll = GUILayout.BeginScrollView(this.materialsScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.MaxHeight(200), GUILayout.Width(140));
+            this.materialsId = GUILayout.SelectionGrid(this.materialsId, MaterialsLibrary.Instance.MaterialNames, 1);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
             MaterialDefinition material = new MaterialDefinition();
-            if (this.PChute.materials.MaterialNames.IndexInRange(this.materialsId))
+            if (MaterialsLibrary.Instance.MaterialNames.IndexInRange(this.materialsId))
             {
-                string name = this.PChute.materials.MaterialNames[this.materialsId];
-                this.PChute.materials.TryGetMaterial(name, ref material);
+                string name = MaterialsLibrary.Instance.MaterialNames[this.materialsId];
+                MaterialsLibrary.Instance.TryGetMaterial(name, ref material);
             }
             StringBuilder builder = new StringBuilder();
             builder.Append("Description:  ").AppendLine(material.Description);
@@ -478,17 +471,17 @@ namespace RealChute
             builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.absoluteZero).ToString()).Append("°C");
             builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString()).Append("J/kg∙K");
             builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString());
-            GUILayout.Label(builder.ToString(), this.skins.label);
+            GUILayout.Label(builder.ToString());
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Choose material", this.skins.button, GUILayout.Width(150)))
+            if (GUILayout.Button("Choose material", GUILayout.Width(150)))
             {
                 this.Material = material;
                 this.materialsVisible = false;
             }
-            if (GUILayout.Button("Cancel", this.skins.button, GUILayout.Width(150)))
+            if (GUILayout.Button("Cancel", GUILayout.Width(150)))
             {
                 this.materialsVisible = false;
             }

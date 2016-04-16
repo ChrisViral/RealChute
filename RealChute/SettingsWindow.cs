@@ -15,30 +15,27 @@ namespace RealChute
     public class SettingsWindow : MonoBehaviour
     {
         #region Fields
-        private GUISkin skins = HighLogic.Skin;
-        private int id = Guid.NewGuid().GetHashCode();
+        private readonly int id = Guid.NewGuid().GetHashCode();
         private bool showing = true, destroying;
         private string level = string.Empty;
         private Rect window, drag;
-        private Texture2D buttonTexture = new Texture2D(38, 38);
-        private RealChuteSettings settings = RealChuteSettings.Fetch;
         #endregion
 
         #region Methods
-        private void HideUi()
+        private void HideUI()
         {
             this.showing = false;
         }
 
-        private void ShowUi()
+        private void ShowUI()
         {
             this.showing = true;
         }
 
         private void CloseWindow()
         {
-            int i = 1;
-            if (int.TryParse(this.level, out i)) { this.settings.EngineerLevel = i; }
+            int i;
+            if (int.TryParse(this.level, out i)) { RealChuteSettings.Instance.EngineerLevel = i; }
             if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
         }
         #endregion
@@ -47,20 +44,20 @@ namespace RealChute
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
-            this.window = new Rect(100, 100, 330, 200);
-            this.drag = new Rect(0, 0, 330, 20);
-            this.level = this.settings.EngineerLevel.ToString();
+            this.window = new Rect(100, 100, 350, 200);
+            this.drag = new Rect(0, 0, 350, 30);
+            this.level = RealChuteSettings.Instance.EngineerLevel.ToString();
 
-            GameEvents.onShowUI.Add(ShowUi);
-            GameEvents.onHideUI.Add(HideUi);
-            GameEvents.onGUIAstronautComplexSpawn.Add(HideUi);
-            GameEvents.onGUIAstronautComplexDespawn.Add(ShowUi);
-            GameEvents.onGUIRnDComplexSpawn.Add(HideUi);
-            GameEvents.onGUIRnDComplexDespawn.Add(ShowUi);
-            GameEvents.onGUIMissionControlSpawn.Add(HideUi);
-            GameEvents.onGUIMissionControlDespawn.Add(ShowUi);
-            GameEvents.onGUIAdministrationFacilitySpawn.Add(HideUi);
-            GameEvents.onGUIAdministrationFacilityDespawn.Add(ShowUi);
+            GameEvents.onShowUI.Add(ShowUI);
+            GameEvents.onHideUI.Add(HideUI);
+            GameEvents.onGUIAstronautComplexSpawn.Add(HideUI);
+            GameEvents.onGUIAstronautComplexDespawn.Add(ShowUI);
+            GameEvents.onGUIRnDComplexSpawn.Add(HideUI);
+            GameEvents.onGUIRnDComplexDespawn.Add(ShowUI);
+            GameEvents.onGUIMissionControlSpawn.Add(HideUI);
+            GameEvents.onGUIMissionControlDespawn.Add(ShowUI);
+            GameEvents.onGUIAdministrationFacilitySpawn.Add(HideUI);
+            GameEvents.onGUIAdministrationFacilityDespawn.Add(ShowUI);
         }
 
         private void OnDestroy()
@@ -70,40 +67,40 @@ namespace RealChute
             CloseWindow();
             RealChuteSettings.SaveSettings();
 
-            GameEvents.onShowUI.Remove(ShowUi);
-            GameEvents.onHideUI.Remove(HideUi);
-            GameEvents.onGUIAstronautComplexSpawn.Remove(HideUi);
-            GameEvents.onGUIAstronautComplexDespawn.Remove(ShowUi);
-            GameEvents.onGUIRnDComplexSpawn.Remove(HideUi);
-            GameEvents.onGUIRnDComplexDespawn.Remove(ShowUi);
-            GameEvents.onGUIMissionControlSpawn.Remove(HideUi);
-            GameEvents.onGUIMissionControlDespawn.Remove(ShowUi);
-            GameEvents.onGUIAdministrationFacilitySpawn.Remove(HideUi);
-            GameEvents.onGUIAdministrationFacilityDespawn.Remove(ShowUi);
+            GameEvents.onShowUI.Remove(ShowUI);
+            GameEvents.onHideUI.Remove(HideUI);
+            GameEvents.onGUIAstronautComplexSpawn.Remove(HideUI);
+            GameEvents.onGUIAstronautComplexDespawn.Remove(ShowUI);
+            GameEvents.onGUIRnDComplexSpawn.Remove(HideUI);
+            GameEvents.onGUIRnDComplexDespawn.Remove(ShowUI);
+            GameEvents.onGUIMissionControlSpawn.Remove(HideUI);
+            GameEvents.onGUIMissionControlDespawn.Remove(ShowUI);
+            GameEvents.onGUIAdministrationFacilitySpawn.Remove(HideUI);
+            GameEvents.onGUIAdministrationFacilityDespawn.Remove(ShowUI);
         }
         #endregion
 
         #region GUI
         private void OnGUI()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
-            if (this.showing)
-            {
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion, this.skins.window);
-            }
+            if (!CompatibilityChecker.IsAllCompatible() || !this.showing) { return; }
+
+            GUI.skin = HighLogic.Skin;
+            this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion);
         }
 
         private void Window(int id)
         {
             GUI.DragWindow(this.drag);
-            this.settings.AutoArm = GUILayout.Toggle(this.settings.AutoArm, "Automatically arm when staging", this.skins.toggle);
-            this.settings.JokeActivated = GUILayout.Toggle(this.settings.JokeActivated, "Activate April Fools' joke (USE AT OWN RISK)", this.skins.toggle);
-            this.settings.ActivateNyan = GUILayout.Toggle(this.settings.ActivateNyan, "Activate NyanMode™", this.skins.toggle);
-            this.settings.GuiResizeUpdates = GUILayout.Toggle(this.settings.GuiResizeUpdates, "Part GUI resize updates canopy size", this.skins.toggle);
-            this.settings.MustBeEngineer = GUILayout.Toggle(this.settings.MustBeEngineer, "Only engineers can repack in career", this.skins.toggle);
-            if (!this.settings.MustBeEngineer) { GUI.enabled = false; }
+
+            RealChuteSettings.Instance.AutoArm = GUILayout.Toggle(RealChuteSettings.Instance.AutoArm, "Automatically arm when staging");
+            RealChuteSettings.Instance.JokeActivated = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)");
+            RealChuteSettings.Instance.ActivateNyan = GUILayout.Toggle(RealChuteSettings.Instance.ActivateNyan, "Activate NyanMode™");
+            RealChuteSettings.Instance.GuiResizeUpdates = GUILayout.Toggle(RealChuteSettings.Instance.GuiResizeUpdates, "Part GUI resize updates canopy size");
+            RealChuteSettings.Instance.MustBeEngineer = GUILayout.Toggle(RealChuteSettings.Instance.MustBeEngineer, "Only engineers can repack in career");
+            if (!RealChuteSettings.Instance.MustBeEngineer) { GUI.enabled = false; }
             GuiUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
-            if (!this.settings.MustBeEngineer) { GUI.enabled = true; }
+            GUI.enabled = true;
 
             GuiUtils.CenteredButton("Close", CloseWindow, 100);
         }

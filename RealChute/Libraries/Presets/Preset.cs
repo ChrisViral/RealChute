@@ -10,14 +10,14 @@ using System.Linq;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries
+namespace RealChute.Libraries.Presets
 {
     public class Preset
     {
         public class ChuteParameters
         {
             #region Propreties
-            private string material = "Nylon";
+            private readonly string material = "Nylon";
             /// <summary>
             /// Material of the parachute
             /// </summary>
@@ -26,7 +26,7 @@ namespace RealChute.Libraries
                 get { return this.material; }
             }
 
-            private string preDeployedDiameter = "1";
+            private readonly string preDeployedDiameter = "1";
             /// <summary>
             /// Predeployed diameter of the parachute
             /// </summary>
@@ -35,7 +35,7 @@ namespace RealChute.Libraries
                 get { return this.preDeployedDiameter; }
             }
 
-            private string deployedDiameter = "25";
+            private readonly string deployedDiameter = "25";
             /// <summary>
             /// Deployed diameter of the parachute
             /// </summary>
@@ -44,7 +44,7 @@ namespace RealChute.Libraries
                 get { return this.deployedDiameter; }
             }
 
-            private bool minIsPressure;
+            private readonly bool minIsPressure;
             /// <summary>
             /// Wether the minimum deployment clause is pressure or altitude
             /// </summary>
@@ -53,7 +53,7 @@ namespace RealChute.Libraries
                 get { return this.minIsPressure; }
             }
 
-            private string minDeployment = "25000";
+            private readonly string minDeployment = "25000";
             /// <summary>
             /// Minimum predeployment altitude
             /// </summary>
@@ -62,7 +62,7 @@ namespace RealChute.Libraries
                 get { return this.minDeployment; }
             }
 
-            private string minPressure = "0.01";
+            private readonly string minPressure = "0.01";
             /// <summary>
             /// Minimum predeployment pressure
             /// </summary>
@@ -71,7 +71,7 @@ namespace RealChute.Libraries
                 get { return this.minPressure; }
             }
 
-            private string deploymentAlt = "700";
+            private readonly string deploymentAlt = "700";
             /// <summary>
             /// Full deployment altitude
             /// </summary>
@@ -80,7 +80,7 @@ namespace RealChute.Libraries
                 get { return this.deploymentAlt; }
             }
 
-            private string cutAlt = string.Empty;
+            private readonly string cutAlt = string.Empty;
             /// <summary>
             /// Autocut altitude
             /// </summary>
@@ -89,7 +89,7 @@ namespace RealChute.Libraries
                 get { return this.cutAlt; }
             }
 
-            private string preDeploymentSpeed = "2";
+            private readonly string preDeploymentSpeed = "2";
             /// <summary>
             /// Predeployment speed
             /// </summary>
@@ -98,7 +98,7 @@ namespace RealChute.Libraries
                 get { return this.preDeploymentSpeed; }
             }
 
-            private string deploymentSpeed = "6";
+            private readonly string deploymentSpeed = "6";
             /// <summary>
             /// Deployment speed
             /// </summary>
@@ -107,7 +107,7 @@ namespace RealChute.Libraries
                 get { return this.deploymentSpeed; }
             }
 
-            private string chuteTexture = string.Empty;
+            private readonly string chuteTexture = string.Empty;
             /// <summary>
             /// GUI ID for the canopy texture
             /// </summary>
@@ -116,7 +116,7 @@ namespace RealChute.Libraries
                 get { return this.chuteTexture; }
             }
 
-            private string modelName = string.Empty;
+            private readonly string modelName = string.Empty;
             /// <summary>
             /// GUI ID for the canopy model
             /// </summary>
@@ -125,7 +125,7 @@ namespace RealChute.Libraries
                 get { return this.modelName; }
             }
 
-            private int type;
+            private readonly int type;
             /// <summary>
             /// ID of the parachute type
             /// </summary>
@@ -134,7 +134,7 @@ namespace RealChute.Libraries
                 get { return this.type; }
             }
 
-            private bool calcSelect;
+            private readonly bool calcSelect;
             /// <summary>
             /// GUI calculations mode
             /// </summary>
@@ -143,7 +143,7 @@ namespace RealChute.Libraries
                 get { return this.calcSelect; }
             }
 
-            private bool getMass = true;
+            private readonly bool getMass = true;
             /// <summary>
             /// GUI mass obtention
             /// </summary>
@@ -152,7 +152,7 @@ namespace RealChute.Libraries
                 get { return this.getMass; }
             }
 
-            private bool useDry = true;
+            private readonly bool useDry = true;
             /// <summary>
             /// GUI wet/dry mass
             /// </summary>
@@ -161,7 +161,7 @@ namespace RealChute.Libraries
                 get { return this.useDry; }
             }
 
-            private string mass = "10";
+            private readonly string mass = "10";
             /// <summary>
             /// GUI mass field
             /// </summary>
@@ -170,7 +170,7 @@ namespace RealChute.Libraries
                 get { return this.mass; }
             }
 
-            private string landingSpeed = "6";
+            private readonly string landingSpeed = "6";
             /// <summary>
             /// GUI landing speed field
             /// </summary>
@@ -179,7 +179,7 @@ namespace RealChute.Libraries
                 get { return this.landingSpeed; }
             }
 
-            private string deceleration = "10";
+            private readonly string deceleration = "10";
             /// <summary>
             /// GUI deceleration field
             /// </summary>
@@ -188,7 +188,7 @@ namespace RealChute.Libraries
                 get { return this.deceleration; }
             }
 
-            private string refDepAlt = "700";
+            private readonly string refDepAlt = "700";
             /// <summary>
             /// GUI mains deployment alt field
             /// </summary>
@@ -197,7 +197,7 @@ namespace RealChute.Libraries
                 get { return this.refDepAlt; }
             }
 
-            private string chuteCount = "1";
+            private readonly string chuteCount = "1";
             /// <summary>
             /// GUI chute count field
             /// </summary>
@@ -240,12 +240,10 @@ namespace RealChute.Libraries
             /// <summary>
             /// Creates a ChuteParameters from the given ProceduralChute
             /// </summary>
-            /// <param name="pChute"></param>
-            /// <param name="secondary"></param>
             public ChuteParameters(ProceduralChute pChute, ChuteTemplate chute)
             {
-                TemplateGui templateGui = chute.templateGui;
-                this.material = MaterialsLibrary.Instance.GetMaterial(templateGui.materialsId).Name;
+                TemplateGUI templateGui = chute.templateGUI;
+                this.material = MaterialsLibrary.MaterialsLibrary.Instance.GetMaterial(templateGui.materialsId).Name;
                 this.preDeployedDiameter = templateGui.preDepDiam;
                 this.deployedDiameter = templateGui.depDiam;
                 this.minIsPressure = templateGui.isPressure;
@@ -260,7 +258,7 @@ namespace RealChute.Libraries
                     if (pChute.textures.Canopies.Count > 0) { this.chuteTexture = pChute.textures.GetCanopy(templateGui.chuteId).Name; }
                     if (pChute.textures.Models.Count > 0) { this.modelName = pChute.textures.GetModel(templateGui.modelId).Name; }
                 }
-                this.type = templateGui.TypeId;
+                this.type = templateGui.TypeID;
                 this.calcSelect = templateGui.calcSelect;
                 this.getMass = templateGui.getMass;
                 this.useDry = templateGui.useDry;
@@ -276,7 +274,6 @@ namespace RealChute.Libraries
             /// <summary>
             /// Saves this object to a config node
             /// </summary>
-            /// <param name="secondary">Wether this is the main or secondary chute</param>
             public ConfigNode Save()
             {
                 ConfigNode node = new ConfigNode("CHUTE");
@@ -307,7 +304,7 @@ namespace RealChute.Libraries
         }
 
         #region Propreties
-        private string name = string.Empty;
+        private readonly string name = string.Empty;
         /// <summary>
         /// Name of the preset
         /// </summary>
@@ -316,7 +313,7 @@ namespace RealChute.Libraries
             get { return this.name; }
         }
 
-        private string description = string.Empty;
+        private readonly string description = string.Empty;
         /// <summary>
         /// Description of the preset
         /// </summary>
@@ -325,7 +322,7 @@ namespace RealChute.Libraries
             get { return this.description; }
         }
 
-        private string textureLibrary = string.Empty;
+        private readonly string textureLibrary = string.Empty;
         /// <summary>
         /// TextureLibrary for this part
         /// </summary>
@@ -334,7 +331,7 @@ namespace RealChute.Libraries
             get { return this.textureLibrary; }
         }
 
-        private string sizeId = string.Empty;
+        private readonly string sizeId = string.Empty;
         /// <summary>
         /// Size ID for this chute
         /// </summary>
@@ -343,7 +340,7 @@ namespace RealChute.Libraries
             get { return this.sizeId; }
         }
 
-        private string cutSpeed = "0.5f";
+        private readonly string cutSpeed = "0.5f";
         /// <summary>
         /// Autocut speed for the chute
         /// </summary>
@@ -352,7 +349,7 @@ namespace RealChute.Libraries
             get { return this.cutSpeed; }
         }
 
-        private string timer = "0s";
+        private readonly string timer = "0s";
         /// <summary>
         /// Deployment timer for the chute
         /// </summary>
@@ -361,7 +358,7 @@ namespace RealChute.Libraries
             get { return this.timer; }
         }
 
-        private bool mustGoDown;
+        private readonly bool mustGoDown;
         /// <summary>
         /// MustGoDown clause for this preset
         /// </summary>
@@ -370,7 +367,7 @@ namespace RealChute.Libraries
             get { return this.mustGoDown; }
         }
 
-        private bool deployOnGround;
+        private readonly bool deployOnGround;
         /// <summary>
         /// If this chute automatically deploys on ground contact or not
         /// </summary>
@@ -379,7 +376,7 @@ namespace RealChute.Libraries
             get { return this.deployOnGround; }
         }
 
-        private string spares = "5";
+        private readonly string spares = "5";
         /// <summary>
         /// Amount of spare chutes available
         /// </summary>
@@ -388,7 +385,7 @@ namespace RealChute.Libraries
             get { return this.spares; }
         }
 
-        private string landingAlt = "0";
+        private readonly string landingAlt = "0";
         /// <summary>
         /// Planned landing altitude of the craft
         /// </summary>
@@ -397,7 +394,7 @@ namespace RealChute.Libraries
             get { return this.landingAlt; }
         }
 
-        private string caseName = string.Empty;
+        private readonly string caseName = string.Empty;
         /// <summary>
         /// GUI ID for case texture
         /// </summary>
@@ -406,7 +403,7 @@ namespace RealChute.Libraries
             get { return this.caseName; }
         }
 
-        private List<ChuteParameters> parameters = new List<ChuteParameters>();
+        private readonly List<ChuteParameters> parameters;
         /// <summary>
         /// All parameters for potential chutes
         /// </summary>
@@ -443,8 +440,8 @@ namespace RealChute.Libraries
         /// <param name="pChute">ProceduralChute to create the object from</param>
         public Preset(ProceduralChute pChute)
         {
-            this.name = pChute.editorGui.presetName;
-            this.description = pChute.editorGui.presetDescription;
+            this.name = pChute.editorGUI.presetName;
+            this.description = pChute.editorGUI.presetDescription;
             this.textureLibrary = pChute.textureLibrary;
             if (pChute.sizes.Count > 0) { this.sizeId = pChute.sizes[pChute.size].SizeId; }
             this.cutSpeed = pChute.cutSpeed;

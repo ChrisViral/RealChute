@@ -51,8 +51,8 @@ namespace RealChute
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
             UIRadioButton button = filterByFunction.button.activeButton;
-            button.SetState(UIRadioButton.State.False, UIRadioButton.CallType.APPLICATIONSILENT, null, false);
-            button.SetState(UIRadioButton.State.True, UIRadioButton.CallType.APPLICATIONSILENT, null, false);
+            button.SetState(UIRadioButton.State.False, UIRadioButton.CallType.APPLICATION, null, false);
+            button.SetState(UIRadioButton.State.True, UIRadioButton.CallType.APPLICATION, null, false);
         }
 
         private void AddButton()
@@ -61,16 +61,19 @@ namespace RealChute
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
-                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
-                    Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
-                    (Texture)buttonTexture);
+                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
+                         Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
                 add = false;
             }
         }
 
         private void RemoveButton()
         {
-            ApplicationLauncher.Instance.RemoveModApplication(button);
+            if (!add)
+            {
+                ApplicationLauncher.Instance.RemoveModApplication(button);
+                Destroy(button);
+            }
         }
 
         private void Show()
@@ -78,13 +81,17 @@ namespace RealChute
             if (!visible)
             {
                 settings = new GameObject("SettingsWindow", typeof(SettingsWindow));
+                visible = true;
             }
         }
 
         private void Hide()
         {
-            Destroy(settings);
-            visible = false;
+            if (visible)
+            {
+                Destroy(settings);
+                visible = false;
+            }
         }
 
         private void Empty() { }
@@ -101,7 +108,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible())
             {
                 //Removes RealChute parts from being seen if incompatible
-                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute"))
+                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
                     .ForEach(p => p.category = PartCategories.none);
             }
             else

@@ -45,8 +45,7 @@ namespace RealChute.Extensions
         /// <param name="alt">Altitude to get the pressure at</param>
         public static double GetPressureAtAlt(this CelestialBody body, double alt)
         {
-            if (!body.atmosphere || alt > body.GetMaxAtmosphereAltitude()) { return 0; }
-            return FlightGlobals.getStaticPressure(alt, body);
+            return !body.atmosphere || alt > body.GetMaxAtmosphereAltitude() ? 0 : FlightGlobals.getStaticPressure(alt, body);
         }
 
         /// <summary>
@@ -54,8 +53,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetPressureAsl(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0; }
-            return FlightGlobals.getStaticPressure(0, body);
+            return !body.atmosphere ? 0 : FlightGlobals.getStaticPressure(0, body);
         }
 
         /// <summary>
@@ -63,8 +61,7 @@ namespace RealChute.Extensions
         /// </summary>
         public static double GetMaxAtmosphereAltitude(this CelestialBody body)
         {
-            if (!body.atmosphere) { return 0; }
-            return body.atmosphereDepth;
+            return !body.atmosphere ? 0 : body.atmosphereDepth;
         }
 
         /// <summary>
@@ -75,9 +72,9 @@ namespace RealChute.Extensions
         {
             //Thanks NathanKell for this
             return body.GetTemperature(alt) // base temperature
-                    + body.atmosphereTemperatureSunMultCurve.Evaluate((float)alt) // altitude-based multiplier to temperature delta
-                    * (body.latitudeTemperatureBiasCurve.Evaluate(0) + body.latitudeTemperatureSunMultCurve.Evaluate(1)
-                    + body.axialTemperatureSunMultCurve.Evaluate((float)Math.Sin(body.orbit.inclination * (Math.PI / 180))));
+                    + (body.atmosphereTemperatureSunMultCurve.Evaluate((float)alt) // altitude-based multiplier to temperature delta
+                       * (body.latitudeTemperatureBiasCurve.Evaluate(0) + body.latitudeTemperatureSunMultCurve.Evaluate(1)
+                          + body.axialTemperatureSunMultCurve.Evaluate((float)Math.Sin(body.orbit.inclination * (Math.PI / 180)))));
         }
         #endregion
     }

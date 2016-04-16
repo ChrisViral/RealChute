@@ -1,6 +1,6 @@
 ﻿using System.IO;
 using UnityEngine;
-using RealChute.Libraries;
+using RealChute.Libraries.Presets;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -15,18 +15,14 @@ namespace RealChute
 {
     public class RealChuteSettings
     {
-        #region Fetch
-        private static RealChuteSettings fetch;
+        #region Instance
+        private static RealChuteSettings instance;
         /// <summary>
         /// Returns the current RealChute_Settings config file
         /// </summary>
-        public static RealChuteSettings Fetch
+        public static RealChuteSettings Instance
         {
-            get
-            {
-                if (fetch == null) { fetch = new RealChuteSettings(); }
-                return fetch;
-            }
+            get { return instance ?? (instance = new RealChuteSettings()); }
         }
         #endregion
 
@@ -91,7 +87,7 @@ namespace RealChute
             set { this.activateNyan = value; }
         }
 
-        private ConfigNode[] presets = new ConfigNode[0];
+        private readonly ConfigNode[] presets = new ConfigNode[0];
         /// <summary>
         /// All the current preset nodes
         /// </summary>
@@ -126,12 +122,12 @@ namespace RealChute
                 node = ConfigNode.Load(RCUtils.SettingsURL);
                 bool mustSave = false;
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { SaveSettings(); return; }
-                if (!settings.TryGetValue("autoArm", ref this.autoArm)) { mustSave = true; return; }
-                if (!settings.TryGetValue("jokeActivated", ref this.jokeActivated)) { mustSave = true; return; }
-                if (!settings.TryGetValue("guiResizeUpdates", ref this.guiResizeUpdates)) { mustSave = true; return; }
-                if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; return; }
-                if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; return; }
-                if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; return; }
+                if (!settings.TryGetValue("autoArm", ref this.autoArm)) { mustSave = true; }
+                if (!settings.TryGetValue("jokeActivated", ref this.jokeActivated)) { mustSave = true; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref this.guiResizeUpdates)) { mustSave = true; }
+                if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; }
+                if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; }
+                if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; }
                 this.presets = settings.GetNodes("PRESET");
                 if (mustSave) { SaveSettings(); }
             }
@@ -145,12 +141,12 @@ namespace RealChute
         public static void SaveSettings()
         {
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
-            settings.AddValue("autoArm", Fetch.autoArm);
-            settings.AddValue("jokeActivated", Fetch.jokeActivated);
-            settings.AddValue("guiResizeUpdates", Fetch.guiResizeUpdates);
-            settings.AddValue("mustBeEngineer", Fetch.mustBeEngineer);
-            settings.AddValue("engineerLevel", Fetch.engineerLevel);
-            settings.AddValue("activateNyan", Fetch.activateNyan);
+            settings.AddValue("autoArm", Instance.autoArm);
+            settings.AddValue("jokeActivated", Instance.jokeActivated);
+            settings.AddValue("guiResizeUpdates", Instance.guiResizeUpdates);
+            settings.AddValue("mustBeEngineer", Instance.mustBeEngineer);
+            settings.AddValue("engineerLevel", Instance.engineerLevel);
+            settings.AddValue("activateNyan", Instance.activateNyan);
             if (PresetsLibrary.Instance.Presets.Count > 0)
             {
                 foreach (Preset preset in PresetsLibrary.Instance.Presets.Values)

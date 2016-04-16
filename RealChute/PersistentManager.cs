@@ -24,8 +24,8 @@ namespace RealChute
         #endregion
 
         #region Fields
-        private static Dictionary<string, List<SizeNode>> sizes = new Dictionary<string, List<SizeNode>>();
-        private static Dictionary<Type, Dictionary<string, ConfigNode>> nodes = new Dictionary<Type, Dictionary<string, ConfigNode>>();
+        private static readonly Dictionary<string, List<SizeNode>> sizes = new Dictionary<string, List<SizeNode>>();
+        private static readonly Dictionary<Type, Dictionary<string, ConfigNode>> nodes = new Dictionary<Type, Dictionary<string, ConfigNode>>();
         #endregion
 
         #region Functions
@@ -92,6 +92,7 @@ namespace RealChute
         /// </summary>
         /// <typeparam name="T">PartModule type</typeparam>
         /// <param name="name">Part name to get the node for</param>
+        /// <param name="node">Stored module confignode</param>
         public bool TryGetNode<T>(string name, ref ConfigNode node) where T : PartModule
         {
             Dictionary<string, ConfigNode> dict;

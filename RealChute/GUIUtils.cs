@@ -15,13 +15,6 @@ namespace RealChute
 {
     public static class GuiUtils
     {
-        #region Fields
-        /// <summary>
-        /// The KSP GUISkins
-        /// </summary>
-        private static GUISkin skins = HighLogic.Skin;
-        #endregion
-
         #region Properties
         private static GUIStyle redLabel;
         /// <summary>
@@ -33,7 +26,7 @@ namespace RealChute
             {
                 if (redLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(skins.label);
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
                     style.normal.textColor = XKCDColors.Red;
                     style.hover.textColor = XKCDColors.Red;
                     redLabel = style;
@@ -52,7 +45,7 @@ namespace RealChute
             {
                 if (yellowLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(skins.label);
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
                     style.normal.textColor = XKCDColors.BrightYellow;
                     style.hover.textColor = XKCDColors.BrightYellow;
                     yellowLabel = style;
@@ -71,7 +64,7 @@ namespace RealChute
             {
                 if (boldLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(skins.label);
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
                     style.fontStyle = FontStyle.Bold;
                     boldLabel = style;
                 }
@@ -118,7 +111,7 @@ namespace RealChute
         public static bool TryParseTime(string text, out float result)
         {
             if (string.IsNullOrEmpty(text)) { result = 0; return false; }
-            float multiplier = 1, f = 0;
+            float multiplier = 1, f;
             char indicator = text[text.Length - 1];
             if (timeSuffixes.Contains(indicator))
             {
@@ -190,10 +183,10 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -210,10 +203,10 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -230,10 +223,10 @@ namespace RealChute
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
             float f;
-            if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
+            if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
             GUILayout.EndHorizontal();
         }
 
@@ -249,10 +242,10 @@ namespace RealChute
             if (buttons == null) { buttons = toggles; }
             GUILayout.Space(5);
             GUILayout.BeginHorizontal(GUILayout.MaxWidth(maxWidth));
-            GUILayout.Label(label, skins.label);
-            if (GUILayout.Toggle(value, buttons[0], skins.toggle)) { value = true; }
+            GUILayout.Label(label);
+            if (GUILayout.Toggle(value, buttons[0])) { value = true; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!value, buttons[1], skins.toggle)) { value = false; }
+            if (GUILayout.Toggle(!value, buttons[1])) { value = false; }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
@@ -261,15 +254,15 @@ namespace RealChute
         /// Creates a centered GUI button
         /// </summary>
         /// <param name="text">Button text</param>
-        /// <param name="action">Action on button click</param>
+        /// <param name="callback">Action on button click</param>
         /// <param name="width">Width of the button</param>
-        public static void CenteredButton(string text, Action action, float width = 150)
+        public static void CenteredButton(string text, Callback callback, float width = 150)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             if (GUILayout.Button(text, HighLogic.Skin.button, GUILayout.Width(width)))
             {
-                action();
+                callback();
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
