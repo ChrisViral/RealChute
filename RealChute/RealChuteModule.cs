@@ -286,7 +286,7 @@ namespace RealChute
                 if (this.vessel.isActiveVessel)
                 {
                     float time = this.timer - (float)this.deploymentTimer.Elapsed.TotalSeconds;
-                    this.screenMessage = time < 60 ? String.Format("Deployment in {0:0.0}s", time) : String.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time));
+                    this.screenMessage = time < 60 ? string.Format("Deployment in {0:0.0}s", time) : string.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time));
                 }
             }
             else if (this.deploymentTimer.IsRunning) { this.deploymentTimer.Stop(); }
@@ -298,7 +298,7 @@ namespace RealChute
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    this.screenMessage += String.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed);
+                    this.screenMessage += string.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed);
                 }
             }
 
@@ -508,7 +508,7 @@ namespace RealChute
             
             if (this.showMessage)
             {
-                ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime, ScreenMessageStyle.UPPER_CENTER);
+                ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime * 0.6f, ScreenMessageStyle.UPPER_CENTER);
             }
 
             this.Disarm.active = this.armed || this.showDisarm;
@@ -663,19 +663,6 @@ namespace RealChute
                 GameEvents.onShowUI.Add(ShowUI);
 
                 if (this.CanRepack) { SetRepack(); }
-
-                foreach(DragCube cube in this.part.DragCubes.Cubes)
-                {
-                    switch (cube.Name)
-                    {
-                        case "PACKED":
-                            this.part.DragCubes.SetCubeWeight("PACKED", 1); break;
-
-                        case "SEMIDEPLOYED":
-                        case "DEPLOYED":
-                            this.part.DragCubes.SetCubeWeight(cube.Name, 0); break;
-                    }
-                }
             }
 
             //GUI
