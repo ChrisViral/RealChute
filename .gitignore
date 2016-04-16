@@ -54,6 +54,7 @@ ipch/
 
 # ReSharper is a .NET coding add-in
 _ReSharper*
+*.DotSettings
 
 # NCrunch
 *.ncrunch*
@@ -102,7 +103,7 @@ ClientBin
 Thumbs.db
 ToDo.txt
 [Rr]elease/
-[Gg]ame/
+autocopy.bat
 *.ini
 Generated_Code #added for RIA/Silverlight projects
 
