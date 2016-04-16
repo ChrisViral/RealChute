@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -18,40 +17,40 @@ namespace RealChute.Libraries
         public class ModelParameters
         {
             #region Propreties
-            private string _modelURL = string.Empty;
+            private string modelURL = string.Empty;
             /// <summary>
             /// The string URL of the GameObject
             /// </summary>
-            public string modelURL
+            public string ModelURL
             {
-                get { return this._modelURL; }
+                get { return this.modelURL; }
             }
 
-            private string _transformName = string.Empty;
+            private string transformName = string.Empty;
             /// <summary>
             /// The name of the parachute transform
             /// </summary>
-            public string transformName
+            public string TransformName
             {
-                get { return this._transformName; }
+                get { return this.transformName; }
             }
 
-            private string _preDepAnim = string.Empty;
+            private string preDepAnim = string.Empty;
             /// <summary>
             /// The name of the predeployment animation
             /// </summary>
-            public string preDepAnim
+            public string PreDepAnim
             {
-                get { return this._preDepAnim; }
+                get { return this.preDepAnim; }
             }
 
-            private string _depAnim = string.Empty;
+            private string depAnim = string.Empty;
             /// <summary>
             /// The name of the deployment animation
             /// </summary>
-            public string depAnim
+            public string DepAnim
             {
-                get { return this._depAnim; }
+                get { return this.depAnim; }
             }
             #endregion
 
@@ -62,58 +61,58 @@ namespace RealChute.Libraries
             /// <param name="node">ConfigNode to get the values from</param>
             public ModelParameters(ConfigNode node)
             {
-                node.TryGetValue("modelURL", ref _modelURL);
-                node.TryGetValue("transformName", ref _transformName);
-                node.TryGetValue("preDepAnim", ref _preDepAnim);
-                node.TryGetValue("depAnim", ref _depAnim);
+                node.TryGetValue("modelURL", ref this.modelURL);
+                node.TryGetValue("transformName", ref this.transformName);
+                node.TryGetValue("preDepAnim", ref this.preDepAnim);
+                node.TryGetValue("depAnim", ref this.depAnim);
             }
             #endregion
         }
 
         #region Propreties
-        private string _name = string.Empty;
+        private string name = string.Empty;
         /// <summary>
         /// Name of the model
         /// </summary>
-        public string name
+        public string Name
         {
-            get { return this._name; }
+            get { return this.name; }
         }
 
-        private float _diameter = 10;
+        private float diameter = 10;
         /// <summary>
         /// Diameter of the parachutes at 1, 1, 1
         /// </summary>
-        public float diameter
+        public float Diameter
         {
-            get { return this._diameter; }
+            get { return this.diameter; }
         }
 
-        private int _count = 1;
+        private int count = 1;
         /// <summary>
         /// Number of parachutes visually per transform
         /// </summary>
-        public int count
+        public int Count
         {
-            get { return this._count; }
+            get { return this.count; }
         }
 
-        private float _maxDiam = 70;
+        private float maxDiam = 70;
         /// <summary>
         /// Maximum diameter this parachute can have
         /// </summary>
-        public float maxDiam
+        public float MaxDiam
         {
-            get { return this._maxDiam; }
+            get { return this.maxDiam; }
         }
 
-        private List<ModelParameters> _parameters = new List<ModelParameters>();
+        private List<ModelParameters> parameters = new List<ModelParameters>();
         /// <summary>
         /// Parameters for all potential chutes to be used with this model
         /// </summary>
-        public List<ModelParameters> parameters
+        public List<ModelParameters> Parameters
         {
-            get { return this._parameters; }
+            get { return this.parameters; }
         }
         #endregion
 
@@ -129,11 +128,11 @@ namespace RealChute.Libraries
         /// <param name="node">ConfigNode to get the values from</param>
         public ModelConfig(ConfigNode node)
         {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("diameter", ref _diameter);
-            node.TryGetValue("count", ref _count);
-            node.TryGetValue("maxDiam", ref _maxDiam);
-            _parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
+            node.TryGetValue("name", ref this.name);
+            node.TryGetValue("diameter", ref this.diameter);
+            node.TryGetValue("count", ref this.count);
+            node.TryGetValue("maxDiam", ref this.maxDiam);
+            this.parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
         }
         #endregion
     }

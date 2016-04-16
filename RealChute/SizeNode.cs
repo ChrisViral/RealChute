@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -15,76 +14,76 @@ namespace RealChute
     public class SizeNode
     {
         #region Propreties
-        private Vector3 _size = Vector3.one;
+        private Vector3 size = Vector3.one;
         /// <summary>
         /// Size of the parachute
         /// </summary>
-        public Vector3 size
+        public Vector3 Size
         {
-            get { return this._size; }
+            get { return this.size; }
         }
 
-        private string _sizeID = string.Empty;
+        private string sizeId = string.Empty;
         /// <summary>
         /// Identifier for this size
         /// </summary>
-        public string sizeID
+        public string SizeId
         {
-            get { return this._sizeID; }
+            get { return this.sizeId; }
         }
 
-        private float _caseMass = 0.1f;
+        private float caseMass = 0.1f;
         /// <summary>
         /// Case mass for this size
         /// </summary>
-        public float caseMass
+        public float CaseMass
         {
-            get { return this._caseMass; }
+            get { return this.caseMass; }
         }
 
-        private Vector3 _topNode = Vector3.zero;
+        private Vector3 topNode = Vector3.zero;
         /// <summary>
         /// Position of the top node if any
         /// </summary>
-        public Vector3 topNode
+        public Vector3 TopNode
         {
-            get { return this._topNode; }
+            get { return this.topNode; }
         }
 
-        private int _topNodeSize = -1;
+        private int topNodeSize = -1;
         /// <summary>
         /// Size of the top node if any
         /// </summary>
-        public int topNodeSize
+        public int TopNodeSize
         {
-            get { return this._topNodeSize; }
+            get { return this.topNodeSize; }
         }
 
-        private Vector3 _bottomNode = Vector3.zero;
+        private Vector3 bottomNode = Vector3.zero;
         /// <summary>
         /// Position of the bottom node if any
         /// </summary>
-        public Vector3 bottomNode
+        public Vector3 BottomNode
         {
-            get { return this._bottomNode; }
+            get { return this.bottomNode; }
         }
 
-        private int _bottomNodeSize = -1;
+        private int bottomNodeSize = -1;
         /// <summary>
         /// Size of the bottom node if any
         /// </summary>
-        public int bottomNodeSize
+        public int BottomNodeSize
         {
-            get { return this._bottomNodeSize; }
+            get { return this.bottomNodeSize; }
         }
 
-        private float _cost = 400;
+        private float cost = 400;
         /// <summary>
         /// The cost of this case
         /// </summary>
-        public float cost
+        public float Cost
         {
-            get { return this._cost; }
+            get { return this.cost; }
         }
         #endregion
 
@@ -95,14 +94,14 @@ namespace RealChute
         /// <param name="node">ConfigNode to create the object from</param>
         public SizeNode(ConfigNode node)
         {
-            node.TryGetValue("size", ref this._size);
-            node.TryGetValue("sizeID", ref this._sizeID);
-            node.TryGetValue("caseMass", ref this._caseMass);
-            node.TryGetValue("topNode", ref this._topNode);
-            node.TryGetValue("topNodeSize", ref this._topNodeSize);
-            node.TryGetValue("bottomNode", ref this._bottomNode);
-            node.TryGetValue("bottomNodeSize", ref this._bottomNodeSize);
-            node.TryGetValue("cost", ref this._cost);
+            node.TryGetValue("size", ref this.size);
+            node.TryGetValue("sizeID", ref this.sizeId);
+            node.TryGetValue("caseMass", ref this.caseMass);
+            node.TryGetValue("topNode", ref this.topNode);
+            node.TryGetValue("topNodeSize", ref this.topNodeSize);
+            node.TryGetValue("bottomNode", ref this.bottomNode);
+            node.TryGetValue("bottomNodeSize", ref this.bottomNodeSize);
+            node.TryGetValue("cost", ref this.cost);
         }
         #endregion
     }

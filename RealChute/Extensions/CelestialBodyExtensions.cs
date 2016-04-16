@@ -15,7 +15,7 @@ namespace RealChute.Extensions
     public static class CelestialBodyExtensions
     {
         #region Methods
-        private static bool disabled = false;
+        private static bool disabled;
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
         /// </summary>
@@ -24,11 +24,11 @@ namespace RealChute.Extensions
         public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature)
         {
             if (!body.atmosphere || alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            if (RCUtils.FARLoaded && !disabled)
+            if (RCUtils.FarLoaded && !disabled)
             {
                 try
                 {
-                    return (double)RCUtils.densityMethod.Invoke(null, new object[] { body, alt, false });
+                    return (double)RCUtils.DensityMethod.Invoke(null, new object[] { body, alt, false });
                 }
                 catch (Exception e)
                 {
@@ -52,7 +52,7 @@ namespace RealChute.Extensions
         /// <summary>
         /// Gets the atmospheric pressure at seal level on the given body
         /// </summary>
-        public static double GetPressureASL(this CelestialBody body)
+        public static double GetPressureAsl(this CelestialBody body)
         {
             if (!body.atmosphere) { return 0; }
             return FlightGlobals.getStaticPressure(0, body);

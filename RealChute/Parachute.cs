@@ -22,72 +22,72 @@ namespace RealChute
     {
         #region Propreties
         //Predeployed area of the chute
-        public float preDeployedArea
+        public float PreDeployedArea
         {
             get { return RCUtils.GetArea(this.preDeployedDiameter); }
         }
 
         //Deployed area of the chute
-        public float deployedArea
+        public float DeployedArea
         {
             get { return RCUtils.GetArea(this.deployedDiameter); }
         }
 
         //Mass of the chute
-        public float chuteMass
+        public float ChuteMass
         {
-            get { return this.deployedArea * this.mat.areaDensity; }
+            get { return this.DeployedArea * this.mat.AreaDensity; }
         }
 
         //The inverse of the thermal mass of the parachute
-        private double invThermalMass
+        private double InvThermalMass
         {
             get
             {
-                if (this.thermMass == 0) { this.thermMass = 1d / (this.mat.specificHeat * this.chuteMass); }
+                if (this.thermMass == 0) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
                 return this.thermMass;
             }
         }
 
         //The current useful convection area
-        private double convectionArea
+        private double ConvectionArea
         {
             get
             {
-                if (this.deploymentState == DeploymentStates.PREDEPLOYED && this.dragTimer.elapsed.Seconds < this.preDeploymentSpeed)
+                if (this.DeploymentState == DeploymentStates.PREDEPLOYED && this.dragTimer.Elapsed.Seconds < this.preDeploymentSpeed)
                 {
-                    return UtilMath.Lerp(0, this.deployedArea, this.dragTimer.elapsed.Seconds / this.preDeploymentSpeed);
+                    return UtilMath.Lerp(0, this.DeployedArea, this.dragTimer.Elapsed.Seconds / this.preDeploymentSpeed);
                 }
-                return this.deployedArea;
+                return this.DeployedArea;
             }
         }
 
         //Part this chute is associated with
-        private Part part
+        private Part Part
         {
             get { return this.module.part; }
         }
 
         //Vessel this chute is associated with
-        private Vessel vessel
+        private Vessel Vessel
         {
             get { return this.module.vessel; }
         }
 
         //Position to apply the force to
-        public Vector3 forcePosition
+        public Vector3 ForcePosition
         {
             get { return this.parachute.position; }
         }
 
         //If the random deployment timer has been spent
-        public bool randomDeployment
+        public bool RandomDeployment
         {
             get
             {
-                if (!this.randomTimer.isRunning) { this.randomTimer.Start(); }
+                if (!this.randomTimer.IsRunning) { this.randomTimer.Start(); }
 
-                if (this.randomTimer.elapsed.TotalSeconds >= this.randomTime)
+                if (this.randomTimer.Elapsed.TotalSeconds >= this.randomTime)
                 {
                     this.randomTimer.Reset();
                     return true;
@@ -97,40 +97,40 @@ namespace RealChute
         }
 
         //If the parachute has passed the minimum deployment clause
-        public bool deploymentClause
+        public bool DeploymentClause
         {
             get
             {
                 if (this.minIsPressure) { return this.module.atmPressure >= this.minPressure; }
-                else if (this.minDeployment == 0) { return this.part.vessel.LandedOrSplashed; }
+                else if (this.minDeployment == 0) { return this.Part.vessel.LandedOrSplashed; }
                 return this.module.trueAlt <= this.minDeployment;
             }
         }
 
         //If the parachute can deploy
-        public bool canDeploy
+        public bool CanDeploy
         {
             get
             {
-                if (this.module.groundStop || this.module.atmPressure == 0 || this.part.ShieldedFromAirstream) { return false; }
-                else if (this.deploymentState == DeploymentStates.CUT) { return false; }
-                else if (this.deploymentClause)
+                if (this.module.GroundStop || this.module.atmPressure == 0 || this.Part.ShieldedFromAirstream) { return false; }
+                else if (this.DeploymentState == DeploymentStates.CUT) { return false; }
+                else if (this.DeploymentClause)
                 {
                     if (this.cutAlt == -1) { return true; }
                     else if (this.module.trueAlt > this.cutAlt) { return true; }
                 }
-                else if (this.module.secondaryChute && this.parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
-                else if (this.isDeployed) { return true; }
+                else if (this.module.SecondaryChute && this.Parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
+                else if (this.IsDeployed) { return true; }
                 return false;
             }
         }
 
         //If the parachute is deployed
-        public bool isDeployed
+        public bool IsDeployed
         {
             get
             {
-                switch (this.deploymentState)
+                switch (this.DeploymentState)
                 {
                     case DeploymentStates.PREDEPLOYED:
                     case DeploymentStates.LOWDEPLOYED:
@@ -144,14 +144,14 @@ namespace RealChute
         }
 
         //The added vector to drag to angle the parachute
-        private Vector3 forcedVector
+        private Vector3 ForcedVector
         {
             get
             {
                 if (this.check)
                 {
-                    if (forcedOrientation >= 90 || forcedOrientation <= 0) { this.forced = Vector3.zero; }
-                    Vector3 follow = this.forcePosition - this.module.pos;
+                    if (this.forcedOrientation >= 90 || this.forcedOrientation <= 0) { this.forced = Vector3.zero; }
+                    Vector3 follow = this.ForcePosition - this.module.pos;
                     float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
                     this.forced = follow.normalized * length;
                 }
@@ -160,13 +160,13 @@ namespace RealChute
         }
 
         //The parachutes of the associated module
-        public List<Parachute> parachutes
+        public List<Parachute> Parachutes
         {
             get { return this.module.parachutes; }
         }
 
         //Gets/sets the DeploymentState correctly
-        public DeploymentStates deploymentState
+        public DeploymentStates DeploymentState
         {
             get
             {
@@ -185,35 +185,35 @@ namespace RealChute
         //Parachute
         public string material = "Nylon";
         public float preDeployedDiameter = 1, deployedDiameter = 25;
-        public bool minIsPressure = false, capOff = false;
+        public bool minIsPressure, capOff;
         public float minDeployment = 25000, minPressure = 0.01f;
         public float deploymentAlt = 700, cutAlt = -1;
         public float preDeploymentSpeed = 2, deploymentSpeed = 6;
-        public double time = 0;
+        public double time;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
-        public float forcedOrientation = 0;
+        public float forcedOrientation;
         public string depState = "STOWED";
-        public double currentArea = 0, chuteTemperature = 300, thermMass = 0;
-        private double convectiveFlux = 0;
+        public double currentArea, chuteTemperature = 300, thermMass;
+        private double convectiveFlux;
         private SafeState safeState = SafeState.SAFE;
 
         //Flight
-        internal RealChuteModule module = null;
+        internal RealChuteModule module;
         internal bool secondary = false;
-        private Animation anim = null;
-        internal Transform parachute = null, cap = null;
-        private Rigidbody rigidbody = null;
+        private Animation anim;
+        internal Transform parachute, cap;
+        private Rigidbody rigidbody;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
-        internal bool played = false;
+        internal bool played;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
         private Random random = new Random();
         internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private GUISkin skins = HighLogic.Skin;
         private bool check = true;
-        private Vector3 forced = new Vector3();
+        private Vector3 forced;
         #endregion
 
         #region Constructor
@@ -240,9 +240,9 @@ namespace RealChute
         //Lerps the drag vector between upright and the forced angle
         private Vector3 LerpDrag(Vector3 to)
         {
-            if (this.phase.magnitude < (to.magnitude - 0.01f) || this.phase.magnitude > (to.magnitude + 0.01f)) { this.phase = Vector3.Lerp(this.phase, to, 0.01f); }
+            if (this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f) { this.phase = Vector3.Lerp(this.phase, to, 0.01f); }
             else { this.phase = to; }
-            return phase;
+            return this.phase;
         }
 
         //Makes the canopy follow drag direction
@@ -250,7 +250,7 @@ namespace RealChute
         {
             //Smoothes the forced vector
             Vector3 orient = Vector3.zero;
-            if (this.module.secondaryChute) { orient = LerpDrag(this.module.manyDeployed ? this.forcedVector : Vector3.zero); }
+            if (this.module.SecondaryChute) { orient = LerpDrag(this.module.ManyDeployed ? this.ForcedVector : Vector3.zero); }
 
             Vector3 follow = this.module.dragVector + orient;
             if (follow.sqrMagnitude > 0)
@@ -264,41 +264,43 @@ namespace RealChute
         //Parachute low deployment
         public void LowDeploy()
         {
-            this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+            this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.capOff = true;
-            this.part.Effect("rcdeploy");
-            this.deploymentState = DeploymentStates.LOWDEPLOYED;
+            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            else { this.Part.Effect("rcdeploy"); }
+            this.DeploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
             this.cap.gameObject.SetActive(false);
-            if (this.dragTimer.elapsedMilliseconds != 0) { this.part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
-            else { this.part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
+            if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
+            else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
         }
 
         //Parachute predeployment
         public void PreDeploy()
         {
-            this.part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+            this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.capOff = true;
-            this.part.Effect("rcpredeploy");
-            this.deploymentState = DeploymentStates.PREDEPLOYED;
+            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            else { this.Part.Effect("rcpredeploy"); }
+            this.DeploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
             this.cap.gameObject.SetActive(false);
-            if (this.dragTimer.elapsedMilliseconds != 0) { this.part.SkipToAnimationEnd(this.preDeploymentAnimation); }
-            else { this.part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
+            if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.preDeploymentAnimation); }
+            else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
         }
 
         //Parachute deployment
         public void Deploy()
         {
-            this.part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            this.part.Effect("rcdeploy");
-            this.deploymentState = DeploymentStates.DEPLOYED;
-            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation))
+            this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+            if (!RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("rcdeploy"); }
+            this.DeploymentState = DeploymentStates.DEPLOYED;
+            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation))
             {
                 this.dragTimer.Restart();
-                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
                 this.played = true;
             }
             else { this.played = false; }
@@ -307,12 +309,13 @@ namespace RealChute
         //Parachute cutting
         public void Cut()
         {
-            this.part.Effect("rccut");
-            this.deploymentState = DeploymentStates.CUT;
+            if (RealChuteSettings.Fetch.ActivateNyan) { this.Part.Effect("nyan", 0); }
+            else { this.Part.Effect("rccut"); }
+            this.DeploymentState = DeploymentStates.CUT;
             this.parachute.gameObject.SetActive(false);
             this.played = false;
-            if (!this.module.secondaryChute || this.parachutes.TrueForAll(p => p.deploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
-            else if (this.module.secondaryChute && this.parachutes.Exists(p => p.deploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
+            if (!this.module.SecondaryChute || this.Parachutes.TrueForAll(p => p.DeploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
+            else if (this.module.SecondaryChute && this.Parachutes.Exists(p => p.DeploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             this.dragTimer.Reset();
             this.currentArea = 0;
             this.chuteTemperature = RCUtils.startTemp;
@@ -321,7 +324,7 @@ namespace RealChute
         //Repack actions
         public void Repack()
         {
-            this.deploymentState = DeploymentStates.STOWED;
+            this.DeploymentState = DeploymentStates.STOWED;
             this.randomTimer.Reset();
             this.randomTime = (float)this.random.NextDouble();
             this.dragTimer.Reset();
@@ -333,9 +336,9 @@ namespace RealChute
         //Calculates parachute deployed area
         private float DragDeployment(float time, float debutArea, float endArea)
         {
-            if (!this.dragTimer.isRunning) { this.dragTimer.Start(); }
+            if (!this.dragTimer.IsRunning) { this.dragTimer.Start(); }
 
-            this.time = this.dragTimer.elapsed.TotalSeconds;
+            this.time = this.dragTimer.Elapsed.TotalSeconds;
             if (this.time <= time)
             {
                 float deploymentTime = (float)(Math.Exp(this.time - time) * (this.time / time));
@@ -349,45 +352,45 @@ namespace RealChute
         //Drag force vector
         private Vector3 DragForce(float startArea, float targetArea, float time)
         {
-            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.dragCoefficient) * this.module.dragVector * (RealChuteSettings.fetch.jokeActivated ? -1 : 1);
+            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient) * this.module.dragVector * (RealChuteSettings.Fetch.JokeActivated ? -1 : 1);
         }
 
         //Parachute function
         internal void UpdateParachute()
         {
-            if (this.canDeploy)
+            if (this.CanDeploy)
             {
                 this.module.oneWasDeployed = true;
-                if (this.isDeployed)
+                if (this.IsDeployed)
                 {
-                    if (!this.CalculateChuteTemp()) { return; }
+                    if (!CalculateChuteTemp()) { return; }
                     FollowDragDirection();
                 }
 
-                this.part.GetComponentCached(ref this.rigidbody);
-                switch (this.deploymentState)
+                this.Part.GetComponentCached(ref this.rigidbody);
+                switch (this.DeploymentState)
                 {
                     case DeploymentStates.STOWED:
                         {
-                            this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                            if (this.module.trueAlt > this.deploymentAlt && this.deploymentClause && this.randomDeployment) { PreDeploy(); }
-                            else if (this.module.trueAlt <= this.deploymentAlt && this.randomDeployment) { LowDeploy(); }
+                            this.Part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+                            if (this.module.trueAlt > this.deploymentAlt && this.DeploymentClause && this.RandomDeployment) { PreDeploy(); }
+                            else if (this.module.trueAlt <= this.deploymentAlt && this.RandomDeployment) { LowDeploy(); }
                             break;
                         }
 
                     case DeploymentStates.PREDEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(0, this.preDeployedArea, this.preDeploymentSpeed), this.forcePosition, ForceMode.Force);
+                            this.rigidbody.AddForceAtPosition(DragForce(0, this.PreDeployedArea, this.preDeploymentSpeed), this.ForcePosition, ForceMode.Force);
                             if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
                             break;
                         }
                     case DeploymentStates.LOWDEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(0, this.deployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.forcePosition, ForceMode.Force);
-                            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
+                            this.rigidbody.AddForceAtPosition(DragForce(0, this.DeployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.ForcePosition, ForceMode.Force);
+                            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();
-                                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+                                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
                                 this.played = true;
                             }
                             break;
@@ -395,11 +398,11 @@ namespace RealChute
 
                     case DeploymentStates.DEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(this.preDeployedArea, this.deployedArea, this.deploymentSpeed), this.forcePosition, ForceMode.Force);
-                            if (!this.part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
+                            this.rigidbody.AddForceAtPosition(DragForce(this.PreDeployedArea, this.DeployedArea, this.deploymentSpeed), this.ForcePosition, ForceMode.Force);
+                            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();
-                                this.part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+                                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
                                 this.played = true;
                             }
                             break;
@@ -409,16 +412,16 @@ namespace RealChute
                 }
             }
             //Deactivation
-            else if (!this.canDeploy && this.isDeployed) { Cut(); }
+            else if (!this.CanDeploy && this.IsDeployed) { Cut(); }
         }
 
         //Gets convective flux
         //Thanks to Starwaster for an overheating bug fix here
         public void CalculateConvectiveFlux()
         {
-            this.convectiveFlux = this.vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.vessel.mach * this.vessel.mach * this.vessel.mach)* (this.vessel.dynamicPressurekPa / 101.325)),
-                (this.vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / (PhysicsGlobals.FullToCrossSectionLerpEnd))
-                * (this.vessel.externalTemperature - this.chuteTemperature);
+            this.convectiveFlux = this.Vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
+                (this.Vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / PhysicsGlobals.FullToCrossSectionLerpEnd)
+                * (this.Vessel.externalTemperature - this.chuteTemperature);
         }
 
         //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
@@ -430,14 +433,14 @@ namespace RealChute
             if (this.chuteTemperature > 0)
             {
                 double temp2 = this.chuteTemperature * this.chuteTemperature;
-                emissiveFlux = 2 * PhysicsGlobals.StefanBoltzmanConstant * this.mat.emissivity * PhysicsGlobals.RadiationFactor * temp2 * temp2;
+                emissiveFlux = 2 * PhysicsGlobals.StefanBoltzmanConstant * this.mat.Emissivity * PhysicsGlobals.RadiationFactor * temp2 * temp2;
             }
 
             this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature,
-                this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.invThermalMass * this.convectionArea * TimeWarp.fixedDeltaTime * 0.001));
-            if (this.chuteTemperature > this.mat.maxTemp)
+                this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.InvThermalMass * this.ConvectionArea * TimeWarp.fixedDeltaTime * 0.001));
+            if (this.chuteTemperature > this.mat.MaxTemp)
             {
-                ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+                ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.Part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
                 Cut();
                 return false;
             }
@@ -447,10 +450,10 @@ namespace RealChute
         //Returns if the parachute can safely open or not
         public SafeState GetSafeState()
         {
-            if (this.vessel.externalTemperature <= this.mat.maxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
+            if (this.Vessel.externalTemperature <= this.mat.MaxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
             else
             {
-                if (this.chuteTemperature + (0.00035 * this.invThermalMass * this.convectiveFlux * this.deployedArea) <= this.mat.maxTemp) { this.safeState = SafeState.RISKY; }
+                if (this.chuteTemperature + (0.00035 * this.InvThermalMass * this.convectiveFlux * this.DeployedArea) <= this.mat.MaxTemp) { this.safeState = SafeState.RISKY; }
                 else { this.safeState = SafeState.DANGEROUS; }
             }
             return this.safeState;
@@ -462,17 +465,17 @@ namespace RealChute
             this.module.materials.TryGetMaterial(this.material, ref this.mat);
 
             //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
-            this.anim = this.part.FindModelAnimators(this.capName).FirstOrDefault();
+            this.anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
 
-            this.cap = this.part.FindModelTransform(this.capName);
-            this.parachute = this.part.FindModelTransform(this.parachuteName);
+            this.cap = this.Part.FindModelTransform(this.capName);
+            this.parachute = this.Part.FindModelTransform(this.parachuteName);
             if (this.parachute == null && !string.IsNullOrEmpty(this.baseParachuteName))
             {
-                this.parachute = this.part.FindModelTransform(this.baseParachuteName);
+                this.parachute = this.Part.FindModelTransform(this.baseParachuteName);
             }
             this.parachute.gameObject.SetActive(true);
-            this.part.InitiateAnimation(this.preDeploymentAnimation);
-            this.part.InitiateAnimation(this.deploymentAnimation);
+            this.Part.InitiateAnimation(this.preDeploymentAnimation);
+            this.Part.InitiateAnimation(this.deploymentAnimation);
             this.parachute.gameObject.SetActive(false);
 
             if (string.IsNullOrEmpty(this.baseParachuteName)) { this.baseParachuteName = this.parachuteName; }
@@ -490,13 +493,13 @@ namespace RealChute
                 if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
                 if (this.capOff)
                 {
-                    this.part.stackIcon.SetIconColor(XKCDColors.Red);
+                    this.Part.stackIcon.SetIconColor(XKCDColors.Red);
                     this.cap.gameObject.SetActive(false);
                 }
 
-                if (this.module.staged && this.deploymentState != DeploymentStates.CUT)
+                if (this.module.staged && this.DeploymentState != DeploymentStates.CUT)
                 {
-                    this.deploymentState = DeploymentStates.STOWED;
+                    this.DeploymentState = DeploymentStates.STOWED;
                 }
             }
         }
@@ -504,14 +507,14 @@ namespace RealChute
 
         #region GUI
         //Info window GUI
-        internal void UpdateGUI()
+        internal void UpdateGui()
         {
             //Initial label
             StringBuilder builder = new StringBuilder();
-            builder.Append("Material: ").AppendLine(this.mat.name);
-            builder.Append("Drag coefficient: ").AppendLine(this.mat.dragCoefficient.ToString("0.00#"));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.preDeployedArea.ToString("0.###")).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.deployedArea.ToString("0.###")).Append("m²");
+            builder.Append("Material: ").AppendLine(this.mat.Name);
+            builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
+            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
+            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###")).Append("m²");
             GUILayout.Label(builder.ToString(), this.skins.label);
 
             if (HighLogic.LoadedSceneIsFlight)
@@ -520,20 +523,20 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        GUILayout.Label("Deployment safety: safe", skins.label); break;
+                        GUILayout.Label("Deployment safety: safe", this.skins.label); break;
 
                     case SafeState.RISKY:
-                        GUILayout.Label("Deployment safety: risky", GUIUtils.yellowLabel); break;
+                        GUILayout.Label("Deployment safety: risky", GuiUtils.YellowLabel); break;
 
                     case SafeState.DANGEROUS:
-                        GUILayout.Label("Deployment safety: dangerous", GUIUtils.redLabel); break;
+                        GUILayout.Label("Deployment safety: dangerous", GuiUtils.RedLabel); break;
                 }
 
                 //Temperature info
                 builder = new StringBuilder();
-                builder.Append("Chute max temperature: ").Append(this.mat.maxTemp + RCUtils.absoluteZero).AppendLine("°C");
+                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.absoluteZero).AppendLine("°C");
                 builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.absoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
-                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.maxTemp > 0.85 ? GUIUtils.redLabel : this.skins.label);
+                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : this.skins.label);
 
 
                 //Pressure/altitude predeployment toggle
@@ -604,13 +607,13 @@ namespace RealChute
         //Copies the given values to the other parachutes
         private void CopyToOthers(Action<Parachute> action)
         {
-            if (this.module.secondaryChute)
+            if (this.module.SecondaryChute)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Copy to symmetry counterparts", this.skins.button, GUILayout.Height(20), GUILayout.Width(100)))
                 {
-                    foreach (Parachute p in this.parachutes)
+                    foreach (Parachute p in this.Parachutes)
                     {
                         if (p == this) { continue; }
                         action(p);
@@ -648,8 +651,8 @@ namespace RealChute
             node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
             node.TryGetValue("depState", ref this.depState);
-            MaterialsLibrary.instance.TryGetMaterial(this.material, ref this.mat);
-            Transform p = this.part.FindModelTransform(this.parachuteName);
+            MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
+            Transform p = this.Part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
         }
 

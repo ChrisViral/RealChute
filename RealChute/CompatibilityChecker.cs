@@ -80,7 +80,7 @@ namespace RealChute
         }
 
         //Version of the compatibility checker itself.
-        private static int _version = 5;
+        private static int version = 5;
 
         public void Start()
         {
@@ -94,13 +94,13 @@ namespace RealChute
                 .ToArray();
 
             //Let the latest version of the checker execute.
-            if (_version != fields.Max(f => (int)f.GetValue(null))) { return; }
+            if (version != fields.Max(f => (int)f.GetValue(null))) { return; }
 
-            Debug.Log(String.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", _version, Assembly.GetExecutingAssembly().GetName().Name));
+            Debug.Log(String.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", version, Assembly.GetExecutingAssembly().GetName().Name));
 
             //Other checkers will see this version and not run.
             //This accomplishes the same as an explicit "ran" flag with fewer moving parts.
-            _version = int.MaxValue;
+            version = int.MaxValue;
 
             //A mod is incompatible if its compatibility checker has an IsCompatible method which returns false.
             string[] incompatible =
@@ -157,9 +157,9 @@ namespace RealChute
              *   message += "WARNING: You are using 64-bit KSP on Windows. This version of KSP is known to cause crashes. It's highly recommended that you use either 32-bit KSP on Windows or switch to Linux.";
              *}*/
 
-            if ((incompatible.Length > 0) || (incompatibleUnity.Length > 0))
+            if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
-                message += ((message == String.Empty) ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
+                message += (message == String.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
 
                 if (incompatible.Length > 0)
                 {
@@ -184,7 +184,7 @@ namespace RealChute
 
         public static bool SixtyFourBitsMayHaveAChanceAtLife()
         {
-            return (IntPtr.Size == 8) && (Environment.OSVersion.Platform == PlatformID.Win32NT);
+            return IntPtr.Size == 8 && Environment.OSVersion.Platform == PlatformID.Win32NT;
         }
 
         public static bool IsAllCompatible()

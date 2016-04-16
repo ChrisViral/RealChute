@@ -1,6 +1,4 @@
-﻿using RealChute.Extensions;
-
-/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
+﻿/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
  * piece of work, you must get my explicit permission on the matter through a private channel, and must also distribute
@@ -14,22 +12,22 @@ namespace RealChute.Libraries
     public class CanopyConfig
     {
         #region Propreties
-        private string _name = string.Empty;
+        private string name = string.Empty;
         /// <summary>
         /// The name of the texture
         /// </summary>
-        public string name
+        public string Name
         {
-            get { return this._name; }
+            get { return this.name; }
         }
 
-        private string _textureURL = string.Empty;
+        private string textureURL = string.Empty;
         /// <summary>
         /// The URL of the texture
         /// </summary>
-        public string textureURL
+        public string TextureURL
         {
-            get { return this._textureURL; }
+            get { return this.textureURL; }
         }
         #endregion
 
@@ -45,8 +43,8 @@ namespace RealChute.Libraries
         /// <param name="node">ConfigNode to make the config from</param>
         public CanopyConfig(ConfigNode node)
         {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("textureURL", ref _textureURL);
+            node.TryGetValue("name", ref this.name);
+            node.TryGetValue("textureURL", ref this.textureURL);
         }
         #endregion
     }

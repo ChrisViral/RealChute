@@ -13,7 +13,7 @@ using RealChute.Extensions;
 
 namespace RealChute
 {
-    public static class GUIUtils
+    public static class GuiUtils
     {
         #region Fields
         /// <summary>
@@ -23,59 +23,59 @@ namespace RealChute
         #endregion
 
         #region Properties
-        private static GUIStyle _redLabel = null;
+        private static GUIStyle redLabel;
         /// <summary>
         /// A red KSP label
         /// </summary>
-        public static GUIStyle redLabel
+        public static GUIStyle RedLabel
         {
             get
             {
-                if (_redLabel == null)
+                if (redLabel == null)
                 {
                     GUIStyle style = new GUIStyle(skins.label);
                     style.normal.textColor = XKCDColors.Red;
                     style.hover.textColor = XKCDColors.Red;
-                    _redLabel = style;
+                    redLabel = style;
                 }
-                return _redLabel;
+                return redLabel;
             }
         }
 
-        private static GUIStyle _yellowLabel = null;
+        private static GUIStyle yellowLabel;
         /// <summary>
         /// A yellow KSP label
         /// </summary>
-        public static GUIStyle yellowLabel
+        public static GUIStyle YellowLabel
         {
             get
             {
-                if (_yellowLabel == null)
+                if (yellowLabel == null)
                 {
                     GUIStyle style = new GUIStyle(skins.label);
                     style.normal.textColor = XKCDColors.BrightYellow;
                     style.hover.textColor = XKCDColors.BrightYellow;
-                    _yellowLabel = style;
+                    yellowLabel = style;
                 }
-                return _yellowLabel;
+                return yellowLabel;
             }
         }
 
-        private static GUIStyle _boldLabel = null;
+        private static GUIStyle boldLabel;
         /// <summary>
         /// A bold KSP style label for RealChute GUI
         /// </summary>
-        public static GUIStyle boldLabel
+        public static GUIStyle BoldLabel
         {
             get
             {
-                if (_boldLabel == null)
+                if (boldLabel == null)
                 {
                     GUIStyle style = new GUIStyle(skins.label);
                     style.fontStyle = FontStyle.Bold;
-                    _boldLabel = style;
+                    boldLabel = style;
                 }
-                return _boldLabel;
+                return boldLabel;
             }
         }
         #endregion
@@ -191,7 +191,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, redLabel); }
+            else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
@@ -211,7 +211,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, redLabel); }
+            else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();
@@ -231,7 +231,7 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             float f;
             if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label, skins.label); }
-            else { GUILayout.Label(label, redLabel); }
+            else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, skins.textField, GUILayout.Width(width));
             GUILayout.EndHorizontal();

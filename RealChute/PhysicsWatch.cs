@@ -32,41 +32,41 @@ namespace RealChute
         /// <summary>
         /// UT of the last frame
         /// </summary>
-        protected double lastCheck = 0d;
+        protected double lastCheck;
 
         /// <summary>
         /// Total elapsed time calculated by the watch in seconds
         /// </summary>
-        protected double totalSeconds = 0d;
+        protected double totalSeconds;
         #endregion
 
         #region Propreties
-        private bool _isRunning = false;
+        private bool isRunning;
         /// <summary>
         /// If the watch is currently counting down time
         /// </summary>
-        public bool isRunning
+        public bool IsRunning
         {
-            get { return this._isRunning; }
-            protected set { this._isRunning = value; }
+            get { return this.isRunning; }
+            protected set { this.isRunning = value; }
         }
 
         /// <summary>
         /// The current elapsed time of the watch
         /// </summary>
-        public TimeSpan elapsed
+        public TimeSpan Elapsed
         {
-            get { return new TimeSpan(this.elapsedTicks); }
+            get { return new TimeSpan(this.ElapsedTicks); }
         }
 
         /// <summary>
         /// The amount of milliseconds elapsed to the current watch
         /// </summary>
-        public long elapsedMilliseconds
+        public long ElapsedMilliseconds
         {
             get
             {
-                if (this._isRunning) { UpdateWatch(); }
+                if (this.isRunning) { UpdateWatch(); }
                 return (long)Math.Round(this.totalSeconds * millisecondPerSecond);
             }
         }
@@ -74,11 +74,11 @@ namespace RealChute
         /// <summary>
         /// The amount of ticks elapsed to the current watch
         /// </summary>
-        public long elapsedTicks
+        public long ElapsedTicks
         {
             get
             {
-                if (this._isRunning) { UpdateWatch(); }
+                if (this.isRunning) { UpdateWatch(); }
                 return (long)Math.Round(this.totalSeconds * ticksPerSecond);
             }
         }
@@ -106,10 +106,10 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            if (!this._isRunning)
+            if (!this.isRunning)
             {
                 this.lastCheck = Planetarium.GetUniversalTime();
-                this._isRunning = true;
+                this.isRunning = true;
             }
         }
 
@@ -118,10 +118,10 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
-            if (this._isRunning)
+            if (this.isRunning)
             {
                 UpdateWatch();
-                this._isRunning = false;
+                this.isRunning = false;
             }
         }
 
@@ -132,7 +132,7 @@ namespace RealChute
         {
             this.totalSeconds = 0;
             this.lastCheck = Planetarium.GetUniversalTime();
-            this._isRunning = true;
+            this.isRunning = true;
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace RealChute
         {
             this.totalSeconds = 0;
             this.lastCheck = 0;
-            this._isRunning = false;
+            this.isRunning = false;
         }
         #endregion
 
@@ -164,7 +164,7 @@ namespace RealChute
         /// </summary>
         public override string ToString()
         {
-            return elapsed.ToString();
+            return this.Elapsed.ToString();
         }
         #endregion
 

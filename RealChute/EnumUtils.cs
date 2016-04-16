@@ -74,7 +74,7 @@ namespace RealChute
             public bool TryGetValue<T>(string name, out T value) where T : struct, TEnum
             {
                 TEnum result;
-                bool success = values.TryGetValue(name, out result);
+                bool success = this.values.TryGetValue(name, out result);
                 value = (T)result;
                 return success;
 

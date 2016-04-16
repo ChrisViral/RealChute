@@ -24,7 +24,7 @@ namespace RealChute
         #region Fields
         private static ApplicationLauncherButton button = new ApplicationLauncherButton();
         private static bool add = true;
-        private static bool visible = false;
+        private static bool visible;
         private static GameObject settings;
         #endregion
 
@@ -33,8 +33,8 @@ namespace RealChute
         {
             //Loads the RealChute parachutes icon
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
-            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon.png")));
-            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "FilterIcon_selected.png")));
+            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "FilterIcon.png")));
+            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "FilterIcon_selected.png")));
             Icon icon = new Icon("RC_Parachutes", normal, selected);
 
             //Adds the Parachutes filter to the Filter by Function category
@@ -60,7 +60,7 @@ namespace RealChute
             if (ApplicationLauncher.Ready && add)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
-                buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.pluginDataURL, "RC_Icon.png")));
+                buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide,
                     Empty, Empty, Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER,
                     (Texture)buttonTexture);

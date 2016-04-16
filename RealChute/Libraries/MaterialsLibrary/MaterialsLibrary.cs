@@ -18,46 +18,46 @@ namespace RealChute.Libraries
     public class MaterialsLibrary
     {
         #region Instance
-        private static MaterialsLibrary _instance = null;
+        private static MaterialsLibrary instance;
         /// <summary>
         /// Creates an instance of the MaterialsLibrary
         /// </summary>
-        public static MaterialsLibrary instance
+        public static MaterialsLibrary Instance
         {
             get
             {
-                if (_instance == null) { _instance = new MaterialsLibrary(); }
-                return _instance;
+                if (instance == null) { instance = new MaterialsLibrary(); }
+                return instance;
             }
         }
         #endregion
 
         #region Propreties
-        private Dictionary<string, MaterialDefinition> _materials = new Dictionary<string, MaterialDefinition>();
+        private Dictionary<string, MaterialDefinition> materials = new Dictionary<string, MaterialDefinition>();
         /// <summary>
         /// Dictionary containing the name of the materials and their associated MaterialDefinition
         /// </summary>
-        public Dictionary<string, MaterialDefinition> materials
+        public Dictionary<string, MaterialDefinition> Materials
         {
-            get { return this._materials; }
+            get { return this.materials; }
         }
 
-        private string[] _materialNames = new string[0];
+        private string[] materialNames = new string[0];
         /// <summary>
         /// String array of the materials' names
         /// </summary>
-        public string[] materialNames
+        public string[] MaterialNames
         {
-            get { return this._materialNames; }
+            get { return this.materialNames; }
         }
 
-        private int _count = 0;
+        private int count;
         /// <summary>
         /// The amount of materials currently stored
         /// </summary>
-        public int count
+        public int Count
         {
-            get { return this._count; }
+            get { return this.count; }
         }
         #endregion
 
@@ -67,10 +67,10 @@ namespace RealChute.Libraries
         /// </summary>
         public MaterialsLibrary()
         {
-            this._materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n))
-                .ToDictionary(m => m.name, m => m);
-            this._materialNames = this._materials.Keys.ToArray();
-            this._count = this._materialNames.Length;
+            this.materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n))
+                .ToDictionary(m => m.Name, m => m);
+            this.materialNames = this.materials.Keys.ToArray();
+            this.count = this.materialNames.Length;
         }
         #endregion
 
@@ -81,7 +81,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the material</param>
         public bool ContainsMaterial(string name)
         {
-            return this._materials.ContainsKey(name);
+            return this.materials.ContainsKey(name);
         }
 
         /// <summary>
@@ -91,7 +91,7 @@ namespace RealChute.Libraries
         public MaterialDefinition GetMaterial(string name)
         {
             if (!ContainsMaterial(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" MaterialDefinition in the library"); }
-            return this._materials[name];
+            return this.materials[name];
         }
 
         /// <summary>
@@ -100,8 +100,8 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the material</param>
         public MaterialDefinition GetMaterial(int index)
         {
-            if (!this.materialNames.IndexInRange(index)) { throw new IndexOutOfRangeException("Material index [" + index + "] is out of range"); }
-            return GetMaterial(this._materialNames[index]);
+            if (!this.MaterialNames.IndexInRange(index)) { throw new IndexOutOfRangeException("Material index [" + index + "] is out of range"); }
+            return GetMaterial(this.materialNames[index]);
         }
 
         /// <summary>
@@ -113,10 +113,10 @@ namespace RealChute.Libraries
         {
             if (ContainsMaterial(name))
             {
-                material = this._materials[name];
+                material = this.materials[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name) && this._materials.Count > 0) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this.materials.Count > 0) { Debug.LogError("[RealChute]: Could not find the MaterialDefinition \"" + name + "\" in the library"); }
             return false;
         }
 
@@ -126,7 +126,7 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the material</param>
         public int GetMaterialIndex(string name)
         {
-            return _materialNames.IndexOf(name);
+            return this.materialNames.IndexOf(name);
         }
         #endregion
     }

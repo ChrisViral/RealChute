@@ -1,8 +1,7 @@
 ﻿﻿using System;
 using System.Text;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries;
 
@@ -17,49 +16,49 @@ using RealChute.Libraries;
 
 namespace RealChute
 {
-    public class EditorGUI
+    public class EditorGui
     {
         #region Propreties
-        private Part part
+        private Part Part
         {
             get { return this.pChute.part; }
         }
 
-        private RealChuteModule rcModule
+        private RealChuteModule RCModule
         {
             get { return this.pChute.rcModule; }
         }
 
-        private List<ChuteTemplate> chutes
+        private List<ChuteTemplate> Chutes
         {
-            get { return pChute.chutes; }
+            get { return this.pChute.chutes; }
         }
 
         private PresetsLibrary presets
         {
-            get { return pChute.presets; }
+            get { return this.pChute.presets; }
         }
 
-        private List<SizeNode> sizes
+        private List<SizeNode> Sizes
         {
-            get { return pChute.sizes; }
+            get { return this.pChute.sizes; }
         }
         #endregion
 
         #region Fields
-        private ProceduralChute pChute = null;
+        private ProceduralChute pChute;
         private GUISkin skins = HighLogic.Skin;
-        internal Rect window = new Rect(), failedWindow = new Rect(), successfulWindow = new Rect();
-        internal Rect presetsWindow = new Rect(), presetsSaveWindow = new Rect(), presetsWarningWindow = new Rect();
+        internal Rect window, failedWindow, successfulWindow;
+        internal Rect presetsWindow, presetsSaveWindow, presetsWarningWindow;
         private int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
         private int presetId = Guid.NewGuid().GetHashCode(), presetSaveId = Guid.NewGuid().GetHashCode(), presetWarningId = Guid.NewGuid().GetHashCode();
         internal int matX = 500, matY = 370;
-        private Vector2 mainScroll = new Vector2(), failedScroll = new Vector2();
-        private Vector2 presetScroll = new Vector2();
+        private Vector2 mainScroll, failedScroll;
+        private Vector2 presetScroll;
         internal string presetName = string.Empty, presetDescription = string.Empty;
         internal bool warning = false;
-        internal bool visible = false, failedVisible = false, successfulVisible = false;
-        private bool presetVisible = false, presetSaveVisible = false, presetWarningVisible = false, saveWarning = false;
+        internal bool visible = false, failedVisible, successfulVisible;
+        private bool presetVisible, presetSaveVisible, presetWarningVisible, saveWarning;
         internal string[] cases = new string[0], canopies = new string[0], models = new string[0];
         #endregion
 
@@ -67,13 +66,13 @@ namespace RealChute
         /// <summary>
         /// Creates a new blank EditorGUI object
         /// </summary>
-        public EditorGUI() { }
+        public EditorGui() { }
 
         /// <summary>
         /// Creates a new RCEditorGUI
         /// </summary>
         /// <param name="pChute">ProceduralChute module to create the object from</param>
-        public EditorGUI(ProceduralChute pChute)
+        public EditorGui(ProceduralChute pChute)
         {
             this.pChute = pChute;
         }
@@ -81,41 +80,41 @@ namespace RealChute
 
         #region Methods
         //Renders the RealChute editor GUI
-        internal void RenderGUI()
+        internal void RenderGui()
         {
             if (HighLogic.LoadedSceneIsEditor)
             {
                 if (this.visible)
                 {
-                    this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.assemblyVersion, skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
+                    this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, this.skins.window, GUILayout.MaxWidth(420), GUILayout.MaxHeight(Screen.height - 375));
                 }
-                foreach (ChuteTemplate chute in chutes)
+                foreach (ChuteTemplate chute in this.Chutes)
                 {
-                    TemplateGUI gui = chute.templateGUI;
+                    TemplateGui gui = chute.templateGui;
                     if (gui.materialsVisible)
                     {
-                        gui.materialsWindow = GUILayout.Window(gui.matId, gui.materialsWindow, gui.MaterialsWindow, "Parachute material", skins.window, GUILayout.MaxWidth(375), GUILayout.MaxHeight(275));
+                        gui.materialsWindow = GUILayout.Window(gui.matId, gui.materialsWindow, gui.MaterialsWindow, "Parachute material", this.skins.window, GUILayout.MaxWidth(375), GUILayout.MaxHeight(275));
                     }
                 }
                 if (this.failedVisible)
                 {
-                    this.failedWindow = GUILayout.Window(this.failedId, this.failedWindow, ApplicationFailed, "Error", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(300));
+                    this.failedWindow = GUILayout.Window(this.failedId, this.failedWindow, ApplicationFailed, "Error", this.skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(300));
                 }
                 if (this.successfulVisible)
                 {
-                    this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200), GUILayout.ExpandHeight(true));
+                    this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", this.skins.window, GUILayout.MaxWidth(300), GUILayout.MaxHeight(200), GUILayout.ExpandHeight(true));
                 }
                 if (this.presetVisible)
                 {
-                    this.presetsWindow = GUILayout.Window(this.pChute.presetID, this.presetsWindow, Presets, "Presets", skins.window, GUILayout.MaxWidth(400), GUILayout.MaxHeight(500));
+                    this.presetsWindow = GUILayout.Window(this.pChute.presetId, this.presetsWindow, Presets, "Presets", this.skins.window, GUILayout.MaxWidth(400), GUILayout.MaxHeight(500));
                 }
                 if (this.presetSaveVisible)
                 {
-                    this.presetsSaveWindow = GUILayout.Window(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
+                    this.presetsSaveWindow = GUILayout.Window(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", this.skins.window, GUILayout.MaxWidth(350), GUILayout.MaxHeight(400));
                 }
                 if (this.presetWarningVisible)
                 {
-                    this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", skins.window, GUILayout.Width(200), GUILayout.Height(100));
+                    this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", this.skins.window, GUILayout.Width(200), GUILayout.Height(100));
                 }
             }
         }
@@ -128,12 +127,12 @@ namespace RealChute
             #region Info labels
             //Header labels
             StringBuilder builder = new StringBuilder();
-            builder.Append("Selected part: ").AppendLine(this.part.partInfo.title);
-            builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
-            builder.Append("Case mass: ").Append(this.rcModule.caseMass.ToString("0.000")).Append("t");
-            if (this.sizes.Count > 0) { builder.Append("\t\tCase cost: ").Append(this.sizes[this.pChute.size].cost.ToString("0.#")).Append("F"); }
-            builder.Append("\nTotal part mass: ").Append(this.part.TotalMass().ToString("0.000")).Append("t");
-            builder.Append("\tTotal part cost: ").Append(this.part.TotalCost().ToString("0.#")).Append("F");
+            builder.Append("Selected part: ").AppendLine(this.Part.partInfo.title);
+            builder.Append("Symmetry counterparts: ").AppendLine(this.Part.symmetryCounterparts.Count.ToString());
+            builder.Append("Case mass: ").Append(this.RCModule.caseMass.ToString("0.000")).Append("t");
+            if (this.Sizes.Count > 0) { builder.Append("\t\tCase cost: ").Append(this.Sizes[this.pChute.size].Cost.ToString("0.#")).Append("F"); }
+            builder.Append("\nTotal part mass: ").Append(this.Part.TotalMass().ToString("0.000")).Append("t");
+            builder.Append("\tTotal part cost: ").Append(this.Part.TotalCost().ToString("0.#")).Append("F");
             GUILayout.Label(builder.ToString(), this.skins.label);
             #endregion
 
@@ -158,14 +157,14 @@ namespace RealChute
             GUILayout.Label("Target planet:", this.skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
-            this.pChute.planets = GUILayout.SelectionGrid(this.pChute.planets, this.pChute.bodies.bodyNames, 4, this.skins.button, GUILayout.Width(250));
+            this.pChute.planets = GUILayout.SelectionGrid(this.pChute.planets, this.pChute.bodies.BodyNames, 4, this.skins.button, GUILayout.Width(250));
             GUILayout.EndHorizontal();
             this.pChute.body = this.pChute.bodies.GetBody(this.pChute.planets);
             #endregion
 
             #region Size cyclers
             //Size selection
-            if (sizes.Count > 0)
+            if (this.Sizes.Count > 0)
             {
                 GUILayout.BeginHorizontal(GUILayout.Height(20));
                 GUILayout.BeginVertical();
@@ -176,12 +175,12 @@ namespace RealChute
                 if (GUILayout.Button("Previous size", this.skins.button, GUILayout.Width(125)))
                 {
                     this.pChute.size--;
-                    if (this.pChute.size < 0) { this.pChute.size = this.sizes.Count - 1; }
+                    if (this.pChute.size < 0) { this.pChute.size = this.Sizes.Count - 1; }
                 }
                 if (GUILayout.Button("Next size", this.skins.button, GUILayout.Width(125)))
                 {
                     this.pChute.size++;
-                    if (this.pChute.size > this.sizes.Count - 1) { this.pChute.size = 0; }
+                    if (this.pChute.size > this.Sizes.Count - 1) { this.pChute.size = 0; }
                 }
                 GUILayout.EndHorizontal();
             }
@@ -193,64 +192,64 @@ namespace RealChute
 
             //Main chute texture selector
             GUILayout.Space(5);
-            this.chutes[0].templateGUI.TextureSelector();
+            this.Chutes[0].templateGui.TextureSelector();
 
             #region General
             //Materials editor
             GUILayout.Space(5);
-            chutes[0].templateGUI.MaterialsSelector();
+            this.Chutes[0].templateGui.MaterialsSelector();
 
             //MustGoDown
-            GUIUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, this.window.width);
+            GuiUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, this.window.width);
 
             //DeployOnGround
-            GUIUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, this.window.width);
+            GuiUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, this.window.width);
 
             //Timer
-            GUIUtils.CreateTimeEntryArea("Deployment timer:", ref this.pChute.timer, 0, 3600);
+            GuiUtils.CreateTimeEntryArea("Deployment timer:", ref this.pChute.timer, 0, 3600);
 
             //Spares
-            GUIUtils.CreateEmptyEntryArea("Spare chutes:", ref this.pChute.spares, -1, 10);
+            GuiUtils.CreateEmptyEntryArea("Spare chutes:", ref this.pChute.spares, -1, 10);
 
             //CutSpeed
-            GUIUtils.CreateEntryArea("Autocut speed (m/s):", ref this.pChute.cutSpeed, 0.01f, 100);
+            GuiUtils.CreateEntryArea("Autocut speed (m/s):", ref this.pChute.cutSpeed, 0.01f, 100);
 
             //LandingAlt
-            GUIUtils.CreateEntryArea("Landing alt (m):", ref this.pChute.landingAlt, 0, (float)this.pChute.body.GetMaxAtmosphereAltitude());
+            GuiUtils.CreateEntryArea("Landing alt (m):", ref this.pChute.landingAlt, 0, (float)this.pChute.body.GetMaxAtmosphereAltitude());
             #endregion
 
             #region Main
             //Indicator label
             GUILayout.Space(10);
-            GUILayout.Label("________________________________________________", GUIUtils.boldLabel);
-            GUILayout.Label("Main chute:", GUIUtils.boldLabel, GUILayout.Width(150));
-            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GUIUtils.boldLabel);
+            GUILayout.Label("________________________________________________", GuiUtils.BoldLabel);
+            GUILayout.Label("Main chute:", GuiUtils.BoldLabel, GUILayout.Width(150));
+            GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GuiUtils.BoldLabel);
 
-            this.chutes[0].templateGUI.Calculations();
+            this.Chutes[0].templateGui.Calculations();
             #endregion
 
             #region Secondary
             if (this.pChute.secondaryChute)
             {
-                for (int i = 1; i < this.chutes.Count; i++)
+                for (int i = 1; i < this.Chutes.Count; i++)
                 {
-                    ChuteTemplate chute = this.chutes[i];
+                    ChuteTemplate chute = this.Chutes[i];
 
                     //Indicator label
                     GUILayout.Space(10);
-                    GUILayout.Label("________________________________________________", GUIUtils.boldLabel);
-                    GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GUIUtils.boldLabel, GUILayout.Width(150));
-                    GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GUIUtils.boldLabel);
+                    GUILayout.Label("________________________________________________", GuiUtils.BoldLabel);
+                    GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GuiUtils.BoldLabel, GUILayout.Width(150));
+                    GUILayout.Label("‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾‾", GuiUtils.BoldLabel);
 
                     //Texture selector
                     GUILayout.Space(5);
-                    chute.templateGUI.TextureSelector();
+                    chute.templateGui.TextureSelector();
 
                     //Materials editor
                     GUILayout.Space(5);
-                    chute.templateGUI.MaterialsSelector();
+                    chute.templateGui.MaterialsSelector();
 
-                    chute.templateGUI.Calculations();
+                    chute.templateGui.Calculations();
                 }
             }
             #endregion
@@ -269,7 +268,7 @@ namespace RealChute
                 this.pChute.Apply(false);
             }
 
-            if (this.part.symmetryCounterparts.Count > 0)
+            if (this.Part.symmetryCounterparts.Count > 0)
             {
                 if (GUILayout.Button("Apply to all symmetry counterparts", this.skins.button))
                 {
@@ -300,13 +299,13 @@ namespace RealChute
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Label("The application of the parameters succeeded!", skins.label);
+            GUILayout.Label("The application of the parameters succeeded!", this.skins.label);
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
 
             if (this.warning)
             {
-                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", GUIUtils.redLabel);
+                GUILayout.Label("Warning: The mass of the craft was too high and the parachutes have been set at their limit. Please review the stats to make sure no problem may occur.", GuiUtils.RedLabel);
             }
 
             if (GUILayout.Button("Close", this.skins.button))
@@ -323,23 +322,23 @@ namespace RealChute
             GUILayout.BeginHorizontal();
             GUILayout.BeginVertical();
             this.presetScroll = GUILayout.BeginScrollView(this.presetScroll, false, false, this.skins.horizontalScrollbar, this.skins.verticalScrollbar, this.skins.box, GUILayout.Width(200));
-            string[] current = this.presets.GetRelevantPresets(this.chutes.Count);
+            string[] current = this.presets.GetRelevantPresets(this.Chutes.Count);
             string p = string.Empty;
             if (current.Length > 0)
             {
-                this.pChute.presetID = GUILayout.SelectionGrid(this.pChute.presetID, current, 1, this.skins.button);
-                p = current[this.pChute.presetID];
+                this.pChute.presetId = GUILayout.SelectionGrid(this.pChute.presetId, current, 1, this.skins.button);
+                p = current[this.pChute.presetId];
             }
             else { GUILayout.Label("No saved presets", this.skins.label); }
             GUILayout.EndScrollView();
             GUILayout.EndVertical();
             GUILayout.BeginVertical(GUILayout.Width(200));
-            if (!string.IsNullOrEmpty(p)) { GUILayout.Label("Description: " + this.presets.GetPreset(p).description, skins.label); }
-            else { GUILayout.Label("---", skins.label); }
+            if (!string.IsNullOrEmpty(p)) { GUILayout.Label("Description: " + this.presets.GetPreset(p).Description, this.skins.label); }
+            else { GUILayout.Label("---", this.skins.label); }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
 
-            if (this.presets.presets.Count > 0)
+            if (this.presets.Presets.Count > 0)
             {
                 GUILayout.BeginHorizontal();
                 if (GUILayout.Button("Select preset", this.skins.button))
@@ -366,17 +365,17 @@ namespace RealChute
             GUILayout.Label("Preset name:", this.skins.label);
             this.presetName = GUILayout.TextField(this.presetName, this.skins.textField);
             GUILayout.Label("Preset description", this.skins.label);
-            this.presetDescription = GUILayout.TextArea(this.presetDescription, skins.textArea, GUILayout.Height(100));
+            this.presetDescription = GUILayout.TextArea(this.presetDescription, this.skins.textArea, GUILayout.Height(100));
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Save...", this.skins.button))
             {
-                if (this.presetName == string.Empty) { RCUtils.PostPopup("Error!", "Preset name cannot be empty!", "Close"); }
+                if (this.presetName == string.Empty) { RCUtils.PopupDialog("Error!", "Preset name cannot be empty!", "Close"); }
                 else if (this.presets.ContainsPreset(this.presetName))
                 {
                     this.presetWarningVisible = true;
                     this.saveWarning = true;
                 }
-                else if (this.pChute.GetErrors(true).Count != 0 || pChute.GetErrors(false).Count != 0) { this.failedVisible = true; }
+                else if (this.pChute.GetErrors(true).Count != 0 || this.pChute.GetErrors(false).Count != 0) { this.failedVisible = true; }
                 else
                 {
                     this.pChute.CreatePreset();
@@ -392,19 +391,19 @@ namespace RealChute
         private void PresetWarning(int id)
         {
             GUILayout.BeginVertical();
-            GUILayout.Label(this.saveWarning ? "Warning: there is already a preset saved under this name. Are you sure you wish to proceed?" : "Are you sure you wish to delete this preset?", GUIUtils.redLabel);
+            GUILayout.Label(this.saveWarning ? "Warning: there is already a preset saved under this name. Are you sure you wish to proceed?" : "Are you sure you wish to delete this preset?", GuiUtils.RedLabel);
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("Yes", this.skins.button))
             {
-                Preset preset = this.saveWarning ? this.presets.GetPreset(presetName) : this.presets.GetPreset(pChute.presetID, pChute.chutes.Count);
-                Debug.Log("[RealChute]: Deleting the \"" + preset.name + "\" preset from the database.");
+                Preset preset = this.saveWarning ? this.presets.GetPreset(this.presetName) : this.presets.GetPreset(this.pChute.presetId, this.pChute.chutes.Count);
+                Debug.Log("[RealChute]: Deleting the \"" + preset.Name + "\" preset from the database.");
                 this.presets.DeletePreset(preset);
                 if (this.saveWarning)
                 { 
                    this.pChute.CreatePreset();
                    this.presetSaveVisible = false;
                 }
-                else { this.pChute.presetID = 0; }
+                else { this.pChute.presetId = 0; }
                 this.presetWarningVisible = false;
             }
             if (GUILayout.Button("No", this.skins.button)) { this.presetWarningVisible = false; }

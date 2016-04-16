@@ -1,6 +1,4 @@
-﻿using RealChute.Extensions;
-
-/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
+﻿/* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
  * If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and
  * piece of work, you must get my explicit permission on the matter through a private channel, and must also distribute
@@ -14,76 +12,76 @@ namespace RealChute.Libraries
     public class MaterialDefinition
     {
         #region Propreties
-        private string _name = string.Empty;
+        private string name = string.Empty;
         /// <summary>
         /// Name of the material
         /// </summary>
-        public string name
+        public string Name
         {
-            get { return this._name; }
+            get { return this.name; }
         }
 
-        private string _description = "We don't know much about this, it might as well be made of fishnets";
+        private string description = "We don't know much about this, it might as well be made of fishnets";
         /// <summary>
         /// The description of this material
         /// </summary>
-        public string description
+        public string Description
         {
-            get { return this._description; }
+            get { return this.description; }
         }
 
-        private float _areaDensity = 5.65E-5f;
+        private float areaDensity = 5.65E-5f;
         /// <summary>
         /// Area density of this material
         /// </summary>
-        public float areaDensity
+        public float AreaDensity
         {
-            get { return this._areaDensity; }
+            get { return this.areaDensity; }
         }
 
-        private float _dragCoefficient = 1;
+        private float dragCoefficient = 1;
         /// <summary>
         /// Drag coefficient of this material
         /// </summary>
-        public float dragCoefficient
+        public float DragCoefficient
         {
-            get { return this._dragCoefficient; }
+            get { return this.dragCoefficient; }
         }
 
-        private float _areaCost = 0.075f;
+        private float areaCost = 0.075f;
         /// <summary>
         /// Cost of a square meter of this material
         /// </summary>
-        public float areaCost
+        public float AreaCost
         {
-            get { return this._areaCost; }
+            get { return this.areaCost; }
         }
 
-        private double _maxTemp = 493.15;
+        private double maxTemp = 493.15;
         /// <summary>
         /// Maximum temperature this material can withstand (K)
         /// </summary>
-        public double maxTemp
+        public double MaxTemp
         {
-            get { return this._maxTemp; }
+            get { return this.maxTemp; }
         }
 
-        private double _specificHeat = 1700;
+        private double specificHeat = 1700;
         /// <summary>
         /// The specific heat of the material (J/kg∙K)
         /// </summary>
-        public double specificHeat
+        public double SpecificHeat
         {
-            get { return this._specificHeat; }
+            get { return this.specificHeat; }
         }
 
-        private double _emissivity = 0.72;
+        private double emissivity = 0.72;
         /// <summary>
         /// The emissivity constant of the chute at (20°C)
         /// </summary>
-        public double emissivity
+        public double Emissivity
         {
-            get { return this._emissivity; }
+            get { return this.emissivity; }
         }
         #endregion
 
@@ -99,14 +97,14 @@ namespace RealChute.Libraries
         /// <param name="node">Node to initiate the material from</param>
         public MaterialDefinition(ConfigNode node)
         {
-            node.TryGetValue("name", ref this._name);
-            node.TryGetValue("description", ref this._description);
-            node.TryGetValue("areaDensity", ref this._areaDensity);
-            node.TryGetValue("dragCoefficient", ref this._dragCoefficient);
-            node.TryGetValue("areaCost", ref this._areaCost);
-            node.TryGetValue("maxTemp", ref this._maxTemp);
-            node.TryGetValue("specificHeat", ref this._specificHeat);
-            node.TryGetValue("emissivity", ref this._emissivity);
+            node.TryGetValue("name", ref this.name);
+            node.TryGetValue("description", ref this.description);
+            node.TryGetValue("areaDensity", ref this.areaDensity);
+            node.TryGetValue("dragCoefficient", ref this.dragCoefficient);
+            node.TryGetValue("areaCost", ref this.areaCost);
+            node.TryGetValue("maxTemp", ref this.maxTemp);
+            node.TryGetValue("specificHeat", ref this.specificHeat);
+            node.TryGetValue("emissivity", ref this.emissivity);
         }
         #endregion
     }

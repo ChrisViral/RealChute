@@ -15,13 +15,13 @@ namespace RealChute.Extensions
         /// <summary>
         /// Returns the AGL altitude from this vessel at the desired position
         /// </summary>
-        /// <param name="ASL">Sea level altitude of this vessel</param>
-        public static double GetTrueAlt(this Vessel vessel, double ASL)
+        /// <param name="asl">Sea level altitude of this vessel</param>
+        public static double GetTrueAlt(this Vessel vessel, double asl)
         {
-            if (vessel.mainBody.pqsController == null) { return ASL; }
+            if (vessel.mainBody.pqsController == null) { return asl; }
             double terrainAlt = vessel.pqsAltitude;
-            if (vessel.mainBody.ocean && terrainAlt <= 0) { return ASL; }
-            return ASL - terrainAlt;
+            if (vessel.mainBody.ocean && terrainAlt <= 0) { return asl; }
+            return asl - terrainAlt;
         }
 
         /// <summary>

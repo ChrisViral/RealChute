@@ -2,9 +2,7 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.IO;
-using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using UnityEngine;
 using Version = System.Version;
 
@@ -48,6 +46,11 @@ namespace RealChute
         public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
 
         /// <summary>
+        /// Relative URL to the Nyan Cat parachute texture
+        /// </summary>
+        public const string nyanTextureURL = "RealChute/Parts/nyan_texture";
+
+        /// <summary>
         /// PopupDialog anchor vector
         /// </summary>
         private static readonly Vector2 anchor = new Vector2(0.5f, 0.5f);
@@ -57,7 +60,7 @@ namespace RealChute
         /// <summary>
         /// String URL to the RealChute settings config
         /// </summary>
-        public static string settingsURL
+        public static string SettingsURL
         {
             get { return Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
         }
@@ -65,100 +68,73 @@ namespace RealChute
         /// <summary>
         /// Returns the RealChute PluginData folder
         /// </summary>
-        public static string pluginDataURL
+        public static string PluginDataURL
         {
             get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
         }
 
-        private static string _assemblyVersion = string.Empty;
+        private static string assemblyVersion;
         /// <summary>
         /// Gets the current version of the assembly
         /// </summary>
-        public static string assemblyVersion
+        public static string AssemblyVersion
         {
             get
             {
-                if (string.IsNullOrEmpty(_assemblyVersion))
+                if (string.IsNullOrEmpty(assemblyVersion))
                 {
                     Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
                     if (version.Revision == 0)
                     {
-                        _assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
+                        assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
                     }
-                    else { _assemblyVersion = "v" + version.ToString(); }
+                    else { assemblyVersion = "v" + version; }
 #if PRERELEASE
-                    _assemblyVersion += "x3";
+                    assemblyVersion += "x4";
 #endif
                 }
-                return _assemblyVersion;
+                return assemblyVersion;
             }
         }
 
-        private static bool _FARLoaded = false, check = true;
+        private static bool farLoaded, check = true;
         /// <summary>
         /// Returns if FAR is currently loaded in the game
         /// </summary>
-        public static bool FARLoaded
+        public static bool FarLoaded
         {
             get 
             {
                 if (check)
                 {
-                    _FARLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
+                    farLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
                     check = false;
                 }
-                return _FARLoaded;
+                return farLoaded;
             }
         }
 
-        private static MethodInfo _densityMethod = null;
+        private static MethodInfo densityMethod;
         /// <summary>
         /// A delegate to the FAR GetCurrentDensity method
         /// </summary>
-        public static MethodInfo densityMethod
+        public static MethodInfo DensityMethod
         {
             get
             {
-                if (_densityMethod == null)
+                if (densityMethod == null)
                 {
-                    _densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
+                    densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
                         .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
                         .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
                         .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
                 }
-                return _densityMethod;
+                return densityMethod;
             }
         }
 #endregion
 
         #region Methods
-        /// <summary>
-        /// Returns the array of values contained within a string
-        /// </summary>
-        /// <param name="text">Array to parse</param>
-        public static string[] ParseArray(string text)
-        {
-            return text.Split(',').Select(s => s.Trim()).ToArray();
-        }
-
-        /// <summary>
-        /// Returns true if the string can be parsed and stores it into the ref value.
-        /// </summary>
-        /// <param name="text">String to parse</param>
-        /// <param name="result">Value to store the result in</param>
-        public static bool TryParseVector3(string text, ref Vector3 result)
-        {
-            if (string.IsNullOrEmpty(text)) { return false; }
-            string[] elements = ParseArray(text);
-            if (elements.Length != 3) { return false; }
-            float x, y, z;
-            if (!float.TryParse(elements[0], out x)) { return false; }
-            if (!float.TryParse(elements[1], out y)) { return false; }
-            if (!float.TryParse(elements[2], out z)) { return false; }
-            result = new Vector3(x, y, z);
-            return true;
-        }
-
         /// <summary>
         /// Returns the area of a circular parachute of the given diameter
         /// </summary>
@@ -180,7 +156,7 @@ namespace RealChute
         /// <summary>
         /// Rounds the float to the closets half
         /// </summary>
-        /// <param name="f">Number to round</param>
+        /// <param name="d">Number to round</param>
         public static float Round(double d)
         {
             return (float)Math.Max(Math.Round(d, 1, MidpointRounding.AwayFromZero), 0.1);
@@ -235,9 +211,9 @@ namespace RealChute
         /// <param name="title">Title of the PopupDialog</param>
         /// <param name="message">Message of the PopupDialog</param>
         /// <param name="button">Button text of the PopupDialog</param>
-        public static void PostPopup(string title, string message, string button)
+        public static void PopupDialog(string title, string message, string button)
         {
-            PopupDialog.SpawnPopupDialog(anchor, anchor, title, message, button, false, HighLogic.UISkin);
+            global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, message, button, false, HighLogic.UISkin);
         }
         #endregion
     }

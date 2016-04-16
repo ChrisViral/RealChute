@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using UnityEngine;
-using RealChute.Extensions;
 using RealChute.Libraries;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -17,78 +16,88 @@ namespace RealChute
     public class RealChuteSettings
     {
         #region Fetch
-        private static RealChuteSettings _fetch = null;
+        private static RealChuteSettings fetch;
         /// <summary>
         /// Returns the current RealChute_Settings config file
         /// </summary>
-        public static RealChuteSettings fetch
+        public static RealChuteSettings Fetch
         {
             get
             {
-                if (_fetch == null) { _fetch = new RealChuteSettings(); }
-                return _fetch;
+                if (fetch == null) { fetch = new RealChuteSettings(); }
+                return fetch;
             }
         }
         #endregion
 
         #region Propreties
-        private bool _autoArm = false;
+        private bool autoArm;
         /// <summary>
         /// If parachutes must automatically arm when staged
         /// </summary>
-        public bool autoArm
+        public bool AutoArm
         {
-            get { return this._autoArm; }
-            set { this._autoArm = value; }
+            get { return this.autoArm; }
+            set { this.autoArm = value; }
         }
 
-        private bool _jokeActivated = false;
+        private bool jokeActivated;
         /// <summary>
         /// If April Fools joke is activated
         /// </summary>
-        public bool jokeActivated
+        public bool JokeActivated
         {
-            get { return this._jokeActivated; }
-            set { this._jokeActivated = value; }
+            get { return this.jokeActivated; }
+            set { this.jokeActivated = value; }
         }
 
-        private bool _guiResizeUpdates = false;
+        private bool guiResizeUpdates;
         /// <summary>
         /// Whether or not resizing the parachutes through part GUI updates the canopy diameter
         /// </summary>
-        public bool guiResizeUpdates
+        public bool GuiResizeUpdates
         {
-            get { return this._guiResizeUpdates; }
-            set { this._guiResizeUpdates = value; }
+            get { return this.guiResizeUpdates; }
+            set { this.guiResizeUpdates = value; }
         }
 
-        private bool _mustBeEngineer = true;
+        private bool mustBeEngineer = true;
         /// <summary>
         /// If a Kerbal must be an engineer to repack a parachute in career
         /// </summary>
-        public bool mustBeEngineer
+        public bool MustBeEngineer
         {
-            get { return this._mustBeEngineer; }
-            set { this._mustBeEngineer = value; }
+            get { return this.mustBeEngineer; }
+            set { this.mustBeEngineer = value; }
         }
 
-        private int _engineerLevel = 1;
+        private int engineerLevel = 1;
         /// <summary>
         /// The level at which an engineer must be to be able to repack a parachute
         /// </summary>
-        public int engineerLevel
+        public int EngineerLevel
         {
-            get { return this._engineerLevel; }
-            set { this._engineerLevel = value; }
+            get { return this.engineerLevel; }
+            set { this.engineerLevel = value; }
         }
 
-        private ConfigNode[] _presets = new ConfigNode[0];
+        private bool activateNyan;
+        /// <summary>
+        /// Whether or not NyanMode™ is activated
+        /// </summary>
+        public bool ActivateNyan
+        {
+            get { return this.activateNyan; }
+            set { this.activateNyan = value; }
+        }
+
+        private ConfigNode[] presets = new ConfigNode[0];
         /// <summary>
         /// All the current preset nodes
         /// </summary>
-        public ConfigNode[] presets
+        public ConfigNode[] Presets
         {
-            get { return this._presets; }
+            get { return this.presets; }
         }
         #endregion
 
@@ -100,28 +109,30 @@ namespace RealChute
         {
             ConfigNode node = new ConfigNode(), settings = new ConfigNode("REALCHUTE_SETTINGS");
             Debug.Log("[RealChute]: Loading settings file.");
-            if (!File.Exists(RCUtils.settingsURL))
+            if (!File.Exists(RCUtils.SettingsURL))
             {
                 Debug.LogError("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
-                settings.AddValue("autoArm", this._autoArm);
-                settings.AddValue("jokeActivated", this._jokeActivated);
-                settings.AddValue("guiResizeUpdates", this._guiResizeUpdates);
-                settings.AddValue("mustBeEngineer", this._mustBeEngineer);
-                settings.AddValue("engineerLevel", this._engineerLevel);
+                settings.AddValue("autoArm", this.autoArm);
+                settings.AddValue("jokeActivated", this.jokeActivated);
+                settings.AddValue("guiResizeUpdates", this.guiResizeUpdates);
+                settings.AddValue("mustBeEngineer", this.mustBeEngineer);
+                settings.AddValue("engineerLevel", this.engineerLevel);
+                settings.AddValue("activateNyan", this.activateNyan);
                 node.AddNode(settings);
-                node.Save(RCUtils.settingsURL);
+                node.Save(RCUtils.SettingsURL);
             }
             else
             {
-                node = ConfigNode.Load(RCUtils.settingsURL);
+                node = ConfigNode.Load(RCUtils.SettingsURL);
                 bool mustSave = false;
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { SaveSettings(); return; }
-                if (!settings.TryGetValue("autoArm", ref this._autoArm)) { mustSave = true; return; }
-                if (!settings.TryGetValue("jokeActivated", ref this._jokeActivated)) { mustSave = true; return; }
-                if (!settings.TryGetValue("guiResizeUpdates", ref this._guiResizeUpdates)) { mustSave = true; return; }
-                if (!settings.TryGetValue("mustBeEngineer", ref this._mustBeEngineer)) { mustSave = true; return; }
-                if (!settings.TryGetValue("engineerLevel", ref this._engineerLevel)) { mustSave = true; return; }
-                this._presets = settings.GetNodes("PRESET");
+                if (!settings.TryGetValue("autoArm", ref this.autoArm)) { mustSave = true; return; }
+                if (!settings.TryGetValue("jokeActivated", ref this.jokeActivated)) { mustSave = true; return; }
+                if (!settings.TryGetValue("guiResizeUpdates", ref this.guiResizeUpdates)) { mustSave = true; return; }
+                if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; return; }
+                if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; return; }
+                if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; return; }
+                this.presets = settings.GetNodes("PRESET");
                 if (mustSave) { SaveSettings(); }
             }
         }
@@ -134,20 +145,21 @@ namespace RealChute
         public static void SaveSettings()
         {
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
-            settings.AddValue("autoArm", fetch._autoArm);
-            settings.AddValue("jokeActivated", fetch._jokeActivated);
-            settings.AddValue("guiResizeUpdates", fetch._guiResizeUpdates);
-            settings.AddValue("mustBeEngineer", fetch._mustBeEngineer);
-            settings.AddValue("engineerLevel", fetch._engineerLevel);
-            if (PresetsLibrary.instance.presets.Count > 0)
+            settings.AddValue("autoArm", Fetch.autoArm);
+            settings.AddValue("jokeActivated", Fetch.jokeActivated);
+            settings.AddValue("guiResizeUpdates", Fetch.guiResizeUpdates);
+            settings.AddValue("mustBeEngineer", Fetch.mustBeEngineer);
+            settings.AddValue("engineerLevel", Fetch.engineerLevel);
+            settings.AddValue("activateNyan", Fetch.activateNyan);
+            if (PresetsLibrary.Instance.Presets.Count > 0)
             {
-                foreach (Preset preset in PresetsLibrary.instance.presets.Values)
+                foreach (Preset preset in PresetsLibrary.Instance.Presets.Values)
                 {
                     settings.AddNode(preset.Save());
                 }
             }
             node.AddNode(settings);
-            node.Save(RCUtils.settingsURL);
+            node.Save(RCUtils.SettingsURL);
             Debug.Log("[RealChute]: Saved settings file.");
         }
         #endregion

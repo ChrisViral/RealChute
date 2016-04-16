@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using RealChute.Extensions;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -18,193 +17,193 @@ namespace RealChute.Libraries
         public class ChuteParameters
         {
             #region Propreties
-            private string _material = "Nylon";
+            private string material = "Nylon";
             /// <summary>
             /// Material of the parachute
             /// </summary>
-            public string material
+            public string Material
             {
-                get { return this._material; }
+                get { return this.material; }
             }
 
-            private string _preDeployedDiameter = "1";
+            private string preDeployedDiameter = "1";
             /// <summary>
             /// Predeployed diameter of the parachute
             /// </summary>
-            public string preDeployedDiameter
+            public string PreDeployedDiameter
             {
-                get { return this._preDeployedDiameter; }
+                get { return this.preDeployedDiameter; }
             }
 
-            private string _deployedDiameter = "25";
+            private string deployedDiameter = "25";
             /// <summary>
             /// Deployed diameter of the parachute
             /// </summary>
-            public string deployedDiameter
+            public string DeployedDiameter
             {
-                get { return this._deployedDiameter; }
+                get { return this.deployedDiameter; }
             }
 
-            private bool _minIsPressure = false;
+            private bool minIsPressure;
             /// <summary>
             /// Wether the minimum deployment clause is pressure or altitude
             /// </summary>
-            public bool minIsPressure
+            public bool MinIsPressure
             {
-                get { return this._minIsPressure; }
+                get { return this.minIsPressure; }
             }
 
-            private string _minDeployment = "25000";
+            private string minDeployment = "25000";
             /// <summary>
             /// Minimum predeployment altitude
             /// </summary>
-            public string minDeployment
+            public string MinDeployment
             {
-                get { return this._minDeployment; }
+                get { return this.minDeployment; }
             }
 
-            private string _minPressure = "0.01";
+            private string minPressure = "0.01";
             /// <summary>
             /// Minimum predeployment pressure
             /// </summary>
-            public string minPressure
+            public string MinPressure
             {
-                get { return this._minPressure; }
+                get { return this.minPressure; }
             }
 
-            private string _deploymentAlt = "700";
+            private string deploymentAlt = "700";
             /// <summary>
             /// Full deployment altitude
             /// </summary>
-            public string deploymentAlt
+            public string DeploymentAlt
             {
-                get { return this._deploymentAlt; }
+                get { return this.deploymentAlt; }
             }
 
-            private string _cutAlt = string.Empty;
+            private string cutAlt = string.Empty;
             /// <summary>
             /// Autocut altitude
             /// </summary>
-            public string cutAlt
+            public string CutAlt
             {
-                get { return this._cutAlt; }
+                get { return this.cutAlt; }
             }
 
-            private string _preDeploymentSpeed = "2";
+            private string preDeploymentSpeed = "2";
             /// <summary>
             /// Predeployment speed
             /// </summary>
-            public string preDeploymentSpeed
+            public string PreDeploymentSpeed
             {
-                get { return this._preDeploymentSpeed; }
+                get { return this.preDeploymentSpeed; }
             }
 
-            private string _deploymentSpeed = "6";
+            private string deploymentSpeed = "6";
             /// <summary>
             /// Deployment speed
             /// </summary>
-            public string deploymentSpeed
+            public string DeploymentSpeed
             {
-                get { return this._deploymentSpeed; }
+                get { return this.deploymentSpeed; }
             }
 
-            private string _chuteTexture = string.Empty;
+            private string chuteTexture = string.Empty;
             /// <summary>
             /// GUI ID for the canopy texture
             /// </summary>
-            public string chuteTexture
+            public string ChuteTexture
             {
-                get { return this._chuteTexture; }
+                get { return this.chuteTexture; }
             }
 
-            private string _modelName = string.Empty;
+            private string modelName = string.Empty;
             /// <summary>
             /// GUI ID for the canopy model
             /// </summary>
-            public string modelName
+            public string ModelName
             {
-                get { return this._modelName; }
+                get { return this.modelName; }
             }
 
-            private int _type = 0;
+            private int type;
             /// <summary>
             /// ID of the parachute type
             /// </summary>
-            public int type
+            public int Type
             {
-                get { return this._type; }
+                get { return this.type; }
             }
 
-            private bool _calcSelect = false;
+            private bool calcSelect;
             /// <summary>
             /// GUI calculations mode
             /// </summary>
-            public bool calcSelect
+            public bool CalcSelect
             {
-                get { return this._calcSelect; }
+                get { return this.calcSelect; }
             }
 
-            private bool _getMass = true;
+            private bool getMass = true;
             /// <summary>
             /// GUI mass obtention
             /// </summary>
-            public bool getMass
+            public bool GetMass
             {
-                get { return this._getMass; }
+                get { return this.getMass; }
             }
 
-            private bool _useDry = true;
+            private bool useDry = true;
             /// <summary>
             /// GUI wet/dry mass
             /// </summary>
-            public bool useDry
+            public bool UseDry
             {
-                get { return this._useDry; }
+                get { return this.useDry; }
             }
 
-            private string _mass = "10";
+            private string mass = "10";
             /// <summary>
             /// GUI mass field
             /// </summary>
-            public string mass
+            public string Mass
             {
-                get { return this._mass; }
+                get { return this.mass; }
             }
 
-            private string _landingSpeed = "6";
+            private string landingSpeed = "6";
             /// <summary>
             /// GUI landing speed field
             /// </summary>
-            public string landingSpeed
+            public string LandingSpeed
             {
-                get { return this._landingSpeed; }
+                get { return this.landingSpeed; }
             }
 
-            private string _deceleration = "10";
+            private string deceleration = "10";
             /// <summary>
             /// GUI deceleration field
             /// </summary>
-            public string deceleration
+            public string Deceleration
             {
-                get { return this._deceleration; }
+                get { return this.deceleration; }
             }
 
-            private string _refDepAlt = "700";
+            private string refDepAlt = "700";
             /// <summary>
             /// GUI mains deployment alt field
             /// </summary>
-            public string refDepAlt
+            public string RefDepAlt
             {
-                get { return this._refDepAlt; }
+                get { return this.refDepAlt; }
             }
 
-            private string _chuteCount = "1";
+            private string chuteCount = "1";
             /// <summary>
             /// GUI chute count field
             /// </summary>
-            public string chuteCount
+            public string ChuteCount
             {
-                get { return this._chuteCount; }
+                get { return this.chuteCount; }
             }
             #endregion
 
@@ -215,27 +214,27 @@ namespace RealChute.Libraries
             /// <param name="node">ConfigNode to create the object from</param>
             public ChuteParameters(ConfigNode node)
             {
-                node.TryGetValue("material", ref _material);
-                node.TryGetValue("preDeployedDiameter", ref _preDeployedDiameter);
-                node.TryGetValue("deployedDiameter", ref _deployedDiameter);
-                node.TryGetValue("minIsPressure", ref _minIsPressure);
-                node.TryGetValue("minDeployment", ref _minDeployment);
-                node.TryGetValue("minPressure", ref _minPressure);
-                node.TryGetValue("deploymentAlt", ref _deploymentAlt);
-                node.TryGetValue("cutAlt", ref _cutAlt);
-                node.TryGetValue("preDeploymentSpeed", ref _preDeploymentSpeed);
-                node.TryGetValue("deploymentSpeed", ref _deploymentSpeed);
-                node.TryGetValue("chuteTexture", ref _chuteTexture);
-                node.TryGetValue("modelName", ref _modelName);
-                node.TryGetValue("type", ref _type);
-                node.TryGetValue("calcSelect", ref _calcSelect);
-                node.TryGetValue("getMass", ref _getMass);
-                node.TryGetValue("useDry", ref _useDry);
-                node.TryGetValue("mass", ref _mass);
-                node.TryGetValue("landingSpeed", ref _landingSpeed);
-                node.TryGetValue("deceleration", ref _deceleration);
-                node.TryGetValue("refDepAlt", ref _refDepAlt);
-                node.TryGetValue("chuteCount", ref _chuteCount);
+                node.TryGetValue("material", ref this.material);
+                node.TryGetValue("preDeployedDiameter", ref this.preDeployedDiameter);
+                node.TryGetValue("deployedDiameter", ref this.deployedDiameter);
+                node.TryGetValue("minIsPressure", ref this.minIsPressure);
+                node.TryGetValue("minDeployment", ref this.minDeployment);
+                node.TryGetValue("minPressure", ref this.minPressure);
+                node.TryGetValue("deploymentAlt", ref this.deploymentAlt);
+                node.TryGetValue("cutAlt", ref this.cutAlt);
+                node.TryGetValue("preDeploymentSpeed", ref this.preDeploymentSpeed);
+                node.TryGetValue("deploymentSpeed", ref this.deploymentSpeed);
+                node.TryGetValue("chuteTexture", ref this.chuteTexture);
+                node.TryGetValue("modelName", ref this.modelName);
+                node.TryGetValue("type", ref this.type);
+                node.TryGetValue("calcSelect", ref this.calcSelect);
+                node.TryGetValue("getMass", ref this.getMass);
+                node.TryGetValue("useDry", ref this.useDry);
+                node.TryGetValue("mass", ref this.mass);
+                node.TryGetValue("landingSpeed", ref this.landingSpeed);
+                node.TryGetValue("deceleration", ref this.deceleration);
+                node.TryGetValue("refDepAlt", ref this.refDepAlt);
+                node.TryGetValue("chuteCount", ref this.chuteCount);
             }
 
             /// <summary>
@@ -245,31 +244,31 @@ namespace RealChute.Libraries
             /// <param name="secondary"></param>
             public ChuteParameters(ProceduralChute pChute, ChuteTemplate chute)
             {
-                TemplateGUI templateGUI = chute.templateGUI;
-                this._material = MaterialsLibrary.instance.GetMaterial(templateGUI.materialsID).name;
-                this._preDeployedDiameter = templateGUI.preDepDiam;
-                this._deployedDiameter = templateGUI.depDiam;
-                this._minIsPressure = templateGUI.isPressure;
-                this._minDeployment = this.minIsPressure ? chute.parachute.minDeployment.ToString() : templateGUI.predepClause;
-                this._minPressure = this.minIsPressure ? templateGUI.predepClause : chute.parachute.minPressure.ToString();
-                this._deploymentAlt = templateGUI.deploymentAlt;
-                this._cutAlt = templateGUI.cutAlt;
-                this._preDeploymentSpeed = templateGUI.preDepSpeed;
-                this._deploymentSpeed = templateGUI.depSpeed;
+                TemplateGui templateGui = chute.templateGui;
+                this.material = MaterialsLibrary.Instance.GetMaterial(templateGui.materialsId).Name;
+                this.preDeployedDiameter = templateGui.preDepDiam;
+                this.deployedDiameter = templateGui.depDiam;
+                this.minIsPressure = templateGui.isPressure;
+                this.minDeployment = this.MinIsPressure ? chute.parachute.minDeployment.ToString() : templateGui.predepClause;
+                this.minPressure = this.MinIsPressure ? templateGui.predepClause : chute.parachute.minPressure.ToString();
+                this.deploymentAlt = templateGui.deploymentAlt;
+                this.cutAlt = templateGui.cutAlt;
+                this.preDeploymentSpeed = templateGui.preDepSpeed;
+                this.deploymentSpeed = templateGui.depSpeed;
                 if (pChute.textureLibrary != "none")
                 {
-                    if (pChute.textures.canopies.Count > 0) { this._chuteTexture = pChute.textures.GetCanopy(templateGUI.chuteID).name; }
-                    if (pChute.textures.models.Count > 0) { this._modelName = pChute.textures.GetModel(templateGUI.modelID).name; }
+                    if (pChute.textures.Canopies.Count > 0) { this.chuteTexture = pChute.textures.GetCanopy(templateGui.chuteId).Name; }
+                    if (pChute.textures.Models.Count > 0) { this.modelName = pChute.textures.GetModel(templateGui.modelId).Name; }
                 }
-                this._type = templateGUI.typeID;
-                this._calcSelect = templateGUI.calcSelect;
-                this._getMass = templateGUI.getMass;
-                this._useDry = templateGUI.useDry;
-                this._mass = templateGUI.mass;
-                this._landingSpeed = templateGUI.landingSpeed;
-                this._deceleration = templateGUI.deceleration;
-                this._refDepAlt = templateGUI.refDepAlt;
-                this._chuteCount = templateGUI.chuteCount;
+                this.type = templateGui.TypeId;
+                this.calcSelect = templateGui.calcSelect;
+                this.getMass = templateGui.getMass;
+                this.useDry = templateGui.useDry;
+                this.mass = templateGui.mass;
+                this.landingSpeed = templateGui.landingSpeed;
+                this.deceleration = templateGui.deceleration;
+                this.refDepAlt = templateGui.refDepAlt;
+                this.chuteCount = templateGui.chuteCount;
             }
             #endregion
 
@@ -281,139 +280,139 @@ namespace RealChute.Libraries
             public ConfigNode Save()
             {
                 ConfigNode node = new ConfigNode("CHUTE");
-                node.AddValue("material", material);
-                node.AddValue("preDeployedDiameter", preDeployedDiameter);
-                node.AddValue("deployedDiameter", deployedDiameter);
-                node.AddValue("minIsPressure", minIsPressure);
-                node.AddValue("minDeployment", minDeployment);
-                node.AddValue("minPressure", minPressure);
-                node.AddValue("deploymentAlt", deploymentAlt);
-                node.AddValue("cutAlt", cutAlt);
-                node.AddValue("preDeploymentSpeed", preDeploymentSpeed);
-                node.AddValue("deploymentSpeed", deploymentSpeed);
-                node.AddValue("chuteTexture", chuteTexture);
-                node.AddValue("modelName", modelName);
-                node.AddValue("type", type);
-                node.AddValue("calcSelect", calcSelect);
-                node.AddValue("getMass", getMass);
-                node.AddValue("useDry", useDry);
-                node.AddValue("mass", mass);
-                node.AddValue("landingSpeed", landingSpeed);
-                node.AddValue("deceleration", deceleration);
-                node.AddValue("refDepAlt", refDepAlt);
-                node.AddValue("chuteCount", chuteCount);
+                node.AddValue("material", this.Material);
+                node.AddValue("preDeployedDiameter", this.PreDeployedDiameter);
+                node.AddValue("deployedDiameter", this.DeployedDiameter);
+                node.AddValue("minIsPressure", this.MinIsPressure);
+                node.AddValue("minDeployment", this.MinDeployment);
+                node.AddValue("minPressure", this.MinPressure);
+                node.AddValue("deploymentAlt", this.DeploymentAlt);
+                node.AddValue("cutAlt", this.CutAlt);
+                node.AddValue("preDeploymentSpeed", this.PreDeploymentSpeed);
+                node.AddValue("deploymentSpeed", this.DeploymentSpeed);
+                node.AddValue("chuteTexture", this.ChuteTexture);
+                node.AddValue("modelName", this.ModelName);
+                node.AddValue("type", this.Type);
+                node.AddValue("calcSelect", this.CalcSelect);
+                node.AddValue("getMass", this.GetMass);
+                node.AddValue("useDry", this.UseDry);
+                node.AddValue("mass", this.Mass);
+                node.AddValue("landingSpeed", this.LandingSpeed);
+                node.AddValue("deceleration", this.Deceleration);
+                node.AddValue("refDepAlt", this.RefDepAlt);
+                node.AddValue("chuteCount", this.ChuteCount);
                 return node;
             }
             #endregion
         }
 
         #region Propreties
-        private string _name = string.Empty;
+        private string name = string.Empty;
         /// <summary>
         /// Name of the preset
         /// </summary>
-        public string name
+        public string Name
         {
-            get { return this._name; }
+            get { return this.name; }
         }
 
-        private string _description = string.Empty;
+        private string description = string.Empty;
         /// <summary>
         /// Description of the preset
         /// </summary>
-        public string description
+        public string Description
         {
-            get { return this._description; }
+            get { return this.description; }
         }
 
-        private string _textureLibrary = string.Empty;
+        private string textureLibrary = string.Empty;
         /// <summary>
         /// TextureLibrary for this part
         /// </summary>
-        public string textureLibrary
+        public string TextureLibrary
         {
-            get { return this._textureLibrary; }
+            get { return this.textureLibrary; }
         }
 
-        private string _sizeID = string.Empty;
+        private string sizeId = string.Empty;
         /// <summary>
         /// Size ID for this chute
         /// </summary>
-        public string sizeID
+        public string SizeId
         {
-            get { return this._sizeID; }
+            get { return this.sizeId; }
         }
 
-        private string _cutSpeed = "0.5f";
+        private string cutSpeed = "0.5f";
         /// <summary>
         /// Autocut speed for the chute
         /// </summary>
-        public string cutSpeed
+        public string CutSpeed
         {
-            get { return this._cutSpeed; }
+            get { return this.cutSpeed; }
         }
 
-        private string _timer = "0s";
+        private string timer = "0s";
         /// <summary>
         /// Deployment timer for the chute
         /// </summary>
-        public string timer
+        public string Timer
         {
-            get { return this._timer; }
+            get { return this.timer; }
         }
 
-        private bool _mustGoDown = false;
+        private bool mustGoDown;
         /// <summary>
         /// MustGoDown clause for this preset
         /// </summary>
-        public bool mustGoDown
+        public bool MustGoDown
         {
-            get { return this._mustGoDown; }
+            get { return this.mustGoDown; }
         }
 
-        private bool _deployOnGround = false;
+        private bool deployOnGround;
         /// <summary>
         /// If this chute automatically deploys on ground contact or not
         /// </summary>
-        public bool deployOnGround
+        public bool DeployOnGround
         {
-            get { return this._deployOnGround; }
+            get { return this.deployOnGround; }
         }
 
-        private string _spares = "5";
+        private string spares = "5";
         /// <summary>
         /// Amount of spare chutes available
         /// </summary>
-        public string spares
+        public string Spares
         {
-            get { return this._spares; }
+            get { return this.spares; }
         }
 
-        private string _landingAlt = "0";
+        private string landingAlt = "0";
         /// <summary>
         /// Planned landing altitude of the craft
         /// </summary>
-        public string landingAlt
+        public string LandingAlt
         {
-            get { return this._landingAlt; }
+            get { return this.landingAlt; }
         }
 
-        private string _caseName = string.Empty;
+        private string caseName = string.Empty;
         /// <summary>
         /// GUI ID for case texture
         /// </summary>
-        public string caseName
+        public string CaseName
         {
-            get { return this._caseName; }
+            get { return this.caseName; }
         }
 
-        private List<ChuteParameters> _parameters = new List<ChuteParameters>();
+        private List<ChuteParameters> parameters = new List<ChuteParameters>();
         /// <summary>
         /// All parameters for potential chutes
         /// </summary>
-        public List<ChuteParameters> parameters
+        public List<ChuteParameters> Parameters
         {
-            get { return this._parameters; }
+            get { return this.parameters; }
         }
         #endregion
 
@@ -424,18 +423,18 @@ namespace RealChute.Libraries
         /// <param name="node">ConfigNode to create the object from</param>
         public Preset(ConfigNode node)
         {
-            node.TryGetValue("name", ref _name);
-            node.TryGetValue("description", ref _description);
-            node.TryGetValue("textureLibrary", ref _textureLibrary);
-            node.TryGetValue("sizeID", ref _sizeID);
-            node.TryGetValue("cutSpeed", ref _cutSpeed);
-            node.TryGetValue("timer", ref _timer);
-            node.TryGetValue("mustGoDown", ref _mustGoDown);
-            node.TryGetValue("deployOnGround", ref _deployOnGround);
-            node.TryGetValue("spares", ref _spares);
-            node.TryGetValue("landingAlt", ref _landingAlt);
-            node.TryGetValue("caseName", ref _caseName);
-            _parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
+            node.TryGetValue("name", ref this.name);
+            node.TryGetValue("description", ref this.description);
+            node.TryGetValue("textureLibrary", ref this.textureLibrary);
+            node.TryGetValue("sizeID", ref this.sizeId);
+            node.TryGetValue("cutSpeed", ref this.cutSpeed);
+            node.TryGetValue("timer", ref this.timer);
+            node.TryGetValue("mustGoDown", ref this.mustGoDown);
+            node.TryGetValue("deployOnGround", ref this.deployOnGround);
+            node.TryGetValue("spares", ref this.spares);
+            node.TryGetValue("landingAlt", ref this.landingAlt);
+            node.TryGetValue("caseName", ref this.caseName);
+            this.parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
         }
 
         /// <summary>
@@ -444,21 +443,21 @@ namespace RealChute.Libraries
         /// <param name="pChute">ProceduralChute to create the object from</param>
         public Preset(ProceduralChute pChute)
         {
-            this._name = pChute.editorGUI.presetName;
-            this._description = pChute.editorGUI.presetDescription;
-            this._textureLibrary = pChute.textureLibrary;
-            if (pChute.sizes.Count > 0) { this._sizeID = pChute.sizes[pChute.size].sizeID; }
-            this._cutSpeed = pChute.cutSpeed;
-            this._timer = pChute.timer;
-            this._mustGoDown = pChute.mustGoDown;
-            this._deployOnGround = pChute.deployOnGround;
-            this._spares = pChute.spares;
-            this._landingAlt = pChute.landingAlt;
-            if (textureLibrary != "none")
+            this.name = pChute.editorGui.presetName;
+            this.description = pChute.editorGui.presetDescription;
+            this.textureLibrary = pChute.textureLibrary;
+            if (pChute.sizes.Count > 0) { this.sizeId = pChute.sizes[pChute.size].SizeId; }
+            this.cutSpeed = pChute.cutSpeed;
+            this.timer = pChute.timer;
+            this.mustGoDown = pChute.mustGoDown;
+            this.deployOnGround = pChute.deployOnGround;
+            this.spares = pChute.spares;
+            this.landingAlt = pChute.landingAlt;
+            if (this.TextureLibrary != "none")
             {
-                if (pChute.textures.cases.Count > 0) { this._caseName = pChute.parachuteCase.name; }
+                if (pChute.textures.Cases.Count > 0) { this.caseName = pChute.parachuteCase.Name; }
             }
-            _parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
+            this.parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
         }
         #endregion
 
@@ -469,18 +468,18 @@ namespace RealChute.Libraries
         public ConfigNode Save()
         {
             ConfigNode node = new ConfigNode("PRESET");
-            node.AddValue("name", this.name);
-            node.AddValue("description", this.description);
-            node.AddValue("textureLibrary", this.textureLibrary);
-            node.AddValue("sizeID", this.sizeID);
-            node.AddValue("cutSpeed", this.cutSpeed);
-            node.AddValue("timer", this.timer);
-            node.AddValue("mustGoDown", this.mustGoDown);
-            node.AddValue("deployOnGround", this.deployOnGround);
-            node.AddValue("spares", this.spares);
-            node.AddValue("landingAlt", this.landingAlt);
-            node.AddValue("caseName", this.caseName);
-            this.parameters.ForEach(p => node.AddNode(p.Save()));
+            node.AddValue("name", this.Name);
+            node.AddValue("description", this.Description);
+            node.AddValue("textureLibrary", this.TextureLibrary);
+            node.AddValue("sizeID", this.SizeId);
+            node.AddValue("cutSpeed", this.CutSpeed);
+            node.AddValue("timer", this.Timer);
+            node.AddValue("mustGoDown", this.MustGoDown);
+            node.AddValue("deployOnGround", this.DeployOnGround);
+            node.AddValue("spares", this.Spares);
+            node.AddValue("landingAlt", this.LandingAlt);
+            node.AddValue("caseName", this.CaseName);
+            this.Parameters.ForEach(p => node.AddNode(p.Save()));
             return node;
         }
         #endregion

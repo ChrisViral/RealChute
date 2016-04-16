@@ -20,7 +20,7 @@ namespace RealChute
         /// <summary>
         /// The current instance of the SizeManager
         /// </summary>
-        public static PersistentManager instance { get; private set; }
+        public static PersistentManager Instance { get; private set; }
         #endregion
 
         #region Fields
@@ -31,10 +31,10 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || instance != null) { Destroy(this); return; }
-            instance = this;
+            if (!CompatibilityChecker.IsAllCompatible() || Instance != null) { Destroy(this); return; }
+            Instance = this;
             DontDestroyOnLoad(this);
-            print("[RealChute]: Running RealChute " + RCUtils.assemblyVersion);
+            print("[RealChute]: Running RealChute " + RCUtils.AssemblyVersion);
         }
         #endregion
 

@@ -12,7 +12,7 @@ using System.Collections.Generic;
 
 namespace RealChute.Extensions
 {
-    public static class IEnumerableExtensions
+    public static class EnumerableExtensions
     {
         #region Methods
         /// <summary>
