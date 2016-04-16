@@ -104,6 +104,7 @@ Thumbs.db
 ToDo.txt
 [Rr]elease/
 autocopy.bat
+*.lnk
 *.ini
 Generated_Code #added for RIA/Silverlight projects
 
