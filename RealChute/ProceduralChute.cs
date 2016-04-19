@@ -19,7 +19,7 @@ using RealChute.Libraries.TextureLibrary;
 
 namespace RealChute
 {
-    public class ProceduralChute : PartModule, IPartCostModifier, IPartSizeModifier
+    public class ProceduralChute : PartModule, IPartCostModifier
     {
         /// <summary>
         /// Type for the GUI selector entries
@@ -418,16 +418,6 @@ namespace RealChute
         }
 
         public ModifierChangeWhen GetModuleCostChangeWhen()
-        {
-            return ModifierChangeWhen.FIXED;
-        }
-
-        public Vector3 GetModuleSize(Vector3 defaultSize, ModifierStagingSituation sit)
-        {
-            return this.sizes.Count == 0 ? Vector3.one : this.sizes[this.size].Size;
-        }
-
-        public ModifierChangeWhen GetModuleSizeChangeWhen()
         {
             return ModifierChangeWhen.FIXED;
         }

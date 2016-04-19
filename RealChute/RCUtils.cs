@@ -89,9 +89,6 @@ namespace RealChute
                         assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
                     }
                     else { assemblyVersion = "v" + version; }
-#if PRERELEASE
-                    assemblyVersion += "x4";
-#endif
                 }
                 return assemblyVersion;
             }
@@ -132,7 +129,7 @@ namespace RealChute
                 return densityMethod;
             }
         }
-#endregion
+        #endregion
 
         #region Methods
         public static string[] ParseArray(string text)
