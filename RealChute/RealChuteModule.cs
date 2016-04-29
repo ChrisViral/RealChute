@@ -356,8 +356,7 @@ namespace RealChute
         {
             DeactivateRC();
             this.armed = false;
-            if (this.part.inverseStage != 0) { this.part.inverseStage = this.part.inverseStage - 1; }
-            else { this.part.inverseStage = StageManager.CurrentStage; }
+            this.part.inverseStage = this.part.inverseStage != 0 ? this.part.inverseStage - 1 : StageManager.CurrentStage;
         }
 
         //Allows the chute to be repacked if available
@@ -675,7 +674,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             this.node = node;
             LoadParachutes();
-            if (HighLogic.LoadedScene == GameScenes.LOADING)
+            if (HighLogic.LoadedScene == GameScenes.LOADING || !PartLoader.Instance.IsReady() || this.part.partInfo == null)
             {
                 PersistentManager.Instance.AddNode<RealChuteModule>(this.part.name, node);
             }
@@ -737,6 +736,11 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible()) { return; }
             //Saves the parachutes to the persistence
             this.parachutes.ForEach(p => node.AddNode(p.Save()));
+        }
+
+        public override void OnActive()
+        {
+            if (!this.staged) { ActivateRC(); }
         }
 
         public override bool IsStageable()

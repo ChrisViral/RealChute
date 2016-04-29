@@ -81,10 +81,8 @@ namespace RealChute
                 dict = new Dictionary<string, ConfigNode>();
                 nodes.Add(type, dict);
             }
-            if (!dict.ContainsKey(name))
-            {
-                dict.Add(name, node);
-            }
+            
+            dict[name] = node;  //Allows updating the stored node (MM reload)
         }
 
         /// <summary>
