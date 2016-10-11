@@ -39,7 +39,7 @@ namespace RealChute.Extensions
         /// <param name="node">Value to store the result into</param>
         public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node)
         {
-            node = part.findAttachNode(nodeId);
+            node = part.FindAttachNode(nodeId);
             return node != null;
         }
 

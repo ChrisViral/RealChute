@@ -377,13 +377,13 @@ namespace RealChute
 
                     case DeploymentStates.PREDEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(0, this.PreDeployedArea, this.preDeploymentSpeed), this.ForcePosition, ForceMode.Force);
+                            this.Part.AddForceAtPosition(DragForce(0, this.PreDeployedArea, this.preDeploymentSpeed), this.ForcePosition);
                             if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
                             break;
                         }
                     case DeploymentStates.LOWDEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(0, this.DeployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.ForcePosition, ForceMode.Force);
+                            this.Part.AddForceAtPosition(DragForce(0, this.DeployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.ForcePosition);
                             if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();
@@ -395,7 +395,7 @@ namespace RealChute
 
                     case DeploymentStates.DEPLOYED:
                         {
-                            this.rigidbody.AddForceAtPosition(DragForce(this.PreDeployedArea, this.DeployedArea, this.deploymentSpeed), this.ForcePosition, ForceMode.Force);
+                            this.Part.AddForceAtPosition(DragForce(this.PreDeployedArea, this.DeployedArea, this.deploymentSpeed), this.ForcePosition);
                             if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                             {
                                 this.dragTimer.Restart();

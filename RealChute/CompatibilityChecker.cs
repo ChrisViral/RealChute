@@ -57,7 +57,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 1 && Versioning.version_minor == 1 && Versioning.Revision >= 2;
+            return Versioning.version_major == 1 && Versioning.version_minor == 2 && Versioning.Revision >= 0;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -70,7 +70,7 @@ namespace RealChute
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
             
-            return Application.unityVersion.Equals("5.2.4f1");
+            return Application.unityVersion.Equals("5.4.0p4");
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
