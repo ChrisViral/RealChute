@@ -57,7 +57,8 @@ namespace RealChute
 
         private void AddButton()
         {
-            if (ApplicationLauncher.Ready && add)
+            // The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
+            if (ApplicationLauncher.Ready && add && HighLogic.LoadedScene == GameScenes.SPACECENTER)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
