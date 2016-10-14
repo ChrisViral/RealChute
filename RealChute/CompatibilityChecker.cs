@@ -78,11 +78,11 @@ namespace RealChute
         }
 
         //Version of the compatibility checker itself.
-        private static int version = 5;
+        private static int _version = 5;
 
         public void Start()
         {
-            //Checkers are identified by the type name and version field name.
+            //Checkers are identified by the type name and _version field name.
             FieldInfo[] fields =
                 GetAllTypes()
                 .Where(t => t.Name == "CompatibilityChecker")
@@ -92,16 +92,16 @@ namespace RealChute
                 .ToArray();
 
             //Let the latest version of the checker execute.
-            if (version != fields.Max(f => (int)f.GetValue(null))) { return; }
+            if (_version != fields.Max(f => (int)f.GetValue(null))) { return; }
 
-            Debug.Log(string.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", version, Assembly.GetExecutingAssembly().GetName().Name));
+            Debug.Log(String.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", _version, Assembly.GetExecutingAssembly().GetName().Name));
 
             //Other checkers will see this version and not run.
             //This accomplishes the same as an explicit "ran" flag with fewer moving parts.
-            version = int.MaxValue;
+            _version = int.MaxValue;
 
             //A mod is incompatible if its compatibility checker has an IsCompatible method which returns false.
-            string[] incompatible =
+            String[] incompatible =
                 fields
                 .Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
                 .Where(m => m.IsStatic)
@@ -115,7 +115,7 @@ namespace RealChute
                     catch (Exception e)
                     {
                         //If a mod throws an exception from IsCompatible, it's not compatible.
-                        Debug.LogWarning(string.Format("[CompatibilityChecker] Exception while invoking IsCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
+                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
                         return true;
                     }
                 })
@@ -123,7 +123,7 @@ namespace RealChute
                 .ToArray();
 
             //A mod is incompatible with Unity if its compatibility checker has an IsUnityCompatible method which returns false.
-            string[] incompatibleUnity =
+            String[] incompatibleUnity =
                 fields
                 .Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
                 .Where(m => m != null)  //Mods without IsUnityCompatible() are assumed to be compatible.
@@ -138,7 +138,7 @@ namespace RealChute
                     catch (Exception e)
                     {
                         //If a mod throws an exception from IsUnityCompatible, it's not compatible.
-                        Debug.LogWarning(string.Format("[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
+                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
                         return true;
                     }
                 })
@@ -148,7 +148,7 @@ namespace RealChute
             Array.Sort(incompatible);
             Array.Sort(incompatibleUnity);
 
-            string message = string.Empty;
+            String message = String.Empty;
 
             /*if (SixtyFourBitsMayHaveAChanceAtLife())
              *{
@@ -157,20 +157,20 @@ namespace RealChute
 
             if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
-                message += (message == string.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
+                message += (message == String.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
 
                 if (incompatible.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + string.Join(", ", incompatible));
-                    message += string.Format("\n\nThese mods are incompatible with KSP {0}.{1}.{2}:\n\n", Versioning.version_major, Versioning.version_minor, Versioning.Revision);
-                    message += string.Join("\n", incompatible);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + String.Join(", ", incompatible));
+                    message += String.Format("\n\nThese mods are incompatible with KSP {0}.{1}.{2}:\n\n", Versioning.version_major, Versioning.version_minor, Versioning.Revision);
+                    message += String.Join("\n", incompatible);
                 }
 
                 if (incompatibleUnity.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + string.Join(", ", incompatibleUnity));
-                    message += string.Format("\n\nThese mods are incompatible with Unity {0}:\n\n", Application.unityVersion);
-                    message += string.Join("\n", incompatibleUnity);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + String.Join(", ", incompatibleUnity));
+                    message += String.Format("\n\nThese mods are incompatible with Unity {0}:\n\n", Application.unityVersion);
+                    message += String.Join("\n", incompatibleUnity);
                 }
             }
 
@@ -192,7 +192,7 @@ namespace RealChute
 
         private static IEnumerable<Type> GetAllTypes()
         {
-            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Type[] types;
                 try
@@ -204,7 +204,7 @@ namespace RealChute
                     types = Type.EmptyTypes;
                 }
 
-                foreach (Type type in types)
+                foreach (var type in types)
                 {
                     yield return type;
                 }

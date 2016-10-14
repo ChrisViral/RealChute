@@ -9,7 +9,7 @@
       <File FileName="RealChute\GUIUtils.cs" Line="8" Column="23" />
       <File FileName="RealChute\Parachute.cs" Line="398" Column="150" />
       <File FileName="RealChute\Extensions\PartExtensions.cs" Line="33" Column="10" />
-      <File FileName="RealChute\CompatibilityChecker.cs" Line="60" Column="111" />
+      <File FileName="RealChute\CompatibilityChecker.cs" Line="60" Column="49" />
       <File FileName="RealChute\RCUtils.cs" Line="65" Column="13" />
     </Files>
   </MonoDevelop.Ide.Workbench>
