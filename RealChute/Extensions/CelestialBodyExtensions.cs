@@ -21,14 +21,14 @@ namespace RealChute.Extensions
         /// </summary>
         /// <param name="alt">Altitude the fetch the density at</param>
         /// <param name="temperature">Ambient temperature</param>
-        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature)
+        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null)
         {
             if (!body.atmosphere || alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            if (RCUtils.FarLoaded && !disabled)
+            if (RCUtils.FarLoaded && !disabled && vessel != null)
             {
                 try
                 {
-                    return (double)RCUtils.DensityMethod.Invoke(null, new object[] { body, alt, false });
+                    return (double)RCUtils.DensityMethod.Invoke(null, new object[] { vessel });
                 }
                 catch (Exception e)
                 {

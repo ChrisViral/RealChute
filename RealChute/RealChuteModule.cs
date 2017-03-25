@@ -526,7 +526,7 @@ namespace RealChute
             this.asl = FlightGlobals.getAltitudeAtPos(this.pos);
             this.trueAlt = this.vessel.GetTrueAlt(this.asl);
             this.atmPressure = this.vessel.mainBody.GetPressureAtAlt(this.asl) * PhysicsGlobals.KpaToAtmospheres;
-            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(this.asl, this.vessel.atmosphericTemperature);
+            this.atmDensity = this.vessel.mainBody.GetDensityAtAlt(this.asl, this.vessel.atmosphericTemperature, this.vessel);
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
             this.dragVector = -velocity.normalized;

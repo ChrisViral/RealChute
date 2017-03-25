@@ -121,10 +121,14 @@ namespace RealChute
             {
                 if (densityMethod == null)
                 {
-                    densityMethod = AssemblyLoader.loadedAssemblies.FirstOrDefault(a => a.dllName == "FerramAerospaceResearch").assembly
+                    /*
+                    densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
                         .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethods().Where(m => m.IsPublic && m.IsStatic)
                         .Where(m => m.ReturnType == typeof(double) && m.Name == "GetCurrentDensity").ToDictionary(m => m, m => m.GetParameters())
-                        .Single(m => m.Value[0].ParameterType == typeof(CelestialBody) && m.Value[1].ParameterType == typeof(double)).Key;
+                        .Single(m => m.Value[0].ParameterType == typeof(Vessel)).Key;
+*/
+                    densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
+                                                  .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethod("GetCurrentDensity");
                 }
                 return densityMethod;
             }
