@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -18,17 +19,20 @@ namespace RealChute.Extensions
         private static bool disabled;
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
+        /// DEPRECATED per discussion with ferram4; FAR is no longer needed as stock KSP handles this adequately now.
         /// </summary>
-        /// <param name="alt">Altitude the fetch the density at</param>
+        /// <param name="alt">Altitude to fetch the density at</param>
         /// <param name="temperature">Ambient temperature</param>
+        /// <param name="vessel">Optional vessel to pass to FARAeroUtil.GetCurrentDensity(vessel)</param>
         public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null)
         {
             if (!body.atmosphere || alt > GetMaxAtmosphereAltitude(body)) { return 0; }
+            /*
             if (RCUtils.FarLoaded && !disabled && vessel != null)
             {
                 try
                 {
-                    return (double)RCUtils.DensityMethod.Invoke(null, new object[] { vessel });
+                    return (double)RCUtils.DensityMethod.Invoke(null, BindingFlags.Public & BindingFlags.Static, null, new object[] { vessel }, null);
                 }
                 catch (Exception e)
                 {
@@ -36,6 +40,7 @@ namespace RealChute.Extensions
                     disabled = true;
                 }
             }
+            */
            return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body);
         }
 
@@ -49,7 +54,7 @@ namespace RealChute.Extensions
         }
 
         /// <summary>
-        /// Gets the atmospheric pressure at seal level on the given body
+        /// Gets the atmospheric pressure at sea level on the given body
         /// </summary>
         public static double GetPressureAsl(this CelestialBody body)
         {
