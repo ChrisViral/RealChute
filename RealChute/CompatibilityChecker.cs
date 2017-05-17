@@ -41,11 +41,14 @@ namespace RealChute
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     internal class CompatibilityChecker : MonoBehaviour
     {
+        #region Properties
         /// <summary>
         /// RealChute compatibility flag, used to halt run on incompatible builds
         /// </summary>
         internal static bool IsAllCompatible { get; } = IsCompatible() && IsUnityCompatible();
+        #endregion
 
+        #region CompatibilityChecker
         public static bool IsCompatible()
         {
             /*-----------------------------------------------*\
@@ -198,5 +201,6 @@ namespace RealChute
                 }
             }
         }
+        #endregion
     }
 }

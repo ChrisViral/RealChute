@@ -18,14 +18,14 @@ namespace RealChute
     {
         #region Constants
         /// <summary>
-        /// The amound of ticks in a second
+        /// The amount of ticks in a second
         /// </summary>
-        protected const long ticksPerSecond = 10000000L;
+        protected const long TicksPerSecond = 10000000L;
 
         /// <summary>
         /// The amount of milliseconds in a second
         /// </summary>
-        protected const long millisecondPerSecond = 1000L;
+        protected const long MillisecondPerSecond = 1000L;
         #endregion
 
         #region Fields
@@ -41,23 +41,15 @@ namespace RealChute
         #endregion
 
         #region Propreties
-        private bool isRunning;
         /// <summary>
         /// If the watch is currently counting down time
         /// </summary>
-        public bool IsRunning
-        {
-            get { return this.isRunning; }
-            protected set { this.isRunning = value; }
-        }
+        public bool IsRunning { get; protected set; }
 
         /// <summary>
         /// The current elapsed time of the watch
         /// </summary>
-        public TimeSpan Elapsed
-        {
-            get { return new TimeSpan(this.ElapsedTicks); }
-        }
+        public TimeSpan Elapsed => new TimeSpan(this.ElapsedTicks);
 
         /// <summary>
         /// The amount of milliseconds elapsed to the current watch
@@ -66,8 +58,8 @@ namespace RealChute
         {
             get
             {
-                if (this.isRunning) { UpdateWatch(); }
-                return (long)Math.Round(this.totalSeconds * millisecondPerSecond);
+                if (this.IsRunning) { UpdateWatch(); }
+                return (long)Math.Round(this.totalSeconds * MillisecondPerSecond);
             }
         }
 
@@ -78,8 +70,8 @@ namespace RealChute
         {
             get
             {
-                if (this.isRunning) { UpdateWatch(); }
-                return (long)Math.Round(this.totalSeconds * ticksPerSecond);
+                if (this.IsRunning) { UpdateWatch(); }
+                return (long)Math.Round(this.totalSeconds * TicksPerSecond);
             }
         }
         #endregion
@@ -94,10 +86,7 @@ namespace RealChute
         /// Creates a new PhysicsWatch starting at a certain amount of time
         /// </summary>
         /// <param name="seconds">Time to start at, in seconds</param>
-        public PhysicsWatch(double seconds)
-        {
-            this.totalSeconds = seconds;
-        }
+        public PhysicsWatch(double seconds) => this.totalSeconds = seconds;
         #endregion
 
         #region Methods
@@ -106,10 +95,10 @@ namespace RealChute
         /// </summary>
         public void Start()
         {
-            if (!this.isRunning)
+            if (!this.IsRunning)
             {
                 this.lastCheck = Planetarium.GetUniversalTime();
-                this.isRunning = true;
+                this.IsRunning = true;
             }
         }
 
@@ -118,10 +107,10 @@ namespace RealChute
         /// </summary>
         public void Stop()
         {
-            if (this.isRunning)
+            if (this.IsRunning)
             {
                 UpdateWatch();
-                this.isRunning = false;
+                this.IsRunning = false;
             }
         }
 
@@ -130,9 +119,9 @@ namespace RealChute
         /// </summary>
         public void Restart()
         {
-            this.totalSeconds = 0;
+            this.totalSeconds = 0d;
             this.lastCheck = Planetarium.GetUniversalTime();
-            this.isRunning = true;
+            this.IsRunning = true;
         }
 
         /// <summary>
@@ -140,9 +129,9 @@ namespace RealChute
         /// </summary>
         public void Reset()
         {
-            this.totalSeconds = 0;
-            this.lastCheck = 0;
-            this.isRunning = false;
+            this.totalSeconds = 0d;
+            this.lastCheck = 0d;
+            this.IsRunning = false;
         }
         #endregion
 
@@ -162,10 +151,7 @@ namespace RealChute
         /// <summary>
         /// Returns a string representation fo this instance
         /// </summary>
-        public override string ToString()
-        {
-            return this.Elapsed.ToString();
-        }
+        public override string ToString() => this.Elapsed.ToString();
         #endregion
 
         #region Static Methods

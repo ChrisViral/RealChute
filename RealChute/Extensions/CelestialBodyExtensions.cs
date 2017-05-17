@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reflection;
-using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -20,57 +18,34 @@ namespace RealChute.Extensions
         /// Returns the atmospheric density at the given altitude on the given celestial body
         /// DEPRECATED per discussion with ferram4; FAR is no longer needed as stock KSP handles this adequately now.
         /// </summary>
+        /// <param name="body">Body to get the density for</param>
         /// <param name="alt">Altitude to fetch the density at</param>
         /// <param name="temperature">Ambient temperature</param>
         /// <param name="vessel">Optional vessel to pass to FARAeroUtil.GetCurrentDensity(vessel)</param>
-        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null)
-        {
-            if (!body.atmosphere || alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            /*
-            if (RCUtils.FarLoaded && !disabled && vessel != null)
-            {
-                try
-                {
-                    return (double)RCUtils.DensityMethod.Invoke(null, BindingFlags.Public & BindingFlags.Static, null, new object[] { vessel }, null);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
-                    disabled = true;
-                }
-            }
-            */
-           return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body);
-        }
+        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null) => !body.atmosphere || alt > GetMaxAtmosphereAltitude(body) ? 0d : FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body);
 
         /// <summary>
         /// Returns the atmospheric pressure at this altitude
         /// </summary>
+        /// <param name="body">Body to get the pressure for for</param>
         /// <param name="alt">Altitude to get the pressure at</param>
-        public static double GetPressureAtAlt(this CelestialBody body, double alt)
-        {
-            return !body.atmosphere || alt > body.GetMaxAtmosphereAltitude() ? 0 : FlightGlobals.getStaticPressure(alt, body);
-        }
+        public static double GetPressureAtAlt(this CelestialBody body, double alt) => !body.atmosphere || alt > body.GetMaxAtmosphereAltitude() ? 0d : FlightGlobals.getStaticPressure(alt, body);
 
         /// <summary>
         /// Gets the atmospheric pressure at sea level on the given body
+        /// <param name="body">Body to get the pressure for for</param>
         /// </summary>
-        public static double GetPressureAsl(this CelestialBody body)
-        {
-            return !body.atmosphere ? 0 : FlightGlobals.getStaticPressure(0, body);
-        }
+        public static double GetPressureASL(this CelestialBody body) => !body.atmosphere ? 0 : FlightGlobals.getStaticPressure(0, body);
 
         /// <summary>
         /// Returns the altitude at which the atmosphere disappears
         /// </summary>
-        public static double GetMaxAtmosphereAltitude(this CelestialBody body)
-        {
-            return !body.atmosphere ? 0 : body.atmosphereDepth;
-        }
+        public static double GetMaxAtmosphereAltitude(this CelestialBody body) => !body.atmosphere ? 0d : body.atmosphereDepth;
 
         /// <summary>
         /// Returns the maximum temperature possible on a given body at the given altitude
         /// </summary>
+        /// <param name="body">Body to get the temperature for</param>
         /// <param name="alt">Alt to get the max temperature at</param>
         public static double GetMaxTemperatureAtAlt(this CelestialBody body, double alt)
         {
@@ -78,7 +53,7 @@ namespace RealChute.Extensions
             return body.GetTemperature(alt) // base temperature
                     + (body.atmosphereTemperatureSunMultCurve.Evaluate((float)alt) // altitude-based multiplier to temperature delta
                        * (body.latitudeTemperatureBiasCurve.Evaluate(0) + body.latitudeTemperatureSunMultCurve.Evaluate(1)
-                          + body.axialTemperatureSunMultCurve.Evaluate((float)Math.Sin(body.orbit.inclination * (Math.PI / 180)))));
+                          + body.axialTemperatureSunMultCurve.Evaluate((float)Math.Sin(body.orbit.inclination * (Math.PI / 180d)))));
         }
         #endregion
     }

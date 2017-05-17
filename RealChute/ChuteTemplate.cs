@@ -132,13 +132,13 @@ namespace RealChute
                     case ParachuteType.MAIN:
                         {
                             alt = double.Parse(this.pChute.landingAlt);
-                            acc = this.Body.GeeASL * RCUtils.geeToAcc;
+                            acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                             break;
                         }
                     case ParachuteType.DROGUE:
                         {
                             alt = double.Parse(this.templateGUI.refDepAlt);
-                            acc = this.Body.GeeASL * RCUtils.geeToAcc;
+                            acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                             break;
                         }
                     case ParachuteType.DRAG:
@@ -228,7 +228,7 @@ namespace RealChute
         {
             if (this.Textures == null) { return; }
             Texture2D texture = null;
-            if (RealChuteSettings.Instance.ActivateNyan) { texture = GameDatabase.Instance.GetTexture(RCUtils.nyanTextureURL, false); }
+            if (RealChuteSettings.Instance.ActivateNyan) { texture = GameDatabase.Instance.GetTexture(RCUtils.NyanTextureUrl, false); }
             else if (this.Textures.TryGetCanopy(this.templateGUI.chuteId, ref this.canopy))
             {
                 if (string.IsNullOrEmpty(this.canopy.TextureURL))

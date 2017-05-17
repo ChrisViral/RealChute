@@ -700,7 +700,7 @@ namespace RealChute
                 Parachute parachute = this.parachutes[0];
                 builder.AppendFormat("Parachute material: {0}\n", parachute.material);
                 builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.DragCoefficient);
-                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.MaxTemp + RCUtils.absoluteZero);
+                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.MaxTemp + RCUtils.AbsoluteZero);
                 builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
                 builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
                 if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }
@@ -716,7 +716,7 @@ namespace RealChute
             {
                 builder.Append("Parachute materials: ").AppendJoin(this.parachutes.Select(p => p.material), ", ").AppendLine();
                 builder.Append("Drag coefficients: ").AppendJoin(this.parachutes.Select(p => p.mat.DragCoefficient.ToString("0.00")), ", ").AppendLine();
-                builder.Append("Chute max temperatures: ").AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.absoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
+                builder.Append("Chute max temperatures: ").AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.AbsoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
                 builder.Append("Predeployed diameters: ").AppendJoin(this.parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Deployed diameters: ").AppendJoin(this.parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Minimum deployment clauses: ").AppendJoin(this.parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();

@@ -13,6 +13,9 @@ using UnityEngine;
 
 namespace RealChute
 {
+    /// <summary>
+    /// ConfigNode persistant holder, saves data through scenes
+    /// </summary>
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class PersistentManager : MonoBehaviour
     {
@@ -56,15 +59,7 @@ namespace RealChute
         /// Returns the given list of SizeNode for the wanted Part name
         /// </summary>
         /// <param name="name">Part name to get the sizes for</param>
-        public List<SizeNode> GetSizes(string name)
-        {
-            List<SizeNode> list;
-            if (sizes.TryGetValue(name, out list))
-            {
-                return list;
-            }
-            return new List<SizeNode>();
-        }
+        public List<SizeNode> GetSizes(string name) => sizes.TryGetValue(name, out List<SizeNode> list) ? list : new List<SizeNode>();
 
         /// <summary>
         /// Stores a ConfigNode value in a persistent dictionary, sorted by PartModule type and Part name
@@ -74,9 +69,8 @@ namespace RealChute
         /// <param name="node">ConfigNode to store</param>
         public void AddNode<T>(string name, ConfigNode node) where T : PartModule
         {
-            Dictionary<string, ConfigNode> dict;
             Type type = typeof(T);
-            if (!nodes.TryGetValue(type, out dict))
+            if (!nodes.TryGetValue(type, out Dictionary<string, ConfigNode> dict))
             {
                 dict = new Dictionary<string, ConfigNode>();
                 nodes.Add(type, dict);
@@ -91,18 +85,7 @@ namespace RealChute
         /// <typeparam name="T">PartModule type</typeparam>
         /// <param name="name">Part name to get the node for</param>
         /// <param name="node">Stored module confignode</param>
-        public bool TryGetNode<T>(string name, ref ConfigNode node) where T : PartModule
-        {
-            Dictionary<string, ConfigNode> dict;
-            if (nodes.TryGetValue(typeof(T), out dict))
-            {
-                if (dict.TryGetValue(name, out node))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
+        public bool TryGetNode<T>(string name, ref ConfigNode node) where T : PartModule => nodes.TryGetValue(typeof(T), out Dictionary<string, ConfigNode> dict) && dict.TryGetValue(name, out node);
         #endregion
     }
 }

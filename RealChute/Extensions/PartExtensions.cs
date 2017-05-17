@@ -37,11 +37,7 @@ namespace RealChute.Extensions
         /// </summary>
         /// <param name="nodeId">Name of the node to find</param>
         /// <param name="node">Value to store the result into</param>
-        public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node)
-        {
-            node = part.FindAttachNode(nodeId);
-            return node != null;
-        }
+        public static bool TryGetAttachNodeById(this Part part, string nodeId, out AttachNode node) => (node = part.FindAttachNode(nodeId)) != null;
 
         /// <summary>
         /// Gets the children transforms of this specific part
@@ -56,18 +52,12 @@ namespace RealChute.Extensions
         /// <summary>
         /// Returns the total mass of the part
         /// </summary>
-        public static float TotalMass(this Part part)
-        {
-            return part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0;
-        }
+        public static float TotalMass(this Part part) => part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0;
 
         /// <summary>
         /// Total cost of this part
         /// </summary>
-        public static float TotalCost(this Part part)
-        {
-            return part.GetModuleCosts(part.partInfo.cost) + part.partInfo.cost;
-        }
+        public static float TotalCost(this Part part) => part.GetModuleCosts(part.partInfo.cost) + part.partInfo.cost;
 
         /// <summary>
         /// Initiates an animation for later use
@@ -75,9 +65,8 @@ namespace RealChute.Extensions
         /// <param name="animationName">Name of the animation</param>
         public static void InitiateAnimation(this Part part, string animationName)
         {
-            foreach (Animation animation in part.FindModelAnimators(animationName))
+            foreach (AnimationState state in part.FindModelAnimators(animationName).Select(animation => animation[animationName]))
             {
-                AnimationState state = animation[animationName];
                 state.normalizedTime = 0;
                 state.normalizedSpeed = 0;
                 state.enabled = false;
@@ -123,10 +112,7 @@ namespace RealChute.Extensions
         /// Returns if the animation is playing
         /// </summary>
         /// <param name="animationName">Name of the animation to check</param>
-        public static bool CheckAnimationPlaying(this Part part, string animationName)
-        {
-            return part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
-        }
+        public static bool CheckAnimationPlaying(this Part part, string animationName) => part.FindModelAnimators(animationName).Exists(a => a[animationName].normalizedTime >= 1);
         #endregion
     }
 }

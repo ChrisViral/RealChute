@@ -20,10 +20,7 @@ namespace RealChute
         /// <summary>
         /// Returns the current RealChute_Settings config file
         /// </summary>
-        public static RealChuteSettings Instance
-        {
-            get { return instance ?? (instance = new RealChuteSettings()); }
-        }
+        public static RealChuteSettings Instance => instance ?? (instance = new RealChuteSettings());
         #endregion
 
         #region Propreties
@@ -87,14 +84,10 @@ namespace RealChute
             set { this.activateNyan = value; }
         }
 
-        private readonly ConfigNode[] presets = new ConfigNode[0];
         /// <summary>
         /// All the current preset nodes
         /// </summary>
-        public ConfigNode[] Presets
-        {
-            get { return this.presets; }
-        }
+        public ConfigNode[] Presets { get; } = new ConfigNode[0];
         #endregion
 
         #region Constructor
@@ -128,7 +121,7 @@ namespace RealChute
                 if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; }
                 if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; }
                 if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; }
-                this.presets = settings.GetNodes("PRESET");
+                this.Presets = settings.GetNodes("PRESET");
                 if (mustSave) { SaveSettings(); }
             }
         }

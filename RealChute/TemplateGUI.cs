@@ -101,7 +101,7 @@ namespace RealChute
                     if (!GuiUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
                     if (!GuiUtils.CheckRange(d, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
                 }
-                if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GuiUtils.CheckRange(f, 0.0001f, (float)this.Body.GetPressureAsl()) : !GuiUtils.CheckRange(f, 10, max)))
+                if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GuiUtils.CheckRange(f, 0.0001f, (float)this.Body.GetPressureASL()) : !GuiUtils.CheckRange(f, 10, max)))
                 {
                     errors.Add(this.isPressure ? "Predeployment pressure" : "Predeployment altitude");
                 }
@@ -423,7 +423,7 @@ namespace RealChute
             {
                 label = "Predeployment pressure (atm):";
                 min = 0.0001f;
-                max = (float)this.Body.GetPressureAsl();
+                max = (float)this.Body.GetPressureASL();
             }
             else
             {
@@ -468,7 +468,7 @@ namespace RealChute
             builder.Append("\nDrag coefficient:  ").AppendLine(material.DragCoefficient.ToString("0.00#"));
             builder.Append("\nArea density:  ").Append(material.AreaDensity * 1000).AppendLine("kg/m²");
             builder.Append("\nArea cost:  ").Append(material.AreaCost.ToString()).Append("F/m²");
-            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.absoluteZero).ToString()).Append("°C");
+            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.AbsoluteZero).ToString()).Append("°C");
             builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString()).Append("J/kg∙K");
             builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString());
             GUILayout.Label(builder.ToString());

@@ -13,6 +13,11 @@ using RealChute.Extensions;
 
 namespace RealChute
 {
+    /// <summary>
+    /// DO NOT ACCESS OR INHERIT THIS CLASS
+    /// All usage should pass through the class EnumUtils
+    /// </summary>
+    /// <typeparam name="TEnum">Enum type, forced through EnumUtils class</typeparam>
     public abstract class EnumConstraint<TEnum> where TEnum : class
     {
         /// <summary>
@@ -24,12 +29,12 @@ namespace RealChute
             /// <summary>
             /// Stores the string -> enum conversion
             /// </summary>
-            private readonly Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
+            private readonly Dictionary<string, TEnum> values;
 
             /// <summary>
             /// Stores the enum -> string conversion
             /// </summary>
-            private readonly Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+            private readonly Dictionary<TEnum, string> names;
 
             /// <summary>
             /// The name of the enum values correctly ordered for index search
@@ -49,14 +54,20 @@ namespace RealChute
             /// <param name="enumType">Type of converter. Must be an enum type.</param>
             public EnumConverter(Type enumType)
             {
-                if (enumType == null) { throw new ArgumentNullException("enumType", "Enum conversion type cannot be null"); }
-                Array values = Enum.GetValues(enumType);
-                this.orderedNames = new string[values.Length];
-                this.orderedValues = new TEnum[values.Length];
-                for (int i = 0; i < values.Length; i++)
+                if (enumType == null) { throw new ArgumentNullException(nameof(enumType), "Enum conversion type cannot be null"); }
+
+                Array val = Enum.GetValues(enumType);
+                this.values = new Dictionary<string, TEnum>(val.Length);
+                this.names = new Dictionary<TEnum, string>(val.Length);
+                this.orderedNames = new string[val.Length];
+                this.orderedValues = new TEnum[val.Length];
+
+                for (int i = 0; i < val.Length; i++)
                 {
-                    TEnum value = (TEnum)values.GetValue(i);
+                    TEnum value = (TEnum)val.GetValue(i);
                     string name = Enum.GetName(enumType, value);
+                    if (name == null) { continue; } //If this triggers skip
+
                     this.orderedNames[i] = name;
                     this.orderedValues[i] = value;
                     this.values.Add(name, value);
@@ -73,9 +84,8 @@ namespace RealChute
             /// <param name="value">Value to store the result into</param>
             public void TryGetValue<T>(string name, out T value) where T : struct, TEnum
             {
-                TEnum result;
-                this.values.TryGetValue(name, out result);
-                value = (T)result;
+                this.values.TryGetValue(name, out TEnum result);
+                value = (T)(result ?? default(T));
             }
 
             /// <summary>
@@ -83,10 +93,7 @@ namespace RealChute
             /// </summary>
             /// <param name="value">Enum to get the string for</param>
             /// <param name="name">Value to store the result into</param>
-            public void TryGetName<T>(T value, out string name) where T : struct, TEnum
-            {
-                this.names.TryGetValue(value, out name);
-            }
+            public void TryGetName<T>(T value, out string name) where T : struct, TEnum => this.names.TryGetValue(value, out name);
             #endregion
         }
 
@@ -104,9 +111,8 @@ namespace RealChute
         /// <typeparam name="T">Type of the enum</typeparam>
         private static EnumConverter GetConverter<T>() where T : struct, TEnum
         {
-            EnumConverter converter;
             Type enumType = typeof(T);
-            if (!converters.TryGetValue(enumType, out converter))
+            if (!converters.TryGetValue(enumType, out EnumConverter converter))
             {
                 converter = new EnumConverter(enumType);
                 converters.Add(enumType, converter);
@@ -121,8 +127,7 @@ namespace RealChute
         /// <param name="value">Enum value to convert to string</param>
         public static string GetName<T>(T value) where T : struct, TEnum
         {
-            string result;
-            GetConverter<T>().TryGetName(value, out result);
+            GetConverter<T>().TryGetName(value, out string result);
             return result;
         }
 
@@ -133,8 +138,7 @@ namespace RealChute
         /// <param name="name">String to parse</param>
         public static T GetValue<T>(string name) where T : struct, TEnum
         {
-            T result;
-            GetConverter<T>().TryGetValue(name, out result);
+            GetConverter<T>().TryGetValue(name, out T result);
             return result;
         }
 
@@ -147,8 +151,7 @@ namespace RealChute
         {
             EnumConverter converter = GetConverter<T>();
             if (!converter.orderedNames.IndexInRange(index)) { return default(T); }
-            T result;
-            converter.TryGetValue(converter.orderedNames[index], out result);
+            converter.TryGetValue(converter.orderedNames[index], out T result);
             return result;
         }
 
@@ -167,44 +170,36 @@ namespace RealChute
         /// Returns the string representation of each enum member in order
         /// </summary>
         /// <typeparam name="T">Type of the enum</typeparam>
-        public static string[] GetNames<T>() where T : struct, TEnum
-        {
-            return GetConverter<T>().orderedNames;
-        }
+        public static string[] GetNames<T>() where T : struct, TEnum => GetConverter<T>().orderedNames;
 
         /// <summary>
         /// Gets an array of all the values of the Enum
         /// </summary>
         /// <typeparam name="T">Type of the Enum</typeparam>
-        public static T[] GetValues<T>() where T : struct, TEnum
-        {
-            return Array.ConvertAll(GetConverter<T>().orderedValues, v => (T)v);
-        }
+        public static T[] GetValues<T>() where T : struct, TEnum => Array.ConvertAll(GetConverter<T>().orderedValues, v => (T)v);
 
         /// <summary>
         /// Returns the index of the Enum value of the given name
         /// </summary>
         /// <typeparam name="T">Type of the Enum</typeparam>
         /// <param name="name">Name of the element to find</param>
-        public static int IndexOf<T>(string name) where T : struct, TEnum
-        {
-            return GetNames<T>().IndexOf(name);
-        }
+        public static int IndexOf<T>(string name) where T : struct, TEnum => GetNames<T>().IndexOf(name);
 
         /// <summary>
         /// Returns the index of the Enum member of the given value
         /// </summary>
         /// <typeparam name="T">Type of the Enum</typeparam>
         /// <param name="value">Value to find the index of</param>
-        public static int IndexOf<T>(T value) where T : struct, TEnum
-        {
-            return GetValues<T>().IndexOf(value);
-        }
+        public static int IndexOf<T>(T value) where T : struct, TEnum => GetValues<T>().IndexOf(value);
         #endregion
     }
 
+    /// <summary>
+    /// Enum util methods
+    /// </summary>
     public class EnumUtils : EnumConstraint<Enum>
     {
+        #region Constructors
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
          * The actual implementation is in EnumConstraint */
 
@@ -212,5 +207,6 @@ namespace RealChute
         /// Prevents object instantiation
         /// </summary>
         private EnumUtils() { }
+        #endregion
     }
 }

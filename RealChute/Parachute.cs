@@ -315,7 +315,7 @@ namespace RealChute
             else if (this.module.SecondaryChute && this.Parachutes.Exists(p => p.DeploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             this.dragTimer.Reset();
             this.currentArea = 0;
-            this.chuteTemperature = RCUtils.startTemp;
+            this.chuteTemperature = RCUtils.StartTemp;
         }
 
         //Repack actions
@@ -422,7 +422,7 @@ namespace RealChute
         //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
         private bool CalculateChuteTemp()
         {
-            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.startTemp; }
+            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.StartTemp; }
 
             double emissiveFlux = 0;
             if (this.chuteTemperature > 0)
@@ -528,8 +528,8 @@ namespace RealChute
 
                 //Temperature info
                 builder = new StringBuilder();
-                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.absoluteZero).AppendLine("°C");
-                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.absoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
+                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
+                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
                 GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : GUI.skin.label);
 
 
