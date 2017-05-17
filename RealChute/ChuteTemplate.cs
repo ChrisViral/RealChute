@@ -5,6 +5,7 @@ using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
 using RealChute.Libraries.Presets;
 using RealChute.Libraries.TextureLibrary;
+using RealChute.Utils;
 using Object = UnityEngine.Object;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see

@@ -5,6 +5,7 @@ using System.Text;
 using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
+using RealChute.Utils;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see

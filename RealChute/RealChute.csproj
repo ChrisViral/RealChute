@@ -55,14 +55,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChuteTemplate.cs" />
-    <Compile Include="EnumUtils.cs" />
+    <Compile Include="Utils\EnumUtils.cs" />
     <Compile Include="Extensions\IEnumerableExtensions.cs" />
     <Compile Include="Extensions\StringBuilderExtensions.cs" />
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
-    <Compile Include="GUIUtils.cs" />
+    <Compile Include="Utils\GUIUtils.cs" />
     <Compile Include="RCToolbarManager.cs" />
-    <Compile Include="PhysicsWatch.cs" />
+    <Compile Include="Utils\PhysicsWatch.cs" />
     <Compile Include="PersistentManager.cs" />
     <Compile Include="SettingsWindow.cs" />
     <Compile Include="CompatibilityChecker.cs" />
@@ -78,7 +78,7 @@
     <Compile Include="Libraries\TextureLibrary\ModelConfig.cs" />
     <Compile Include="Parachute.cs" />
     <Compile Include="ProceduralChute.cs" />
-    <Compile Include="RCUtils.cs" />
+    <Compile Include="Utils\RCUtils.cs" />
     <Compile Include="RealChuteModule.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Libraries\TextureLibrary\TextureConfig.cs" />

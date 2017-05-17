@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.IO;
+using System.Reflection;
 using UnityEngine;
 using Version = System.Version;
 using Popup = PopupDialog;
@@ -15,7 +15,7 @@ using Popup = PopupDialog;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute.Utils
 {
     /// <summary>
     /// General purpose util methods

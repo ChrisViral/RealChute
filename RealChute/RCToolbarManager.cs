@@ -5,6 +5,7 @@ using UnityEngine;
 using RealChute.Extensions;
 using KSP.UI;
 using KSP.UI.Screens;
+using RealChute.Utils;
 using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
