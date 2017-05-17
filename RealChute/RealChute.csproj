@@ -35,6 +35,10 @@
     <LangVersion>Default</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="RealChuteUI, Version=1.0.6346.8728, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Output\GameData\RealChute\Plugins\RealChuteUI.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine">
       <HintPath>..\..\..\..\..\Games\KSP Modding\KSP_x64_Data\Managed\UnityEngine.dll</HintPath>
