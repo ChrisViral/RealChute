@@ -106,7 +106,7 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible())
+            if (!CompatibilityChecker.IsAllCompatible)
             {
                 //Removes RealChute parts from being seen if incompatible
                 PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))

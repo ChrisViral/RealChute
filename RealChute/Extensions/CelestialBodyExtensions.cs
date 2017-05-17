@@ -16,7 +16,6 @@ namespace RealChute.Extensions
     public static class CelestialBodyExtensions
     {
         #region Methods
-        private static bool disabled;
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
         /// DEPRECATED per discussion with ferram4; FAR is no longer needed as stock KSP handles this adequately now.

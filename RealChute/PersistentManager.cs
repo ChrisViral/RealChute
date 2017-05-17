@@ -31,7 +31,7 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || Instance != null) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible || Instance != null) { Destroy(this); return; }
             Instance = this;
             DontDestroyOnLoad(this);
             print("[RealChute]: Running RealChute " + RCUtils.AssemblyVersion);

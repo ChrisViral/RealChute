@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+//ReSharper disable All
 
 /*-----------------------------------------*\
 |   SUBSTITUTE YOUR MOD'S NAMESPACE HERE.   |
@@ -40,6 +41,11 @@ namespace RealChute
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     internal class CompatibilityChecker : MonoBehaviour
     {
+        /// <summary>
+        /// RealChute compatibility flag, used to halt run on incompatible builds
+        /// </summary>
+        internal static bool IsAllCompatible { get; } = IsCompatible() && IsUnityCompatible();
+
         public static bool IsCompatible()
         {
             /*-----------------------------------------------*\
@@ -80,119 +86,101 @@ namespace RealChute
         //Version of the compatibility checker itself.
         private static int _version = 5;
 
-        public void Start()
+        private void Start()
         {
             //Checkers are identified by the type name and _version field name.
-            FieldInfo[] fields =
-                GetAllTypes()
-                .Where(t => t.Name == "CompatibilityChecker")
-                .Select(t => t.GetField("_version", BindingFlags.Static | BindingFlags.NonPublic))
-                .Where(f => f != null)
-                .Where(f => f.FieldType == typeof(int))
-                .ToArray();
+            FieldInfo[] fields = GetAllTypes()
+                                .Where(t => t.Name == "CompatibilityChecker")
+                                .Select(t => t.GetField("_version", BindingFlags.Static | BindingFlags.NonPublic))
+                                .Where(f => f != null)
+                                .Where(f => f.FieldType == typeof(int))
+                                .ToArray();
 
             //Let the latest version of the checker execute.
             if (_version != fields.Max(f => (int)f.GetValue(null))) { return; }
 
-            Debug.Log(String.Format("[CompatibilityChecker] Running checker version {0} from '{1}'", _version, Assembly.GetExecutingAssembly().GetName().Name));
+            Debug.Log($"[CompatibilityChecker] Running checker version {_version} from '{Assembly.GetExecutingAssembly().GetName().Name}'");
 
             //Other checkers will see this version and not run.
             //This accomplishes the same as an explicit "ran" flag with fewer moving parts.
             _version = int.MaxValue;
 
             //A mod is incompatible if its compatibility checker has an IsCompatible method which returns false.
-            String[] incompatible =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
-                .Where(m =>
-                {
-                    try
-                    {
-                        return !(bool)m.Invoke(null, new object[0]);
-                    }
-                    catch (Exception e)
-                    {
-                        //If a mod throws an exception from IsCompatible, it's not compatible.
-                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
-                        return true;
-                    }
-                })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
+            string[] incompatible = fields
+                                   .Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
+                                   .Where(m => m.IsStatic)
+                                   .Where(m => m.ReturnType == typeof(bool))
+                                   .Where(m =>
+                                    {
+                                        try
+                                        {
+                                            return !(bool)m.Invoke(null, new object[0]);
+                                        }
+                                        catch (Exception e)
+                                        {
+                                            //If a mod throws an exception from IsCompatible, it's not compatible.
+                                            Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
+                                            return true;
+                                        }
+                                    })
+                                   .Select(m => m.DeclaringType.Assembly.GetName().Name)
+                                   .ToArray();
 
             //A mod is incompatible with Unity if its compatibility checker has an IsUnityCompatible method which returns false.
-            String[] incompatibleUnity =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
-                .Where(m => m != null)  //Mods without IsUnityCompatible() are assumed to be compatible.
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
-                .Where(m =>
-                {
-                    try
-                    {
-                        return !(bool)m.Invoke(null, new object[0]);
-                    }
-                    catch (Exception e)
-                    {
-                        //If a mod throws an exception from IsUnityCompatible, it's not compatible.
-                        Debug.LogWarning(String.Format("[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{0}':\n\n{1}", m.DeclaringType.Assembly.GetName().Name, e));
-                        return true;
-                    }
-                })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
+            string[] incompatibleUnity = fields
+                                        .Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
+                                        .Where(m => m != null)  //Mods without IsUnityCompatible() are assumed to be compatible.
+                                        .Where(m => m.IsStatic)
+                                        .Where(m => m.ReturnType == typeof(bool))
+                                        .Where(m =>
+                                        {
+                                            try
+                                            {
+                                                return !(bool)m.Invoke(null, new object[0]);
+                                            }
+                                            catch (Exception e)
+                                            {
+                                                //If a mod throws an exception from IsUnityCompatible, it's not compatible.
+                                                Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
+                                                return true;
+                                            }
+                                        })
+                                       .Select(m => m.DeclaringType.Assembly.GetName().Name)
+                                       .ToArray();
 
             Array.Sort(incompatible);
             Array.Sort(incompatibleUnity);
 
-            String message = String.Empty;
-
-            /*if (SixtyFourBitsMayHaveAChanceAtLife())
-             *{
-             *   message += "WARNING: You are using 64-bit KSP on Windows. This version of KSP is known to cause crashes. It's highly recommended that you use either 32-bit KSP on Windows or switch to Linux.";
-             *}*/
+            string message = string.Empty;
 
             if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
-                message += (message == String.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
+                message += (message == string.Empty ? "Some" : "\n\nAdditionally, some") + " installed mods may be incompatible with this version of Kerbal Space Program. Features may be broken or disabled. Please check for updates to the listed mods.";
 
                 if (incompatible.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + String.Join(", ", incompatible));
-                    message += String.Format("\n\nThese mods are incompatible with KSP {0}.{1}.{2}:\n\n", Versioning.version_major, Versioning.version_minor, Versioning.Revision);
-                    message += String.Join("\n", incompatible);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods detected: " + string.Join(", ", incompatible));
+                    message += $"\n\nThese mods are incompatible with KSP {Versioning.version_major}.{Versioning.version_minor}.{Versioning.Revision}:\n\n";
+                    message += string.Join("\n", incompatible);
                 }
 
                 if (incompatibleUnity.Length > 0)
                 {
-                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + String.Join(", ", incompatibleUnity));
-                    message += String.Format("\n\nThese mods are incompatible with Unity {0}:\n\n", Application.unityVersion);
-                    message += String.Join("\n", incompatibleUnity);
+                    Debug.LogWarning("[CompatibilityChecker] Incompatible mods (Unity) detected: " + string.Join(", ", incompatibleUnity));
+                    message += $"\n\nThese mods are incompatible with Unity {Application.unityVersion}:\n\n";
+                    message += string.Join("\n", incompatibleUnity);
                 }
             }
 
-            if (incompatible.Length > 0 || incompatibleUnity.Length > 0) //|| SixtyFourBitsMayHaveAChanceAtLife())
+            if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
                 PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "Incompatible Mods Detected", message, "OK", true, HighLogic.UISkin);
             }
         }
 
-        public static bool SixtyFourBitsMayHaveAChanceAtLife()
-        {
-            return IntPtr.Size == 8 && Environment.OSVersion.Platform == PlatformID.Win32NT;
-        }
-
-        public static bool IsAllCompatible()
-        {
-            return IsCompatible() && IsUnityCompatible(); //&& !SixtyFourBitsMayHaveAChanceAtLife();
-        }
-
         private static IEnumerable<Type> GetAllTypes()
         {
-            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies())
             {
                 Type[] types;
                 try
@@ -204,7 +192,7 @@ namespace RealChute
                     types = Type.EmptyTypes;
                 }
 
-                foreach (var type in types)
+                foreach (Type type in types)
                 {
                     yield return type;
                 }
