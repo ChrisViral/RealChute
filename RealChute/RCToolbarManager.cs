@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using UnityEngine;
-using RealChute.Extensions;
-using KSP.UI;
+﻿using KSP.UI;
 using KSP.UI.Screens;
+using RealChute.Extensions;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using AppScenes = KSP.UI.Screens.ApplicationLauncher.AppScenes;
 using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -22,8 +23,8 @@ namespace RealChute
     public class RCToolbarManager : MonoBehaviour
     {
         #region Fields
-        private static ApplicationLauncherButton button = new ApplicationLauncherButton();
-        private static bool add = true;
+        private static ApplicationLauncherButton button;
+        private static bool added;
         private static bool visible;
         private static GameObject settings;
         #endregion
@@ -39,13 +40,13 @@ namespace RealChute
 
             //Adds the Parachutes filter to the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
-                .Find(f => f.button.categoryName == "Filter by Function");
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon,
+                .Find(f => f.button.categoryName == "Filter by function");
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon,
                 p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
             //Sets the buttons in the Filter by Module category
             List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters
-                .Find(f => f.button.categoryName == "Filter by Module").subcategories;
+                .Find(f => f.button.categoryName == "Filter by module").subcategories;
             modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
 
@@ -57,23 +58,25 @@ namespace RealChute
 
         private void AddButton()
         {
-            // The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
-            if (ApplicationLauncher.Ready && add && HighLogic.LoadedScene == GameScenes.SPACECENTER)
+            //The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
+            if (ApplicationLauncher.Ready && !added && HighLogic.LoadedScene == GameScenes.SPACECENTER)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
-                         Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
-                add = false;
+                         Empty, Empty, AppScenes.SPACECENTER, buttonTexture);
+                added = true;
             }
         }
 
         private void RemoveButton()
         {
-            if (!add)
+            if (added)
             {
                 ApplicationLauncher.Instance.RemoveModApplication(button);
                 Destroy(button);
+                button = null;
+                added = false;
             }
         }
 
@@ -97,16 +100,21 @@ namespace RealChute
 
         private void Empty() { }
 
-        public static void SetApplauncherButtonFalse()
+        private void SetButtonVisibility(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {
-            button.SetFalse();
+            if (data.from == GameScenes.SPACECENTER && data.to != GameScenes.SPACECENTER)
+            {
+                RemoveButton();
+            }
         }
+
+        public static void SetApplauncherButtonFalse() => button?.SetFalse();
         #endregion
 
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible())
+            if (!CompatibilityChecker.IsAllCompatible)
             {
                 //Removes RealChute parts from being seen if incompatible
                 PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
@@ -117,6 +125,7 @@ namespace RealChute
                 GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
                 GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
+                GameEvents.onGameSceneSwitchRequested.Add(SetButtonVisibility);
             }
         }
         #endregion

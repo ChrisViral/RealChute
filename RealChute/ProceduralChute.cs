@@ -427,7 +427,7 @@ namespace RealChute
         private void Update()
         {
             //Updating of size if possible
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
+            if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
 
             if (this.sizes.Count > 0 && this.part.transform.GetChild(0).localScale != Vector3.Scale(this.originalSize, this.sizes[this.size].Size))
             {
@@ -463,7 +463,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Rendering manager
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
 
             GUI.skin = HighLogic.Skin;
             this.editorGUI.RenderGUI();
@@ -473,7 +473,7 @@ namespace RealChute
         #region Overrides
         public override void OnStart(StartState state)
         {
-            if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight || !CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight || !CompatibilityChecker.IsAllCompatible) { return; }
             //Identification of the RealChuteModule
             if (this.part.Modules.Contains("RealChuteModule")) { this.rcModule = (RealChuteModule)this.part.Modules["RealChuteModule"]; }
             else { return; }
@@ -579,7 +579,7 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
             this.node = node;
             LoadChutes();
             if (this.node.HasNode("SIZE"))
@@ -612,12 +612,12 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            return !CompatibilityChecker.IsAllCompatible() || !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : "This RealChute part can be tweaked from the Action Groups window.";
+            return !CompatibilityChecker.IsAllCompatible|| !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : "This RealChute part can be tweaked from the Action Groups window.";
         }
 
         public override void OnSave(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
             //Saves the templates to the persistence or craft file
             this.chutes.ForEach(c => node.AddNode(c.Save()));
         }

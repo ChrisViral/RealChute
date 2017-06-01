@@ -43,7 +43,7 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { Destroy(this); return; }
+            if (!CompatibilityChecker.IsAllCompatible) { Destroy(this); return; }
             this.window = new Rect(100, 100, 350, 200);
             this.drag = new Rect(0, 0, 350, 30);
             this.level = RealChuteSettings.Instance.EngineerLevel.ToString();
@@ -62,7 +62,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
             this.destroying = true;
             CloseWindow();
             RealChuteSettings.SaveSettings();
@@ -83,7 +83,7 @@ namespace RealChute
         #region GUI
         private void OnGUI()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || !this.showing) { return; }
+            if (!CompatibilityChecker.IsAllCompatible|| !this.showing) { return; }
 
             GUI.skin = HighLogic.Skin;
             this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion);
