@@ -477,7 +477,7 @@ namespace RealChute
         #region Functions
         private void Update()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight) { return; }
+            if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsFlight) { return; }
 
             //Makes the chute icon blink if failed
             if (this.failedTimer.IsRunning)
@@ -521,7 +521,7 @@ namespace RealChute
         private void FixedUpdate()
         {
             //Flight values
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
+            if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsFlight || FlightGlobals.ActiveVessel == null || this.part.Rigidbody == null) { return; }
             this.pos = this.part.transform.position;
             this.asl = FlightGlobals.getAltitudeAtPos(this.pos);
             this.trueAlt = this.vessel.GetTrueAlt(this.asl);
@@ -597,7 +597,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!CompatibilityChecker.IsAllCompatible() || !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
+            if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
             //Hide/show UI event removal
             GameEvents.onHideUI.Remove(HideUI);
             GameEvents.onShowUI.Remove(ShowUI);
@@ -608,7 +608,7 @@ namespace RealChute
         public override void OnStart(StartState state)
         {
             if (!HighLogic.LoadedSceneIsEditor && !HighLogic.LoadedSceneIsFlight) { return; }
-            if (!CompatibilityChecker.IsAllCompatible())
+            if (!CompatibilityChecker.IsAllCompatible)
             {
                 foreach (BaseAction a in this.Actions)
                 {
@@ -671,7 +671,7 @@ namespace RealChute
 
         public override void OnLoad(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
             this.node = node;
             LoadParachutes();
             if (HighLogic.LoadedScene == GameScenes.LOADING || !PartLoader.Instance.IsReady() || this.part.partInfo == null)
@@ -683,7 +683,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return string.Empty; }
+            if (!CompatibilityChecker.IsAllCompatible) { return string.Empty; }
             //Info in the editor part window
             this.part.mass = this.caseMass + this.parachutes.Sum(p => p.ChuteMass);
 
@@ -733,7 +733,7 @@ namespace RealChute
 
         public override void OnSave(ConfigNode node)
         {
-            if (!CompatibilityChecker.IsAllCompatible()) { return; }
+            if (!CompatibilityChecker.IsAllCompatible) { return; }
             //Saves the parachutes to the persistence
             this.parachutes.ForEach(p => node.AddNode(p.Save()));
         }
@@ -753,7 +753,7 @@ namespace RealChute
         private void OnGUI()
         {
             //Handles GUI rendering
-            if (CompatibilityChecker.IsAllCompatible() && (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
+            if (CompatibilityChecker.IsAllCompatible&& (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
             {
                 GUI.skin = HighLogic.Skin;
                 this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion);

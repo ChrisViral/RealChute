@@ -16,7 +16,6 @@ namespace RealChute.Extensions
     public static class CelestialBodyExtensions
     {
         #region Methods
-        private static bool disabled;
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
         /// DEPRECATED per discussion with ferram4; FAR is no longer needed as stock KSP handles this adequately now.
@@ -27,20 +26,7 @@ namespace RealChute.Extensions
         public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null)
         {
             if (!body.atmosphere || alt > GetMaxAtmosphereAltitude(body)) { return 0; }
-            /*
-            if (RCUtils.FarLoaded && !disabled && vessel != null)
-            {
-                try
-                {
-                    return (double)RCUtils.DensityMethod.Invoke(null, BindingFlags.Public & BindingFlags.Static, null, new object[] { vessel }, null);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogError("[RealChute]: Encountered an error calculating atmospheric density with FAR. Using stock values.\n" + e.StackTrace);
-                    disabled = true;
-                }
-            }
-            */
+            
            return FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body);
         }
 

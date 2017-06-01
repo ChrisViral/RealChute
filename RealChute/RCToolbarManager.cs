@@ -40,7 +40,7 @@ namespace RealChute
             //Adds the Parachutes filter to the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
                 .Find(f => f.button.categoryName == "Filter by Function");
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", icon,
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon,
                 p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
             //Sets the buttons in the Filter by Module category
@@ -106,7 +106,7 @@ namespace RealChute
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible())
+            if (!CompatibilityChecker.IsAllCompatible)
             {
                 //Removes RealChute parts from being seen if incompatible
                 PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
