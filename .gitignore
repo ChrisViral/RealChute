@@ -1,7 +1,6 @@
 # Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
 [Bb]in/
 [Oo]bj/
-RealChute UI/
 
 # mstest test results
 TestResults
@@ -103,7 +102,8 @@ ClientBin
 *.dbmdl
 Thumbs.db
 ToDo.txt
-[Rr]elease/
+RealChute UI/
+*.zip
 autocopy.bat
 *.lnk
 *.ini
