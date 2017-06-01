@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.IO;
-using UnityEngine;
-using RealChute.Extensions;
-using KSP.UI;
+﻿using KSP.UI;
 using KSP.UI.Screens;
+using RealChute.Extensions;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using AppScenes = KSP.UI.Screens.ApplicationLauncher.AppScenes;
 using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -22,7 +23,7 @@ namespace RealChute
     public class RCToolbarManager : MonoBehaviour
     {
         #region Fields
-        private static ApplicationLauncherButton button = new ApplicationLauncherButton();
+        private static ApplicationLauncherButton button;
         private static bool added;
         private static bool visible;
         private static GameObject settings;
@@ -57,13 +58,13 @@ namespace RealChute
 
         private void AddButton()
         {
-            // The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
-            if (ApplicationLauncher.Ready && !added && HighLogic.LoadedScene == GameScenes.SPACECENTER && !HighLogic.LoadedSceneIsFlight)
+            //The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
+            if (ApplicationLauncher.Ready && !added && HighLogic.LoadedScene == GameScenes.SPACECENTER)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
-                         Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
+                         Empty, Empty, AppScenes.SPACECENTER, buttonTexture);
                 added = true;
             }
         }
@@ -74,6 +75,8 @@ namespace RealChute
             {
                 ApplicationLauncher.Instance.RemoveModApplication(button);
                 Destroy(button);
+                button = null;
+                added = false;
             }
         }
 
@@ -97,10 +100,15 @@ namespace RealChute
 
         private void Empty() { }
 
-        public static void SetApplauncherButtonFalse()
+        private void SetButtonVisibility(GameEvents.FromToAction<GameScenes, GameScenes> data)
         {
-            button.SetFalse();
+            if (data.from == GameScenes.SPACECENTER && data.to != GameScenes.SPACECENTER)
+            {
+                RemoveButton();
+            }
         }
+
+        public static void SetApplauncherButtonFalse() => button?.SetFalse();
         #endregion
 
         #region Initialization
@@ -117,6 +125,7 @@ namespace RealChute
                 GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
                 GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
+                GameEvents.onGameSceneSwitchRequested.Add(SetButtonVisibility);
             }
         }
         #endregion

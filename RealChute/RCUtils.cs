@@ -218,7 +218,7 @@ namespace RealChute
         /// <param name="button">Button text of the PopupDialog</param>
         public static void PopupDialog(string title, string message, string button)
         {
-            global::PopupDialog.SpawnPopupDialog(anchor, anchor, "RC_Dialog", title, message, button, false, HighLogic.UISkin);
+            global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, title, message, button, false, HighLogic.UISkin);
         }
         #endregion
     }
