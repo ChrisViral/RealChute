@@ -23,7 +23,7 @@ namespace RealChute
     {
         #region Fields
         private static ApplicationLauncherButton button = new ApplicationLauncherButton();
-        private static bool add = true;
+        private static bool added;
         private static bool visible;
         private static GameObject settings;
         #endregion
@@ -58,19 +58,19 @@ namespace RealChute
         private void AddButton()
         {
             // The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
-            if (ApplicationLauncher.Ready && add && HighLogic.LoadedScene == GameScenes.SPACECENTER)
+            if (ApplicationLauncher.Ready && !added && HighLogic.LoadedScene == GameScenes.SPACECENTER && !HighLogic.LoadedSceneIsFlight)
             {
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
                          Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
-                add = false;
+                added = true;
             }
         }
 
         private void RemoveButton()
         {
-            if (!add)
+            if (added)
             {
                 ApplicationLauncher.Instance.RemoveModApplication(button);
                 Destroy(button);
