@@ -550,7 +550,7 @@ namespace RealChute
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment pressure slider
-                    this.minPressure = GUILayout.HorizontalSlider(this.minPressure, 0.005f, 1);
+                    this.minPressure = 0.005f * (float) Math.Round(GUILayout.HorizontalSlider(this.minPressure / 0.005f, 1, 200));
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -568,7 +568,7 @@ namespace RealChute
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment altitude slider
-                    this.minDeployment = GUILayout.HorizontalSlider(this.minDeployment, 100, 20000);
+                    this.minDeployment = 100 * (float) Math.Round(GUILayout.HorizontalSlider(this.minDeployment / 100, 1, 200));
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -584,7 +584,7 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Deployment altitude slider
-                this.deploymentAlt = GUILayout.HorizontalSlider(this.deploymentAlt, 50, 10000);
+                this.deploymentAlt = 50 * (float) Math.Round(GUILayout.HorizontalSlider(this.deploymentAlt / 50, 1, 200));
 
                 //Copy to symmetry counterparts button
                 CopyToOthers(p => p.deploymentAlt = this.deploymentAlt);
