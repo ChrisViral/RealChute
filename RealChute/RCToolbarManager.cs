@@ -1,4 +1,5 @@
-﻿using KSP.UI;
+﻿using KSP.Localization;
+using KSP.UI;
 using KSP.UI.Screens;
 using RealChute.Extensions;
 using System.Collections.Generic;
@@ -40,13 +41,13 @@ namespace RealChute
 
             //Adds the Parachutes filter to the Filter by Function category
             PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters
-                .Find(f => f.button.categoryName == "Filter by function");
+                .Find(f => f.button.categoryName == Localizer.Format("#autoLOC_453547")); // Filter by Function
             PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon,
                 p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
 
             //Sets the buttons in the Filter by Module category
             List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters
-                .Find(f => f.button.categoryName == "Filter by module").subcategories;
+                .Find(f => f.button.categoryName == Localizer.Format("#autoLOC_453705")).subcategories; // Filter by Module
             modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
             modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
 
