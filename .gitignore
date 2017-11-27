@@ -107,6 +107,7 @@ RealChute UI/
 autocopy.bat
 *.lnk
 *.ini
+.vs
 Generated_Code #added for RIA/Silverlight projects
 
 # Backup & report files from converting an old project file to a newer
