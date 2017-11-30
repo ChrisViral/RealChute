@@ -1,6 +1,6 @@
 ﻿using System;
-using UnityEngine;
 using RealChute.Extensions;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -26,9 +26,11 @@ namespace RealChute
             {
                 if (redLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.normal.textColor = XKCDColors.Red;
-                    style.hover.textColor = XKCDColors.Red;
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label)
+                    {
+                        normal = { textColor = XKCDColors.Red },
+                        hover = { textColor = XKCDColors.Red }
+                    };
                     redLabel = style;
                 }
                 return redLabel;
@@ -45,9 +47,11 @@ namespace RealChute
             {
                 if (yellowLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.normal.textColor = XKCDColors.BrightYellow;
-                    style.hover.textColor = XKCDColors.BrightYellow;
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label)
+                    {
+                        normal = { textColor = XKCDColors.BrightYellow },
+                        hover = { textColor = XKCDColors.BrightYellow }
+                    };
                     yellowLabel = style;
                 }
                 return yellowLabel;
@@ -64,8 +68,7 @@ namespace RealChute
             {
                 if (boldLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label);
-                    style.fontStyle = FontStyle.Bold;
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label) { fontStyle = FontStyle.Bold };
                     boldLabel = style;
                 }
                 return boldLabel;
@@ -92,13 +95,13 @@ namespace RealChute
         /// <param name="text">String to parse</param>
         public static float ParseTime(string text)
         {
-            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException("text"); }
+            if (string.IsNullOrEmpty(text)) { throw new ArgumentNullException(nameof(text)); }
             char indicator = text[text.Length - 1];
-            float multiplier = 1;
+            float multiplier = 1f;
             if (timeSuffixes.Contains(indicator))
             {
                 text = text.Remove(text.Length - 1, 1);
-                if (indicator == 'm') { multiplier = 60; }
+                if (indicator == 'm') { multiplier = 60f; }
             }
             return float.Parse(text) * multiplier;
         }
@@ -111,14 +114,14 @@ namespace RealChute
         public static bool TryParseTime(string text, out float result)
         {
             if (string.IsNullOrEmpty(text)) { result = 0; return false; }
-            float multiplier = 1, f;
+            float multiplier = 1f;
             char indicator = text[text.Length - 1];
             if (timeSuffixes.Contains(indicator))
             {
                 text = text.Remove(text.Length - 1);
-                if (indicator == 'm') { multiplier = 60; }
+                if (indicator == 'm') { multiplier = 60f; }
             }
-            if (float.TryParse(text, out f))
+            if (float.TryParse(text, out float f))
             {
                 result = f * multiplier;
                 return true;
@@ -131,11 +134,7 @@ namespace RealChute
         /// Parse the string and returns -1 if it's empty
         /// </summary>
         /// <param name="text">String to parse</param>
-        public static float ParseEmpty(string text)
-        {
-            if (string.IsNullOrEmpty(text)) { return -1; }
-            return float.Parse(text);
-        }
+        public static float ParseEmpty(string text) => string.IsNullOrEmpty(text) ? -1 : float.Parse(text);
 
         /// <summary>
         /// Parses the spare chutes. If string is empty, returns true and value becomes -1.
@@ -149,8 +148,7 @@ namespace RealChute
                 result = -1;
                 return true;
             }
-            float f;
-            if (float.TryParse(text, out f))
+            if (float.TryParse(text, out float f))
             {
                 result = f;
                 return true;
@@ -165,10 +163,7 @@ namespace RealChute
         /// <param name="f">Value to check</param>
         /// <param name="min">Bottom of the range to check</param>
         /// <param name="max">Top of the range to check</param>
-        public static bool CheckRange(float f, float min, float max)
-        {
-            return f <= max && f >= min;
-        }
+        public static bool CheckRange(float f, float min, float max) => f <= max && f >= min;
 
         /// <summary>
         /// Creates a label and text area of the specified parameters
@@ -182,8 +177,7 @@ namespace RealChute
         {
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            float f;
-            if (float.TryParse(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (float.TryParse(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, GUILayout.Width(width));
@@ -202,8 +196,7 @@ namespace RealChute
         {
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            float f;
-            if (TryParseTime(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (TryParseTime(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, GUILayout.Width(width));
@@ -222,8 +215,7 @@ namespace RealChute
         {
             GUILayout.Space(5);
             GUILayout.BeginHorizontal();
-            float f;
-            if (TryParseWithEmpty(value, out f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (TryParseWithEmpty(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
             value = GUILayout.TextField(value, 10, GUILayout.Width(width));

@@ -15,23 +15,21 @@ namespace RealChute.Extensions
         /// <summary>
         /// Returns the AGL altitude from this vessel at the desired position
         /// </summary>
+        /// <param name="vessel">Vessel to get the altitude for</param>
         /// <param name="asl">Sea level altitude of this vessel</param>
         public static double GetTrueAlt(this Vessel vessel, double asl)
         {
             if (vessel.mainBody.pqsController == null) { return asl; }
             double terrainAlt = vessel.pqsAltitude;
-            if (vessel.mainBody.ocean && terrainAlt <= 0) { return asl; }
-            return asl - terrainAlt;
+            return vessel.mainBody.ocean && terrainAlt <= 0d ? asl : asl - terrainAlt;
         }
 
         /// <summary>
         /// If the given vessel is a Kerbal engineer
         /// </summary>
-        public static bool IsEngineer(this Vessel vessel)
-        {
-            return FlightGlobals.ActiveVessel.parts[0].Modules["KerbalEVA"].part.protoModuleCrew[0]
-                .experienceTrait.Title == "Engineer";
-        }
+        /// <param name="vessel">Vessel to test for</param>
+        public static bool IsEngineer(this Vessel vessel) => FlightGlobals.ActiveVessel.parts[0].Modules["KerbalEVA"].part.protoModuleCrew[0]
+                                                                          .experienceTrait.Title == "Engineer";
         #endregion
     }
 }

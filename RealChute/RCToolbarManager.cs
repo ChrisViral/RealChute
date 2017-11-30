@@ -1,13 +1,12 @@
-﻿using KSP.Localization;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using KSP.Localization;
 using KSP.UI;
 using KSP.UI.Screens;
 using RealChute.Extensions;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using RUI.Icons.Selectable;
 using UnityEngine;
-using AppScenes = KSP.UI.Screens.ApplicationLauncher.AppScenes;
-using Icon = RUI.Icons.Selectable.Icon;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -65,7 +64,7 @@ namespace RealChute
                 Texture2D buttonTexture = new Texture2D(38, 38);
                 buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
                 button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
-                         Empty, Empty, AppScenes.SPACECENTER, buttonTexture);
+                         Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
                 added = true;
             }
         }

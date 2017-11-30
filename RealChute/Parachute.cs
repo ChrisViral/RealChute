@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
+using UnityEngine;
 using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -22,22 +22,13 @@ namespace RealChute
     {
         #region Propreties
         //Predeployed area of the chute
-        public float PreDeployedArea
-        {
-            get { return RCUtils.GetArea(this.preDeployedDiameter); }
-        }
+        public float PreDeployedArea => RCUtils.GetArea(this.preDeployedDiameter);
 
         //Deployed area of the chute
-        public float DeployedArea
-        {
-            get { return RCUtils.GetArea(this.deployedDiameter); }
-        }
+        public float DeployedArea => RCUtils.GetArea(this.deployedDiameter);
 
         //Mass of the chute
-        public float ChuteMass
-        {
-            get { return this.DeployedArea * this.mat.AreaDensity; }
-        }
+        public float ChuteMass => this.DeployedArea * this.mat.AreaDensity;
 
         //The inverse of the thermal mass of the parachute
         private double InvThermalMass
@@ -63,22 +54,13 @@ namespace RealChute
         }
 
         //Part this chute is associated with
-        private Part Part
-        {
-            get { return this.module.part; }
-        }
+        private Part Part => this.module.part;
 
         //Vessel this chute is associated with
-        private Vessel Vessel
-        {
-            get { return this.module.vessel; }
-        }
+        private Vessel Vessel => this.module.vessel;
 
         //Position to apply the force to
-        public Vector3 ForcePosition
-        {
-            get { return this.parachute.position; }
-        }
+        public Vector3 ForcePosition => this.parachute.position;
 
         //If the random deployment timer has been spent
         public bool RandomDeployment
@@ -161,10 +143,7 @@ namespace RealChute
         }
 
         //The parachutes of the associated module
-        public List<Parachute> Parachutes
-        {
-            get { return this.module.parachutes; }
-        }
+        public List<Parachute> Parachutes => this.module.parachutes;
 
         //Gets/sets the DeploymentState correctly
         public DeploymentStates DeploymentState
@@ -245,7 +224,7 @@ namespace RealChute
         //Makes the canopy follow drag direction
         private void FollowDragDirection()
         {
-            //Smoothes the forced vector
+            //Smooths the forced vector
             Vector3 orient = Vector3.zero;
             if (this.module.SecondaryChute) { orient = LerpDrag(this.module.ManyDeployed ? this.ForcedVector : Vector3.zero); }
 
@@ -315,7 +294,7 @@ namespace RealChute
             else if (this.module.SecondaryChute && this.Parachutes.Exists(p => p.DeploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
             this.dragTimer.Reset();
             this.currentArea = 0;
-            this.chuteTemperature = RCUtils.startTemp;
+            this.chuteTemperature = RCUtils.StartTemp;
         }
 
         //Repack actions
@@ -422,7 +401,7 @@ namespace RealChute
         //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
         private bool CalculateChuteTemp()
         {
-            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.startTemp; }
+            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.StartTemp; }
 
             double emissiveFlux = 0;
             if (this.chuteTemperature > 0)
@@ -528,8 +507,8 @@ namespace RealChute
 
                 //Temperature info
                 builder = new StringBuilder();
-                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.absoluteZero).AppendLine("°C");
-                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.absoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
+                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
+                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
                 GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : GUI.skin.label);
 
 

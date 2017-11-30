@@ -27,6 +27,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+// ReSharper disable PossibleNullReferenceException
+
 /*-----------------------------------------*\
 |   SUBSTITUTE YOUR MOD'S NAMESPACE HERE.   |
 \*-----------------------------------------*/
@@ -59,7 +61,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 1 && Versioning.version_minor == 3;
+            return Versioning.version_major == 1 && Versioning.version_minor == 3 && Versioning.Revision >= 1;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -80,6 +82,7 @@ namespace RealChute
         }
 
         //Version of the compatibility checker itself.
+        // ReSharper disable once InconsistentNaming
         private static int _version = 6;
 
         public void Start()

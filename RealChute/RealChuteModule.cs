@@ -1,11 +1,11 @@
 ﻿﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-﻿using UnityEngine;
-using RealChute.Extensions;
-﻿using KSP.UI.Screens;
-using Random = System.Random;
+ using System.Collections.Generic;
+ using System.Linq;
+ using System.Text;
+ using KSP.UI.Screens;
+ using RealChute.Extensions;
+ using UnityEngine;
+ using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -71,77 +71,38 @@ namespace RealChute
 
         #region Propreties
         // If the vessel is stopped on the ground
-        public bool GroundStop
-        {
-            get { return this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed; }
-        }
+        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed;
 
         // If both parachutes must cut
-        public bool AllMustStop
-        {
-            get { return this.SecondaryChute && (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT); }
-        }
+        public bool AllMustStop => this.SecondaryChute && (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT);
 
         // If the parachute can be repacked
-        public bool CanRepack
-        {
-            get
-            {
-                return (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT)
-                    && this.parachutes.TrueForAll(p => !p.IsDeployed) && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
-            }
-        }
+        public bool CanRepack => (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT)
+                                 && this.parachutes.TrueForAll(p => !p.IsDeployed) && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
 
         //If the Kerbal can repack the chute in career mode
-        public bool CanRepackCareer
-        {
-            get
-            {
-                return HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !RealChuteSettings.Instance.MustBeEngineer || FlightGlobals.ActiveVessel.IsEngineer()
-                       && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= RealChuteSettings.Instance.EngineerLevel;
-            }
-        }
+        public bool CanRepackCareer => HighLogic.CurrentGame.Mode != Game.Modes.CAREER || !RealChuteSettings.Instance.MustBeEngineer || FlightGlobals.ActiveVessel.IsEngineer()
+                                       && FlightGlobals.ActiveVessel.VesselValues.RepairSkill.value >= RealChuteSettings.Instance.EngineerLevel;
 
         //If any parachute is deployed
-        public bool AnyDeployed
-        {
-            get { return this.parachutes.Exists(p => p.IsDeployed); }
-        }
+        public bool AnyDeployed => this.parachutes.Exists(p => p.IsDeployed);
 
-        // Wether multiple parachutes are deployed or not
-        public bool ManyDeployed
-        {
-            get { return this.parachutes.Count(p => p.IsDeployed) > 1; }
-        }
+        // Whether multiple parachutes are deployed or not
+        public bool ManyDeployed => this.parachutes.Count(p => p.IsDeployed) > 1;
 
         //If there is more than one parachute on the part
-        public bool SecondaryChute
-        {
-            get { return this.parachutes.Count > 1; }
-        }
+        public bool SecondaryChute => this.parachutes.Count > 1;
 
         //Quick access to the part GUI events
         private BaseEvent deploy, arm, disarm, cut, repack;
-        private BaseEvent Deploy
-        {
-            get { return this.deploy ?? (this.deploy = this.Events["GUIDeploy"]); }
-        }
-        private BaseEvent Arm
-        {
-            get { return this.arm ?? (this.arm = this.Events["GUIArm"]); }
-        }
-        private BaseEvent Disarm
-        {
-            get { return this.disarm ?? (this.disarm = this.Events["GUIDisarm"]); }
-        }
-        private BaseEvent Cut
-        {
-            get { return this.cut ?? (this.cut = this.Events["GUICut"]); }
-        }
-        private BaseEvent Repack
-        {
-            get { return this.repack ?? (this.repack = this.Events["GUIRepack"]); }
-        }
+        private BaseEvent Deploy => this.deploy ?? (this.deploy = this.Events["GUIDeploy"]);
+        private BaseEvent Arm => this.arm ?? (this.arm = this.Events["GUIArm"]);
+
+        private BaseEvent Disarm => this.disarm ?? (this.disarm = this.Events["GUIDisarm"]);
+
+        private BaseEvent Cut => this.cut ?? (this.cut = this.Events["GUICut"]);
+
+        private BaseEvent Repack => this.repack ?? (this.repack = this.Events["GUIRepack"]);
         #endregion
 
         #region Fields
@@ -168,17 +129,11 @@ namespace RealChute
         #region Part GUI
         //Deploys the parachutes if possible
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Deploy Chute", unfocusedRange = 5)]
-        public void GUIDeploy()
-        {
-            ActivateRC();
-        }
+        public void GUIDeploy() => ActivateRC();
 
         //Cuts main chute chute
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Cut main chute", unfocusedRange = 5)]
-        public void GUICut()
-        {
-            this.parachutes.Where(p => p.IsDeployed).ForEach(p => p.Cut());
-        }
+        public void GUICut() => this.parachutes.Where(p => p.IsDeployed).ForEach(p => p.Cut());
 
         //Arms parachutes
         [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Arm parachute", unfocusedRange = 5)]
@@ -208,7 +163,7 @@ namespace RealChute
                 if (!this.CanRepackCareer)
                 {
                     int level = RealChuteSettings.Instance.EngineerLevel;
-                    string message = level > 0 ? "Only a level " + level + " and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
+                    string message = level > 0 ? $"Only a level {level} and higher engineer can repack a parachute" : "Only an engineer can repack a parachute";
                     ScreenMessages.PostScreenMessage(message, 5, ScreenMessageStyle.UPPER_CENTER);
                     return;
                 }
@@ -228,12 +183,12 @@ namespace RealChute
         {
             if (!this.visible)
             {
-                List<RealChuteModule> parachutes = new List<RealChuteModule>();
-                if (HighLogic.LoadedSceneIsEditor) { parachutes.AddRange(EditorLogic.SortedShipList.Where(p => p.Modules.Contains("RealChuteModule")).Select(p => (RealChuteModule)p.Modules["RealChuteModule"])); }
-                else if (HighLogic.LoadedSceneIsFlight) { parachutes.AddRange(this.vessel.FindPartModulesImplementing<RealChuteModule>()); }
-                if (parachutes.Count > 1 && parachutes.Exists(p => p.visible))
+                List<RealChuteModule> chutes = new List<RealChuteModule>();
+                if (HighLogic.LoadedSceneIsEditor) { chutes.AddRange(EditorLogic.SortedShipList.Where(p => p.Modules.Contains("RealChuteModule")).Select(p => (RealChuteModule)p.Modules["RealChuteModule"])); }
+                else if (HighLogic.LoadedSceneIsFlight) { chutes.AddRange(this.vessel.FindPartModulesImplementing<RealChuteModule>()); }
+                if (chutes.Count > 1 && chutes.Exists(p => p.visible))
                 {
-                    RealChuteModule module = parachutes.Find(p => p.visible);
+                    RealChuteModule module = chutes.Find(p => p.visible);
                     this.window.x = module.window.x;
                     this.window.y = module.window.y;
                     module.visible = false;
@@ -246,10 +201,7 @@ namespace RealChute
         #region Action groups
         //Deploys the parachutes if possible
         [KSPAction("Deploy chute")]
-        public void ActionDeploy(KSPActionParam param)
-        {
-            ActivateRC();
-        }
+        public void ActionDeploy(KSPActionParam param) => ActivateRC();
 
         //Cuts main chute
         [KSPAction("Cut main chute")]
@@ -260,10 +212,7 @@ namespace RealChute
 
         //Arms parachutes
         [KSPAction("Arm parachute")]
-        public void ActionArm(KSPActionParam param)
-        {
-            GUIArm();
-        }
+        public void ActionArm(KSPActionParam param) => GUIArm();
 
         [KSPAction("Disarm parachute")]
         public void ActionDisarm(KSPActionParam param)
@@ -286,7 +235,7 @@ namespace RealChute
                 if (this.vessel.isActiveVessel)
                 {
                     float time = this.timer - (float)this.deploymentTimer.Elapsed.TotalSeconds;
-                    this.screenMessage = time < 60 ? string.Format("Deployment in {0:0.0}s", time) : string.Format("Deployment in {0}", RCUtils.ToMinutesSeconds(time));
+                    this.screenMessage = time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}";
                 }
             }
             else if (this.deploymentTimer.IsRunning) { this.deploymentTimer.Stop(); }
@@ -298,7 +247,7 @@ namespace RealChute
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    this.screenMessage += string.Format("Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {0:0.0}/s", this.vessel.verticalSpeed);
+                    this.screenMessage += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
                 }
             }
 
@@ -325,7 +274,7 @@ namespace RealChute
             print("[RealChute]: " + this.part.partInfo.name + " was activated in stage " + this.part.inverseStage);
         }
 
-        //Deactiates the parachute
+        //Deactivates the parachute
         public void DeactivateRC()
         {
             this.staged = false;
@@ -335,11 +284,11 @@ namespace RealChute
         }
 
         //Copies stats from the info window to the symmetry counterparts
-        private void CopyToCouterparts()
+        private void CopyToCounterparts()
         {
-            foreach (Part part in this.part.symmetryCounterparts)
+            foreach (Part p in this.part.symmetryCounterparts)
             {
-                RealChuteModule module = part.Modules["RealChuteModule"] as RealChuteModule;
+                RealChuteModule module = (RealChuteModule)p.Modules["RealChuteModule"];
                 for (int i = 0; i < this.parachutes.Count; i++)
                 {
                     Parachute current = this.parachutes[i], counterpart = module.parachutes[i];
@@ -368,10 +317,7 @@ namespace RealChute
         }
 
         //Drag formula calculations
-        public float DragCalculation(float area, float cd)
-        {
-            return ((float)this.atmDensity * this.sqrSpeed * cd * area) / 2000;
-        }
+        public float DragCalculation(float area, float cd) => ((float)this.atmDensity * this.sqrSpeed * cd * area) / 2000f;
 
         //Loads all the parachutes into the list
         private void LoadParachutes()
@@ -422,56 +368,29 @@ namespace RealChute
         }
 
         //Gives the cost for this parachute
-        public float GetModuleCost(float defaultCost, ModifierStagingSituation sit)
-        {
-            return RCUtils.Round(this.parachutes.Sum(p => p.DeployedArea * p.mat.AreaCost));
-        }
+        public float GetModuleCost(float defaultCost, ModifierStagingSituation sit) => RCUtils.Round(this.parachutes.Sum(p => p.DeployedArea * p.mat.AreaCost));
 
-        public ModifierChangeWhen GetModuleCostChangeWhen()
-        {
-            return ModifierChangeWhen.FIXED;
-        }
+        ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen() => ModifierChangeWhen.FIXED;
 
         //Sets the parts mass dynamically
-        public float GetModuleMass(float defaultMass, ModifierStagingSituation sit)
-        {
-            return this.massDelta;
-        }
+        public float GetModuleMass(float defaultMass, ModifierStagingSituation sit) => this.massDelta;
 
-        public ModifierChangeWhen GetModuleMassChangeWhen()
-        {
-            return ModifierChangeWhen.FIXED;
-        }
+        ModifierChangeWhen IPartMassModifier.GetModuleMassChangeWhen() => ModifierChangeWhen.FIXED;
 
         //Not needed
-        public Callback<Rect> GetDrawModulePanelCallback()
-        {
-            return null;
-        }
+        Callback<Rect> IModuleInfo.GetDrawModulePanelCallback() => null;
 
         //Sets module info title
-        public string GetModuleTitle()
-        {
-            return "RealChute";
-        }
+        public string GetModuleTitle() => "RealChute";
 
         //Sets part info field
-        public string GetPrimaryField()
-        {
-            return "<b>Parachute count:</b> " + this.parachutes.Count;
-        }
+        public string GetPrimaryField() => "<b>Parachute count:</b> " + this.parachutes.Count;
 
         //Event when the UI is hidden (F2)
-        private void HideUI()
-        {
-            this.hid = true;
-        }
+        private void HideUI() => this.hid = true;
 
         //Event when the UI is shown (F2)
-        private void ShowUI()
-        {
-            this.hid = false;
-        }
+        private void ShowUI() => this.hid = false;
         #endregion
 
         #region Functions
@@ -669,14 +588,14 @@ namespace RealChute
             this.drag = new Rect(0, 0, 350, 30);
         }
 
-        public override void OnLoad(ConfigNode node)
+        public override void OnLoad(ConfigNode n)
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
-            this.node = node;
+            this.node = n;
             LoadParachutes();
             if (HighLogic.LoadedScene == GameScenes.LOADING || !PartLoader.Instance.IsReady() || this.part.partInfo == null)
             {
-                PersistentManager.Instance.AddNode<RealChuteModule>(this.part.name, node);
+                PersistentManager.Instance.AddNode<RealChuteModule>(this.part.name, n);
             }
             else { UpdateMass(); }
         }
@@ -700,7 +619,7 @@ namespace RealChute
                 Parachute parachute = this.parachutes[0];
                 builder.AppendFormat("Parachute material: {0}\n", parachute.material);
                 builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.DragCoefficient);
-                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.MaxTemp + RCUtils.absoluteZero);
+                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.MaxTemp + RCUtils.AbsoluteZero);
                 builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
                 builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
                 if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }
@@ -716,7 +635,7 @@ namespace RealChute
             {
                 builder.Append("Parachute materials: ").AppendJoin(this.parachutes.Select(p => p.material), ", ").AppendLine();
                 builder.Append("Drag coefficients: ").AppendJoin(this.parachutes.Select(p => p.mat.DragCoefficient.ToString("0.00")), ", ").AppendLine();
-                builder.Append("Chute max temperatures: ").AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.absoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
+                builder.Append("Chute max temperatures: ").AppendJoin(this.parachutes.Select(p => (p.mat.MaxTemp + RCUtils.AbsoluteZero).ToString("0.#")), "°C, ").AppendLine("°C");
                 builder.Append("Predeployed diameters: ").AppendJoin(this.parachutes.Select(p => p.preDeployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Deployed diameters: ").AppendJoin(this.parachutes.Select(p => p.deployedDiameter.ToString()), "m, ").AppendLine("m");
                 builder.Append("Minimum deployment clauses: ").AppendJoin(this.parachutes.Select(p => p.minIsPressure ? p.minPressure + "atm" : p.minDeployment + "m"), ", ").AppendLine();
@@ -731,11 +650,11 @@ namespace RealChute
             return builder.ToString();
         }
 
-        public override void OnSave(ConfigNode node)
+        public override void OnSave(ConfigNode n)
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
             //Saves the parachutes to the persistence
-            this.parachutes.ForEach(p => node.AddNode(p.Save()));
+            this.parachutes.ForEach(p => n.AddNode(p.Save()));
         }
 
         public override void OnActive()
@@ -743,10 +662,7 @@ namespace RealChute
             if (!this.staged) { ActivateRC(); }
         }
 
-        public override bool IsStageable()
-        {
-            return true;
-        }
+        public override bool IsStageable() => true;
         #endregion
 
         #region GUI
@@ -773,7 +689,7 @@ namespace RealChute
             builder.Append("Part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
             GUILayout.Label(builder.ToString());
 
-            //Beggining scroll
+            //Beginning scroll
             this.scroll = GUILayout.BeginScrollView(this.scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box);
             GUILayout.Space(5);
             GUILayout.Label("General:", GuiUtils.BoldLabel, GUILayout.Width(120));
@@ -803,7 +719,7 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                GuiUtils.CenteredButton("Copy to others chutes", CopyToCouterparts);
+                GuiUtils.CenteredButton("Copy to others chutes", CopyToCounterparts);
             }
 
             //Close button

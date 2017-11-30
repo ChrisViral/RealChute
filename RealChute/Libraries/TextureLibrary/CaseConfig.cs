@@ -1,4 +1,4 @@
-﻿using System;
+﻿
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -18,28 +18,18 @@ namespace RealChute.Libraries.TextureLibrary
         /// <summary>
         /// Name of the texture
         /// </summary>
-        public string Name
-        {
-            get { return this.name; }
-        }
+        public string Name => this.name;
 
-        private readonly string[] types = new string[0];
         /// <summary>
         /// Types of parachute this texture applies to
         /// </summary>
-        public string[] Types
-        {
-            get { return this.types; }
-        }
+        public string[] Types { get; } = new string[0];
 
         private readonly string textureURL = string.Empty;
         /// <summary>
         /// URL of the texture
         /// </summary>
-        public string TextureURL
-        {
-            get { return this.textureURL; }
-        }
+        public string TextureURL => this.textureURL;
         #endregion
 
         #region Constructor
@@ -58,7 +48,7 @@ namespace RealChute.Libraries.TextureLibrary
             string array = string.Empty;
             if (node.TryGetValue("types", ref array))
             {
-                this.types = RCUtils.ParseArray(array);
+                this.Types = RCUtils.ParseArray(array);
             }
             node.TryGetValue("textureURL", ref this.textureURL);
         }

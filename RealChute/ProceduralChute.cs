@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using RealChute.Extensions;
-using UnityEngine;
-using RealChute.Libraries;
 using KSP.UI.Screens;
+using RealChute.Extensions;
+using RealChute.Libraries;
 using RealChute.Libraries.Presets;
 using RealChute.Libraries.TextureLibrary;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -130,10 +130,7 @@ namespace RealChute
         }
 
         //Gets the total mass of the craft
-        internal float GetCraftMass(bool dry)
-        {
-            return EditorLogic.SortedShipList.Where(p => p.physicalSignificance != Part.PhysicalSignificance.NONE).Sum(p => dry ? p.mass : p.TotalMass());
-        }
+        internal float GetCraftMass(bool dry) => EditorLogic.SortedShipList.Where(p => p.physicalSignificance != Part.PhysicalSignificance.NONE).Sum(p => dry ? p.mass : p.TotalMass());
 
         //Lists the errors of a given type
         internal List<string> GetErrors(bool general)
@@ -141,8 +138,7 @@ namespace RealChute
             if (general)
             {
                 List<string> errors = new List<string>();
-                float f;
-                if (!GuiUtils.TryParseTime(this.timer, out f) || !GuiUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
+                if (!GuiUtils.TryParseTime(this.timer, out float f) || !GuiUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
                 if (!GuiUtils.TryParseWithEmpty(this.spares, out f) || !GuiUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
                 if (!float.TryParse(this.cutSpeed, out f) || !GuiUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
                 if (!float.TryParse(this.landingAlt, out f) || !GuiUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
@@ -215,10 +211,7 @@ namespace RealChute
         }
 
         //Checks if th given AttachNode has the parent part
-        private bool CheckParentNode(AttachNode node)
-        {
-            return node.attachedPart != null && this.part.parent != null && node.attachedPart == this.part.parent;
-        }
+        private bool CheckParentNode(AttachNode node) => node.attachedPart != null && this.part.parent != null && node.attachedPart == this.part.parent;
 
         //Modifies the size of a part
         private void UpdateScale(Part part, RealChuteModule module)
@@ -230,9 +223,8 @@ namespace RealChute
             root.localScale = Vector3.Scale(this.originalSize, size.Size);
             module.caseMass = size.CaseMass;
             module.UpdateMass();
-            AttachNode topNode, bottomNode;
-            bool hasTopNode = part.TryGetAttachNodeById("top", out topNode);
-            bool hasBottomNode = part.TryGetAttachNodeById("bottom", out bottomNode);
+            bool hasTopNode = part.TryGetAttachNodeById("top", out AttachNode topNode);
+            bool hasBottomNode = part.TryGetAttachNodeById("bottom", out AttachNode bottomNode);
             List<Part> allTopChildParts, allBottomChildParts;
 
             // If this is the root part, move things for the top and the bottom.
@@ -384,7 +376,7 @@ namespace RealChute
         {
             PresetsLibrary.Instance.AddPreset(new Preset(this));
             RealChuteSettings.SaveSettings();
-            RCUtils.PopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was succesfully saved!", "Close");
+            RCUtils.PopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was successfully saved!", "Close");
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }
 
@@ -399,7 +391,7 @@ namespace RealChute
                 }
                 else
                 {
-                    RealChuteModule module = this.rcModule ?? this.part.Modules["RealChuteModule"] as RealChuteModule;
+                    RealChuteModule module = this.rcModule ?? (RealChuteModule)this.part.Modules["RealChuteModule"];
                     if (module.parachutes.Count > 0)
                     {
                         for (int i = 0; i < module.parachutes.Count; i++)
@@ -412,15 +404,9 @@ namespace RealChute
         }
 
         //Returns the cost for this size, if any
-        public float GetModuleCost(float defaultCost, ModifierStagingSituation sit)
-        {
-            return this.sizes.Count > 0 ? this.sizes[this.size].Cost : 0;
-        }
+        public float GetModuleCost(float defaultCost, ModifierStagingSituation sit) => this.sizes.Count > 0 ? this.sizes[this.size].Cost : 0;
 
-        public ModifierChangeWhen GetModuleCostChangeWhen()
-        {
-            return ModifierChangeWhen.FIXED;
-        }
+        ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen() => ModifierChangeWhen.FIXED;
         #endregion
 
         #region Functions
@@ -589,8 +575,7 @@ namespace RealChute
             }
 
             //Top node original location
-            AttachNode a;
-            if (this.part.TryGetAttachNodeById("top", out a))
+            if (this.part.TryGetAttachNodeById("top", out AttachNode a))
             {
                 this.top = a.originalPosition.y;
             }

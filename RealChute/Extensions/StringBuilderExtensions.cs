@@ -19,28 +19,31 @@ namespace RealChute.Extensions
         /// <summary>
         /// Concatenates this sequence of strings together using the specified separator.
         /// </summary>
+        /// <param name="seq">Sequence to join</param>
         /// <param name="separator">String separating elements</param>
-        public static string Join(this IEnumerable<string> seq, string separator)
-        {
-            return new StringBuilder().AppendJoin(seq, separator).ToString();
-        }
+        public static string Join(this IEnumerable<string> seq, string separator) => new StringBuilder().AppendJoin(seq, separator).ToString();
 
         /// <summary>
         /// Appends each element of the sequence with the specified separator to the StringBuilder.
         /// </summary>
+        /// <param name="builder">StringBuilder to append on</param>
         /// <param name="seq">Sequence to concatenate</param>
         /// <param name="separator">String separating each element</param>
         public static StringBuilder AppendJoin(this StringBuilder builder, IEnumerable<string> seq, string separator)
         {
-            IEnumerator<string> e = seq.GetEnumerator();
-            if (e.MoveNext())
+            using (IEnumerator<string> e = seq.GetEnumerator())
             {
-                builder.Append(e.Current);
-                while (e.MoveNext())
+                if (e.MoveNext())
                 {
-                    builder.Append(separator).Append(e.Current);
+                    builder.Append(e.Current);
+                    while (e.MoveNext())
+                    {
+                        builder.Append(separator).Append(e.Current);
+                    }
+
                 }
             }
+
             return builder;
         }
         #endregion

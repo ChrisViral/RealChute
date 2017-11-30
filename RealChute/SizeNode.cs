@@ -18,73 +18,49 @@ namespace RealChute
         /// <summary>
         /// Size of the parachute
         /// </summary>
-        public Vector3 Size
-        {
-            get { return this.size; }
-        }
+        public Vector3 Size => this.size;
 
         private readonly string sizeId = string.Empty;
         /// <summary>
         /// Identifier for this size
         /// </summary>
-        public string SizeId
-        {
-            get { return this.sizeId; }
-        }
+        public string SizeId => this.sizeId;
 
         private readonly float caseMass = 0.1f;
         /// <summary>
         /// Case mass for this size
         /// </summary>
-        public float CaseMass
-        {
-            get { return this.caseMass; }
-        }
+        public float CaseMass => this.caseMass;
 
         private readonly Vector3 topNode = Vector3.zero;
         /// <summary>
         /// Position of the top node if any
         /// </summary>
-        public Vector3 TopNode
-        {
-            get { return this.topNode; }
-        }
+        public Vector3 TopNode => this.topNode;
 
         private readonly int topNodeSize = -1;
         /// <summary>
         /// Size of the top node if any
         /// </summary>
-        public int TopNodeSize
-        {
-            get { return this.topNodeSize; }
-        }
+        public int TopNodeSize => this.topNodeSize;
 
         private readonly Vector3 bottomNode = Vector3.zero;
         /// <summary>
         /// Position of the bottom node if any
         /// </summary>
-        public Vector3 BottomNode
-        {
-            get { return this.bottomNode; }
-        }
+        public Vector3 BottomNode => this.bottomNode;
 
         private readonly int bottomNodeSize = -1;
         /// <summary>
         /// Size of the bottom node if any
         /// </summary>
-        public int BottomNodeSize
-        {
-            get { return this.bottomNodeSize; }
-        }
+        public int BottomNodeSize => this.bottomNodeSize;
 
         private readonly float cost = 400;
         /// <summary>
         /// The cost of this case
         /// </summary>
-        public float Cost
-        {
-            get { return this.cost; }
-        }
+        public float Cost => this.cost;
         #endregion
 
         #region Constructor

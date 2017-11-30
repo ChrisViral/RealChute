@@ -21,190 +21,127 @@ namespace RealChute.Libraries.Presets
             /// <summary>
             /// Material of the parachute
             /// </summary>
-            public string Material
-            {
-                get { return this.material; }
-            }
+            public string Material => this.material;
 
             private readonly string preDeployedDiameter = "1";
             /// <summary>
             /// Predeployed diameter of the parachute
             /// </summary>
-            public string PreDeployedDiameter
-            {
-                get { return this.preDeployedDiameter; }
-            }
+            public string PreDeployedDiameter => this.preDeployedDiameter;
 
             private readonly string deployedDiameter = "25";
             /// <summary>
             /// Deployed diameter of the parachute
             /// </summary>
-            public string DeployedDiameter
-            {
-                get { return this.deployedDiameter; }
-            }
+            public string DeployedDiameter => this.deployedDiameter;
 
             private readonly bool minIsPressure;
             /// <summary>
-            /// Wether the minimum deployment clause is pressure or altitude
+            /// Whether the minimum deployment clause is pressure or altitude
             /// </summary>
-            public bool MinIsPressure
-            {
-                get { return this.minIsPressure; }
-            }
+            public bool MinIsPressure => this.minIsPressure;
 
             private readonly string minDeployment = "25000";
             /// <summary>
             /// Minimum predeployment altitude
             /// </summary>
-            public string MinDeployment
-            {
-                get { return this.minDeployment; }
-            }
+            public string MinDeployment => this.minDeployment;
 
             private readonly string minPressure = "0.01";
             /// <summary>
             /// Minimum predeployment pressure
             /// </summary>
-            public string MinPressure
-            {
-                get { return this.minPressure; }
-            }
+            public string MinPressure => this.minPressure;
 
             private readonly string deploymentAlt = "700";
             /// <summary>
             /// Full deployment altitude
             /// </summary>
-            public string DeploymentAlt
-            {
-                get { return this.deploymentAlt; }
-            }
+            public string DeploymentAlt => this.deploymentAlt;
 
             private readonly string cutAlt = string.Empty;
             /// <summary>
             /// Autocut altitude
             /// </summary>
-            public string CutAlt
-            {
-                get { return this.cutAlt; }
-            }
+            public string CutAlt => this.cutAlt;
 
             private readonly string preDeploymentSpeed = "2";
             /// <summary>
             /// Predeployment speed
             /// </summary>
-            public string PreDeploymentSpeed
-            {
-                get { return this.preDeploymentSpeed; }
-            }
+            public string PreDeploymentSpeed => this.preDeploymentSpeed;
 
             private readonly string deploymentSpeed = "6";
             /// <summary>
             /// Deployment speed
             /// </summary>
-            public string DeploymentSpeed
-            {
-                get { return this.deploymentSpeed; }
-            }
+            public string DeploymentSpeed => this.deploymentSpeed;
 
             private readonly string chuteTexture = string.Empty;
             /// <summary>
             /// GUI ID for the canopy texture
             /// </summary>
-            public string ChuteTexture
-            {
-                get { return this.chuteTexture; }
-            }
+            public string ChuteTexture => this.chuteTexture;
 
             private readonly string modelName = string.Empty;
             /// <summary>
             /// GUI ID for the canopy model
             /// </summary>
-            public string ModelName
-            {
-                get { return this.modelName; }
-            }
+            public string ModelName => this.modelName;
 
             private readonly int type;
             /// <summary>
             /// ID of the parachute type
             /// </summary>
-            public int Type
-            {
-                get { return this.type; }
-            }
+            public int Type => this.type;
 
             private readonly bool calcSelect;
             /// <summary>
             /// GUI calculations mode
             /// </summary>
-            public bool CalcSelect
-            {
-                get { return this.calcSelect; }
-            }
+            public bool CalcSelect => this.calcSelect;
 
             private readonly bool getMass = true;
             /// <summary>
-            /// GUI mass obtention
+            /// GUI mass getter
             /// </summary>
-            public bool GetMass
-            {
-                get { return this.getMass; }
-            }
+            public bool GetMass => this.getMass;
 
             private readonly bool useDry = true;
             /// <summary>
             /// GUI wet/dry mass
             /// </summary>
-            public bool UseDry
-            {
-                get { return this.useDry; }
-            }
+            public bool UseDry => this.useDry;
 
             private readonly string mass = "10";
             /// <summary>
             /// GUI mass field
             /// </summary>
-            public string Mass
-            {
-                get { return this.mass; }
-            }
+            public string Mass => this.mass;
 
             private readonly string landingSpeed = "6";
             /// <summary>
             /// GUI landing speed field
             /// </summary>
-            public string LandingSpeed
-            {
-                get { return this.landingSpeed; }
-            }
+            public string LandingSpeed => this.landingSpeed;
 
             private readonly string deceleration = "10";
             /// <summary>
             /// GUI deceleration field
             /// </summary>
-            public string Deceleration
-            {
-                get { return this.deceleration; }
-            }
+            public string Deceleration => this.deceleration;
 
             private readonly string refDepAlt = "700";
             /// <summary>
             /// GUI mains deployment alt field
             /// </summary>
-            public string RefDepAlt
-            {
-                get { return this.refDepAlt; }
-            }
+            public string RefDepAlt => this.refDepAlt;
 
             private readonly string chuteCount = "1";
             /// <summary>
             /// GUI chute count field
             /// </summary>
-            public string ChuteCount
-            {
-                get { return this.chuteCount; }
-            }
+            public string ChuteCount => this.chuteCount;
             #endregion
 
             #region Constructor
@@ -258,7 +195,7 @@ namespace RealChute.Libraries.Presets
                     if (pChute.textures.Canopies.Count > 0) { this.chuteTexture = pChute.textures.GetCanopy(templateGui.chuteId).Name; }
                     if (pChute.textures.Models.Count > 0) { this.modelName = pChute.textures.GetModel(templateGui.modelId).Name; }
                 }
-                this.type = templateGui.TypeID;
+                this.type = templateGui.TypeId;
                 this.calcSelect = templateGui.calcSelect;
                 this.getMass = templateGui.getMass;
                 this.useDry = templateGui.useDry;
@@ -308,109 +245,72 @@ namespace RealChute.Libraries.Presets
         /// <summary>
         /// Name of the preset
         /// </summary>
-        public string Name
-        {
-            get { return this.name; }
-        }
+        public string Name => this.name;
 
         private readonly string description = string.Empty;
         /// <summary>
         /// Description of the preset
         /// </summary>
-        public string Description
-        {
-            get { return this.description; }
-        }
+        public string Description => this.description;
 
         private readonly string textureLibrary = string.Empty;
         /// <summary>
         /// TextureLibrary for this part
         /// </summary>
-        public string TextureLibrary
-        {
-            get { return this.textureLibrary; }
-        }
+        public string TextureLibrary => this.textureLibrary;
 
         private readonly string sizeId = string.Empty;
         /// <summary>
         /// Size ID for this chute
         /// </summary>
-        public string SizeId
-        {
-            get { return this.sizeId; }
-        }
+        public string SizeId => this.sizeId;
 
         private readonly string cutSpeed = "0.5f";
         /// <summary>
         /// Autocut speed for the chute
         /// </summary>
-        public string CutSpeed
-        {
-            get { return this.cutSpeed; }
-        }
+        public string CutSpeed => this.cutSpeed;
 
         private readonly string timer = "0s";
         /// <summary>
         /// Deployment timer for the chute
         /// </summary>
-        public string Timer
-        {
-            get { return this.timer; }
-        }
+        public string Timer => this.timer;
 
         private readonly bool mustGoDown;
         /// <summary>
         /// MustGoDown clause for this preset
         /// </summary>
-        public bool MustGoDown
-        {
-            get { return this.mustGoDown; }
-        }
+        public bool MustGoDown => this.mustGoDown;
 
         private readonly bool deployOnGround;
         /// <summary>
         /// If this chute automatically deploys on ground contact or not
         /// </summary>
-        public bool DeployOnGround
-        {
-            get { return this.deployOnGround; }
-        }
+        public bool DeployOnGround => this.deployOnGround;
 
         private readonly string spares = "5";
         /// <summary>
         /// Amount of spare chutes available
         /// </summary>
-        public string Spares
-        {
-            get { return this.spares; }
-        }
+        public string Spares => this.spares;
 
         private readonly string landingAlt = "0";
         /// <summary>
         /// Planned landing altitude of the craft
         /// </summary>
-        public string LandingAlt
-        {
-            get { return this.landingAlt; }
-        }
+        public string LandingAlt => this.landingAlt;
 
         private readonly string caseName = string.Empty;
         /// <summary>
         /// GUI ID for case texture
         /// </summary>
-        public string CaseName
-        {
-            get { return this.caseName; }
-        }
+        public string CaseName => this.caseName;
 
-        private readonly List<ChuteParameters> parameters;
         /// <summary>
         /// All parameters for potential chutes
         /// </summary>
-        public List<ChuteParameters> Parameters
-        {
-            get { return this.parameters; }
-        }
+        public List<ChuteParameters> Parameters { get; }
         #endregion
 
         #region Constructor
@@ -431,7 +331,7 @@ namespace RealChute.Libraries.Presets
             node.TryGetValue("spares", ref this.spares);
             node.TryGetValue("landingAlt", ref this.landingAlt);
             node.TryGetValue("caseName", ref this.caseName);
-            this.parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
+            this.Parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
         }
 
         /// <summary>
@@ -454,7 +354,7 @@ namespace RealChute.Libraries.Presets
             {
                 if (pChute.textures.Cases.Count > 0) { this.caseName = pChute.parachuteCase.Name; }
             }
-            this.parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
+            this.Parameters = new List<ChuteParameters>(pChute.chutes.Select(c => new ChuteParameters(pChute, c)));
         }
         #endregion
 

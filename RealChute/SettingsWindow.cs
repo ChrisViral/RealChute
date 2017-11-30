@@ -22,20 +22,13 @@ namespace RealChute
         #endregion
 
         #region Methods
-        private void HideUI()
-        {
-            this.showing = false;
-        }
+        private void HideUI() => this.showing = false;
 
-        private void ShowUI()
-        {
-            this.showing = true;
-        }
+        private void ShowUI() => this.showing = true;
 
         private void CloseWindow()
         {
-            int i;
-            if (int.TryParse(this.level, out i)) { RealChuteSettings.Instance.EngineerLevel = i; }
+            if (int.TryParse(this.level, out int i)) { RealChuteSettings.Instance.EngineerLevel = i; }
             if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
         }
         #endregion

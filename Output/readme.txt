@@ -12,6 +12,13 @@ OWN DISCRETION.
 //-------------------------------------------------------//
 -- Changelog--
 
+November 30th 2017
+v1.4.5
+-Compatibility for KSP 1.3.1
+-Fixed issue with editor window
+-Implemented increments for in flight window sliders
+-Solution-wise code cleanup/optimizations
+
 June 1st 2017
 v1.4.4
 -RealChute 1.3 compatibility update

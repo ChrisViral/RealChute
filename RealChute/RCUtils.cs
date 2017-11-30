@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEngine;
-using Version = System.Version;
+using static System.Math;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -23,32 +23,32 @@ namespace RealChute
         /// <summary>
         /// Transforms from gees to m/s²
         /// </summary>
-        public const double geeToAcc = 9.80665;
+        public const double GeeToAcc = 9.80665;
 
         /// <summary>
         /// Parachute starting temperature
         /// </summary>
-        public const double startTemp = 300;
+        public const double StartTemp = 300d;
 
         /// <summary>
         /// Absolute zero in °C
         /// </summary>
-        public const double absoluteZero = -273.15;
+        public const double AbsoluteZero = -273.15d;
 
         /// <summary>
         /// URL of the RealChute settings config from the GameData folder
         /// </summary>
-        public const string localSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
+        public const string LocalSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
 
         /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
-        public const string localPluginDataURL = "GameData/RealChute/Plugins/PluginData";
+        public const string LocalPluginDataURL = "GameData/RealChute/Plugins/PluginData";
 
         /// <summary>
         /// Relative URL to the Nyan Cat parachute texture
         /// </summary>
-        public const string nyanTextureURL = "RealChute/Parts/nyan_texture";
+        public const string NyanTextureURL = "RealChute/Parts/nyan_texture";
 
         /// <summary>
         /// PopupDialog anchor vector
@@ -60,18 +60,12 @@ namespace RealChute
         /// <summary>
         /// String URL to the RealChute settings config
         /// </summary>
-        public static string SettingsURL
-        {
-            get { return Path.Combine(KSPUtil.ApplicationRootPath, localSettingsURL); }
-        }
+        public static string SettingsURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalSettingsURL);
 
         /// <summary>
         /// Returns the RealChute PluginData folder
         /// </summary>
-        public static string PluginDataURL
-        {
-            get { return Path.Combine(KSPUtil.ApplicationRootPath, localPluginDataURL); }
-        }
+        public static string PluginDataURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalPluginDataURL);
 
         private static string assemblyVersion;
         /// <summary>
@@ -119,12 +113,9 @@ namespace RealChute
         {
             get
             {
-                if (densityMethod == null)
-                {
-                    densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
-                                                  .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethod("GetCurrentDensity", BindingFlags.Public & BindingFlags.Static);
-                }
-                return densityMethod;
+                return densityMethod ??
+                      (densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
+                                                     .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethod("GetCurrentDensity", BindingFlags.Public & BindingFlags.Static));
             }
         }
         #endregion
@@ -144,28 +135,19 @@ namespace RealChute
         /// Returns the area of a circular parachute of the given diameter
         /// </summary>
         /// <param name="diameter">Diameter of the chute</param>
-        public static float GetArea(float diameter)
-        {
-            return (float)((diameter * diameter * Math.PI) / 4d);
-        }
+        public static float GetArea(float diameter) => (float)((PI * diameter * diameter) / 4d);
 
         /// <summary>
         /// Returns the diameter of a given area
         /// </summary>
         /// <param name="area">Area to determine dthe diameter of</param>
-        public static float GetDiameter(float area)
-        {
-            return (float)(Math.Sqrt(area / Math.PI) * 2);
-        }
+        public static float GetDiameter(float area) => (float)(Sqrt(area / PI) * 2d);
 
         /// <summary>
         /// Rounds the float to the closets half
         /// </summary>
         /// <param name="d">Number to round</param>
-        public static float Round(double d)
-        {
-            return (float)Math.Max(Math.Round(d, 1, MidpointRounding.AwayFromZero), 0.1);
-        }
+        public static float Round(double d) => (float)Max(Math.Round(d, 1, MidpointRounding.AwayFromZero), 0.1);
 
         /// <summary>
         /// Transform the given time value in seconds to minutes and seconds
@@ -173,23 +155,16 @@ namespace RealChute
         /// <param name="time">Time value to transform</param>
         public static string ToMinutesSeconds(float time)
         {
-            float minutes = 0, seconds;
-            for (seconds = time; seconds >= 60; seconds -= 60)
-            {
-                minutes++;
-            }
-
-            return String.Concat(minutes, "m ", seconds.ToString("0.0"), "s");
+            int minutes = (int)Floor(time % 60d);
+            float seconds = time - (60 * minutes);
+            return $"{minutes}m {seconds:0.0}s";
         }
 
         /// <summary>
         /// Returns true if the number is a whole number (no decimals)
         /// </summary>
         /// <param name="f">Float to check</param>
-        public static bool IsWholeNumber(float f)
-        {
-            return Math.Truncate(f) == f;
-        }
+        public static bool IsWholeNumber(float f) => Truncate(f) == f;
 
         /// <summary>
         /// Returns a simplified string for the chute number
@@ -216,10 +191,7 @@ namespace RealChute
         /// <param name="title">Title of the PopupDialog</param>
         /// <param name="message">Message of the PopupDialog</param>
         /// <param name="button">Button text of the PopupDialog</param>
-        public static void PopupDialog(string title, string message, string button)
-        {
-            global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, title, message, button, false, HighLogic.UISkin);
-        }
+        public static void PopupDialog(string title, string message, string button) => global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, title, message, button, false, HighLogic.UISkin);
         #endregion
     }
 }
