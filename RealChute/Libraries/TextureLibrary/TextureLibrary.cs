@@ -20,21 +20,14 @@ namespace RealChute.Libraries.TextureLibrary
         /// <summary>
         /// Creates a new instance
         /// </summary>
-        public static TextureLibrary Instance
-        {
-            get { return instance ?? (instance = new TextureLibrary()); }
-        }
+        public static TextureLibrary Instance => instance ?? (instance = new TextureLibrary());
         #endregion
 
         #region Propreties
-        private readonly Dictionary<string, TextureConfig> configs;
         /// <summary>
         /// Name of all the TextureConfigs with the associated objects
         /// </summary>
-        public Dictionary<string, TextureConfig> Configs
-        {
-            get { return this.configs; }
-        }
+        public Dictionary<string, TextureConfig> Configs { get; }
         #endregion
 
         #region Constructor
@@ -43,7 +36,7 @@ namespace RealChute.Libraries.TextureLibrary
         /// </summary>
         public TextureLibrary()
         {
-            this.configs = GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n))
+            this.Configs = GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n))
                 .ToDictionary(t => t.Name, t => t);
         }
         #endregion
@@ -53,10 +46,7 @@ namespace RealChute.Libraries.TextureLibrary
         /// Determines if the config of the given name exists in the library.
         /// </summary>
         /// <param name="name">Name of the searched config</param>
-        public bool ContainsConfig(string name)
-        {
-            return this.configs.ContainsKey(name);
-        }
+        public bool ContainsConfig(string name) => this.Configs.ContainsKey(name);
 
         /// <summary>
         /// Returns the config of the given name.
@@ -64,8 +54,8 @@ namespace RealChute.Libraries.TextureLibrary
         /// <param name="name">Name of the config searched for</param>
         public TextureConfig GetConfig(string name)
         {
-            if (!ContainsConfig(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" TextureConfig in the library"); }
-            return this.configs[name];
+            if (!ContainsConfig(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" TextureConfig in the library"); }
+            return this.Configs[name];
         }
 
         /// <summary>
@@ -77,10 +67,10 @@ namespace RealChute.Libraries.TextureLibrary
         {
             if (ContainsConfig(name))
             {
-                config = this.configs[name];
+                config = this.Configs[name];
                 return true;
             }
-            if (!string.IsNullOrEmpty(name) && this.configs.Count > 0) { Debug.LogError("[RealChute]: Could not find the TextureConfig \"" + name + "\" in the GameData folder"); }
+            if (!string.IsNullOrEmpty(name) && this.Configs.Count > 0) { Debug.LogError($"[RealChute]: Could not find the TextureConfig \"{name}\" in the GameData folder"); }
             return false;
         }
         #endregion

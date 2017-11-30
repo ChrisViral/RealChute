@@ -21,30 +21,19 @@ namespace RealChute.Libraries.Presets
         /// <summary>
         /// Returns the current PresetsLibrary
         /// </summary>
-        public static PresetsLibrary Instance
-        {
-            get { return instance ?? (instance = new PresetsLibrary()); }
-        }
+        public static PresetsLibrary Instance => instance ?? (instance = new PresetsLibrary());
         #endregion
 
         #region Propreties
-        private readonly Dictionary<string, Preset> presets;
         /// <summary>
         /// Dictionary of the preset names with their associated presets
         /// </summary>
-        public Dictionary<string, Preset> Presets
-        {
-            get { return this.presets; }
-        }
+        public Dictionary<string, Preset> Presets { get; }
 
-        private readonly Dictionary<int, string[]> parameters = new Dictionary<int, string[]>();
         /// <summary>
         /// A dictionary of the number of used chutes as keys and the associated preset names as values
         /// </summary>
-        public Dictionary<int, string[]> Parameters
-        {
-            get { return this.parameters; }
-        }
+        public Dictionary<int, string[]> Parameters { get; } = new Dictionary<int, string[]>();
         #endregion
 
         #region Constuctor
@@ -53,7 +42,7 @@ namespace RealChute.Libraries.Presets
         /// </summary>
         public PresetsLibrary()
         {
-            this.presets = RealChuteSettings.Instance.Presets.Select(n => new Preset(n)).ToDictionary(p => p.Name, p => p);
+            this.Presets = RealChuteSettings.Instance.Presets.Select(n => new Preset(n)).ToDictionary(p => p.Name, p => p);
             RefreshData();
         }
         #endregion
@@ -63,10 +52,7 @@ namespace RealChute.Libraries.Presets
         /// If the Preset of the given name exists
         /// </summary>
         /// <param name="name">Name of the preset to look for</param>
-        public bool ContainsPreset(string name)
-        {
-            return this.presets.ContainsKey(name);
-        }
+        public bool ContainsPreset(string name) => this.Presets.ContainsKey(name);
 
         /// <summary>
         /// Returns the preset of the given name
@@ -74,8 +60,8 @@ namespace RealChute.Libraries.Presets
         /// <param name="name">Name of the preset to get</param>
         public Preset GetPreset(string name)
         {
-            if (!ContainsPreset(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" Preset in the library"); }
-            return this.presets[name];
+            if (!ContainsPreset(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" Preset in the library"); }
+            return this.Presets[name];
         }
 
         /// <summary>
@@ -84,8 +70,7 @@ namespace RealChute.Libraries.Presets
         /// <param name="chuteCount">Number of parachutes associated to the Preset</param>
         public string[] GetRelevantPresets(int chuteCount)
         {
-            if (!this.parameters.ContainsKey(chuteCount)) { return new string[0]; }
-            return this.parameters[chuteCount];
+            return !this.Parameters.ContainsKey(chuteCount) ? new string[0] : this.Parameters[chuteCount];
         }
 
         /// <summary>
@@ -96,7 +81,7 @@ namespace RealChute.Libraries.Presets
         public Preset GetPreset(int index, int chuteCount)
         {
             string[] relevant = GetRelevantPresets(chuteCount);
-            if (!relevant.IndexInRange(index)) { throw new IndexOutOfRangeException("Preset index [" + index + "] for " + chuteCount + " chutes is out of range"); }
+            if (!relevant.IndexInRange(index)) { throw new IndexOutOfRangeException($"Preset index [{index}] for {chuteCount} chutes is out of range"); }
             return GetPreset(relevant[index]);
         }
 
@@ -106,7 +91,7 @@ namespace RealChute.Libraries.Presets
         /// <param name="preset">Preset to add</param>
         public void AddPreset(Preset preset)
         {
-            this.presets.Add(preset.Name, preset);
+            this.Presets.Add(preset.Name, preset);
             RefreshData();
             RealChuteSettings.SaveSettings();
         }
@@ -117,7 +102,7 @@ namespace RealChute.Libraries.Presets
         /// <param name="preset">Name of the preset to delete</param>
         public void DeletePreset(Preset preset)
         {
-            this.presets.Remove(preset.Name);
+            this.Presets.Remove(preset.Name);
             RefreshData();
             RealChuteSettings.SaveSettings();
         }
@@ -127,12 +112,12 @@ namespace RealChute.Libraries.Presets
         /// </summary>
         private void RefreshData()
         {
-            if (this.presets.Count <= 0) { return; }
-            int max = this.presets.Values.Select(p => p.Parameters.Count).Max();
+            if (this.Presets.Count <= 0) { return; }
+            int max = this.Presets.Values.Select(p => p.Parameters.Count).Max();
             for (int i = 1; i <= max; i++)
             {
-                if (!this.parameters.ContainsKey(i)) { this.parameters.Add(i, new string[0]); }
-                this.parameters[i] = this.presets.Values.Where(p => p.Parameters.Count == i).Select(p => p.Name).ToArray();
+                if (!this.Parameters.ContainsKey(i)) { this.Parameters.Add(i, new string[0]); }
+                this.Parameters[i] = this.Presets.Values.Where(p => p.Parameters.Count == i).Select(p => p.Name).ToArray();
             }
         }
         #endregion

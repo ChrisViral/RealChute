@@ -16,19 +16,13 @@ namespace RealChute.Libraries.TextureLibrary
         /// <summary>
         /// The name of the texture
         /// </summary>
-        public string Name
-        {
-            get { return this.name; }
-        }
+        public string Name => this.name;
 
         private readonly string textureURL = string.Empty;
         /// <summary>
         /// The URL of the texture
         /// </summary>
-        public string TextureURL
-        {
-            get { return this.textureURL; }
-        }
+        public string TextureURL => this.textureURL;
         #endregion
 
         #region Constructor

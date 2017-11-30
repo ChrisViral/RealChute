@@ -1,10 +1,10 @@
 ﻿﻿using System;
-using System.Text;
-using System.Collections.Generic;
-﻿using UnityEngine;
-using RealChute.Extensions;
-using RealChute.Libraries;
-﻿using RealChute.Libraries.Presets;
+ using System.Collections.Generic;
+ using System.Text;
+ using RealChute.Extensions;
+ using RealChute.Libraries;
+ using RealChute.Libraries.Presets;
+ using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -20,25 +20,13 @@ namespace RealChute
     public class EditorGUI
     {
         #region Propreties
-        private Part Part
-        {
-            get { return this.pChute.part; }
-        }
+        private Part Part => this.pChute.part;
 
-        private RealChuteModule RCModule
-        {
-            get { return this.pChute.rcModule; }
-        }
+        private RealChuteModule RCModule => this.pChute.rcModule;
 
-        private List<ChuteTemplate> Chutes
-        {
-            get { return this.pChute.chutes; }
-        }
+        private List<ChuteTemplate> Chutes => this.pChute.chutes;
 
-        private List<SizeNode> Sizes
-        {
-            get { return this.pChute.sizes; }
-        }
+        private List<SizeNode> Sizes => this.pChute.sizes;
         #endregion
 
         #region Fields

@@ -1,6 +1,6 @@
 ﻿using System.IO;
-using UnityEngine;
 using RealChute.Libraries.Presets;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -20,10 +20,7 @@ namespace RealChute
         /// <summary>
         /// Returns the current RealChute_Settings config file
         /// </summary>
-        public static RealChuteSettings Instance
-        {
-            get { return instance ?? (instance = new RealChuteSettings()); }
-        }
+        public static RealChuteSettings Instance => instance ?? (instance = new RealChuteSettings());
         #endregion
 
         #region Propreties
@@ -33,8 +30,8 @@ namespace RealChute
         /// </summary>
         public bool AutoArm
         {
-            get { return this.autoArm; }
-            set { this.autoArm = value; }
+            get => this.autoArm;
+            set => this.autoArm = value;
         }
 
         private bool jokeActivated;
@@ -43,8 +40,8 @@ namespace RealChute
         /// </summary>
         public bool JokeActivated
         {
-            get { return this.jokeActivated; }
-            set { this.jokeActivated = value; }
+            get => this.jokeActivated;
+            set => this.jokeActivated = value;
         }
 
         private bool guiResizeUpdates;
@@ -53,8 +50,8 @@ namespace RealChute
         /// </summary>
         public bool GuiResizeUpdates
         {
-            get { return this.guiResizeUpdates; }
-            set { this.guiResizeUpdates = value; }
+            get => this.guiResizeUpdates;
+            set => this.guiResizeUpdates = value;
         }
 
         private bool mustBeEngineer = true;
@@ -63,8 +60,8 @@ namespace RealChute
         /// </summary>
         public bool MustBeEngineer
         {
-            get { return this.mustBeEngineer; }
-            set { this.mustBeEngineer = value; }
+            get => this.mustBeEngineer;
+            set => this.mustBeEngineer = value;
         }
 
         private int engineerLevel = 1;
@@ -73,8 +70,8 @@ namespace RealChute
         /// </summary>
         public int EngineerLevel
         {
-            get { return this.engineerLevel; }
-            set { this.engineerLevel = value; }
+            get => this.engineerLevel;
+            set => this.engineerLevel = value;
         }
 
         private bool activateNyan;
@@ -83,18 +80,14 @@ namespace RealChute
         /// </summary>
         public bool ActivateNyan
         {
-            get { return this.activateNyan; }
-            set { this.activateNyan = value; }
+            get => this.activateNyan;
+            set => this.activateNyan = value;
         }
 
-        private readonly ConfigNode[] presets = new ConfigNode[0];
         /// <summary>
         /// All the current preset nodes
         /// </summary>
-        public ConfigNode[] Presets
-        {
-            get { return this.presets; }
-        }
+        public ConfigNode[] Presets { get; }
         #endregion
 
         #region Constructor
@@ -115,6 +108,7 @@ namespace RealChute
                 settings.AddValue("engineerLevel", this.engineerLevel);
                 settings.AddValue("activateNyan", this.activateNyan);
                 node.AddNode(settings);
+                this.Presets = new ConfigNode[0];
                 node.Save(RCUtils.SettingsURL);
             }
             else
@@ -128,7 +122,7 @@ namespace RealChute
                 if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; }
                 if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; }
                 if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; }
-                this.presets = settings.GetNodes("PRESET");
+                this.Presets = settings.GetNodes("PRESET");
                 if (mustSave) { SaveSettings(); }
             }
         }

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using UnityEngine;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
 using RealChute.Libraries.TextureLibrary;
-using SelectorType = RealChute.ProceduralChute.SelectorType;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -31,36 +30,21 @@ namespace RealChute
     public class TemplateGUI
     {
         #region Properties
-        private ProceduralChute PChute
-        {
-            get { return this.template.pChute; }
-        }
+        private ProceduralChute PChute => this.template.pChute;
 
-        private Parachute Parachute
-        {
-            get { return this.template.parachute; }
-        }
+        private Parachute Parachute => this.template.parachute;
 
-        private bool Secondary
-        {
-            get { return this.template.Secondary; }
-        }
+        private bool Secondary => this.template.Secondary;
 
         private MaterialDefinition Material
         {
-            get { return this.template.material; }
-            set { this.template.material = value; }
+            get => this.template.material;
+            set => this.template.material = value;
         }
 
-        private ModelConfig Model
-        {
-            get { return this.template.model; }
-        }
+        private ModelConfig Model => this.template.model;
 
-        private CelestialBody Body
-        {
-            get { return this.template.Body; }
-        }
+        private CelestialBody Body => this.template.Body;
 
         public List<string> Errors
         {
@@ -95,9 +79,8 @@ namespace RealChute
                 }
                 else
                 {
-                    float p, d;
-                    if (!float.TryParse(this.preDepDiam, out p)) { p = 0; }
-                    if (!float.TryParse(this.depDiam, out d)) { d = 0; }
+                    if (!float.TryParse(this.preDepDiam, out float p)) { p = 0; }
+                    if (!float.TryParse(this.depDiam, out float d)) { d = 0; }
                     if (!GuiUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
                     if (!GuiUtils.CheckRange(d, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
                 }
@@ -113,43 +96,37 @@ namespace RealChute
             }
         }
 
-        public int TypeID
+        public int TypeId
         {
             get
             {
-                if (this.tId == -1) { this.TypeID = 0; }
+                if (this.tId == -1) { this.TypeId = 0; }
                 return this.tId;
             }
             set
             {
                 this.tId = value;
-                this.t= EnumUtils.GetValueAt<ParachuteType>(value);
+                this.Type= EnumUtils.GetValueAt<ParachuteType>(value);
             }
         }
 
-        public int LastTypeID
+        public int LastTypeId
         {
             get
             {
-                if (this.ltId == -1) { this.LastTypeID = 0; }
+                if (this.ltId == -1) { this.LastTypeId = 0; }
                 return this.ltId;
             }
             set
             {
                 this.ltId = value;
-                this.lt = EnumUtils.GetValueAt<ParachuteType>(value);
+                this.LastType = EnumUtils.GetValueAt<ParachuteType>(value);
             }
         }
 
-        public ParachuteType Type
-        {
-            get { return this.t; }
-        }
+        public ParachuteType Type { get; private set; } = ParachuteType.MAIN;
 
-        public ParachuteType LastType
-        {
-            get { return this.lt; }
-        }
+        public ParachuteType LastType { get; private set; } = ParachuteType.MAIN;
         #endregion
 
         #region Fields
@@ -159,7 +136,6 @@ namespace RealChute
         internal bool materialsVisible;
         internal Vector2 parachuteScroll, materialsScroll;
         public int chuteId = -1, modelId = -1, materialsId;
-        private ParachuteType t = ParachuteType.MAIN, lt = ParachuteType.MAIN;
         private int tId = -1, ltId;
         public bool isPressure, calcSelect = true;
         public bool getMass = true, useDry = true;
@@ -223,14 +199,14 @@ namespace RealChute
                             break;
                         }
                 }
-                this.LastTypeID = this.TypeID;
+                this.LastTypeId = this.TypeId;
             }
         }
 
         //Texture selector GUI code
         internal void TextureSelector()
         {
-            string[] cases = this.PChute.TextureEntries(SelectorType.CASE), chutes = this.PChute.TextureEntries(SelectorType.CHUTE), models = this.PChute.TextureEntries(SelectorType.MODEL);
+            string[] cases = this.PChute.TextureEntries(ProceduralChute.SelectorType.CASE), chutes = this.PChute.TextureEntries(ProceduralChute.SelectorType.CHUTE), models = this.PChute.TextureEntries(ProceduralChute.SelectorType.MODEL);
             bool a = false, b = false, c = false;
             int h = 0;
             if (!this.Secondary && cases.Length > 1) { h++; a = true; }
@@ -314,7 +290,7 @@ namespace RealChute
         {
             #region Calculations
             //Selection mode
-            GuiUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300, new string[] { "Automatic", "Manual" });
+            GuiUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300, new[] { "Automatic", "Manual" });
             GUILayout.Space(5);
 
             //Calculations
@@ -325,7 +301,7 @@ namespace RealChute
             #region Automatic
             if (this.calcSelect)
             {
-                this.TypeID = GUILayout.SelectionGrid(this.TypeID, EnumUtils.GetNames<ParachuteType>(), 3);
+                this.TypeId = GUILayout.SelectionGrid(this.TypeId, EnumUtils.GetNames<ParachuteType>(), 3);
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Toggle(this.getMass, "Use current craft mass", GUILayout.Width(150))) { this.getMass = true; }
@@ -375,9 +351,8 @@ namespace RealChute
             #region Manual
             else
             {
-                float p, d;
-                if (!float.TryParse(this.preDepDiam, out p)) { p = -1; }
-                if (!float.TryParse(this.depDiam, out d)) { d = -1; }
+                if (!float.TryParse(this.preDepDiam, out float p)) { p = -1; }
+                if (!float.TryParse(this.depDiam, out float d)) { d = -1; }
 
                 //Predeployed diameter
                 GuiUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100);
@@ -468,7 +443,7 @@ namespace RealChute
             builder.Append("\nDrag coefficient:  ").AppendLine(material.DragCoefficient.ToString("0.00#"));
             builder.Append("\nArea density:  ").Append(material.AreaDensity * 1000).AppendLine("kg/m²");
             builder.Append("\nArea cost:  ").Append(material.AreaCost.ToString()).Append("F/m²");
-            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.absoluteZero).ToString()).Append("°C");
+            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.AbsoluteZero).ToString()).Append("°C");
             builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString()).Append("J/kg∙K");
             builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString());
             GUILayout.Label(builder.ToString());

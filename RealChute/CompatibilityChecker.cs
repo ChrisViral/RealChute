@@ -27,6 +27,8 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
+// ReSharper disable PossibleNullReferenceException
+
 /*-----------------------------------------*\
 |   SUBSTITUTE YOUR MOD'S NAMESPACE HERE.   |
 \*-----------------------------------------*/

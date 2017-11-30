@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using RealChute.Extensions;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -22,30 +22,19 @@ namespace RealChute.Libraries
         /// <summary>
         /// Accesses the atmospheric planets library
         /// </summary>
-        public static AtmoPlanets Instance
-        {
-            get { return instance ?? (instance = new AtmoPlanets()); }
-        }
+        public static AtmoPlanets Instance => instance ?? (instance = new AtmoPlanets());
         #endregion
 
         #region Propreties
-        private readonly Dictionary<string, CelestialBody> bodies = new Dictionary<string, CelestialBody>();
         /// <summary>
         /// Body name/body dictionary of all the CelestialBodies with an atmosphere and a surface for quick name lookup
         /// </summary>
-        public Dictionary<string, CelestialBody> Bodies
-        {
-            get { return this.bodies; }
-        }
+        public Dictionary<string, CelestialBody> Bodies { get; } = new Dictionary<string, CelestialBody>();
 
-        private readonly string[] bodyNames = new string[0];
         /// <summary>
         /// CelestialBody list for quick index lookup
         /// </summary>
-        public string[] BodyNames
-        {
-            get { return this.bodyNames; }
-        }
+        public string[] BodyNames { get; } = new string[0];
         #endregion
 
         #region Constructor
@@ -56,22 +45,19 @@ namespace RealChute.Libraries
         {
             if (FlightGlobals.Bodies.Count > 0)
             {
-                this.bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null)
+                this.Bodies = FlightGlobals.Bodies.Where(b => b.atmosphere && b.pqsController != null)
                     .ToDictionary(b => b.bodyName, b => b);
-                this.bodyNames = this.bodies.Keys.ToArray();
+                this.BodyNames = this.Bodies.Keys.ToArray();
             }
         }
         #endregion
 
         #region Methods
         /// <summary>
-        /// Checks if the atmpospheric bodies contains the body of the given name
+        /// Checks if the atmospheric bodies contains the body of the given name
         /// </summary>
         /// <param name="name">Name of the CelestialBody</param>
-        public bool ContainsBody(string name)
-        {
-            return this.bodies.ContainsKey(name);
-        }
+        public bool ContainsBody(string name) => this.Bodies.ContainsKey(name);
 
         /// <summary>
         /// Finds the atmospheric CelestialBody of the given name
@@ -79,8 +65,8 @@ namespace RealChute.Libraries
         /// <param name="name">Name of the body</param>
         public CelestialBody GetBody(string name)
         {
-            if (!ContainsBody(name)) { throw new KeyNotFoundException("Could not find the \"" + name + "\" CelestialBody in the library"); }
-            return this.bodies[name];
+            if (!ContainsBody(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" CelestialBody in the library"); }
+            return this.Bodies[name];
         }
 
         /// <summary>
@@ -89,8 +75,8 @@ namespace RealChute.Libraries
         /// <param name="index">Index of the body</param>
         public CelestialBody GetBody(int index)
         {
-            if (!this.bodyNames.IndexInRange(index)) { throw new IndexOutOfRangeException("CelestialBody index [" + index + "] is out of range"); }
-            return GetBody(this.bodyNames[index]);
+            if (!this.BodyNames.IndexInRange(index)) { throw new IndexOutOfRangeException($"CelestialBody index [{index}] is out of range"); }
+            return GetBody(this.BodyNames[index]);
         }
 
         /// <summary>
@@ -103,10 +89,10 @@ namespace RealChute.Libraries
         {
             if (ContainsBody(name))
             {
-                index = this.bodyNames.IndexOf(name);
+                index = this.BodyNames.IndexOf(name);
                 return true;
             }
-            if (!string.IsNullOrEmpty(name) && this.bodyNames.Length > 0) { Debug.LogError("[RealChute]: Could not find the atmospheric CelestialBody \"" + name + "\" in the library"); }
+            if (!string.IsNullOrEmpty(name) && this.BodyNames.Length > 0) { Debug.LogError($"[RealChute]: Could not find the atmospheric CelestialBody \"{name}\" in the library"); }
             return false;
         }
         #endregion

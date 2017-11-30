@@ -21,37 +21,25 @@ namespace RealChute.Libraries.TextureLibrary
             /// <summary>
             /// The string URL of the GameObject
             /// </summary>
-            public string ModelURL
-            {
-                get { return this.modelURL; }
-            }
+            public string ModelURL => this.modelURL;
 
             private readonly string transformName = string.Empty;
             /// <summary>
             /// The name of the parachute transform
             /// </summary>
-            public string TransformName
-            {
-                get { return this.transformName; }
-            }
+            public string TransformName => this.transformName;
 
             private readonly string preDepAnim = string.Empty;
             /// <summary>
             /// The name of the predeployment animation
             /// </summary>
-            public string PreDepAnim
-            {
-                get { return this.preDepAnim; }
-            }
+            public string PreDepAnim => this.preDepAnim;
 
             private readonly string depAnim = string.Empty;
             /// <summary>
             /// The name of the deployment animation
             /// </summary>
-            public string DepAnim
-            {
-                get { return this.depAnim; }
-            }
+            public string DepAnim => this.depAnim;
             #endregion
 
             #region Constructor
@@ -74,46 +62,30 @@ namespace RealChute.Libraries.TextureLibrary
         /// <summary>
         /// Name of the model
         /// </summary>
-        public string Name
-        {
-            get { return this.name; }
-        }
+        public string Name => this.name;
 
-        private readonly float diameter = 10;
+        private readonly float diameter = 10f;
         /// <summary>
         /// Diameter of the parachutes at 1, 1, 1
         /// </summary>
-        public float Diameter
-        {
-            get { return this.diameter; }
-        }
+        public float Diameter => this.diameter;
 
         private readonly int count = 1;
         /// <summary>
         /// Number of parachutes visually per transform
         /// </summary>
-        public int Count
-        {
-            get { return this.count; }
-        }
+        public int Count => this.count;
 
-        private readonly float maxDiam = 70;
+        private readonly float maxDiam = 70f;
         /// <summary>
         /// Maximum diameter this parachute can have
         /// </summary>
-        public float MaxDiam
-        {
-            get { return this.maxDiam; }
-        }
+        public float MaxDiam => this.maxDiam;
 
-        private readonly List<ModelParameters> parameters = new List<ModelParameters>();
         /// <summary>
         /// Parameters for all potential chutes to be used with this model
         /// </summary>
-        public List<ModelParameters> Parameters
-        {
-            get { return this.parameters; }
-        }
+        public List<ModelParameters> Parameters { get; } = new List<ModelParameters>();
         #endregion
 
         #region Constructor
@@ -132,7 +104,7 @@ namespace RealChute.Libraries.TextureLibrary
             node.TryGetValue("diameter", ref this.diameter);
             node.TryGetValue("count", ref this.count);
             node.TryGetValue("maxDiam", ref this.maxDiam);
-            this.parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
+            this.Parameters = new List<ModelParameters>(node.GetNodes("PARAMETERS").Select(n => new ModelParameters(n)));
         }
         #endregion
     }

@@ -16,73 +16,49 @@ namespace RealChute.Libraries.MaterialsLibrary
         /// <summary>
         /// Name of the material
         /// </summary>
-        public string Name
-        {
-            get { return this.name; }
-        }
+        public string Name => this.name;
 
         private readonly string description = "We don't know much about this, it might as well be made of fishnets";
         /// <summary>
         /// The description of this material
         /// </summary>
-        public string Description
-        {
-            get { return this.description; }
-        }
+        public string Description => this.description;
 
         private readonly float areaDensity = 5.65E-5f;
         /// <summary>
         /// Area density of this material
         /// </summary>
-        public float AreaDensity
-        {
-            get { return this.areaDensity; }
-        }
+        public float AreaDensity => this.areaDensity;
 
-        private readonly float dragCoefficient = 1;
+        private readonly float dragCoefficient = 1F;
         /// <summary>
         /// Drag coefficient of this material
         /// </summary>
-        public float DragCoefficient
-        {
-            get { return this.dragCoefficient; }
-        }
+        public float DragCoefficient => this.dragCoefficient;
 
         private readonly float areaCost = 0.075f;
         /// <summary>
         /// Cost of a square meter of this material
         /// </summary>
-        public float AreaCost
-        {
-            get { return this.areaCost; }
-        }
+        public float AreaCost => this.areaCost;
 
         private readonly double maxTemp = 493.15;
         /// <summary>
         /// Maximum temperature this material can withstand (K)
         /// </summary>
-        public double MaxTemp
-        {
-            get { return this.maxTemp; }
-        }
+        public double MaxTemp => this.maxTemp;
 
-        private readonly double specificHeat = 1700;
+        private readonly double specificHeat = 1700d;
         /// <summary>
         /// The specific heat of the material (J/kg∙K)
         /// </summary>
-        public double SpecificHeat
-        {
-            get { return this.specificHeat; }
-        }
+        public double SpecificHeat => this.specificHeat;
 
         private readonly double emissivity = 0.72;
         /// <summary>
         /// The emissivity constant of the chute at (20°C)
         /// </summary>
-        public double Emissivity
-        {
-            get { return this.emissivity; }
-        }
+        public double Emissivity => this.emissivity;
         #endregion
 
         #region Constructor
