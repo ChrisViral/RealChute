@@ -12,6 +12,15 @@ OWN DISCRETION.
 //-------------------------------------------------------//
 -- Changelog--
 
+August 25th 2018
+v1.4.6.1
+-Recompiled for KSP 1.4.5
+
+March 20th 2018
+v1.4.6
+-Recompiled for KSP 1.4.1
+-Has been tested to run on KSP 1.4.0 with no issues detected.
+
 November 30th 2017
 v1.4.5
 -Compatibility for KSP 1.3.1
