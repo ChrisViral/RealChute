@@ -12,6 +12,7 @@ OWN DISCRETION.
 //-------------------------------------------------------//
 -- Changelog--
 October 15th 2018
+v1.4.7
 Fixed localization issue with KSP 1.4.5 (Parachute category and chute parts not showing up in VAB)
 
 August 25th 2018
@@ -69,7 +70,7 @@ v1.4
 April 16th 2016
 v1.4x4
 *Prerelease*
--New NyanMode™
+-New NyanModeâ„¢
 -Fixed plugin loading problems from IPartMassModifier and IPartCostModifier
 -Added IPartSizeModifier support
 -Refactored and cleaned the codebase through ReSharper
@@ -287,7 +288,7 @@ July 18th 2014
 v1.2
 WARNING: ALL VESSELS AND CRAFT FILES WILL BREAK WITH THIS UPDATE. YOU HAVE BEEN WARNED.
 -v0.24 compatibility, built to work on Windows x64
--Completely changed the way multiple chutes on a part are handled¸
+-Completely changed the way multiple chutes on a part are handledÂ¸
 -Very large part of the code refactored, once again
 -Options from the RealChute_Settings.cfg file are now available to be tweaked from the SpaceCenter, icon gracefully offered by sumghai
 -Parachutes are now contained into PARACHUTE{} nodes inside PART configs
@@ -605,7 +606,7 @@ MATERIAL
 {
   name: name of the material (string name you put in the PartModule)
   description: short description of the material
-  areaDensity: density of the material in t/m²
+  areaDensity: density of the material in t/mÂ²
   dragCoefficient: drag coefficient of this material (recommended to not go below 0.5 and above 2)
 }
 
