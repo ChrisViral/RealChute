@@ -11,6 +11,8 @@ OWN DISCRETION.
 
 //-------------------------------------------------------//
 -- Changelog--
+October 15th 2018
+Fixed localization issue with KSP 1.4.5 (Parachute category and chute parts not showing up in VAB)
 
 August 25th 2018
 v1.4.6.1
