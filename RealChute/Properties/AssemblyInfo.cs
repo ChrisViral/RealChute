@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2017")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,4 +41,8 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.*")]
+<<<<<<< Updated upstream
 [assembly: AssemblyInformationalVersion("1.4.7.0")]
+=======
+[assembly: AssemblyInformationalVersion("1.4.7.1")]
+>>>>>>> Stashed changes
