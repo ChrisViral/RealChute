@@ -1,19 +1,17 @@
-Please COMPLETELY DELETE any previous RealChute installation before installing
+﻿Please COMPLETELY DELETE any previous RealChute installation before installing
 a new version. Not doing so could corrupt save files, craft files, or break
 different aspects of the game. I am *not* responsible if you do not delete it
 the previous install and break something.
 
-NOTE: AS OF KSP 1.1, REALCHUTE NO LONGER IS LOCKED ON THE WINDOWS 64BIT BUILDS.
-THIS IS HOWEVER POTENTIALLY SUBJECT TO CHANGE, AND SUPPORT FOR THOSE BUILDS AS WELL
-AS THE OSX 64BIT BUILD MAY BE REVERTED AT ANY MOMENT, AND THIS, ENTIRELY UP TO MY
-OWN DISCRETION.
-
-
 //-------------------------------------------------------//
 -- Changelog--
+October 16th 2018
+v1.4.7.1
+-Recompiled for 1.5
+
 October 15th 2018
 v1.4.7
-Fixed localization issue with KSP 1.4.5 (Parachute category and chute parts not showing up in VAB)
+-Fixed localization issue with KSP 1.4.5 (Parachute category and chute parts not showing up in VAB)
 
 August 25th 2018
 v1.4.6.1
