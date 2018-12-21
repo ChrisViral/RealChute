@@ -5,6 +5,10 @@ the previous install and break something.
 
 //-------------------------------------------------------//
 -- Changelog--
+December 21st 2018
+v1.4.7.2
+-Recompiled for KSP 1.6
+
 October 16th 2018
 v1.4.7.1
 -Recompiled for 1.5
