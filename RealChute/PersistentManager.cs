@@ -31,10 +31,11 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
+            Debug.Log("[RealChute]: Running RealChute " + RCUtils.AssemblyVersion);
             if (!CompatibilityChecker.IsAllCompatible|| Instance != null) { Destroy(this); return; }
+
             Instance = this;
             DontDestroyOnLoad(this);
-            print("[RealChute]: Running RealChute " + RCUtils.AssemblyVersion);
         }
         #endregion
 
