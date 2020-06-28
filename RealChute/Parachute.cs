@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -386,8 +387,27 @@ namespace RealChute
                 }
             }
             //Deactivation
-            else if (!this.CanDeploy && this.IsDeployed) { Cut(); }
+            else if (!this.CanDeploy && this.IsDeployed)
+            {
+                if (this.module.GroundStopAfterDelay)  
+                { Cut(); }
+            }
         }
+#if false
+        float startWait = -1f;
+        void WaitForCut(float delayBeforeCut)
+        {
+            if (startWait < 0)
+            {
+                startWait = Time.time + delayBeforeCut;
+            }
+            else
+            {
+                if (Time.time > startWait)
+                    Cut();
+            }
+        }
+#endif
 
         //Gets convective flux
         //Thanks to Starwaster for an overheating fix here
@@ -476,9 +496,9 @@ namespace RealChute
                 }
             }
         }
-        #endregion
+#endregion
 
-        #region GUI
+#region GUI
         //Info window GUI
         internal void RenderGUI()
         {
@@ -596,9 +616,9 @@ namespace RealChute
                 GUILayout.EndHorizontal();
             }
         }
-        #endregion
+#endregion
 
-        #region Load/Save
+#region Load/Save
         /// <summary>
         /// Loads the Parachute from a ConfigNode.
         /// </summary>
@@ -656,6 +676,6 @@ namespace RealChute
             node.AddValue("depState", this.depState);
             return node;
         }
-        #endregion
+#endregion
     }
 }

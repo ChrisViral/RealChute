@@ -199,6 +199,9 @@ namespace RealChute
 
             //LandingAlt
             GuiUtils.CreateEntryArea("Landing alt (m):", ref this.pChute.landingAlt, 0, (float)this.pChute.body.GetMaxAtmosphereAltitude());
+
+            // delayBeforeCut
+            GuiUtils.CreateEntryArea("Delay before cutting chutes after landing: ", ref this.pChute.delayBeforeCut, 0, 5f);
             #endregion
 
             #region Main

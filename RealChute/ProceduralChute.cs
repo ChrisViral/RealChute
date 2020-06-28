@@ -73,7 +73,7 @@ namespace RealChute
 
         //GUI strings
         [KSPField(isPersistant = true)]
-        public string timer = string.Empty, cutSpeed = string.Empty, spares = string.Empty, landingAlt = "0";
+        public string timer = string.Empty, cutSpeed = string.Empty, spares = string.Empty, landingAlt = "0", delayBeforeCut = string.Empty;
         #endregion
 
         #region Fields
@@ -142,6 +142,8 @@ namespace RealChute
                 if (!GuiUtils.TryParseWithEmpty(this.spares, out f) || !GuiUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
                 if (!float.TryParse(this.cutSpeed, out f) || !GuiUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
                 if (!float.TryParse(this.landingAlt, out f) || !GuiUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
+
+                if (!float.TryParse(this.delayBeforeCut, out f) || !GuiUtils.CheckRange(f, 0, 5f)) { errors.Add("Delay before cut"); }
                 return errors;
             }
             return new List<string>(this.chutes.SelectMany(c => c.templateGUI.Errors));
@@ -173,7 +175,7 @@ namespace RealChute
             this.rcModule.cutSpeed = float.Parse(this.cutSpeed);
             this.rcModule.spareChutes = GuiUtils.ParseEmpty(this.spares);
             this.rcModule.chuteCount = (int)this.rcModule.spareChutes;
-
+            this.rcModule.delayBeforeCut = float.Parse(this.delayBeforeCut);
             this.chutes.ForEach(c => c.ApplyChanges(toSymmetryCounterparts));
 
             if (toSymmetryCounterparts)
@@ -187,6 +189,7 @@ namespace RealChute
                     module.mustGoDown = this.mustGoDown;
                     module.timer = GuiUtils.ParseTime(this.timer);
                     module.cutSpeed = float.Parse(this.cutSpeed);
+                    module.delayBeforeCut = float.Parse(this.delayBeforeCut);
                     module.spareChutes = GuiUtils.ParseEmpty(this.spares);
 
                     ProceduralChute pChute = (ProceduralChute)p.Modules["ProceduralChute"];
@@ -199,6 +202,7 @@ namespace RealChute
                     pChute.timer = this.timer;
                     pChute.cutSpeed = this.cutSpeed;
                     pChute.spares = this.spares;
+                    pChute.delayBeforeCut = this.delayBeforeCut;
                 }
             }
             this.rcModule.UpdateMass();
@@ -362,6 +366,7 @@ namespace RealChute
             this.mustGoDown = preset.MustGoDown;
             this.deployOnGround = preset.DeployOnGround;
             this.spares = preset.Spares;
+            this.delayBeforeCut = preset.DelayBeforeCut;
             if (this.textureLibrary == preset.TextureLibrary || this.textures != null && this.textures.ContainsCase(preset.CaseName))
             {
                 this.caseId = this.textures.GetCaseIndex(preset.CaseName);
@@ -539,6 +544,7 @@ namespace RealChute
                     this.deployOnGround = this.rcModule.deployOnGround;
                     this.timer = this.rcModule.timer + "s";
                     this.cutSpeed = this.rcModule.cutSpeed.ToString();
+                    this.delayBeforeCut = this.rcModule.delayBeforeCut.ToString();
                     if (this.rcModule.spareChutes != -1) { this.spares = this.rcModule.spareChutes.ToString(); }
                     this.originalSize = this.part.transform.GetChild(0).localScale;
                     this.initiated = true;

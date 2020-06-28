@@ -307,6 +307,11 @@ namespace RealChute.Libraries.Presets
         /// </summary>
         public string CaseName => this.caseName;
 
+        private readonly string delayBeforecut = "0.0";
+        /// <summary>
+        /// DelayBeforeCut in seconds after touchdown
+        /// </summary>
+        public string DelayBeforeCut => this.delayBeforecut;
         /// <summary>
         /// All parameters for potential chutes
         /// </summary>
@@ -331,6 +336,7 @@ namespace RealChute.Libraries.Presets
             node.TryGetValue("spares", ref this.spares);
             node.TryGetValue("landingAlt", ref this.landingAlt);
             node.TryGetValue("caseName", ref this.caseName);
+            node.TryGetValue("delayBeforeCut", ref this.delayBeforecut);
             this.Parameters = new List<ChuteParameters>(node.GetNodes("CHUTE").Select(n => new ChuteParameters(n)));
         }
 
@@ -347,9 +353,10 @@ namespace RealChute.Libraries.Presets
             this.cutSpeed = pChute.cutSpeed;
             this.timer = pChute.timer;
             this.mustGoDown = pChute.mustGoDown;
-            this.deployOnGround = pChute.deployOnGround;
+            this.deployOnGround = pChute.deployOnGround;            
             this.spares = pChute.spares;
             this.landingAlt = pChute.landingAlt;
+            this.delayBeforecut = pChute.delayBeforeCut;
             if (this.TextureLibrary != "none")
             {
                 if (pChute.textures.Cases.Count > 0) { this.caseName = pChute.parachuteCase.Name; }
@@ -376,6 +383,7 @@ namespace RealChute.Libraries.Presets
             node.AddValue("spares", this.Spares);
             node.AddValue("landingAlt", this.LandingAlt);
             node.AddValue("caseName", this.CaseName);
+            node.AddValue("delayBeforeCut", this.DelayBeforeCut);
             this.Parameters.ForEach(p => node.AddNode(p.Save()));
             return node;
         }

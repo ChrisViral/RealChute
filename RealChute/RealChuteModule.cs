@@ -63,15 +63,44 @@ namespace RealChute
         public bool wait = true, armed, oneWasDeployed;
         [KSPField(isPersistant = true)]
         public bool staged, launched;
+        [KSPField(isPersistant = true)]
+        public float delayBeforeCut = 0f;
         [KSPField(isPersistant = true, guiActive = true, guiName = "Spare chutes")]
         public int chuteCount = 5;
         [KSPField]
         public bool reverseOrientation;
+
+
+        float waitUntilTime = -1f;
         #endregion
 
         #region Propreties
         // If the vessel is stopped on the ground
-        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed;
+        public bool GroundStop => (this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed && this.vessel.verticalSpeed < this.cutSpeed);
+
+        public bool GroundStopAfterDelay {  get
+            {
+                if (GroundStop)
+                {
+                    if (this.delayBeforeCut == 0)
+                    return true;
+                
+                    if (waitUntilTime < 0)
+                    {
+                        waitUntilTime = Time.time + delayBeforeCut;
+                    }
+                    else
+                    {
+                        if (Time.time > waitUntilTime)
+                        {
+                            waitUntilTime = -1; // reset in case of a repack
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+        }
 
         // If both parachutes must cut
         public bool AllMustStop => this.SecondaryChute && (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT);
@@ -116,6 +145,7 @@ namespace RealChute
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
         public SafeState safeState = SafeState.SAFE;
+
 
         //GUI
         protected bool visible, hid;
@@ -171,6 +201,7 @@ namespace RealChute
                 this.part.Effect("rcrepack");
                 this.Repack.guiActiveUnfocused = false;
                 this.oneWasDeployed = false;
+                this.waitUntilTime = -1f;
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
                 if (this.chuteCount != -1) { this.chuteCount--; }
                 this.parachutes.Where(p => p.DeploymentState == DeploymentStates.CUT).ForEach(p => p.Repack());
@@ -495,7 +526,7 @@ namespace RealChute
                     }
 
                     //Parachutes
-                    this.parachutes.ForEach(p => p.UpdateParachute());
+                    this.parachutes.ForEach(p => p.UpdateParachute()); 
 
                     //If all parachutes must be cut
                     if (this.AllMustStop)
@@ -701,6 +732,7 @@ namespace RealChute
             if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy"); }
             if (this.deployOnGround) { builder.AppendLine("Automatically deploys on ground contact"); }
             if (this.spareChutes >= 0) { builder.Append("Spare chutes: ").Append(this.chuteCount); }
+            if (this.delayBeforeCut > 0) { builder.Append("Delay before cut: ").Append(this.delayBeforeCut); }
             else { builder.Append("Spare chutes: inf"); }
             GUILayout.Label(builder.ToString());
 
