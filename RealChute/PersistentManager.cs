@@ -73,7 +73,7 @@ namespace RealChute
                 dict = new Dictionary<string, ConfigNode>();
                 nodes.Add(type, dict);
             }
-            
+
             dict[name] = node;  //Allows updating the stored node (MM reload)
         }
 
