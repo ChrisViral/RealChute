@@ -71,7 +71,7 @@ namespace RealChute
 
         #region Propreties
         // If the vessel is stopped on the ground
-        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed;
+        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.srfSpeed < this.cutSpeed;
 
         // If both parachutes must cut
         public bool AllMustStop => this.SecondaryChute && (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT);
@@ -423,7 +423,7 @@ namespace RealChute
                     this.failedTimer.Reset();
                 }
             }
-            
+
             if (this.showMessage)
             {
                 ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime * 0.6f, ScreenMessageStyle.UPPER_CENTER);

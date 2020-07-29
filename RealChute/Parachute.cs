@@ -53,6 +53,21 @@ namespace RealChute
             }
         }
 
+        //The current convective coefficient
+        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.fi.convectiveMachLerp) * this.Vessel.mainBody.convectionMultiplier;
+
+        //Newtonian convective coefficient
+        private double ConvectiveCoefficientNewtonian => (this.fi.density > 1.0 ?
+                                                            this.fi.density :
+                                                            Math.Pow(this.fi.density, PhysicsGlobals.NewtonianDensityExponent))
+                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.fi.spd, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
+
+        //Mach convective coefficient
+        private double ConvectiveCoefficientMach => (this.fi.density > 1.0 ?
+                                                        this.fi.density :
+                                                        Math.Pow(this.fi.density, PhysicsGlobals.MachConvectionDensityExponent))
+                                                  * Math.Pow(this.fi.spd, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
+
         //Part this chute is associated with
         private Part Part => this.module.part;
 
@@ -172,7 +187,7 @@ namespace RealChute
         public double time;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
-        public float forcedOrientation;
+        public float forcedOrientation, maxRotation = 90f;
         public string depState = "STOWED";
         public double currentArea, chuteTemperature = 300, thermMass;
         private double convectiveFlux;
@@ -183,8 +198,10 @@ namespace RealChute
         internal bool secondary = false;
         internal Transform parachute, cap;
         private Rigidbody rigidbody;
+        private FlightIntegrator fi;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
+        private Quaternion? lastRotation;
         internal bool played;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
         private readonly Random random = new Random();
@@ -235,6 +252,12 @@ namespace RealChute
                 this.parachute.rotation = drag;
             }
             ParachuteNoise();
+
+            if (this.lastRotation != null && this.maxRotation > 0f)
+            {
+                this.parachute.rotation = Quaternion.RotateTowards(this.lastRotation.Value, this.parachute.rotation, this.maxRotation * Time.fixedDeltaTime);
+                this.lastRotation = this.parachute.rotation;
+            }
         }
 
         //Parachute low deployment
@@ -307,6 +330,7 @@ namespace RealChute
             this.time = 0;
             this.capOff = false;
             this.cap.gameObject.SetActive(true);
+            this.lastRotation = null;
         }
 
         //Calculates parachute deployed area
@@ -393,7 +417,7 @@ namespace RealChute
         //Thanks to Starwaster for an overheating fix here
         public void CalculateConvectiveFlux()
         {
-            this.convectiveFlux = this.Vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
+            this.convectiveFlux = this.ConvectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
                 (this.Vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / PhysicsGlobals.FullToCrossSectionLerpEnd)
                 * (this.Vessel.externalTemperature - this.chuteTemperature);
         }
@@ -460,6 +484,7 @@ namespace RealChute
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
+                this.fi = this.Vessel.FindVesselModuleImplementing<FlightIntegrator>();
                 this.randomX = (float)((this.random.NextDouble() - 0.5) * 200);
                 this.randomY = (float)((this.random.NextDouble() - 0.5) * 200);
                 this.randomTime = (float)this.random.NextDouble();
@@ -623,6 +648,7 @@ namespace RealChute
             node.TryGetValue("preDeploymentAnimation", ref this.preDeploymentAnimation);
             node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
+            node.TryGetValue("maxRotation", ref this.maxRotation);
             node.TryGetValue("depState", ref this.depState);
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.Part.FindModelTransform(this.parachuteName);
@@ -653,6 +679,7 @@ namespace RealChute
             node.AddValue("preDeploymentAnimation", this.preDeploymentAnimation);
             node.AddValue("deploymentAnimation", this.deploymentAnimation);
             node.AddValue("forcedOrientation", this.forcedOrientation);
+            node.AddValue("maxRotation", this.maxRotation);
             node.AddValue("depState", this.depState);
             return node;
         }
