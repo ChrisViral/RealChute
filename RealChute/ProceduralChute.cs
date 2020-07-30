@@ -326,6 +326,7 @@ namespace RealChute
             this.lastSize = this.size;
             this.part.SendMessage("RC_Rescale", new Vector3(scaleX, scaleY, scaleZ));
             if (HighLogic.LoadedSceneIsEditor) { GameEvents.onEditorShipModified.Fire(EditorLogic.fetch.ship); }
+            else if (HighLogic.LoadedSceneIsFlight) { this.rcModule.UpdateDragCubes(); }
         }
 
         //Modifies the case texture of a part
@@ -400,6 +401,25 @@ namespace RealChute
                         }
                     }
                 }
+            }
+        }
+
+        //Sets the part scale temporarily to render the drag cube
+        internal void SetDragCubeSize(bool on)
+        {
+            //Don't scale if there are not several sizes
+            if (this.sizes.Count < 1) { return; }
+
+            //Check for correct case
+            if (on)
+            {
+                this.part.transform.localScale = this.part.transform.GetChild(0).localScale;
+                this.part.transform.GetChild(0).localScale = Vector3.one;
+            }
+            else
+            {
+                this.part.transform.GetChild(0).localScale = this.part.transform.localScale;
+                this.part.transform.localScale = Vector3.one;
             }
         }
 
@@ -544,7 +564,7 @@ namespace RealChute
                     this.initiated = true;
                 }
             }
-            else  if (this.textures != null)
+            else if (this.textures != null)
             {
                 this.textures.TryGetCase(this.caseId, this.type, ref this.parachuteCase);
                 this.lastCaseId = this.caseId;
@@ -566,6 +586,7 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
+            Debug.Log($"[ProceduralChute]: OnLoad({(node != null ? node.name : "null")})");
             this.node = node;
             LoadChutes();
             if (this.node.HasNode("SIZE"))
@@ -607,5 +628,6 @@ namespace RealChute
             this.chutes.ForEach(c => node.AddNode(c.Save()));
         }
         #endregion
+
     }
 }

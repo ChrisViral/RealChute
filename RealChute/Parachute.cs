@@ -35,7 +35,7 @@ namespace RealChute
         {
             get
             {
-                if (this.thermMass == 0) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
+                if (this.thermMass == 0d) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
                 return this.thermMass;
             }
         }
@@ -227,14 +227,13 @@ namespace RealChute
         //Adds a random noise to the parachute movement
         private void ParachuteNoise()
         {
-            this.parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5 * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0));
+            this.parachute.Rotate(new Vector3(5f * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5f * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0f));
         }
 
         //Lerps the drag vector between upright and the forced angle
         private Vector3 LerpDrag(Vector3 to)
         {
-            if (this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f) { this.phase = Vector3.Lerp(this.phase, to, 0.01f); }
-            else { this.phase = to; }
+            this.phase = this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f ? Vector3.Lerp(this.phase, to, 0.01f) : to;
             return this.phase;
         }
 
@@ -265,11 +264,12 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.capOff = true;
+            this.cap.gameObject.SetActive(false);
+            this.module.UpdateDragCubes();
             if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
-            this.cap.gameObject.SetActive(false);
             if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
             else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
@@ -280,11 +280,12 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.capOff = true;
+            this.cap.gameObject.SetActive(false);
+            this.module.UpdateDragCubes();
             if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcpredeploy"); }
             this.DeploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
-            this.cap.gameObject.SetActive(false);
             if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.preDeploymentAnimation); }
             else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
