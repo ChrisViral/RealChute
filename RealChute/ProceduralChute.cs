@@ -586,7 +586,6 @@ namespace RealChute
         public override void OnLoad(ConfigNode node)
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
-            Debug.Log($"[ProceduralChute]: OnLoad({(node != null ? node.name : "null")})");
             this.node = node;
             LoadChutes();
             if (this.node.HasNode("SIZE"))

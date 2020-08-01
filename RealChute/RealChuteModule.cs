@@ -409,7 +409,6 @@ namespace RealChute
 
             //Render new DragCube
             DragCube cube = DragCubeSystem.Instance.RenderProceduralDragCube(this.part);
-            Debug.Log($"[RealChuteModule]: DragCube:\nArea:  {string.Join(",\t", cube.Area)}\nDepth: {string.Join(",\t", cube.Depth)}\nDrag:  {string.Join(",\t", cube.Drag)}");
             this.part.DragCubes.ClearCubes();
             this.part.DragCubes.Cubes.Add(cube);
             this.part.DragCubes.ResetCubeWeights();
