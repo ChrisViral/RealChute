@@ -109,8 +109,8 @@ namespace RealChute
         private bool displayed, showDisarm;
         internal double asl, trueAlt;
         internal double atmPressure, atmDensity;
-        internal float sqrSpeed, massDelta;
-        internal FlightIntegrator fi;
+        internal float sqrSpeed, speed, massDelta;
+        internal double convectiveFactor;
         private ProceduralChute pChute;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
@@ -479,7 +479,10 @@ namespace RealChute
             this.atmDensity = this.vessel.atmDensity;
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
+            this.speed = Mathf.Sqrt(this.sqrSpeed);
+            this.convectiveFactor = Math.Pow(UtilMath.Clamp01((this.vessel.mach - PhysicsGlobals.NewtonianMachTempLerpStartMach) / (PhysicsGlobals.NewtonianMachTempLerpEndMach - PhysicsGlobals.NewtonianMachTempLerpStartMach)), PhysicsGlobals.NewtonianMachTempLerpExponent);
             this.dragVector = -velocity.normalized;
+
             if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
@@ -604,7 +607,6 @@ namespace RealChute
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
-                this.fi = (FlightIntegrator)this.vessel.vesselModules.First(m => m is FlightIntegrator);
                 this.pChute = this.part.Modules["ProceduralChute"] as ProceduralChute;
                 UpdateDragCubes();
                 Random random = new Random();

@@ -54,19 +54,19 @@ namespace RealChute
         }
 
         //The current convective coefficient
-        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.fi.convectiveMachLerp) * this.Vessel.mainBody.convectionMultiplier;
+        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.convectiveFactor) * this.Vessel.mainBody.convectionMultiplier;
 
         //Newtonian convective coefficient
-        private double ConvectiveCoefficientNewtonian => (this.module.fi.density > 1.0 ?
-                                                            this.module.fi.density :
-                                                            Math.Pow(this.module.fi.density, PhysicsGlobals.NewtonianDensityExponent))
-                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.fi.spd, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
+        private double ConvectiveCoefficientNewtonian => (this.module.atmDensity > 1.0 ?
+                                                            this.module.atmDensity :
+                                                            Math.Pow(this.module.atmDensity, PhysicsGlobals.NewtonianDensityExponent))
+                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.speed, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
 
         //Mach convective coefficient
-        private double ConvectiveCoefficientMach => (this.module.fi.density > 1.0 ?
-                                                        this.module.fi.density :
-                                                        Math.Pow(this.module.fi.density, PhysicsGlobals.MachConvectionDensityExponent))
-                                                  * Math.Pow(this.module.fi.spd, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
+        private double ConvectiveCoefficientMach => (this.module.atmDensity > 1.0 ?
+                                                        this.module.atmDensity :
+                                                        Math.Pow(this.module.atmDensity, PhysicsGlobals.MachConvectionDensityExponent))
+                                                  * Math.Pow(this.module.speed, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
 
         //Part this chute is associated with
         private Part Part => this.module.part;
