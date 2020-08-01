@@ -54,19 +54,19 @@ namespace RealChute
         }
 
         //The current convective coefficient
-        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.fi.convectiveMachLerp) * this.Vessel.mainBody.convectionMultiplier;
+        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.fi.convectiveMachLerp) * this.Vessel.mainBody.convectionMultiplier;
 
         //Newtonian convective coefficient
-        private double ConvectiveCoefficientNewtonian => (this.fi.density > 1.0 ?
-                                                            this.fi.density :
-                                                            Math.Pow(this.fi.density, PhysicsGlobals.NewtonianDensityExponent))
-                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.fi.spd, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
+        private double ConvectiveCoefficientNewtonian => (this.module.fi.density > 1.0 ?
+                                                            this.module.fi.density :
+                                                            Math.Pow(this.module.fi.density, PhysicsGlobals.NewtonianDensityExponent))
+                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.fi.spd, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
 
         //Mach convective coefficient
-        private double ConvectiveCoefficientMach => (this.fi.density > 1.0 ?
-                                                        this.fi.density :
-                                                        Math.Pow(this.fi.density, PhysicsGlobals.MachConvectionDensityExponent))
-                                                  * Math.Pow(this.fi.spd, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
+        private double ConvectiveCoefficientMach => (this.module.fi.density > 1.0 ?
+                                                        this.module.fi.density :
+                                                        Math.Pow(this.module.fi.density, PhysicsGlobals.MachConvectionDensityExponent))
+                                                  * Math.Pow(this.module.fi.spd, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
 
         //Part this chute is associated with
         private Part Part => this.module.part;
@@ -198,7 +198,6 @@ namespace RealChute
         internal bool secondary = false;
         internal Transform parachute, cap;
         private Rigidbody rigidbody;
-        private FlightIntegrator fi;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
         private Quaternion? lastRotation;
@@ -485,7 +484,6 @@ namespace RealChute
             }
             if (HighLogic.LoadedSceneIsFlight)
             {
-                this.fi = this.Vessel.FindVesselModuleImplementing<FlightIntegrator>();
                 this.randomX = (float)((this.random.NextDouble() - 0.5) * 200);
                 this.randomY = (float)((this.random.NextDouble() - 0.5) * 200);
                 this.randomTime = (float)this.random.NextDouble();

@@ -110,6 +110,7 @@ namespace RealChute
         internal double asl, trueAlt;
         internal double atmPressure, atmDensity;
         internal float sqrSpeed, massDelta;
+        internal FlightIntegrator fi;
         private ProceduralChute pChute;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
@@ -604,6 +605,7 @@ namespace RealChute
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
+                this.fi = (FlightIntegrator)this.vessel.vesselModules.First(m => m is FlightIntegrator);
                 this.pChute = this.part.Modules["ProceduralChute"] as ProceduralChute;
                 UpdateDragCubes();
                 Random random = new Random();
