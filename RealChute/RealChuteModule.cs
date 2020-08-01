@@ -71,13 +71,13 @@ namespace RealChute
 
         #region Propreties
         // If the vessel is stopped on the ground
-        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.horizontalSrfSpeed < this.cutSpeed;
+        public bool GroundStop => this.vessel.LandedOrSplashed && this.vessel.srfSpeed < this.cutSpeed;
 
         // If both parachutes must cut
-        public bool AllMustStop => this.SecondaryChute && (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT);
+        public bool AllMustStop => this.SecondaryChute && (this.GroundStop || this.atmPressure == 0d) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT);
 
         // If the parachute can be repacked
-        public bool CanRepack => (this.GroundStop || this.atmPressure == 0) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT)
+        public bool CanRepack => (this.GroundStop || this.atmPressure == 0d) && this.parachutes.Exists(p => p.DeploymentState == DeploymentStates.CUT)
                                  && this.parachutes.TrueForAll(p => !p.IsDeployed) && (this.chuteCount > 0 || this.chuteCount == -1) && FlightGlobals.ActiveVessel.isEVA;
 
         //If the Kerbal can repack the chute in career mode
@@ -97,11 +97,8 @@ namespace RealChute
         private BaseEvent deploy, arm, disarm, cut, repack;
         private BaseEvent Deploy => this.deploy ?? (this.deploy = this.Events["GUIDeploy"]);
         private BaseEvent Arm => this.arm ?? (this.arm = this.Events["GUIArm"]);
-
         private BaseEvent Disarm => this.disarm ?? (this.disarm = this.Events["GUIDisarm"]);
-
         private BaseEvent Cut => this.cut ?? (this.cut = this.Events["GUICut"]);
-
         private BaseEvent Repack => this.repack ?? (this.repack = this.Events["GUIRepack"]);
         #endregion
 
@@ -112,7 +109,9 @@ namespace RealChute
         private bool displayed, showDisarm;
         internal double asl, trueAlt;
         internal double atmPressure, atmDensity;
-        internal float sqrSpeed, massDelta;
+        internal float sqrSpeed, speed, massDelta;
+        internal double convectiveFactor;
+        private ProceduralChute pChute;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
         public SafeState safeState = SafeState.SAFE;
@@ -174,6 +173,7 @@ namespace RealChute
                 this.part.stackIcon.SetIconColor(XKCDColors.White);
                 if (this.chuteCount != -1) { this.chuteCount--; }
                 this.parachutes.Where(p => p.DeploymentState == DeploymentStates.CUT).ForEach(p => p.Repack());
+                UpdateDragCubes();
             }
         }
 
@@ -386,6 +386,37 @@ namespace RealChute
         //Sets part info field
         public string GetPrimaryField() => "<b>Parachute count:</b> " + this.parachutes.Count;
 
+        //Sets up the part for DragCube rendering
+        private void SetupForDragCubeRendering(bool on)
+        {
+            //Setup all deployed canopies
+            foreach (Parachute chute in this.parachutes.Where(chute => chute.IsDeployed))
+            {
+                chute.parachute.gameObject.SetActive(!on);
+            }
+
+            //Setup case size
+            if (this.pChute)
+            {
+                this.pChute.SetDragCubeSize(on);
+            }
+        }
+
+        //Updates the DragCube for this part
+        public void UpdateDragCubes()
+        {
+           SetupForDragCubeRendering(true);
+
+            //Render new DragCube
+            DragCube cube = DragCubeSystem.Instance.RenderProceduralDragCube(this.part);
+            this.part.DragCubes.ClearCubes();
+            this.part.DragCubes.Cubes.Add(cube);
+            this.part.DragCubes.ResetCubeWeights();
+            this.part.DragCubes.ForceUpdate(true, true, true);
+
+            SetupForDragCubeRendering(false);
+        }
+
         //Event when the UI is hidden (F2)
         private void HideUI() => this.hid = true;
 
@@ -409,11 +440,11 @@ namespace RealChute
                         ScreenMessages.PostScreenMessage("Parachute deployment failed.", 2.5f, ScreenMessageStyle.UPPER_CENTER);
                         if (this.part.ShieldedFromAirstream) { ScreenMessages.PostScreenMessage("Reason: parachute is in fairings", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         else if (this.GroundStop) { ScreenMessages.PostScreenMessage("Reason: stopped on the ground.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
-                        else if (this.atmPressure == 0) { ScreenMessages.PostScreenMessage("Reason: in space.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
+                        else if (this.atmPressure == 0d) { ScreenMessages.PostScreenMessage("Reason: in space.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         else { ScreenMessages.PostScreenMessage("Reason: too high.", 2.5f, ScreenMessageStyle.UPPER_CENTER); }
                         this.displayed = true;
                     }
-                    if (time < 0.5 || time >= 1 && time < 1.5 || time >= 2) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
+                    if (time < 0.5 || time >= 1d && time < 1.5 || time >= 2d) { this.part.stackIcon.SetIconColor(XKCDColors.Red); }
                     else { this.part.stackIcon.SetIconColor(XKCDColors.White); }
                 }
                 else
@@ -423,7 +454,7 @@ namespace RealChute
                     this.failedTimer.Reset();
                 }
             }
-            
+
             if (this.showMessage)
             {
                 ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime * 0.6f, ScreenMessageStyle.UPPER_CENTER);
@@ -448,7 +479,10 @@ namespace RealChute
             this.atmDensity = this.vessel.atmDensity;
             Vector3 velocity = this.part.Rigidbody.velocity + Krakensbane.GetFrameVelocityV3f();
             this.sqrSpeed = velocity.sqrMagnitude;
+            this.speed = Mathf.Sqrt(this.sqrSpeed);
+            this.convectiveFactor = Math.Pow(UtilMath.Clamp01((this.vessel.mach - PhysicsGlobals.NewtonianMachTempLerpStartMach) / (PhysicsGlobals.NewtonianMachTempLerpEndMach - PhysicsGlobals.NewtonianMachTempLerpStartMach)), PhysicsGlobals.NewtonianMachTempLerpExponent);
             this.dragVector = -velocity.normalized;
+
             if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
@@ -573,6 +607,8 @@ namespace RealChute
             //Flight loading
             if (HighLogic.LoadedSceneIsFlight)
             {
+                this.pChute = this.part.Modules["ProceduralChute"] as ProceduralChute;
+                UpdateDragCubes();
                 Random random = new Random();
                 this.parachutes.ForEach(p => p.randomTime = (float)random.NextDouble());
 

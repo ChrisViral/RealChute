@@ -382,7 +382,7 @@ namespace RealChute
                 Debug.Log("[RealChute]: Deleting the \"" + preset.Name + "\" preset from the database.");
                 PresetsLibrary.Instance.DeletePreset(preset);
                 if (this.saveWarning)
-                { 
+                {
                    this.pChute.CreatePreset();
                    this.presetSaveVisible = false;
                 }

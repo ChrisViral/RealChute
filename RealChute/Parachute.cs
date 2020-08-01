@@ -35,7 +35,7 @@ namespace RealChute
         {
             get
             {
-                if (this.thermMass == 0) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
+                if (this.thermMass == 0d) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
                 return this.thermMass;
             }
         }
@@ -52,6 +52,21 @@ namespace RealChute
                 return this.DeployedArea;
             }
         }
+
+        //The current convective coefficient
+        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.convectiveFactor) * this.Vessel.mainBody.convectionMultiplier;
+
+        //Newtonian convective coefficient
+        private double ConvectiveCoefficientNewtonian => (this.module.atmDensity > 1.0 ?
+                                                            this.module.atmDensity :
+                                                            Math.Pow(this.module.atmDensity, PhysicsGlobals.NewtonianDensityExponent))
+                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.speed, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
+
+        //Mach convective coefficient
+        private double ConvectiveCoefficientMach => (this.module.atmDensity > 1.0 ?
+                                                        this.module.atmDensity :
+                                                        Math.Pow(this.module.atmDensity, PhysicsGlobals.MachConvectionDensityExponent))
+                                                  * Math.Pow(this.module.speed, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
 
         //Part this chute is associated with
         private Part Part => this.module.part;
@@ -172,7 +187,7 @@ namespace RealChute
         public double time;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
-        public float forcedOrientation;
+        public float forcedOrientation, maxRotation = 90f;
         public string depState = "STOWED";
         public double currentArea, chuteTemperature = 300, thermMass;
         private double convectiveFlux;
@@ -185,6 +200,7 @@ namespace RealChute
         private Rigidbody rigidbody;
         internal MaterialDefinition mat = new MaterialDefinition();
         internal Vector3 phase = Vector3.zero;
+        private Quaternion? lastRotation;
         internal bool played;
         internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
         private readonly Random random = new Random();
@@ -210,14 +226,13 @@ namespace RealChute
         //Adds a random noise to the parachute movement
         private void ParachuteNoise()
         {
-            this.parachute.Rotate(new Vector3(5 * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5 * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0));
+            this.parachute.Rotate(new Vector3(5f * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5f * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0f));
         }
 
         //Lerps the drag vector between upright and the forced angle
         private Vector3 LerpDrag(Vector3 to)
         {
-            if (this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f) { this.phase = Vector3.Lerp(this.phase, to, 0.01f); }
-            else { this.phase = to; }
+            this.phase = this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f ? Vector3.Lerp(this.phase, to, 0.01f) : to;
             return this.phase;
         }
 
@@ -235,6 +250,12 @@ namespace RealChute
                 this.parachute.rotation = drag;
             }
             ParachuteNoise();
+
+            if (this.lastRotation != null && this.maxRotation > 0f)
+            {
+                this.parachute.rotation = Quaternion.RotateTowards(this.lastRotation.Value, this.parachute.rotation, this.maxRotation * Time.fixedDeltaTime);
+                this.lastRotation = this.parachute.rotation;
+            }
         }
 
         //Parachute low deployment
@@ -242,11 +263,12 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
             this.capOff = true;
+            this.cap.gameObject.SetActive(false);
+            this.module.UpdateDragCubes();
             if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
-            this.cap.gameObject.SetActive(false);
             if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
             else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
@@ -257,11 +279,12 @@ namespace RealChute
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
             this.capOff = true;
+            this.cap.gameObject.SetActive(false);
+            this.module.UpdateDragCubes();
             if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcpredeploy"); }
             this.DeploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
-            this.cap.gameObject.SetActive(false);
             if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.preDeploymentAnimation); }
             else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
             this.dragTimer.Start();
@@ -307,6 +330,7 @@ namespace RealChute
             this.time = 0;
             this.capOff = false;
             this.cap.gameObject.SetActive(true);
+            this.lastRotation = null;
         }
 
         //Calculates parachute deployed area
@@ -393,7 +417,7 @@ namespace RealChute
         //Thanks to Starwaster for an overheating fix here
         public void CalculateConvectiveFlux()
         {
-            this.convectiveFlux = this.Vessel.convectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
+            this.convectiveFlux = this.ConvectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
                 (this.Vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / PhysicsGlobals.FullToCrossSectionLerpEnd)
                 * (this.Vessel.externalTemperature - this.chuteTemperature);
         }
@@ -623,6 +647,7 @@ namespace RealChute
             node.TryGetValue("preDeploymentAnimation", ref this.preDeploymentAnimation);
             node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
+            node.TryGetValue("maxRotation", ref this.maxRotation);
             node.TryGetValue("depState", ref this.depState);
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.Part.FindModelTransform(this.parachuteName);
@@ -653,6 +678,7 @@ namespace RealChute
             node.AddValue("preDeploymentAnimation", this.preDeploymentAnimation);
             node.AddValue("deploymentAnimation", this.deploymentAnimation);
             node.AddValue("forcedOrientation", this.forcedOrientation);
+            node.AddValue("maxRotation", this.maxRotation);
             node.AddValue("depState", this.depState);
             return node;
         }
