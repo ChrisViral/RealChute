@@ -61,7 +61,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 1 && Versioning.version_minor >= 8 && Versioning.version_minor <= 10;
+            return Versioning.version_major == 1 && Versioning.version_minor >= 8 && Versioning.version_minor <= 11;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -73,7 +73,7 @@ namespace RealChute
             /*-----------------------------------------------*\
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
-            return Application.unityVersion.Equals("2019.2.2f1");
+            return Application.unityVersion == "2019.2.2f1";
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -84,16 +84,15 @@ namespace RealChute
         // ReSharper disable once InconsistentNaming
         private static int _version = 6;
 
+        private static readonly Vector2 anchor = new Vector2(0.5f, 0.5f);
+
         public void Start()
         {
             //Checkers are identified by the type name and _version field name.
-            FieldInfo[] fields =
-                GetAllTypes()
-                .Where(t => t.Name == "CompatibilityChecker")
-                .Select(t => t.GetField("_version", BindingFlags.Static | BindingFlags.NonPublic))
-                .Where(f => f != null)
-                .Where(f => f.FieldType == typeof(int))
-                .ToArray();
+            FieldInfo[] fields = GetAllTypes().Where(t => t.Name == nameof(CompatibilityChecker))
+                                              .Select(t => t.GetField(nameof(_version), BindingFlags.Static | BindingFlags.NonPublic))
+                                              .Where(f => f != null && f.FieldType == typeof(int))
+                                              .ToArray();
 
             //Let the latest version of the checker execute.
             if (_version != fields.Max(f => (int)f.GetValue(null))) { return; }
@@ -105,52 +104,44 @@ namespace RealChute
             _version = int.MaxValue;
 
             //A mod is incompatible if its compatibility checker has an IsCompatible method which returns false.
-            string[] incompatible =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsCompatible", Type.EmptyTypes))
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
-                .Where(m =>
-                {
-                    try
-                    {
-                        return !(bool)m.Invoke(null, new object[0]);
-                    }
-                    catch (Exception e)
-                    {
-                        //If a mod throws an exception from IsCompatible, it's not compatible.
-                        Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
-                        return true;
-                    }
-                })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
+            string[] incompatible = fields.Select(f => f.DeclaringType.GetMethod(nameof(IsCompatible), Type.EmptyTypes))
+                                          .Where(m => m.IsStatic && m.ReturnType == typeof(bool))
+                                          .Where(m =>
+                                           {
+                                               try
+                                               {
+                                                   return !(bool)m.Invoke(null, new object[0]);
+                                               }
+                                               catch (Exception e)
+                                               {
+                                                   //If a mod throws an exception from IsCompatible, it's not compatible.
+                                                   Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
+                                                   return true;
+                                               }
+                                           })
+                                          .Select(m => m.DeclaringType.Assembly.GetName().Name)
+                                          .OrderBy(s => s)
+                                          .ToArray();
 
             //A mod is incompatible with Unity if its compatibility checker has an IsUnityCompatible method which returns false.
-            string[] incompatibleUnity =
-                fields
-                .Select(f => f.DeclaringType.GetMethod("IsUnityCompatible", Type.EmptyTypes))
-                .Where(m => m != null)  //Mods without IsUnityCompatible() are assumed to be compatible.
-                .Where(m => m.IsStatic)
-                .Where(m => m.ReturnType == typeof(bool))
-                .Where(m =>
-                {
-                    try
-                    {
-                        return !(bool)m.Invoke(null, new object[0]);
-                    }
-                    catch (Exception e)
-                    {
-                        //If a mod throws an exception from IsUnityCompatible, it's not compatible.
-                        Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
-                        return true;
-                    }
-                })
-                .Select(m => m.DeclaringType.Assembly.GetName().Name)
-                .ToArray();
-
-            Array.Sort(incompatible);
-            Array.Sort(incompatibleUnity);
+            string[] incompatibleUnity = fields.Select(f => f.DeclaringType.GetMethod(nameof(IsUnityCompatible), Type.EmptyTypes))
+                                               .Where(m => m != null && m.IsStatic && m.ReturnType == typeof(bool))  //Mods without IsUnityCompatible() are assumed to be compatible.
+                                               .Where(m =>
+                                                {
+                                                    try
+                                                    {
+                                                        return !(bool)m.Invoke(null, new object[0]);
+                                                    }
+                                                    catch (Exception e)
+                                                    {
+                                                        //If a mod throws an exception from IsUnityCompatible, it's not compatible.
+                                                        Debug.LogWarning($"[CompatibilityChecker] Exception while invoking IsUnityCompatible() from '{m.DeclaringType.Assembly.GetName().Name}':\n\n{e}");
+                                                        return true;
+                                                    }
+                                                })
+                                               .Select(m => m.DeclaringType.Assembly.GetName().Name)
+                                               .OrderBy(s => s)
+                                               .ToArray();
 
             string message = string.Empty;
 
@@ -175,7 +166,7 @@ namespace RealChute
 
             if (incompatible.Length > 0 || incompatibleUnity.Length > 0)
             {
-                PopupDialog.SpawnPopupDialog(new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), "CompatibilityChecker", "Incompatible Mods Detected", message, "OK", true, HighLogic.UISkin);
+                PopupDialog.SpawnPopupDialog(anchor, anchor,  nameof(CompatibilityChecker), "Incompatible Mods Detected", message, "OK", true, HighLogic.UISkin);
             }
         }
 
