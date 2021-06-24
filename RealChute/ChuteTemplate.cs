@@ -157,7 +157,7 @@ namespace RealChute
             if (this.templateGUI.isPressure) { this.parachute.minPressure = float.Parse(this.templateGUI.predepClause); }
             else { this.parachute.minDeployment = float.Parse(this.templateGUI.predepClause); }
             this.parachute.deploymentAlt = float.Parse(this.templateGUI.deploymentAlt);
-            this.parachute.cutAlt = GuiUtils.ParseEmpty(this.templateGUI.cutAlt);
+            this.parachute.cutAlt = GUIUtils.ParseEmpty(this.templateGUI.cutAlt);
             this.parachute.preDeploymentSpeed = float.Parse(this.templateGUI.preDepSpeed);
             this.parachute.deploymentSpeed = float.Parse(this.templateGUI.depSpeed);
 

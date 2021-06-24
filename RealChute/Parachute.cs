@@ -507,12 +507,12 @@ namespace RealChute
         internal void RenderGUI()
         {
             //Initial label
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("Material: ").AppendLine(this.mat.Name);
             builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
             builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
             builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###")).Append("m²");
-            GUILayout.Label(builder.ToString());
+            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
 
             if (HighLogic.LoadedSceneIsFlight)
             {
@@ -520,28 +520,28 @@ namespace RealChute
                 switch (this.safeState)
                 {
                     case SafeState.SAFE:
-                        GUILayout.Label("Deployment safety: safe"); break;
+                        GUILayout.Label("Deployment safety: safe", GUIUtils.ScaledLabel); break;
 
                     case SafeState.RISKY:
-                        GUILayout.Label("Deployment safety: risky", GuiUtils.YellowLabel); break;
+                        GUILayout.Label("Deployment safety: risky", GUIUtils.YellowLabel); break;
 
                     case SafeState.DANGEROUS:
-                        GUILayout.Label("Deployment safety: dangerous", GuiUtils.RedLabel); break;
+                        GUILayout.Label("Deployment safety: dangerous", GUIUtils.RedLabel); break;
                 }
 
                 //Temperature info
-                builder = new StringBuilder();
+                builder = StringBuilderCache.Acquire();
                 builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
                 builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
-                GUILayout.Label(builder.ToString(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GuiUtils.RedLabel : GUI.skin.label);
+                GUILayout.Label(builder.ToStringAndRelease(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GUIUtils.RedLabel : GUIUtils.ScaledLabel);
 
 
                 //Pressure/altitude predeployment toggle
                 GUILayout.BeginHorizontal();
-                GUILayout.Label("Predeployment:");
-                if (GUILayout.Toggle(!this.minIsPressure, "altitude")) { this.minIsPressure = false; }
+                GUILayout.Label("Predeployment:", GUIUtils.ScaledLabel);
+                if (GUILayout.Toggle(!this.minIsPressure, "altitude", GUIUtils.ScaledToggle)) { this.minIsPressure = false; }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.minIsPressure, "pressure")) { this.minIsPressure = true; }
+                if (GUILayout.Toggle(this.minIsPressure, "pressure", GUIUtils.ScaledToggle)) { this.minIsPressure = true; }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
             }
@@ -549,11 +549,11 @@ namespace RealChute
             //Predeployment pressure selection
             if (this.minIsPressure)
             {
-                GUILayout.Label("Predeployment pressure: " + this.minPressure + "atm");
+                GUILayout.Label($"Predeployment pressure: {this.minPressure}atm", GUIUtils.ScaledLabel);
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment pressure slider
-                    this.minPressure = 0.005f * (float) Math.Round(GUILayout.HorizontalSlider(this.minPressure / 0.005f, 1, 200));
+                    this.minPressure = 0.005f * Mathf.Round(GUILayout.HorizontalSlider(this.minPressure / 0.005f, 1f, 200f));
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -567,11 +567,11 @@ namespace RealChute
             //Predeployment altitude selection
             else
             {
-                GUILayout.Label("Predeployment altitude: " + this.minDeployment + "m");
+                GUILayout.Label($"Predeployment altitude: {this.minDeployment}m", GUIUtils.ScaledLabel);
                 if (HighLogic.LoadedSceneIsFlight)
                 {
                     //Predeployment altitude slider
-                    this.minDeployment = 100 * (float) Math.Round(GUILayout.HorizontalSlider(this.minDeployment / 100, 1, 200));
+                    this.minDeployment = 100f * Mathf.Round(GUILayout.HorizontalSlider(this.minDeployment / 100f, 1f, 200f));
 
                     //Copy to symmetry counterparts button
                     CopyToOthers(p =>
@@ -583,22 +583,22 @@ namespace RealChute
             }
 
             //Deployment altitude selection
-            GUILayout.Label("Deployment altitude: " + this.deploymentAlt + "m");
+            GUILayout.Label($"Deployment altitude: {this.deploymentAlt}m", GUIUtils.ScaledLabel);
             if (HighLogic.LoadedSceneIsFlight)
             {
                 //Deployment altitude slider
-                this.deploymentAlt = 50 * (float) Math.Round(GUILayout.HorizontalSlider(this.deploymentAlt / 50, 1, 200));
+                this.deploymentAlt = 50f * Mathf.Round(GUILayout.HorizontalSlider(this.deploymentAlt / 50f, 1f, 200f));
 
                 //Copy to symmetry counterparts button
                 CopyToOthers(p => p.deploymentAlt = this.deploymentAlt);
             }
 
             //Other labels
-            builder = new StringBuilder();
+            builder = StringBuilderCache.Acquire();
             if (this.cutAlt > 0) { builder.Append("Autocut altitude: ").Append(this.cutAlt).AppendLine("m"); }
             builder.Append("Predeployment speed: ").Append(this.preDeploymentSpeed).AppendLine("s");
             builder.Append("Deployment speed: ").Append(this.deploymentSpeed).Append("s");
-            GUILayout.Label(builder.ToString());
+            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
         }
 
         //Copies the given values to the other parachutes
@@ -608,7 +608,7 @@ namespace RealChute
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Copy to symmetry counterparts", GUILayout.Height(25), GUILayout.Width(250)))
+                if (GUILayout.Button("Copy to symmetry counterparts", GUIUtils.ScaledButton, GUILayout.Height(25f * GameSettings.UI_SCALE), GUILayout.Width(250f * GameSettings.UI_SCALE)))
                 {
                     foreach (Parachute p in this.Parachutes)
                     {

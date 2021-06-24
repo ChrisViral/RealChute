@@ -37,8 +37,8 @@ namespace RealChute
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible) { Destroy(this); return; }
-            this.window = new Rect(100, 100, 350, 200);
-            this.drag = new Rect(0, 0, 350, 30);
+            this.window = new Rect(100f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE, 350f * GameSettings.UI_SCALE, 200f * GameSettings.UI_SCALE);
+            this.drag = new Rect(0f, 0f, 350f * GameSettings.UI_SCALE, 30f * GameSettings.UI_SCALE);
             this.level = RealChuteSettings.Instance.EngineerLevel.ToString();
 
             GameEvents.onShowUI.Add(ShowUI);
@@ -79,23 +79,23 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible|| !this.showing) { return; }
 
             GUI.skin = HighLogic.Skin;
-            this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion);
+            this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
         }
 
         private void Window(int id)
         {
             GUI.DragWindow(this.drag);
 
-            RealChuteSettings.Instance.AutoArm = GUILayout.Toggle(RealChuteSettings.Instance.AutoArm, "Automatically arm when staging");
-            RealChuteSettings.Instance.JokeActivated = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)");
-            RealChuteSettings.Instance.ActivateNyan = GUILayout.Toggle(RealChuteSettings.Instance.ActivateNyan, "Activate NyanMode™");
-            RealChuteSettings.Instance.GuiResizeUpdates = GUILayout.Toggle(RealChuteSettings.Instance.GuiResizeUpdates, "Part GUI resize updates canopy size");
-            RealChuteSettings.Instance.MustBeEngineer = GUILayout.Toggle(RealChuteSettings.Instance.MustBeEngineer, "Only engineers can repack in career");
+            RealChuteSettings.Instance.AutoArm = GUILayout.Toggle(RealChuteSettings.Instance.AutoArm, "Automatically arm when staging", GUIUtils.ScaledToggle);
+            RealChuteSettings.Instance.JokeActivated = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)", GUIUtils.ScaledToggle);
+            RealChuteSettings.Instance.ActivateNyan = GUILayout.Toggle(RealChuteSettings.Instance.ActivateNyan, "Activate NyanMode™", GUIUtils.ScaledToggle);
+            RealChuteSettings.Instance.GuiResizeUpdates = GUILayout.Toggle(RealChuteSettings.Instance.GuiResizeUpdates, "Part GUI resize updates canopy size", GUIUtils.ScaledToggle);
+            RealChuteSettings.Instance.MustBeEngineer = GUILayout.Toggle(RealChuteSettings.Instance.MustBeEngineer, "Only engineers can repack in career", GUIUtils.ScaledToggle);
             if (!RealChuteSettings.Instance.MustBeEngineer) { GUI.enabled = false; }
-            GuiUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0, 5, 100);
+            GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0f, 5f, 100f);
             GUI.enabled = true;
 
-            GuiUtils.CenteredButton("Close", CloseWindow, 100);
+            GUIUtils.CenteredButton("Close", CloseWindow, 100f);
         }
         #endregion
     }

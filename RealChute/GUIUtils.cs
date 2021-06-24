@@ -13,9 +13,53 @@ using UnityEngine;
 
 namespace RealChute
 {
-    public static class GuiUtils
+    public static class GUIUtils
     {
+        #region Constants
+        /// <summary>
+        /// Default font size at normal scaling
+        /// </summary>
+        public const int BASE_FONT_SIZE = 12;
+        /// <summary>
+        /// Represents the time suffixes
+        /// </summary>
+        private static readonly char[] timeSuffixes = { 's', 'm' };
+
+        /// <summary>
+        /// Default toggle labels
+        /// </summary>
+        private static readonly string[] toggles = { "True", "False" };
+        #endregion
+
+        #region Fields
+        private static float currentScaling;
+        #endregion
+
         #region Properties
+        private static GUIStyle scaledLabel;
+        /// <summary>
+        /// Appropriately scaled GUI label
+        /// </summary>
+        public static GUIStyle ScaledLabel
+        {
+            get
+            {
+                CheckScaling();
+                if (scaledLabel == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.label)
+                    {
+                        fontSize = Mathf.RoundToInt(BASE_FONT_SIZE * GameSettings.UI_SCALE)
+                    };
+                    scaledLabel = style;
+
+                    Debug.Log($"[RealChuteGUI]: base - {BASE_FONT_SIZE}, scale - {GameSettings.UI_SCALE}, final - {style.fontSize}");
+                }
+
+                return scaledLabel;
+            }
+        }
+
         private static GUIStyle redLabel;
         /// <summary>
         /// A red KSP label
@@ -24,9 +68,10 @@ namespace RealChute
         {
             get
             {
+                CheckScaling();
                 if (redLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label)
+                    GUIStyle style = new GUIStyle(ScaledLabel)
                     {
                         normal = { textColor = XKCDColors.Red },
                         hover = { textColor = XKCDColors.Red }
@@ -45,9 +90,10 @@ namespace RealChute
         {
             get
             {
+                CheckScaling();
                 if (yellowLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label)
+                    GUIStyle style = new GUIStyle(ScaledLabel)
                     {
                         normal = { textColor = XKCDColors.BrightYellow },
                         hover = { textColor = XKCDColors.BrightYellow }
@@ -66,29 +112,118 @@ namespace RealChute
         {
             get
             {
+                CheckScaling();
                 if (boldLabel == null)
                 {
-                    GUIStyle style = new GUIStyle(HighLogic.Skin.label) { fontStyle = FontStyle.Bold };
+                    GUIStyle style = new GUIStyle(ScaledLabel) { fontStyle = FontStyle.Bold };
                     boldLabel = style;
                 }
                 return boldLabel;
             }
         }
-        #endregion
 
-        #region Arrays
+        private static GUIStyle scaledButton;
         /// <summary>
-        /// Represents the time suffixes
+        /// Appropriately scaled GUI button
         /// </summary>
-        private static readonly char[] timeSuffixes = { 's', 'm' };
+        public static GUIStyle ScaledButton
+        {
+            get
+            {
+                CheckScaling();
+                if (scaledButton == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.button)
+                    {
+                        fontSize = Mathf.RoundToInt(BASE_FONT_SIZE * GameSettings.UI_SCALE)
+                    };
+                    scaledButton = style;
+                }
 
+                return scaledButton;
+            }
+        }
+
+        private static GUIStyle scaledToggle;
         /// <summary>
-        /// Default toggle labels
+        /// Appropriately scaled GUI toggle
         /// </summary>
-        private static readonly string[] toggles = { "True", "False" };
+        public static GUIStyle ScaledToggle
+        {
+            get
+            {
+                CheckScaling();
+                if (scaledToggle == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.toggle)
+                    {
+                        fontSize = Mathf.RoundToInt(BASE_FONT_SIZE * GameSettings.UI_SCALE)
+                    };
+                    scaledToggle = style;
+                }
+
+                return scaledToggle;
+            }
+        }
+
+        private static GUIStyle scaledTextField;
+        /// <summary>
+        /// Appropriately scaled GUI toggle
+        /// </summary>
+        public static GUIStyle ScaledTextField
+        {
+            get
+            {
+                CheckScaling();
+                if (scaledTextField == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.textField)
+                    {
+                        fontSize = Mathf.RoundToInt(BASE_FONT_SIZE * GameSettings.UI_SCALE)
+                    };
+                    scaledTextField = style;
+                }
+
+                return scaledTextField;
+            }
+        }
+
+        private static GUIStyle scaledWindow;
+        /// <summary>
+        /// Appropriately scaled GUI toggle
+        /// </summary>
+        public static GUIStyle ScaledWindow
+        {
+            get
+            {
+                CheckScaling();
+                if (scaledWindow == null)
+                {
+                    GUIStyle style = new GUIStyle(HighLogic.Skin.window)
+                    {
+                        fontSize = Mathf.RoundToInt(BASE_FONT_SIZE * GameSettings.UI_SCALE)
+                    };
+                    scaledWindow = style;
+                }
+
+                return scaledWindow;
+            }
+        }
         #endregion
 
         #region Methods
+        /// <summary>
+        /// Make sure the UI Scaling has not changed
+        /// </summary>
+        private static void CheckScaling()
+        {
+            if (!Mathf.Approximately(currentScaling, GameSettings.UI_SCALE))
+            {
+                currentScaling = GameSettings.UI_SCALE;
+                scaledLabel = redLabel = yellowLabel = boldLabel = scaledButton = scaledToggle = scaledTextField = scaledWindow = null;
+            }
+        }
+
         /// <summary>
         /// Parse a time value
         /// </summary>
@@ -173,14 +308,14 @@ namespace RealChute
         /// <param name="min">Minimum possible value</param>
         /// <param name="max">Maximum possible value</param>
         /// <param name="width">Width of the text area</param>
-        public static void CreateEntryArea(string label, ref string value, float min, float max, float width = 150)
+        public static void CreateEntryArea(string label, ref string value, float min, float max, float width = 150f)
         {
-            GUILayout.Space(5);
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
             GUILayout.BeginHorizontal();
-            if (float.TryParse(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (float.TryParse(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label, ScaledLabel); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, ScaledTextField, GUILayout.Width(width * GameSettings.UI_SCALE));
             GUILayout.EndHorizontal();
         }
 
@@ -192,14 +327,14 @@ namespace RealChute
         /// <param name="min">Minimum possible value</param>
         /// <param name="max">Maximum possible value</param>
         /// <param name="width">Width of the text area</param>
-        public static void CreateTimeEntryArea(string label, ref string value, float min, float max, float width = 150)
+        public static void CreateTimeEntryArea(string label, ref string value, float min, float max, float width = 150f)
         {
-            GUILayout.Space(5);
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
             GUILayout.BeginHorizontal();
-            if (TryParseTime(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (TryParseTime(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label, ScaledLabel); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, ScaledTextField, GUILayout.Width(width * GameSettings.UI_SCALE));
             GUILayout.EndHorizontal();
         }
 
@@ -211,14 +346,14 @@ namespace RealChute
         /// <param name="min">Minimum possible value</param>
         /// <param name="max">Maximum possible value</param>
         /// <param name="width">Width of the text area</param>
-        public static void CreateEmptyEntryArea(string label, ref string value, float min, float max, float width = 150)
+        public static void CreateEmptyEntryArea(string label, ref string value, float min, float max, float width = 150f)
         {
-            GUILayout.Space(5);
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
             GUILayout.BeginHorizontal();
-            if (TryParseWithEmpty(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label); }
+            if (TryParseWithEmpty(value, out float f) && CheckRange(f, min, max)) { GUILayout.Label(label, ScaledLabel); }
             else { GUILayout.Label(label, RedLabel); }
             GUILayout.FlexibleSpace();
-            value = GUILayout.TextField(value, 10, GUILayout.Width(width));
+            value = GUILayout.TextField(value, 10, ScaledTextField, GUILayout.Width(width * GameSettings.UI_SCALE));
             GUILayout.EndHorizontal();
         }
 
@@ -232,12 +367,12 @@ namespace RealChute
         public static void CreateTwinToggle(string label, ref bool value, float maxWidth, string[] buttons = null)
         {
             if (buttons == null) { buttons = toggles; }
-            GUILayout.Space(5);
-            GUILayout.BeginHorizontal(GUILayout.MaxWidth(maxWidth));
-            GUILayout.Label(label);
-            if (GUILayout.Toggle(value, buttons[0])) { value = true; }
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
+            GUILayout.BeginHorizontal(GUILayout.MaxWidth(maxWidth * GameSettings.UI_SCALE));
+            GUILayout.Label(label, ScaledLabel);
+            if (GUILayout.Toggle(value, buttons[0], ScaledToggle)) { value = true; }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!value, buttons[1])) { value = false; }
+            if (GUILayout.Toggle(!value, buttons[1], ScaledToggle)) { value = false; }
             GUILayout.FlexibleSpace();
             GUILayout.EndHorizontal();
         }
@@ -248,11 +383,11 @@ namespace RealChute
         /// <param name="text">Button text</param>
         /// <param name="callback">Action on button click</param>
         /// <param name="width">Width of the button</param>
-        public static void CenteredButton(string text, Callback callback, float width = 150)
+        public static void CenteredButton(string text, Callback callback, float width = 150f)
         {
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button(text, HighLogic.Skin.button, GUILayout.Width(width)))
+            if (GUILayout.Button(text, ScaledButton, GUILayout.Width(width * GameSettings.UI_SCALE)))
             {
                 callback();
             }

@@ -620,8 +620,8 @@ namespace RealChute
             }
 
             //GUI
-            this.window = new Rect(200, 100, 350, 400);
-            this.drag = new Rect(0, 0, 350, 30);
+            this.window = new Rect(200f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE, 350f * GameSettings.UI_SCALE, 400f * GameSettings.UI_SCALE);
+            this.drag = new Rect(0f, 0f, 350f * GameSettings.UI_SCALE, 30f * GameSettings.UI_SCALE);
         }
 
         public override void OnLoad(ConfigNode n)
@@ -642,7 +642,7 @@ namespace RealChute
             //Info in the editor part window
             this.part.mass = this.caseMass + this.parachutes.Sum(p => p.ChuteMass);
 
-            StringBuilder builder = new StringBuilder();
+            StringBuilder builder = StringBuilderCache.Acquire();
             builder.AppendFormat("Case mass: {0}\n", this.caseMass);
             if (this.timer > 0) { builder.AppendFormat("Deployment timer: {0}s\n", this.timer); }
             if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy: true"); }
@@ -683,7 +683,7 @@ namespace RealChute
                     builder.Append("\nAutocut altitudes: ").AppendJoin(this.parachutes.Select(p => p.cutAlt == -1 ? "-- " : p.cutAlt + "m"), ", ");
                 }
             }
-            return builder.ToString();
+            return builder.ToStringAndRelease();
         }
 
         public override void OnSave(ConfigNode n)
@@ -708,7 +708,7 @@ namespace RealChute
             if (CompatibilityChecker.IsAllCompatible&& (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
             {
                 GUI.skin = HighLogic.Skin;
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion);
+                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
             }
         }
 
@@ -720,32 +720,32 @@ namespace RealChute
             GUILayout.BeginVertical();
 
             //Top info labels
-            StringBuilder builder = new StringBuilder("Part name: ").AppendLine(this.part.partInfo.title);
+            StringBuilder builder = StringBuilderCache.Acquire().Append("Part name: ").AppendLine(this.part.partInfo.title);
             builder.Append("Symmetry counterparts: ").AppendLine(this.part.symmetryCounterparts.Count.ToString());
             builder.Append("Part mass: ").Append(this.part.TotalMass().ToString("0.###")).Append("t");
-            GUILayout.Label(builder.ToString());
+            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.BoldLabel);
 
             //Beginning scroll
             this.scroll = GUILayout.BeginScrollView(this.scroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box);
-            GUILayout.Space(5);
-            GUILayout.Label("General:", GuiUtils.BoldLabel, GUILayout.Width(120));
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
+            GUILayout.Label("General:", GUIUtils.BoldLabel, GUILayout.Width(120f * GameSettings.UI_SCALE));
 
             //General labels
-            builder = new StringBuilder("Autocut speed: ").Append(this.cutSpeed).AppendLine("m/s");
+            builder = StringBuilderCache.Acquire().Append("Autocut speed: ").Append(this.cutSpeed).AppendLine("m/s");
             if (this.timer >= 60) { builder.Append("Deployment timer: ").AppendLine(RCUtils.ToMinutesSeconds(this.timer)); }
             else if (this.timer > 0) { builder.Append("Deployment timer: ").Append(this.timer.ToString("0.#")).AppendLine("s"); }
             if (this.mustGoDown) { builder.AppendLine("Must go downwards to deploy"); }
             if (this.deployOnGround) { builder.AppendLine("Automatically deploys on ground contact"); }
             if (this.spareChutes >= 0) { builder.Append("Spare chutes: ").Append(this.chuteCount); }
             else { builder.Append("Spare chutes: inf"); }
-            GUILayout.Label(builder.ToString());
+            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
 
             //Specific labels
             for (int i = 0; i < this.parachutes.Count; i++)
             {
-                GUILayout.Label("___________________________________________", GuiUtils.BoldLabel);
-                GUILayout.Space(3);
-                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GuiUtils.BoldLabel, GUILayout.Width(120));
+                GUILayout.Label("___________________________________________", GUIUtils.BoldLabel);
+                GUILayout.Space(3f * GameSettings.UI_SCALE);
+                GUILayout.Label(RCUtils.ParachuteNumber(i) + ":", GUIUtils.BoldLabel, GUILayout.Width(120f * GameSettings.UI_SCALE));
                 this.parachutes[i].RenderGUI();
             }
 
@@ -755,11 +755,11 @@ namespace RealChute
             //Copy button if in flight
             if (HighLogic.LoadedSceneIsFlight && this.part.symmetryCounterparts.Count > 0)
             {
-                GuiUtils.CenteredButton("Copy to others chutes", CopyToCounterparts);
+                GUIUtils.CenteredButton("Copy to others chutes", CopyToCounterparts);
             }
 
             //Close button
-            GuiUtils.CenteredButton("Close", () => this.visible = false);
+            GUIUtils.CenteredButton("Close", () => this.visible = false);
 
             //Closer
             GUILayout.EndVertical();

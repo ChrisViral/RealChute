@@ -138,10 +138,10 @@ namespace RealChute
             if (general)
             {
                 List<string> errors = new List<string>();
-                if (!GuiUtils.TryParseTime(this.timer, out float f) || !GuiUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
-                if (!GuiUtils.TryParseWithEmpty(this.spares, out f) || !GuiUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
-                if (!float.TryParse(this.cutSpeed, out f) || !GuiUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
-                if (!float.TryParse(this.landingAlt, out f) || !GuiUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
+                if (!GUIUtils.TryParseTime(this.timer, out float f) || !GUIUtils.CheckRange(f, 0, 3600)) { errors.Add("Deployment timer"); }
+                if (!GUIUtils.TryParseWithEmpty(this.spares, out f) || !GUIUtils.CheckRange(f, -1, 10) || !RCUtils.IsWholeNumber(f)) { errors.Add("Spare chutes"); }
+                if (!float.TryParse(this.cutSpeed, out f) || !GUIUtils.CheckRange(f, 0.01f, 100)) { errors.Add("Autocut speed"); }
+                if (!float.TryParse(this.landingAlt, out f) || !GUIUtils.CheckRange(f, 0, (float)this.body.GetMaxAtmosphereAltitude())) { errors.Add("Landing altitude"); }
                 return errors;
             }
             return new List<string>(this.chutes.SelectMany(c => c.templateGUI.Errors));
@@ -153,13 +153,13 @@ namespace RealChute
             GUILayout.Label("General:");
             StringBuilder builder = new StringBuilder();
             builder.AppendJoin(GetErrors(true), "\n");
-            GUILayout.Label(builder.ToString(), GuiUtils.RedLabel);
+            GUILayout.Label(builder.ToString(), GUIUtils.RedLabel);
             GUILayout.Space(10);
 
             GUILayout.Label("Chutes:");
             builder = new StringBuilder();
             builder.AppendJoin(GetErrors(false), "\n");
-            GUILayout.Label(builder.ToString(), GuiUtils.RedLabel);
+            GUILayout.Label(builder.ToString(), GUIUtils.RedLabel);
             GUILayout.Space(10);
         }
 
@@ -169,9 +169,9 @@ namespace RealChute
             if (!showMessage && (GetErrors(true).Count > 0 || GetErrors(false).Count > 0)) { this.editorGUI.failedVisible = true; return; }
             this.rcModule.mustGoDown = this.mustGoDown;
             this.rcModule.deployOnGround = this.deployOnGround;
-            this.rcModule.timer = GuiUtils.ParseTime(this.timer);
+            this.rcModule.timer = GUIUtils.ParseTime(this.timer);
             this.rcModule.cutSpeed = float.Parse(this.cutSpeed);
-            this.rcModule.spareChutes = GuiUtils.ParseEmpty(this.spares);
+            this.rcModule.spareChutes = GUIUtils.ParseEmpty(this.spares);
             this.rcModule.chuteCount = (int)this.rcModule.spareChutes;
 
             this.chutes.ForEach(c => c.ApplyChanges(toSymmetryCounterparts));
@@ -185,9 +185,9 @@ namespace RealChute
                     UpdateScale(p, module);
 
                     module.mustGoDown = this.mustGoDown;
-                    module.timer = GuiUtils.ParseTime(this.timer);
+                    module.timer = GUIUtils.ParseTime(this.timer);
                     module.cutSpeed = float.Parse(this.cutSpeed);
-                    module.spareChutes = GuiUtils.ParseEmpty(this.spares);
+                    module.spareChutes = GUIUtils.ParseEmpty(this.spares);
 
                     ProceduralChute pChute = (ProceduralChute)p.Modules["ProceduralChute"];
                     pChute.presetId = this.presetId;
@@ -501,21 +501,23 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsEditor)
             {
                 //Windows initiation
-                this.editorGUI.window = new Rect(5, 390, 420, Screen.height - 395);
+                float y = 390f * GameSettings.UI_SCALE;
+                float height = Screen.height - y - (20f * GameSettings.UI_SCALE);
+                this.editorGUI.window = new Rect(5f * GameSettings.UI_SCALE, y, 420f * GameSettings.UI_SCALE, height);
                 this.chutes.ForEach(c =>
                 {
-                    c.templateGUI.materialsWindow = new Rect(this.editorGUI.matX, this.editorGUI.matY, 375, 275);
-                    c.templateGUI.drag = new Rect(0, 0, 375, 25);
+                    c.templateGUI.materialsWindow = new Rect(this.editorGUI.matX, this.editorGUI.matY, 375f * GameSettings.UI_SCALE, 275f * GameSettings.UI_SCALE);
+                    c.templateGUI.drag = new Rect(0f, 0f, 375f * GameSettings.UI_SCALE, 25f * GameSettings.UI_SCALE);
                 });
-                this.editorGUI.failedWindow = new Rect((Screen.width / 2) - 150, (Screen.height / 2) - 150, 300, 300);
-                this.editorGUI.successfulWindow = new Rect((Screen.width / 2) - 150, (Screen.height / 2) - 25, 300, 50);
-                this.editorGUI.presetsWindow = new Rect((Screen.width / 2) - 200, (Screen.height / 2) - 250, 400, 500);
-                this.editorGUI.presetsSaveWindow = new Rect((Screen.width / 2) - 175, (Screen.height / 2) - 110, 350, 220);
-                this.editorGUI.presetsWarningWindow = new Rect((Screen.width / 2) - 100, (Screen.height / 2) - 50, 200, 100);
+                this.editorGUI.failedWindow = new Rect((Screen.width / 2f) - (150f * GameSettings.UI_SCALE), (Screen.height / 2f) - (150f * GameSettings.UI_SCALE), 300f * GameSettings.UI_SCALE, 300f * GameSettings.UI_SCALE);
+                this.editorGUI.successfulWindow = new Rect((Screen.width / 2f) - (150f * GameSettings.UI_SCALE), (Screen.height / 2f) - (25f * GameSettings.UI_SCALE), 300f * GameSettings.UI_SCALE, 50f * GameSettings.UI_SCALE);
+                this.editorGUI.presetsWindow = new Rect((Screen.width / 2f) - (200f * GameSettings.UI_SCALE), (Screen.height / 2f) - (250f * GameSettings.UI_SCALE), 400f * GameSettings.UI_SCALE, 500f * GameSettings.UI_SCALE);
+                this.editorGUI.presetsSaveWindow = new Rect((Screen.width / 2f) - (175f * GameSettings.UI_SCALE), (Screen.height / 2f) - (110f * GameSettings.UI_SCALE), 350f * GameSettings.UI_SCALE, 220f * GameSettings.UI_SCALE);
+                this.editorGUI.presetsWarningWindow = new Rect((Screen.width / 2f) - (100f * GameSettings.UI_SCALE), (Screen.height / 2f) - (50f * GameSettings.UI_SCALE), 200f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE);
 
                 if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
                 {
-                    float level = 0;
+                    float level = 0f;
                     bool isVab = true;
                     switch (EditorDriver.editorFacility)
                     {

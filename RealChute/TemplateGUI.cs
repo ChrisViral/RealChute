@@ -54,44 +54,44 @@ namespace RealChute
                 float f, max = (float)this.Body.GetMaxAtmosphereAltitude();
                 if (this.calcSelect)
                 {
-                    if (!this.getMass && (!float.TryParse(this.mass, out f) || !GuiUtils.CheckRange(f, 0.1f, 10000))) { errors.Add("Craft mass"); }
+                    if (!this.getMass && (!float.TryParse(this.mass, out f) || !GUIUtils.CheckRange(f, 0.1f, 10000))) { errors.Add("Craft mass"); }
                     switch (this.Type)
                     {
                         case ParachuteType.MAIN:
                             {
-                                if (!float.TryParse(this.landingSpeed, out f) || !GuiUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
+                                if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
                                 break;
                             }
                         case ParachuteType.DROGUE:
                             {
-                                if (!float.TryParse(this.landingSpeed, out f) && !GuiUtils.CheckRange(f, 0.1f, 5000)) { errors.Add("Landing speed"); }
-                                if (!float.TryParse(this.refDepAlt, out f) || !GuiUtils.CheckRange(f, 10, max)) { errors.Add("Mains planned deployment alt"); }
+                                if (!float.TryParse(this.landingSpeed, out f) && !GUIUtils.CheckRange(f, 0.1f, 5000)) { errors.Add("Landing speed"); }
+                                if (!float.TryParse(this.refDepAlt, out f) || !GUIUtils.CheckRange(f, 10, max)) { errors.Add("Mains planned deployment alt"); }
                                 break;
                             }
                         case ParachuteType.DRAG:
                             {
-                                if (!float.TryParse(this.landingSpeed, out f) || !GuiUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
-                                if (!float.TryParse(this.deceleration, out f) || !GuiUtils.CheckRange(f, 0.1f, 100)) { errors.Add("Wanted deceleration"); }
+                                if (!float.TryParse(this.landingSpeed, out f) || !GUIUtils.CheckRange(f, 0.1f, 300)) { errors.Add("Landing speed"); }
+                                if (!float.TryParse(this.deceleration, out f) || !GUIUtils.CheckRange(f, 0.1f, 100)) { errors.Add("Wanted deceleration"); }
                                 break;
                             }
                     }
-                    if (!float.TryParse(this.chuteCount, out f) || !GuiUtils.CheckRange(f, 1, 100)) { errors.Add("Parachute count"); }
+                    if (!float.TryParse(this.chuteCount, out f) || !GUIUtils.CheckRange(f, 1, 100)) { errors.Add("Parachute count"); }
                 }
                 else
                 {
                     if (!float.TryParse(this.preDepDiam, out float p)) { p = 0; }
                     if (!float.TryParse(this.depDiam, out float d)) { d = 0; }
-                    if (!GuiUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
-                    if (!GuiUtils.CheckRange(d, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
+                    if (!GUIUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
+                    if (!GUIUtils.CheckRange(d, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
                 }
-                if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GuiUtils.CheckRange(f, 0.0001f, (float)this.Body.GetPressureAsl()) : !GuiUtils.CheckRange(f, 10, max)))
+                if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GUIUtils.CheckRange(f, 0.0001f, (float)this.Body.GetPressureAsl()) : !GUIUtils.CheckRange(f, 10, max)))
                 {
                     errors.Add(this.isPressure ? "Predeployment pressure" : "Predeployment altitude");
                 }
-                if (!float.TryParse(this.deploymentAlt, out f) || !GuiUtils.CheckRange(f, 10, max)) { errors.Add("Deployment altitude"); }
-                if (!GuiUtils.TryParseWithEmpty(this.cutAlt, out f) || !GuiUtils.CheckRange(f, -1, max)) { errors.Add("Autocut altitude"); }
-                if (!float.TryParse(this.preDepSpeed, out f) || !GuiUtils.CheckRange(f, 0.5f, 5)) { errors.Add("Predeployment speed"); }
-                if (!float.TryParse(this.depSpeed, out f) || !GuiUtils.CheckRange(f, 1, 10)) { errors.Add("Deployment speed"); }
+                if (!float.TryParse(this.deploymentAlt, out f) || !GUIUtils.CheckRange(f, 10, max)) { errors.Add("Deployment altitude"); }
+                if (!GUIUtils.TryParseWithEmpty(this.cutAlt, out f) || !GUIUtils.CheckRange(f, -1, max)) { errors.Add("Autocut altitude"); }
+                if (!float.TryParse(this.preDepSpeed, out f) || !GUIUtils.CheckRange(f, 0.5f, 5)) { errors.Add("Predeployment speed"); }
+                if (!float.TryParse(this.depSpeed, out f) || !GUIUtils.CheckRange(f, 1, 10)) { errors.Add("Deployment speed"); }
                 return errors;
             }
         }
@@ -143,6 +143,7 @@ namespace RealChute
         public string mass = "10", landingSpeed = "6", deceleration = "10", refDepAlt = "700", chuteCount = "1";
         public string deploymentAlt = string.Empty, landingAlt = "0", cutAlt = string.Empty;
         public string preDepSpeed = string.Empty, depSpeed = string.Empty;
+        private static readonly string[] calculationModes = { "Automatic", "Manual" };
         #endregion
 
         #region Constructor
@@ -217,47 +218,47 @@ namespace RealChute
             GUILayout.BeginHorizontal();
 
             #region Labels
-            GUILayout.BeginVertical(GUILayout.Height(35 * h));
+            GUILayout.BeginVertical(GUILayout.Height(35 * h * GameSettings.UI_SCALE));
 
             //Labels
             if (a)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Case texture:");
+                GUILayout.Label("Case texture:", GUIUtils.ScaledLabel);
             }
             if (b)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Chute texture:");
+                GUILayout.Label("Chute texture:", GUIUtils.ScaledLabel);
             }
             if (c)
             {
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Chute model: ");
+                GUILayout.Label("Chute model: ", GUIUtils.ScaledLabel);
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
             #endregion
 
             #region Selectors
-            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Height(35 * h));
+            GUILayout.BeginVertical(GUI.skin.box, GUILayout.Height(35 * h* GameSettings.UI_SCALE));
             //Boxes
             if (a)
             {
                 GUILayout.FlexibleSpace();
-                this.PChute.caseId = GUILayout.SelectionGrid(this.PChute.caseId, cases, cases.Length);
+                this.PChute.caseId = GUILayout.SelectionGrid(this.PChute.caseId, cases, cases.Length, GUIUtils.ScaledButton);
             }
 
             if (b)
             {
                 GUILayout.FlexibleSpace();
-                this.chuteId = GUILayout.SelectionGrid(this.chuteId, chutes, chutes.Length);
+                this.chuteId = GUILayout.SelectionGrid(this.chuteId, chutes, chutes.Length, GUIUtils.ScaledButton);
             }
 
             if (c)
             {
                 GUILayout.FlexibleSpace();
-                this.modelId = GUILayout.SelectionGrid(this.modelId, models, models.Length);
+                this.modelId = GUILayout.SelectionGrid(this.modelId, models, models.Length, GUIUtils.ScaledButton);
             }
             GUILayout.FlexibleSpace();
             GUILayout.EndVertical();
@@ -271,13 +272,13 @@ namespace RealChute
         {
             if (MaterialsLibrary.Instance.Count >= 1)
             {
-                GUILayout.BeginHorizontal(GUILayout.Height(20));
+                GUILayout.BeginHorizontal(GUILayout.Height(20f * GameSettings.UI_SCALE));
                 GUILayout.BeginVertical();
                 GUILayout.FlexibleSpace();
-                GUILayout.Label("Current material: " + this.Material.Name);
+                GUILayout.Label("Current material: " + this.Material.Name, GUIUtils.ScaledLabel);
                 GUILayout.EndVertical();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Change material", GUILayout.Width(150)))
+                if (GUILayout.Button("Change material", GUIUtils.ScaledButton, GUILayout.Width(150f * GameSettings.UI_SCALE)))
                 {
                     this.materialsVisible = !this.materialsVisible;
                 }
@@ -290,35 +291,35 @@ namespace RealChute
         {
             #region Calculations
             //Selection mode
-            GuiUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300, new[] { "Automatic", "Manual" });
-            GUILayout.Space(5);
+            GUIUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300f, calculationModes);
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
 
             //Calculations
-            this.parachuteScroll = GUILayout.BeginScrollView(this.parachuteScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(160));
+            this.parachuteScroll = GUILayout.BeginScrollView(this.parachuteScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.Height(160f * GameSettings.UI_SCALE));
             string label;
             float max, min;
 
             #region Automatic
             if (this.calcSelect)
             {
-                this.TypeId = GUILayout.SelectionGrid(this.TypeId, EnumUtils.GetNames<ParachuteType>(), 3);
+                this.TypeId = GUILayout.SelectionGrid(this.TypeId, EnumUtils.GetNames<ParachuteType>(), 3, GUIUtils.ScaledButton);
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.getMass, "Use current craft mass", GUILayout.Width(150))) { this.getMass = true; }
+                if (GUILayout.Toggle(this.getMass, "Use current craft mass", GUIUtils.ScaledToggle, GUILayout.Width(150f * GameSettings.UI_SCALE))) { this.getMass = true; }
                 GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(!this.getMass, "Input craft mass", GUILayout.Width(150))) { this.getMass = false; }
+                if (GUILayout.Toggle(!this.getMass, "Input craft mass", GUIUtils.ScaledToggle, GUILayout.Width(150f * GameSettings.UI_SCALE))) { this.getMass = false; }
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
                 if (this.getMass)
                 {
-                    GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"));
-                    if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), GUILayout.Width(125))) { this.useDry = !this.useDry; }
+                    GUILayout.Label("Currently using " + (this.useDry ? "dry mass" : "wet mass"), GUIUtils.ScaledLabel);
+                    if (GUILayout.Button("Switch to " + (this.useDry ? "wet mass" : "dry mass"), GUIUtils.ScaledButton, GUILayout.Width(175f * GameSettings.UI_SCALE))) { this.useDry = !this.useDry; }
                 }
 
                 else
                 {
-                    GuiUtils.CreateEntryArea("Mass to use (t):", ref this.mass, 0.1f, 10000, 100);
+                    GUIUtils.CreateEntryArea("Mass to use (t):", ref this.mass, 0.1f, 10000f, 100f);
                 }
                 max = 300;
                 switch (this.Type)
@@ -326,25 +327,25 @@ namespace RealChute
                     case ParachuteType.MAIN:
                         label = "Wanted touchdown speed (m/s):"; break;
                     case ParachuteType.DROGUE:
-                        label = "Wanted speed at target alt (m/s):"; max = 5000; break;
+                        label = "Wanted speed at target alt (m/s):"; max = 5000f; break;
                     case ParachuteType.DRAG:
                         label = "Planned landing speed (m/s):"; break;
                     default:
                         label = string.Empty; break;
                 }
-                GuiUtils.CreateEntryArea(label, ref this.landingSpeed, 0.1f, max, 100);
+                GUIUtils.CreateEntryArea(label, ref this.landingSpeed, 0.1f, max, 100f);
 
                 if (this.Type == ParachuteType.DROGUE)
                 {
-                    GuiUtils.CreateEntryArea("Target altitude (m):", ref this.refDepAlt, 10, (float)this.Body.GetMaxAtmosphereAltitude(), 100);
+                    GUIUtils.CreateEntryArea("Target altitude (m):", ref this.refDepAlt, 10f, (float)this.Body.GetMaxAtmosphereAltitude(), 100f);
                 }
 
                 if (this.Type == ParachuteType.DRAG)
                 {
-                    GuiUtils.CreateEntryArea("Wanted deceleration (m/s²):", ref this.deceleration, 0.1f, 100, 100);
+                    GUIUtils.CreateEntryArea("Wanted deceleration (m/s²):", ref this.deceleration, 0.1f, 100f, 100f);
                 }
 
-                GuiUtils.CreateEntryArea("Parachutes used (parachutes):", ref this.chuteCount, 1, 100, 100);
+                GUIUtils.CreateEntryArea("Parachutes used (parachutes):", ref this.chuteCount, 1f, 100f, 100f);
             }
             #endregion
 
@@ -355,14 +356,14 @@ namespace RealChute
                 if (!float.TryParse(this.depDiam, out float d)) { d = -1; }
 
                 //Predeployed diameter
-                GuiUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100);
-                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²"); }
-                else { GUILayout.Label("Resulting predeployed area: --- m²"); }
+                GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100f);
+                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
+                else { GUILayout.Label("Resulting predeployed area: --- m²", GUIUtils.ScaledLabel); }
 
                 //Deployed diameter
-                GuiUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam, 100);
-                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²"); }
-                else { GUILayout.Label("Resulting deployed area: --- m²"); }
+                GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1f, this.PChute.textures == null ? 70f : this.Model.MaxDiam, 100f);
+                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
+                else { GUILayout.Label("Resulting deployed area: --- m²", GUIUtils.ScaledLabel); }
             }
             #endregion
 
@@ -371,9 +372,9 @@ namespace RealChute
 
             #region Specific
             //Pressure/alt toggle
-            GUILayout.Space(5);
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Toggle(this.isPressure, "Pressure predeployment"))
+            if (GUILayout.Toggle(this.isPressure, "Pressure predeployment", GUIUtils.ScaledToggle))
             {
                 if (!this.isPressure)
                 {
@@ -382,7 +383,7 @@ namespace RealChute
                 }
             }
             GUILayout.FlexibleSpace();
-            if (GUILayout.Toggle(!this.isPressure, "Altitude predeployment"))
+            if (GUILayout.Toggle(!this.isPressure, "Altitude predeployment", GUIUtils.ScaledToggle))
             {
                 if (this.isPressure)
                 {
@@ -406,19 +407,19 @@ namespace RealChute
                 min = 10;
                 max = (float)this.Body.GetMaxAtmosphereAltitude();
             }
-            GuiUtils.CreateEntryArea(label, ref this.predepClause, min, max);
+            GUIUtils.CreateEntryArea(label, ref this.predepClause, min, max);
 
             //Deployment altitude
-            GuiUtils.CreateEntryArea("Deployment altitude", ref this.deploymentAlt, 10, (float)this.Body.GetMaxAtmosphereAltitude());
+            GUIUtils.CreateEntryArea("Deployment altitude", ref this.deploymentAlt, 10f, (float)this.Body.GetMaxAtmosphereAltitude());
 
             //Cut altitude
-            GuiUtils.CreateEmptyEntryArea("Autocut altitude (m):", ref this.cutAlt, -1, (float)this.Body.GetMaxAtmosphereAltitude());
+            GUIUtils.CreateEmptyEntryArea("Autocut altitude (m):", ref this.cutAlt, -1f, (float)this.Body.GetMaxAtmosphereAltitude());
 
             //Predeployment speed
-            GuiUtils.CreateEntryArea("Pre deployment speed (s):", ref this.preDepSpeed, 0.5f, 5);
+            GUIUtils.CreateEntryArea("Pre deployment speed (s):", ref this.preDepSpeed, 0.5f, 5f);
 
             //Deployment speed
-            GuiUtils.CreateEntryArea("Deployment speed (s):", ref this.depSpeed, 1, 10);
+            GUIUtils.CreateEntryArea("Deployment speed (s):", ref this.depSpeed, 1f, 10f);
             #endregion
         }
 
@@ -428,17 +429,23 @@ namespace RealChute
             GUI.DragWindow(this.drag);
             GUILayout.BeginVertical();
             GUILayout.BeginHorizontal();
-            this.materialsScroll = GUILayout.BeginScrollView(this.materialsScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.MaxHeight(200), GUILayout.Width(140));
-            this.materialsId = GUILayout.SelectionGrid(this.materialsId, MaterialsLibrary.Instance.MaterialNames, 1);
+            this.materialsScroll = GUILayout.BeginScrollView(this.materialsScroll, false, false, GUI.skin.horizontalScrollbar, GUI.skin.verticalScrollbar, GUI.skin.box, GUILayout.MaxHeight(200f * GameSettings.UI_SCALE), GUILayout.Width(140f * GameSettings.UI_SCALE));
+            this.materialsId = GUILayout.SelectionGrid(this.materialsId, MaterialsLibrary.Instance.MaterialNames, 1, GUIUtils.ScaledButton);
             GUILayout.EndScrollView();
             GUILayout.BeginVertical();
-            MaterialDefinition material = new MaterialDefinition();
+            MaterialDefinition material = null;
             if (MaterialsLibrary.Instance.MaterialNames.IndexInRange(this.materialsId))
             {
                 string name = MaterialsLibrary.Instance.MaterialNames[this.materialsId];
                 MaterialsLibrary.Instance.TryGetMaterial(name, ref material);
             }
-            StringBuilder builder = new StringBuilder();
+
+            if (material == null)
+            {
+                material = new MaterialDefinition();
+            }
+
+            StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("Description:  ").AppendLine(material.Description);
             builder.Append("\nDrag coefficient:  ").AppendLine(material.DragCoefficient.ToString("0.00#"));
             builder.Append("\nArea density:  ").Append(material.AreaDensity * 1000).AppendLine("kg/m²");
@@ -446,17 +453,17 @@ namespace RealChute
             builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.AbsoluteZero).ToString()).Append("°C");
             builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString()).Append("J/kg∙K");
             builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString());
-            GUILayout.Label(builder.ToString());
+            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Choose material", GUILayout.Width(150)))
+            if (GUILayout.Button("Choose material", GUIUtils.ScaledButton, GUILayout.Width(150f * GameSettings.UI_SCALE)))
             {
                 this.Material = material;
                 this.materialsVisible = false;
             }
-            if (GUILayout.Button("Cancel", GUILayout.Width(150)))
+            if (GUILayout.Button("Cancel", GUIUtils.ScaledButton, GUILayout.Width(150f * GameSettings.UI_SCALE)))
             {
                 this.materialsVisible = false;
             }

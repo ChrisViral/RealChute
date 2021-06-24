@@ -42,7 +42,7 @@ namespace RealChute
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     internal class CompatibilityChecker : MonoBehaviour
     {
-        public static bool IsAllCompatible { get; } = IsCompatible() && IsUnityCompatible();
+        public static bool IsAllCompatible => IsCompatible() && IsUnityCompatible();
 
         public static bool IsCompatible()
         {
@@ -61,7 +61,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 1 && Versioning.version_minor == 11;
+            return Versioning.version_major == 1 && Versioning.version_minor == 12;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -73,7 +73,7 @@ namespace RealChute
             /*-----------------------------------------------*\
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
-            return Application.unityVersion == "2019.2.2f1";
+            return Application.unityVersion == "2019.4.18f1";
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
