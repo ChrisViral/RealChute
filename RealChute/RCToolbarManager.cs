@@ -123,11 +123,13 @@ namespace RealChute
             }
             else
             {
+                Debug.Log("[RealChute]: Adding toolbar events");
                 GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
                 GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
                 GameEvents.onGameSceneSwitchRequested.Add(SetButtonVisibility);
                 this.isInitialized = true;
+                DontDestroyOnLoad(this);
             }
         }
 
@@ -135,6 +137,7 @@ namespace RealChute
         {
             if (!this.isInitialized) return;
 
+            Debug.Log("[RealChute]: Removing toolbar events");
             GameEvents.onGUIEditorToolbarReady.Remove(AddFilter);
             GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
             GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveButton);
