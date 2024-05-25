@@ -23,6 +23,8 @@ namespace RealChute
     public class RCToolbarManager : MonoBehaviour
     {
         #region Fields
+        private bool isInitialized;
+
         private static ApplicationLauncherButton button;
         private static bool added;
         private static bool visible;
@@ -125,7 +127,19 @@ namespace RealChute
                 GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
                 GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
                 GameEvents.onGameSceneSwitchRequested.Add(SetButtonVisibility);
+                this.isInitialized = true;
             }
+        }
+
+        private void OnDestroy()
+        {
+            if (!this.isInitialized) return;
+
+            GameEvents.onGUIEditorToolbarReady.Remove(AddFilter);
+            GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
+            GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveButton);
+            GameEvents.onGameSceneSwitchRequested.Remove(SetButtonVisibility);
+            this.isInitialized = false;
         }
         #endregion
     }
