@@ -67,6 +67,8 @@ namespace RealChute
         public int chuteCount = 5;
         [KSPField]
         public bool reverseOrientation;
+        [KSPField]
+        public SafeState safeState = SafeState.SAFE;
         #endregion
 
         #region Propreties
@@ -114,7 +116,6 @@ namespace RealChute
         private ProceduralChute pChute;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
-        public SafeState safeState = SafeState.SAFE;
 
         //GUI
         protected bool visible, hid;
@@ -578,6 +579,7 @@ namespace RealChute
             }
             //Staging icon
             this.part.stagingIcon = "PARACHUTES";
+            this.safeState = SafeState.SAFE;
 
             //Part GUI
             if (this.spareChutes < 0) { this.Fields["chuteCount"].guiActive = false; }
