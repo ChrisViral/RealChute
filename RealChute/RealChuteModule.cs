@@ -2,6 +2,7 @@
  using System.Collections.Generic;
  using System.Linq;
  using System.Text;
+ using KSP.UI;
  using KSP.UI.Screens;
  using RealChute.Extensions;
  using UnityEngine;
@@ -94,6 +95,9 @@ namespace RealChute
 
         //If there is more than one parachute on the part
         public bool SecondaryChute => this.parachutes.Count > 1;
+
+        //Check if the staging button has been pressed this frame
+        public bool PressedStage => !InputLockManager.IsLocked(ControlTypes.STAGING) && GameSettings.LAUNCH_STAGES.GetKeyDown();
 
         //Quick access to the part GUI events
         private BaseEvent deploy, arm, disarm, cut, repack;
@@ -484,7 +488,7 @@ namespace RealChute
             this.convectiveFactor = Math.Pow(UtilMath.Clamp01((this.vessel.mach - PhysicsGlobals.NewtonianMachTempLerpStartMach) / (PhysicsGlobals.NewtonianMachTempLerpEndMach - PhysicsGlobals.NewtonianMachTempLerpStartMach)), PhysicsGlobals.NewtonianMachTempLerpExponent);
             this.dragVector = -velocity.normalized;
 
-            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
+            if (!this.staged && this.PressedStage && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
                 if (!this.launched && !this.vessel.LandedOrSplashed)
