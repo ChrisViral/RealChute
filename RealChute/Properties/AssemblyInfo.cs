@@ -42,3 +42,6 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.*")]
 [assembly: AssemblyInformationalVersion("1.4.8.3")]
+
+// ClickThroughBlocker dependency
+[assembly: KSPAssemblyDependency("ClickThroughBlocker", 1, 0)]

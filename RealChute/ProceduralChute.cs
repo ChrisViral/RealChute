@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Highlighting;
-using KSP.UI.Screens;
 using RealChute.Extensions;
 using RealChute.Libraries;
 using RealChute.Libraries.Presets;

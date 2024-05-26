@@ -42,6 +42,9 @@
       <HintPath>G:\Modding\KSP\KSP_x64_Data\Managed\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ClickThroughBlocker">
+      <HintPath>G:\Modding\KSP\GameData\000_ClickThroughBlocker\Plugins\ClickThroughBlocker.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>G:\Modding\KSP\KSP_x64_Data\Managed\UnityEngine.AnimationModule.dll</HintPath>

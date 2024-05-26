@@ -1,10 +1,11 @@
 ﻿﻿using System;
- using System.Collections.Generic;
- using System.Text;
- using RealChute.Extensions;
- using RealChute.Libraries;
- using RealChute.Libraries.Presets;
- using UnityEngine;
+using System.Collections.Generic;
+using System.Text;
+ using ClickThroughFix;
+using RealChute.Extensions;
+using RealChute.Libraries;
+using RealChute.Libraries.Presets;
+using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -73,35 +74,35 @@ namespace RealChute
             GUI.skin = HighLogic.Skin;
             if (this.visible)
             {
-                mainWindow = GUILayout.Window(this.mainId, mainWindow, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
+                mainWindow = ClickThruBlocker.GUILayoutWindow(this.mainId, mainWindow, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
             }
             foreach (ChuteTemplate chute in this.Chutes)
             {
                 TemplateGUI gui = chute.templateGUI;
                 if (gui.materialsVisible)
                 {
-                    gui.materialsWindow = GUILayout.Window(gui.matId, gui.materialsWindow, gui.MaterialsWindow, "Parachute material", GUIUtils.ScaledWindow, GUILayout.MaxWidth(375f * GameSettings.UI_SCALE), GUILayout.MaxHeight(275f * GameSettings.UI_SCALE));
+                    gui.materialsWindow = ClickThruBlocker.GUILayoutWindow(gui.matId, gui.materialsWindow, gui.MaterialsWindow, "Parachute material", GUIUtils.ScaledWindow, GUILayout.MaxWidth(375f * GameSettings.UI_SCALE), GUILayout.MaxHeight(275f * GameSettings.UI_SCALE));
                 }
             }
             if (this.failedVisible)
             {
-                this.failedWindow = GUILayout.Window(this.failedId, this.failedWindow, ApplicationFailed, "Error", GUIUtils.ScaledWindow, GUILayout.MaxWidth(300f * GameSettings.UI_SCALE), GUILayout.MaxHeight(300f * GameSettings.UI_SCALE));
+                this.failedWindow = ClickThruBlocker.GUILayoutWindow(this.failedId, this.failedWindow, ApplicationFailed, "Error", GUIUtils.ScaledWindow, GUILayout.MaxWidth(300f * GameSettings.UI_SCALE), GUILayout.MaxHeight(300f * GameSettings.UI_SCALE));
             }
             if (this.successfulVisible)
             {
-                this.successfulWindow = GUILayout.Window(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", GUIUtils.ScaledWindow, GUILayout.MaxWidth(300f * GameSettings.UI_SCALE), GUILayout.MaxHeight(200f * GameSettings.UI_SCALE), GUILayout.ExpandHeight(true));
+                this.successfulWindow = ClickThruBlocker.GUILayoutWindow(this.successId, this.successfulWindow, ApplicationSucceeded, "Success", GUIUtils.ScaledWindow, GUILayout.MaxWidth(300f * GameSettings.UI_SCALE), GUILayout.MaxHeight(200f * GameSettings.UI_SCALE), GUILayout.ExpandHeight(true));
             }
             if (this.presetVisible)
             {
-                this.presetsWindow = GUILayout.Window(this.pChute.presetId, this.presetsWindow, Presets, "Presets", GUIUtils.ScaledWindow, GUILayout.MaxWidth(400f * GameSettings.UI_SCALE), GUILayout.MaxHeight(500f * GameSettings.UI_SCALE));
+                this.presetsWindow = ClickThruBlocker.GUILayoutWindow(this.pChute.presetId, this.presetsWindow, Presets, "Presets", GUIUtils.ScaledWindow, GUILayout.MaxWidth(400f * GameSettings.UI_SCALE), GUILayout.MaxHeight(500f * GameSettings.UI_SCALE));
             }
             if (this.presetSaveVisible)
             {
-                this.presetsSaveWindow = GUILayout.Window(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", GUIUtils.ScaledWindow, GUILayout.MaxWidth(350f * GameSettings.UI_SCALE), GUILayout.MaxHeight(400f * GameSettings.UI_SCALE));
+                this.presetsSaveWindow = ClickThruBlocker.GUILayoutWindow(this.presetSaveId, this.presetsSaveWindow, SavePreset, "Save as preset", GUIUtils.ScaledWindow, GUILayout.MaxWidth(350f * GameSettings.UI_SCALE), GUILayout.MaxHeight(400f * GameSettings.UI_SCALE));
             }
             if (this.presetWarningVisible)
             {
-                this.presetsWarningWindow = GUILayout.Window(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", GUIUtils.ScaledWindow, GUILayout.Width(200f * GameSettings.UI_SCALE), GUILayout.Height(100f * GameSettings.UI_SCALE));
+                this.presetsWarningWindow = ClickThruBlocker.GUILayoutWindow(this.presetWarningId, this.presetsWarningWindow, PresetWarning, "Warning", GUIUtils.ScaledWindow, GUILayout.Width(200f * GameSettings.UI_SCALE), GUILayout.Height(100f * GameSettings.UI_SCALE));
             }
         }
 

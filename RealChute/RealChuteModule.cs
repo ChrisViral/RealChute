@@ -1,12 +1,12 @@
 ﻿﻿using System;
- using System.Collections.Generic;
- using System.Linq;
- using System.Text;
- using KSP.UI;
- using KSP.UI.Screens;
- using RealChute.Extensions;
- using UnityEngine;
- using Random = System.Random;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using ClickThroughFix;
+using KSP.UI.Screens;
+using RealChute.Extensions;
+using UnityEngine;
+using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -714,7 +714,7 @@ namespace RealChute
             if (CompatibilityChecker.IsAllCompatible&& (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
             {
                 GUI.skin = HighLogic.Skin;
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
+                this.window = ClickThruBlocker.GUILayoutWindow(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
             }
         }
 
