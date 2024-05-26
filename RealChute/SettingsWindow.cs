@@ -30,7 +30,6 @@ namespace RealChute
         private void CloseWindow()
         {
             if (int.TryParse(this.level, out int i)) { RealChuteSettings.Instance.EngineerLevel = i; }
-            if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
         }
         #endregion
 

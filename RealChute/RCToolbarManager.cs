@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using KSP.Localization;
 using KSP.UI;
 using KSP.UI.Screens;
 using RealChute.Extensions;
 using RUI.Icons.Selectable;
+using ToolbarControl_NS;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -24,15 +24,14 @@ namespace RealChute
     {
         #region Fields
         private bool isInitialized;
+        private ToolbarControl controller;
 
-        private static ApplicationLauncherButton button;
-        private static bool added;
         private static bool visible;
         private static GameObject settings;
         #endregion
 
         #region Methods
-        private void AddFilter()
+        private static void AddFilter()
         {
             //Loads the RealChute parachutes icon
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
@@ -57,80 +56,50 @@ namespace RealChute
             button.SetState(UIRadioButton.State.True, UIRadioButton.CallType.APPLICATION, null, false);
         }
 
-        private void AddButton()
+        private static void Show()
         {
-            //The LoadedScene check shouldn't be necessary but but button is being added in FLIGHT too. (not editor, not map view, just flight)
-            if (ApplicationLauncher.Ready && !added && HighLogic.LoadedScene == GameScenes.SPACECENTER)
-            {
-                Texture2D buttonTexture = new Texture2D(38, 38);
-                buttonTexture.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "RC_Icon.png")));
-                button = ApplicationLauncher.Instance.AddModApplication(Show, Hide, Empty, Empty,
-                         Empty, Empty, ApplicationLauncher.AppScenes.SPACECENTER, buttonTexture);
-                added = true;
-            }
+            if (visible) return;
+
+            settings = new GameObject("RealChuteSettingsWindow", typeof(SettingsWindow));
+            visible = true;
         }
 
-        private void RemoveButton()
+        private static void Hide()
         {
-            if (added)
-            {
-                ApplicationLauncher.Instance.RemoveModApplication(button);
-                Destroy(button);
-                button = null;
-                added = false;
-            }
+            if (!visible) return;
+
+            Destroy(settings);
+            visible = false;
         }
-
-        private void Show()
-        {
-            if (!visible)
-            {
-                settings = new GameObject("SettingsWindow", typeof(SettingsWindow));
-                visible = true;
-            }
-        }
-
-        private void Hide()
-        {
-            if (visible)
-            {
-                Destroy(settings);
-                visible = false;
-            }
-        }
-
-        private void Empty() { }
-
-        private void SetButtonVisibility(GameEvents.FromToAction<GameScenes, GameScenes> data)
-        {
-            if (data.from == GameScenes.SPACECENTER && data.to != GameScenes.SPACECENTER)
-            {
-                RemoveButton();
-            }
-        }
-
-        public static void SetApplauncherButtonFalse() => button?.SetFalse();
         #endregion
 
         #region Initialization
         private void Awake()
         {
-            if (!CompatibilityChecker.IsAllCompatible)
+            if (CompatibilityChecker.IsAllCompatible)
             {
-                //Removes RealChute parts from being seen if incompatible
-                PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
-                    .ForEach(p => p.category = PartCategories.none);
-            }
-            else
-            {
-                Debug.Log("[RealChute]: Adding toolbar events");
-                GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
-                GameEvents.onGUIApplicationLauncherReady.Add(AddButton);
-                GameEvents.onGUIApplicationLauncherDestroyed.Add(RemoveButton);
-                GameEvents.onGameSceneSwitchRequested.Add(SetButtonVisibility);
                 this.isInitialized = true;
                 DontDestroyOnLoad(this);
+                return;
             }
+
+            //Removes RealChute parts from being seen if incompatible
+            PartLoader.LoadedPartsList
+                      .Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
+                      .ForEach(p => p.category = PartCategories.none);
+        }
+
+        private void Start()
+        {
+            if (!this.isInitialized) return;
+
+            Debug.Log("[RealChute]: Adding toolbar events");
+            ToolbarControl.RegisterMod(nameof(RealChute), DisplayName: "RealChute Settings", useBlizzy: false, useStock: true, NoneAllowed: false);
+
+            this.controller = this.gameObject.AddComponent<ToolbarControl>();
+            this.controller.AddToAllToolbars(Show, Hide, ApplicationLauncher.AppScenes.SPACECENTER, nameof(RealChute), nameof(RCToolbarManager),
+                                             RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, RCUtils.ToolbarIconURL, "RealChute Settings");
+            GameEvents.onGUIEditorToolbarReady.Add(AddFilter);
         }
 
         private void OnDestroy()
@@ -139,9 +108,9 @@ namespace RealChute
 
             Debug.Log("[RealChute]: Removing toolbar events");
             GameEvents.onGUIEditorToolbarReady.Remove(AddFilter);
-            GameEvents.onGUIApplicationLauncherReady.Remove(AddButton);
-            GameEvents.onGUIApplicationLauncherDestroyed.Remove(RemoveButton);
-            GameEvents.onGameSceneSwitchRequested.Remove(SetButtonVisibility);
+            this.controller.OnDestroy();
+            Destroy(this.controller);
+
             this.isInitialized = false;
         }
         #endregion
