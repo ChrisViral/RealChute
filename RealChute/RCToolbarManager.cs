@@ -31,7 +31,7 @@ namespace RealChute
         #endregion
 
         #region Methods
-        private static void AddFilter()
+        private void AddFilter()
         {
             //Loads the RealChute parachutes icon
             Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
