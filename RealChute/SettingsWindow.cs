@@ -17,7 +17,7 @@ namespace RealChute
     {
         #region Fields
         private readonly int id = Guid.NewGuid().GetHashCode();
-        private bool showing = true, destroying;
+        private bool showing = true;
         private string level = string.Empty;
         private Rect window, drag;
         #endregion
@@ -30,6 +30,8 @@ namespace RealChute
         private void CloseWindow()
         {
             if (int.TryParse(this.level, out int i)) { RealChuteSettings.Instance.EngineerLevel = i; }
+
+            RCToolbarManager.Instance.RequestHide();
         }
         #endregion
 
@@ -37,8 +39,8 @@ namespace RealChute
         private void Awake()
         {
             if (!CompatibilityChecker.IsAllCompatible) { Destroy(this); return; }
-            this.window = new Rect(100f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE, 350f * GameSettings.UI_SCALE, 200f * GameSettings.UI_SCALE);
-            this.drag = new Rect(0f, 0f, 350f * GameSettings.UI_SCALE, 30f * GameSettings.UI_SCALE);
+            this.window = new Rect(100f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE, 300f * GameSettings.UI_SCALE, 150f * GameSettings.UI_SCALE);
+            this.drag = new Rect(0f, 0f, 300f * GameSettings.UI_SCALE, 25f * GameSettings.UI_SCALE);
             this.level = RealChuteSettings.Instance.EngineerLevel.ToString();
 
             GameEvents.onShowUI.Add(ShowUI);
@@ -56,7 +58,6 @@ namespace RealChute
         private void OnDestroy()
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
-            this.destroying = true;
             CloseWindow();
             RealChuteSettings.SaveSettings();
 
