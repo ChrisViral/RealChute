@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -31,7 +34,8 @@ namespace RealChute
         #region Functions
         private void Awake()
         {
-            Debug.Log("[RealChute]: Running RealChute " + RCUtils.AssemblyVersion);
+            string version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
+            Debug.Log("[RealChute]: Running RealChute v" + version);
             if (!CompatibilityChecker.IsAllCompatible|| Instance != null) { Destroy(this); return; }
 
             Instance = this;

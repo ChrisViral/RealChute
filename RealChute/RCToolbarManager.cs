@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using KSP.UI;
 using KSP.UI.Screens;
 using RealChute.Extensions;
@@ -22,15 +23,18 @@ namespace RealChute
     [KSPAddon(KSPAddon.Startup.MainMenu, true)]
     public class RCToolbarManager : MonoBehaviour
     {
-        #region Fields
-        private bool isInitialized;
-        private ToolbarControl controller;
+        #region Instance
+        public static RCToolbarManager Instance { get; private set; }
+        #endregion
 
-        private static bool visible;
-        private static GameObject settings;
+        #region Fields
+        private ToolbarControl controller;
+        private bool visible;
+        private GameObject settings;
         #endregion
 
         #region Methods
+        // ReSharper disable once MemberCanBeMadeStatic.Local - breaks event call
         private void AddFilter()
         {
             //Loads the RealChute parachutes icon
@@ -56,29 +60,31 @@ namespace RealChute
             button.SetState(UIRadioButton.State.True, UIRadioButton.CallType.APPLICATION, null, false);
         }
 
-        private static void Show()
+        private void Show()
         {
-            if (visible) return;
+            if (this.visible) return;
 
-            settings = new GameObject("RealChuteSettingsWindow", typeof(SettingsWindow));
-            visible = true;
+            this.settings = new GameObject("RealChuteSettingsWindow", typeof(SettingsWindow));
+            this.visible = true;
         }
 
-        private static void Hide()
+        private void Hide()
         {
-            if (!visible) return;
+            if (!this.visible) return;
 
-            Destroy(settings);
-            visible = false;
+            Destroy(this.settings);
+            this.visible = false;
         }
+
+        internal void RequestHide() => this.controller.SetFalse(true);
         #endregion
 
         #region Initialization
         private void Awake()
         {
-            if (CompatibilityChecker.IsAllCompatible)
+            if (CompatibilityChecker.IsAllCompatible && !Instance)
             {
-                this.isInitialized = true;
+                Instance = this;
                 DontDestroyOnLoad(this);
                 return;
             }
@@ -91,7 +97,7 @@ namespace RealChute
 
         private void Start()
         {
-            if (!this.isInitialized) return;
+            if (Instance != this) return;
 
             Debug.Log("[RealChute]: Adding toolbar events");
             ToolbarControl.RegisterMod(nameof(RealChute), DisplayName: "RealChute Settings", useBlizzy: false, useStock: true, NoneAllowed: false);
@@ -104,14 +110,13 @@ namespace RealChute
 
         private void OnDestroy()
         {
-            if (!this.isInitialized) return;
+            if (Instance != this) return;
 
             Debug.Log("[RealChute]: Removing toolbar events");
             GameEvents.onGUIEditorToolbarReady.Remove(AddFilter);
             this.controller.OnDestroy();
             Destroy(this.controller);
-
-            this.isInitialized = false;
+            Instance = null;
         }
         #endregion
     }
