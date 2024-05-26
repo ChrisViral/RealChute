@@ -1,4 +1,5 @@
 ﻿using System;
+using ClickThroughFix;
 using UnityEngine;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
@@ -29,7 +30,6 @@ namespace RealChute
         private void CloseWindow()
         {
             if (int.TryParse(this.level, out int i)) { RealChuteSettings.Instance.EngineerLevel = i; }
-            if (!this.destroying) { RCToolbarManager.SetApplauncherButtonFalse(); }
         }
         #endregion
 
@@ -79,7 +79,7 @@ namespace RealChute
             if (!CompatibilityChecker.IsAllCompatible|| !this.showing) { return; }
 
             GUI.skin = HighLogic.Skin;
-            this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
+            this.window = ClickThruBlocker.GUILayoutWindow(this.id, this.window, Window, "RealChute Settings " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
         }
 
         private void Window(int id)

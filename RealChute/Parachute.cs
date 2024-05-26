@@ -108,7 +108,7 @@ namespace RealChute
         {
             get
             {
-                if (this.module.GroundStop || this.module.atmPressure == 0 || this.Part.ShieldedFromAirstream) { return false; }
+                if (this.module.GroundStop || this.module.atmPressure == 0 || (this.Part.ShieldedFromAirstream && !this.ignoreShielded)) { return false; }
                 if (this.DeploymentState == DeploymentStates.CUT) { return false; }
                 if (this.DeploymentClause)
                 {
@@ -190,6 +190,7 @@ namespace RealChute
         public float forcedOrientation, maxRotation = 90f;
         public string depState = "STOWED";
         public double currentArea, chuteTemperature = 300, thermMass;
+        public bool ignoreShielded = false;
         private double convectiveFlux;
         private SafeState safeState = SafeState.SAFE;
 
@@ -649,6 +650,7 @@ namespace RealChute
             node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
             node.TryGetValue("maxRotation", ref this.maxRotation);
             node.TryGetValue("depState", ref this.depState);
+            node.TryGetValue("ignoreShielded", ref this.ignoreShielded);
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.Part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
@@ -680,6 +682,7 @@ namespace RealChute
             node.AddValue("forcedOrientation", this.forcedOrientation);
             node.AddValue("maxRotation", this.maxRotation);
             node.AddValue("depState", this.depState);
+            node.AddValue("ignoreShielded", this.ignoreShielded);
             return node;
         }
         #endregion

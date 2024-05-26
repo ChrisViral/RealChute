@@ -51,6 +51,11 @@ namespace RealChute
         public const string NyanTextureURL = "RealChute/Parts/nyan_texture";
 
         /// <summary>
+        /// RealChute toolbar icon URL
+        /// </summary>
+        public const string ToolbarIconURL = "RealChute/Plugins/PluginData/RC_Icon.png";
+
+        /// <summary>
         /// PopupDialog anchor vector
         /// </summary>
         private static readonly Vector2 anchor = new Vector2(0.5f, 0.5f);
@@ -94,7 +99,7 @@ namespace RealChute
         /// </summary>
         public static bool FarLoaded
         {
-            get 
+            get
             {
                 if (check)
                 {

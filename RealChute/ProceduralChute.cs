@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using KSP.UI.Screens;
+using Highlighting;
 using RealChute.Extensions;
 using RealChute.Libraries;
 using RealChute.Libraries.Presets;
@@ -89,23 +89,60 @@ namespace RealChute
         //Sizes
         public List<SizeNode> sizes = new List<SizeNode>();
         public Transform parent;
+
         #endregion
 
         #region Part GUI
-        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Next size")]
-        public void GUINextSize()
+        private static ProceduralChute editorVisibleChute;
+
+        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Show Parachute Editor")]
+        public void GUIToggleEditor()
         {
-            this.size++;
-            if (this.size > this.sizes.Count - 1) { this.size = 0; }
-            if (RealChuteSettings.Instance.GuiResizeUpdates) { Apply(false, false); }
+            if (!this.editorGUI.visible)
+            {
+                ShowEditor();
+            }
+            else
+            {
+                HideEditor();
+            }
         }
 
-        [KSPEvent(active = true, guiActiveEditor = true, guiName = "Previous size")]
-        public void GUIPreviousSize()
+        private void ShowEditor()
         {
-            this.size--;
-            if (this.size < 0) { this.size = this.sizes.Count - 1; }
-            if (RealChuteSettings.Instance.GuiResizeUpdates) { Apply(false, false); }
+            if (this.editorGUI?.visible ?? true) return;
+
+            if (editorVisibleChute)
+            {
+                editorVisibleChute.HideEditor();
+            }
+            else
+            {
+                EditorGUI.ResetWindowLocation();
+            }
+
+            this.editorGUI.visible = true;
+            this.Events[nameof(GUIToggleEditor)].guiName = "Hide Parachute Editor";
+            editorVisibleChute = this;
+        }
+
+        internal void HideEditor()
+        {
+            if (!this.editorGUI?.visible ?? true) return;
+
+            this.editorGUI.visible = false;
+            this.editorGUI.failedVisible = false;
+            this.editorGUI.successfulVisible = false;
+            this.editorGUI.presetVisible = false;
+            this.editorGUI.presetSaveVisible = false;
+            this.editorGUI.presetWarningVisible = false;
+            this.chutes.ForEach(c => c.templateGUI.materialsVisible = false);
+            this.Events[nameof(GUIToggleEditor)].guiName = "Show Parachute Editor";
+            editorVisibleChute = null;
+
+            // Disable part highlighting
+            HighlightPart(this.part, false);
+            this.part.symmetryCounterparts.ForEach(p => HighlightPart(p, false));
         }
         #endregion
 
@@ -426,6 +463,23 @@ namespace RealChute
         //Returns the cost for this size, if any
         public float GetModuleCost(float defaultCost, ModifierStagingSituation sit) => this.sizes.Count > 0 ? this.sizes[this.size].Cost : 0;
 
+        //Highlights the part in the editor window
+        private static void HighlightPart(Part partToHighlight, bool shouldHighlight, Color? highlightColour = null)
+        {
+            if (shouldHighlight)
+            {
+                partToHighlight.SetHighlightType(Part.HighlightType.AlwaysOn);
+                partToHighlight.SetHighlightColor(highlightColour ?? Highlighter.colorPartEditorActionSelected);
+            }
+            else
+            {
+                partToHighlight.SetHighlightType(Part.HighlightType.Disabled);
+                partToHighlight.SetHighlightColor();
+            }
+
+            partToHighlight.SetHighlight(shouldHighlight, false);
+        }
+
         ModifierChangeWhen IPartCostModifier.GetModuleCostChangeWhen() => ModifierChangeWhen.FIXED;
         #endregion
 
@@ -440,25 +494,19 @@ namespace RealChute
                 UpdateScale(this.part, this.rcModule);
             }
 
-            //If unselected
-            if (!HighLogic.LoadedSceneIsEditor || !EditorLogic.fetch || EditorLogic.fetch.editorScreen != EditorScreen.Actions)
+            if (!HighLogic.LoadedSceneIsEditor)
             {
-                this.editorGUI.visible = false;
+                HideEditor();
                 return;
             }
 
-            //Checks if the part is selected
-            if (EditorActionGroups.Instance.GetSelectedParts().Contains(this.part))
+            if (this.editorGUI.visible)
             {
-                this.editorGUI.visible = true;
+                //We're running this every frame to avoid something else from clearing the highlight
+                HighlightPart(this.part, true, XKCDColors.Dandelion);
+                this.part.symmetryCounterparts.ForEach(p => HighlightPart(p, true));
             }
-            else
-            {
-                this.editorGUI.visible = false;
-                this.chutes.ForEach(c => c.templateGUI.materialsVisible = false);
-                this.editorGUI.failedVisible = false;
-                this.editorGUI.successfulVisible = false;
-            }
+
             //Checks if size must update
             if (this.sizes.Count > 0 && this.lastSize != this.size) { UpdateScale(this.part, this.rcModule); }
             //Checks if case texture must update
@@ -469,10 +517,18 @@ namespace RealChute
         private void OnGUI()
         {
             //Rendering manager
-            if (!CompatibilityChecker.IsAllCompatible) { return; }
+            if (!CompatibilityChecker.IsAllCompatible || !this.editorGUI.visible) { return; }
 
             GUI.skin = HighLogic.Skin;
             this.editorGUI.RenderGUI();
+        }
+
+        private void OnDestroy()
+        {
+            if (editorVisibleChute == this)
+            {
+                HideEditor();
+            }
         }
         #endregion
 
@@ -501,9 +557,8 @@ namespace RealChute
             if (HighLogic.LoadedSceneIsEditor)
             {
                 //Windows initiation
-                float y = 390f * GameSettings.UI_SCALE;
-                float height = Screen.height - y - (20f * GameSettings.UI_SCALE);
-                this.editorGUI.window = new Rect(5f * GameSettings.UI_SCALE, y, 420f * GameSettings.UI_SCALE, height);
+                this.editorGUI.windowDrag = new Rect(0f, 0f, 400f * GameSettings.UI_SCALE, 25f * GameSettings.UI_SCALE);
+                this.editorGUI.closeButtonRect = new Rect(370f * GameSettings.UI_SCALE, 10f * GameSettings.UI_SCALE, 20f * GameSettings.UI_SCALE, 20f * GameSettings.UI_SCALE);
                 this.chutes.ForEach(c =>
                 {
                     c.templateGUI.materialsWindow = new Rect(this.editorGUI.matX, this.editorGUI.matY, 375f * GameSettings.UI_SCALE, 275f * GameSettings.UI_SCALE);
@@ -514,28 +569,6 @@ namespace RealChute
                 this.editorGUI.presetsWindow = new Rect((Screen.width / 2f) - (200f * GameSettings.UI_SCALE), (Screen.height / 2f) - (250f * GameSettings.UI_SCALE), 400f * GameSettings.UI_SCALE, 500f * GameSettings.UI_SCALE);
                 this.editorGUI.presetsSaveWindow = new Rect((Screen.width / 2f) - (175f * GameSettings.UI_SCALE), (Screen.height / 2f) - (110f * GameSettings.UI_SCALE), 350f * GameSettings.UI_SCALE, 220f * GameSettings.UI_SCALE);
                 this.editorGUI.presetsWarningWindow = new Rect((Screen.width / 2f) - (100f * GameSettings.UI_SCALE), (Screen.height / 2f) - (50f * GameSettings.UI_SCALE), 200f * GameSettings.UI_SCALE, 100f * GameSettings.UI_SCALE);
-
-                if (HighLogic.CurrentGame.Mode == Game.Modes.CAREER)
-                {
-                    float level = 0f;
-                    bool isVab = true;
-                    switch (EditorDriver.editorFacility)
-                    {
-                        case EditorFacility.VAB:
-                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.VehicleAssemblyBuilding); break;
-
-                        case EditorFacility.SPH:
-                            level = ScenarioUpgradeableFacilities.GetFacilityLevel(SpaceCenterFacility.SpaceplaneHangar); isVab = false; break;
-                    }
-                    if (GameVariables.Instance.UnlockedActionGroupsStock(level, isVab))
-                    {
-                        this.Events.ForEach(e => e.guiActiveEditor = false);
-                    }
-                }
-                else
-                {
-                    this.Events.ForEach(e => e.guiActiveEditor = false);
-                }
 
                 //Gets the original part state
                 if (this.textures != null && this.caseId == -1)

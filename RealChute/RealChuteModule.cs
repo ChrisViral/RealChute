@@ -1,11 +1,12 @@
 ﻿﻿using System;
- using System.Collections.Generic;
- using System.Linq;
- using System.Text;
- using KSP.UI.Screens;
- using RealChute.Extensions;
- using UnityEngine;
- using Random = System.Random;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using ClickThroughFix;
+using KSP.UI.Screens;
+using RealChute.Extensions;
+using UnityEngine;
+using Random = System.Random;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -67,6 +68,8 @@ namespace RealChute
         public int chuteCount = 5;
         [KSPField]
         public bool reverseOrientation;
+        [KSPField]
+        public SafeState safeState = SafeState.SAFE;
         #endregion
 
         #region Propreties
@@ -93,6 +96,9 @@ namespace RealChute
         //If there is more than one parachute on the part
         public bool SecondaryChute => this.parachutes.Count > 1;
 
+        //Check if the staging button has been pressed this frame
+        public bool PressedStage => !InputLockManager.IsLocked(ControlTypes.STAGING) && GameSettings.LAUNCH_STAGES.GetKeyDown();
+
         //Quick access to the part GUI events
         private BaseEvent deploy, arm, disarm, cut, repack;
         private BaseEvent Deploy => this.deploy ?? (this.deploy = this.Events["GUIDeploy"]);
@@ -114,7 +120,6 @@ namespace RealChute
         private ProceduralChute pChute;
         public List<Parachute> parachutes = new List<Parachute>();
         public ConfigNode node;
-        public SafeState safeState = SafeState.SAFE;
 
         //GUI
         protected bool visible, hid;
@@ -483,7 +488,7 @@ namespace RealChute
             this.convectiveFactor = Math.Pow(UtilMath.Clamp01((this.vessel.mach - PhysicsGlobals.NewtonianMachTempLerpStartMach) / (PhysicsGlobals.NewtonianMachTempLerpEndMach - PhysicsGlobals.NewtonianMachTempLerpStartMach)), PhysicsGlobals.NewtonianMachTempLerpExponent);
             this.dragVector = -velocity.normalized;
 
-            if (!this.staged && GameSettings.LAUNCH_STAGES.GetKeyDown() && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
+            if (!this.staged && this.PressedStage && this.vessel.isActiveVessel && (this.part.inverseStage == StageManager.CurrentStage - 1 || StageManager.CurrentStage == 0)) { ActivateRC(); }
             if (this.deployOnGround && !this.staged)
             {
                 if (!this.launched && !this.vessel.LandedOrSplashed)
@@ -578,6 +583,7 @@ namespace RealChute
             }
             //Staging icon
             this.part.stagingIcon = "PARACHUTES";
+            this.safeState = SafeState.SAFE;
 
             //Part GUI
             if (this.spareChutes < 0) { this.Fields["chuteCount"].guiActive = false; }
@@ -708,7 +714,7 @@ namespace RealChute
             if (CompatibilityChecker.IsAllCompatible&& (HighLogic.LoadedSceneIsFlight || HighLogic.LoadedSceneIsEditor) && this.visible && !this.hid)
             {
                 GUI.skin = HighLogic.Skin;
-                this.window = GUILayout.Window(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
+                this.window = ClickThruBlocker.GUILayoutWindow(this.id, this.window, Window, "RealChute Info Window " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow);
             }
         }
 
