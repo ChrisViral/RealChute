@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2021")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2024")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -37,11 +37,11 @@ using System.Runtime.InteropServices;
 //      Build Number
 //      Revision
 //
-// You can specify all the values or you can default the Build and Revision Numbers
+// You can specify all the values, or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.4.8.*")]
-[assembly: AssemblyInformationalVersion("1.4.8.3")]
+[assembly: AssemblyVersion("1.4.9.*")]
+[assembly: AssemblyInformationalVersion("1.4.9.0")]
 
 // Add third party mods dependencies
 [assembly: KSPAssemblyDependency("ClickThroughBlocker", 1, 0)]
