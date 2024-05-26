@@ -503,7 +503,7 @@ namespace RealChute
             if (this.editorGUI.visible)
             {
                 //We're running this every frame to avoid something else from clearing the highlight
-                HighlightPart(this.part, true, Highlighter.colorPartHighlightDefault);
+                HighlightPart(this.part, true, XKCDColors.Dandelion);
                 this.part.symmetryCounterparts.ForEach(p => HighlightPart(p, true));
             }
 
