@@ -31,7 +31,7 @@ namespace RealChute
 
         #region Fields
         private readonly ProceduralChute pChute;
-        internal Rect window, failedWindow, successfulWindow;
+        internal Rect windowDrag, closeButtonRect, failedWindow, successfulWindow;
         internal Rect presetsWindow, presetsSaveWindow, presetsWarningWindow;
         private readonly int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
         private readonly int presetSaveId = Guid.NewGuid().GetHashCode(), presetWarningId = Guid.NewGuid().GetHashCode();
@@ -41,8 +41,11 @@ namespace RealChute
         internal string presetName = string.Empty, presetDescription = string.Empty;
         internal bool warning = false;
         internal bool visible = false, failedVisible, successfulVisible;
-        private bool presetVisible, presetSaveVisible, presetWarningVisible, saveWarning;
+        internal bool presetVisible, presetSaveVisible, presetWarningVisible;
+        private bool saveWarning;
         internal string[] cases = new string[0], canopies = new string[0], models = new string[0];
+
+        internal static Rect mainWindow;
         #endregion
 
         #region Constructor
@@ -70,7 +73,7 @@ namespace RealChute
             GUI.skin = HighLogic.Skin;
             if (this.visible)
             {
-                this.window = GUILayout.Window(this.mainId, this.window, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
+                mainWindow = GUILayout.Window(this.mainId, mainWindow, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
             }
             foreach (ChuteTemplate chute in this.Chutes)
             {
@@ -105,6 +108,14 @@ namespace RealChute
         //Main GUI window
         private void Window(int id)
         {
+            //Top right close button
+            Color temp = GUI.color;
+            GUI.color = new Color(1f, 0.3f, 0.3f, 1f);
+            bool shouldClose = GUI.Button(this.closeButtonRect, "X", GUIUtils.ScaledButton);
+            GUI.color = temp;
+
+            GUI.DragWindow(this.windowDrag);
+
             GUILayout.BeginVertical();
 
             #region Info labels
@@ -183,10 +194,10 @@ namespace RealChute
             this.Chutes[0].templateGUI.MaterialsSelector();
 
             //MustGoDown
-            GUIUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, this.window.width);
+            GUIUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, mainWindow.width);
 
             //DeployOnGround
-            GUIUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, this.window.width);
+            GUIUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, mainWindow.width);
 
             //Timer
             GUIUtils.CreateTimeEntryArea("Deployment timer:", ref this.pChute.timer, 0f, 3600f);
@@ -241,6 +252,7 @@ namespace RealChute
             GUILayout.BeginVertical();
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();
+            GUILayout.Space(5f * GameSettings.UI_SCALE);
             GUILayout.EndScrollView();
             //Scroll end
 
@@ -261,6 +273,11 @@ namespace RealChute
             #endregion
 
             GUILayout.EndVertical();
+
+            if (shouldClose)
+            {
+                this.pChute.HideEditor();
+            }
         }
 
         //Failure notice
@@ -392,6 +409,12 @@ namespace RealChute
             if (GUILayout.Button("No", GUIUtils.ScaledButton)) { this.presetWarningVisible = false; }
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
+        }
+
+        //Resets the main window location to its default value
+        internal static void ResetWindowLocation()
+        {
+            mainWindow = new Rect((Screen.width / 2f) - (200f * GameSettings.UI_SCALE), (Screen.height / 2f) - (300f * GameSettings.UI_SCALE), 400f * GameSettings.UI_SCALE, 600f * GameSettings.UI_SCALE);
         }
         #endregion
     }
