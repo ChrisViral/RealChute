@@ -510,7 +510,7 @@ namespace RealChute
             //Checks if size must update
             if (this.sizes.Count > 0 && this.lastSize != this.size) { UpdateScale(this.part, this.rcModule); }
             //Checks if case texture must update
-            if (this.textures.Cases.Count > 0 && this.lastCaseId != this.caseId) { UpdateCaseTexture(this.rcModule); }
+            if (this.textures?.Cases.Count > 0 && this.lastCaseId != this.caseId) { UpdateCaseTexture(this.rcModule); }
             this.chutes.ForEach(c => c.SwitchType());
         }
 
