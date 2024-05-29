@@ -661,7 +661,7 @@ namespace RealChute
                 Parachute parachute = this.parachutes[0];
                 builder.AppendFormat("Parachute material: {0}\n", parachute.material);
                 builder.AppendFormat("Drag coefficient: {0:0.00}\n", parachute.mat.DragCoefficient);
-                builder.AppendFormat("Material max temperature: {0:0.#}°C", parachute.mat.MaxTemp + RCUtils.AbsoluteZero);
+                builder.AppendFormat("Material max temperature: {0:0.#}°C\n", parachute.mat.MaxTemp + RCUtils.AbsoluteZero);
                 builder.AppendFormat("Predeployed diameter: {0}m\n", parachute.preDeployedDiameter);
                 builder.AppendFormat("Deployed diameter: {0}m\n", parachute.deployedDiameter);
                 if (!parachute.minIsPressure) { builder.AppendFormat("Minimum deployment altitude: {0}m\n", parachute.minDeployment); }

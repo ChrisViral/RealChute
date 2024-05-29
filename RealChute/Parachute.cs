@@ -190,13 +190,14 @@ namespace RealChute
         public float forcedOrientation, maxRotation = 90f;
         public string depState = "STOWED";
         public double currentArea, chuteTemperature = 300, thermMass;
-        public bool ignoreShielded = false;
+        public bool ignoreShielded;
+        public float referenceDiameter = -1f;
+        public int canopyCount = 1;
         private double convectiveFlux;
         private SafeState safeState = SafeState.SAFE;
 
         //Flight
         internal RealChuteModule module;
-        internal bool secondary = false;
         internal Transform parachute, cap;
         private Rigidbody rigidbody;
         internal MaterialDefinition mat = new MaterialDefinition();
@@ -651,6 +652,8 @@ namespace RealChute
             node.TryGetValue("maxRotation", ref this.maxRotation);
             node.TryGetValue("depState", ref this.depState);
             node.TryGetValue("ignoreShielded", ref this.ignoreShielded);
+            node.TryGetValue("referenceDiameter", ref this.referenceDiameter);
+            node.TryGetValue("canopyCount", ref this.canopyCount);
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.Part.FindModelTransform(this.parachuteName);
             if (p != null) { p.gameObject.SetActive(false); }
@@ -683,6 +686,8 @@ namespace RealChute
             node.AddValue("maxRotation", this.maxRotation);
             node.AddValue("depState", this.depState);
             node.AddValue("ignoreShielded", this.ignoreShielded);
+            node.AddValue("referenceDiameter", this.referenceDiameter);
+            node.AddValue("canopyCount", this.canopyCount);
             return node;
         }
         #endregion

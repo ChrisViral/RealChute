@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
@@ -21,9 +21,6 @@ namespace RealChute
     public class ChuteTemplate
     {
         #region Propreties
-        //All Parachutes objects on the part
-        public List<Parachute> Parachutes => this.pChute.rcModule.parachutes;
-
         //Current part
         private Part Part => this.pChute.part;
 
@@ -43,6 +40,16 @@ namespace RealChute
             {
                 string[] canopies = RCUtils.ParseArray(this.pChute.currentCanopies);
                 return canopies.IndexInRange(this.id) ? canopies[this.id] : string.Empty;
+            }
+        }
+
+        //Current canopy model for this chute
+        public string CurrentCanopyModel
+        {
+            get
+            {
+                string[] models = RCUtils.ParseArray(this.pChute.currentCanopyModels);
+                return models.IndexInRange(this.id) ? models[this.id] : string.Empty;
             }
         }
 
@@ -233,7 +240,11 @@ namespace RealChute
         //Updates the canopy model
         internal void UpdateCanopy()
         {
-            if (this.Textures == null) { return; }
+            if (this.Textures == null)
+            {
+                TryUpdateCanopyScaleFromModule();
+                return;
+            }
 
             if (this.Textures.TryGetModel(this.templateGUI.modelId, ref this.model))
             {
@@ -251,14 +262,11 @@ namespace RealChute
                 }
 
                 test.SetActive(true);
-                float scale = RCUtils.GetDiameter(this.parachute.DeployedArea / this.model.Count) / this.model.Diameter;
-                test.transform.localScale = new Vector3(scale, scale, scale);
-                Debug.Log("[RealChute]: " + this.Part.partInfo.title + " " + RCUtils.ParachuteNumber(this.id) + " Scale: " + scale);
+                UpdateCanopyScale(test.transform, this.model.Count, this.model.Diameter);
 
-                GameObject obj = Object.Instantiate(test);
-                Object.Destroy(test);
                 Transform toDestroy = this.parachute.parachute;
-                obj.transform.parent = toDestroy.parent;
+                GameObject obj = Object.Instantiate(test, toDestroy.parent, true);
+                Object.Destroy(test);
                 obj.transform.position = toDestroy.position;
                 obj.transform.rotation = toDestroy.rotation;
                 Object.DestroyImmediate(toDestroy.gameObject);
@@ -272,6 +280,20 @@ namespace RealChute
             }
 
             UpdateCanopyTexture();
+        }
+
+        private void TryUpdateCanopyScaleFromModule()
+        {
+            if (this.parachute.referenceDiameter <= 0f || this.parachute.canopyCount <= 0) return;
+
+            UpdateCanopyScale(this.parachute.parachute, this.parachute.canopyCount, this.parachute.referenceDiameter);
+        }
+
+        private void UpdateCanopyScale(Transform canopyTransform, int canopyCount, float referenceDiameter)
+        {
+            float scale = RCUtils.GetDiameter(this.parachute.DeployedArea / canopyCount) / referenceDiameter;
+            canopyTransform.localScale = new Vector3(scale, scale, scale);
+            Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} Scale: {scale}");
         }
 
         //Type switchup event
@@ -336,16 +358,19 @@ namespace RealChute
                 {
                     if (this.templateGUI.chuteId == -1)
                     {
-                        if (this.Textures.TryGetCanopy(this.CurrentCanopy, ref this.canopy))
-                        {
-                            this.templateGUI.chuteId = this.Textures.GetCanopyIndex(this.canopy.Name);
-                        }
-                        else { this.templateGUI.modelId = 0; }
+                        this.templateGUI.chuteId = this.Textures.TryGetCanopy(this.CurrentCanopy, ref this.canopy) ? this.Textures.GetCanopyIndex(this.canopy.Name) : 0;
                     }
 
                     if (this.templateGUI.modelId == -1)
                     {
-                        this.templateGUI.modelId = this.Textures.TryGetModel(this.parachute.parachuteName, ref this.model, true) ? this.Textures.GetModelIndex(this.model.Name) : 0;
+                        if (this.Textures.TryGetModel(this.CurrentCanopyModel, ref this.model))
+                        {
+                            this.templateGUI.modelId = this.Textures.GetModelIndex(this.model.Name);
+                        }
+                        else
+                        {
+                            this.templateGUI.modelId = this.Textures.TryGetModel(this.parachute.parachuteName, ref this.model, true) ? this.Textures.GetModelIndex(this.model.Name) : 0;
+                        }
                     }
 
                     if (this.templateGUI.TypeId == -1)
