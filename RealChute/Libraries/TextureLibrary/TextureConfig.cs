@@ -171,7 +171,7 @@ namespace RealChute.Libraries.TextureLibrary
             if (!string.IsNullOrEmpty(type) && this.Types.Count > 0 && this.Cases.Count > 0) { Debug.LogError($"[RealChute]: Could not find the CaseConfig of \"{type}\" type at the [{index}] index in the library"); }
             return false;
         }
-        
+
         /// <summary>
         /// Returns all the CaseConfigs of the given parachute type
         /// </summary>

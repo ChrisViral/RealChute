@@ -21,9 +21,6 @@ namespace RealChute
     public class ChuteTemplate
     {
         #region Propreties
-        //All Parachutes objects on the part
-        public List<Parachute> Parachutes => this.pChute.rcModule.parachutes;
-
         //Current part
         private Part Part => this.pChute.part;
 
@@ -43,6 +40,16 @@ namespace RealChute
             {
                 string[] canopies = RCUtils.ParseArray(this.pChute.currentCanopies);
                 return canopies.IndexInRange(this.id) ? canopies[this.id] : string.Empty;
+            }
+        }
+
+        //Current canopy model for this chute
+        public string CurrentCanopyModel
+        {
+            get
+            {
+                string[] models = RCUtils.ParseArray(this.pChute.currentCanopyModels);
+                return models.IndexInRange(this.id) ? models[this.id] : string.Empty;
             }
         }
 
@@ -351,16 +358,19 @@ namespace RealChute
                 {
                     if (this.templateGUI.chuteId == -1)
                     {
-                        if (this.Textures.TryGetCanopy(this.CurrentCanopy, ref this.canopy))
-                        {
-                            this.templateGUI.chuteId = this.Textures.GetCanopyIndex(this.canopy.Name);
-                        }
-                        else { this.templateGUI.modelId = 0; }
+                        this.templateGUI.chuteId = this.Textures.TryGetCanopy(this.CurrentCanopy, ref this.canopy) ? this.Textures.GetCanopyIndex(this.canopy.Name) : 0;
                     }
 
                     if (this.templateGUI.modelId == -1)
                     {
-                        this.templateGUI.modelId = this.Textures.TryGetModel(this.parachute.parachuteName, ref this.model, true) ? this.Textures.GetModelIndex(this.model.Name) : 0;
+                        if (this.Textures.TryGetModel(this.CurrentCanopyModel, ref this.model))
+                        {
+                            this.templateGUI.modelId = this.Textures.GetModelIndex(this.model.Name);
+                        }
+                        else
+                        {
+                            this.templateGUI.modelId = this.Textures.TryGetModel(this.parachute.parachuteName, ref this.model, true) ? this.Textures.GetModelIndex(this.model.Name) : 0;
+                        }
                     }
 
                     if (this.templateGUI.TypeId == -1)

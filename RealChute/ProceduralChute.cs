@@ -41,6 +41,8 @@ namespace RealChute
         [KSPField]
         public string currentCanopies = string.Empty;
         [KSPField]
+        public string currentCanopyModels = string.Empty;
+        [KSPField]
         public string currentTypes = "Main";
         [KSPField]
         public bool isTweakable = true;
