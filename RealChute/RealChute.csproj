@@ -116,7 +116,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>xcopy "$(SolutionDir)Output\*" "G:\Modding\KSP\*" /D /E /C /R /I /K /Y</PostBuildEvent>
+    <PostBuildEvent>xcopy "$(SolutionDir)Output\*" "G:\Modding\KSP\*" /D /E /C /R /I /K /Y
+del "$(TargetDir)$(TargetName).pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
