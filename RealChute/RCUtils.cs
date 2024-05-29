@@ -92,37 +92,6 @@ namespace RealChute
                 return assemblyVersion;
             }
         }
-
-        private static bool farLoaded, check = true;
-        /// <summary>
-        /// Returns if FAR is currently loaded in the game
-        /// </summary>
-        public static bool FarLoaded
-        {
-            get
-            {
-                if (check)
-                {
-                    farLoaded = AssemblyLoader.loadedAssemblies.Any(a => a.dllName == "FerramAerospaceResearch");
-                    check = false;
-                }
-                return farLoaded;
-            }
-        }
-
-        private static MethodInfo densityMethod;
-        /// <summary>
-        /// A delegate to the FAR GetCurrentDensity method
-        /// </summary>
-        public static MethodInfo DensityMethod
-        {
-            get
-            {
-                return densityMethod ??
-                      (densityMethod = AssemblyLoader.loadedAssemblies.Single(a => a.dllName == "FerramAerospaceResearch").assembly
-                                                     .GetTypes().Single(t => t.Name == "FARAeroUtil").GetMethod("GetCurrentDensity", BindingFlags.Public & BindingFlags.Static));
-            }
-        }
         #endregion
 
         #region Methods

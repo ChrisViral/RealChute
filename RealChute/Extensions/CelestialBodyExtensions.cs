@@ -16,15 +16,13 @@ namespace RealChute.Extensions
         #region Methods
         /// <summary>
         /// Returns the atmospheric density at the given altitude on the given celestial body
-        /// DEPRECATED per discussion with ferram4; FAR is no longer needed as stock KSP handles this adequately now.
         /// </summary>
         /// <param name="body">Body to get the density for</param>
         /// <param name="alt">Altitude to fetch the density at</param>
         /// <param name="temperature">Ambient temperature</param>
-        /// <param name="vessel">Optional vessel to pass to FARAeroUtil.GetCurrentDensity(vessel)</param>
-        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature, Vessel vessel = null)
+        public static double GetDensityAtAlt(this CelestialBody body, double alt, double temperature)
         {
-            return !body.atmosphere || alt > GetMaxAtmosphereAltitude(body) ? 0d : FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body);
+            return body.atmosphere && alt <= GetMaxAtmosphereAltitude(body) ? FlightGlobals.getAtmDensity(body.GetPressureAtAlt(alt), temperature, body) : 0d;
         }
 
         /// <summary>
@@ -32,19 +30,19 @@ namespace RealChute.Extensions
         /// </summary>
         /// <param name="body">body to get the pressure for</param>
         /// <param name="alt">Altitude to get the pressure at</param>
-        public static double GetPressureAtAlt(this CelestialBody body, double alt) => !body.atmosphere || alt > body.GetMaxAtmosphereAltitude() ? 0 : FlightGlobals.getStaticPressure(alt, body);
+        public static double GetPressureAtAlt(this CelestialBody body, double alt) => body.atmosphere && alt <= body.GetMaxAtmosphereAltitude() ? FlightGlobals.getStaticPressure(alt, body) : 0d;
 
         /// <summary>
         /// Gets the atmospheric pressure at sea level on the given body
         /// </summary>
         /// <param name="body">body to get the pressure for</param>
-        public static double GetPressureAsl(this CelestialBody body) => !body.atmosphere ? 0 : FlightGlobals.getStaticPressure(0, body);
+        public static double GetPressureAsl(this CelestialBody body) => body.atmosphere ? FlightGlobals.getStaticPressure(0, body) : 0d;
 
         /// <summary>
         /// Returns the altitude at which the atmosphere disappears
         /// </summary>
         /// <param name="body">body to get the max atmosphere alt for</param>
-        public static double GetMaxAtmosphereAltitude(this CelestialBody body) => !body.atmosphere ? 0 : body.atmosphereDepth;
+        public static double GetMaxAtmosphereAltitude(this CelestialBody body) => body.atmosphere ? body.atmosphereDepth : 0d;
 
         /// <summary>
         /// Returns the maximum temperature possible on a given body at the given altitude
