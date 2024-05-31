@@ -250,26 +250,39 @@ namespace RealChute
             {
                 if (string.IsNullOrEmpty(this.Parameters.ModelURL))
                 {
-                    Debug.LogWarning("[RealChute]: The " + this.model.Name + " #" + (this.id + 1) + " URL is empty");
+                    Debug.LogWarning($"[RealChute]: The {this.model.Name} #{this.id + 1} URL is empty");
                     return;
                 }
 
                 GameObject test = GameDatabase.Instance.GetModel(this.Parameters.ModelURL);
                 if (test == null)
                 {
-                    Debug.LogWarning("[RealChute]: The " + this.model.Name + " #" + (this.id + 1) + " GameObject is null");
+                    Debug.LogWarning($"[RealChute]: The {this.model.Name} #{this.id + 1} GameObject is null");
                     return;
                 }
 
+                int lastSlash = this.Parameters.ModelURL.LastIndexOf('/');
+                test.name = this.Parameters.ModelURL.Substring(lastSlash + 1);
                 test.SetActive(true);
-                UpdateCanopyScale(test.transform, this.model.Count, this.model.Diameter);
+                RCUtils.PrintHierarchy(test);
 
+                GameObject canopyRootObject = !string.IsNullOrEmpty(this.Parameters.InstantiateName) ? RCUtils.FindChildRecursive(test, this.Parameters.InstantiateName) : test;
+                if (!canopyRootObject)
+                {
+                    Debug.LogWarning($"[RealChute]: Could not find root object {this.Parameters.InstantiateName} on model {this.model.Name} #{this.id + 1}");
+                    Object.Destroy(test);
+                    return;
+                }
+
+                UpdateCanopyScale(canopyRootObject.transform, this.model.Count, this.model.Diameter);
                 Transform toDestroy = this.parachute.parachute;
-                GameObject obj = Object.Instantiate(test, toDestroy.parent, true);
+                GameObject obj = Object.Instantiate(canopyRootObject, toDestroy.parent);
+                obj.name = canopyRootObject.name; // Removes (Clone)
                 Object.Destroy(test);
-                obj.transform.position = toDestroy.position;
-                obj.transform.rotation = toDestroy.rotation;
+
+                obj.transform.SetPositionAndRotation(toDestroy.position, toDestroy.rotation);
                 Object.DestroyImmediate(toDestroy.gameObject);
+
                 this.parachute.parachute = this.Part.FindModelTransform(this.Parameters.TransformName);
                 this.parachute.parachuteName = this.Parameters.TransformName;
                 this.parachute.deploymentAnimation = this.Parameters.DepAnim;

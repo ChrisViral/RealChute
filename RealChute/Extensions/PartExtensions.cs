@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -74,6 +75,9 @@ namespace RealChute.Extensions
         {
             foreach (Animation animation in part.FindModelAnimators(animationName))
             {
+                #if DEBUG
+                Debug.Log($"[RealChute]: Part {part.name} Animation Clip {animationName} on Object {animation.gameObject.name}");
+                #endif
                 AnimationState state = animation[animationName];
                 state.normalizedTime = 0f;
                 state.normalizedSpeed = 0f;

@@ -29,6 +29,12 @@ namespace RealChute.Libraries.TextureLibrary
             /// </summary>
             public string TransformName => this.transformName;
 
+            private readonly string instantiateName;
+            /// <summary>
+            /// Name of the object from the model to instantiate
+            /// </summary>
+            public string InstantiateName => this.instantiateName;
+
             private readonly string preDepAnim = string.Empty;
             /// <summary>
             /// The name of the predeployment animation
@@ -51,6 +57,7 @@ namespace RealChute.Libraries.TextureLibrary
             {
                 node.TryGetValue("modelURL", ref this.modelURL);
                 node.TryGetValue("transformName", ref this.transformName);
+                node.TryGetValue("instantiateName", ref this.instantiateName);
                 node.TryGetValue("preDepAnim", ref this.preDepAnim);
                 node.TryGetValue("depAnim", ref this.depAnim);
             }

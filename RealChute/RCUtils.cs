@@ -3,8 +3,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using UnityEngine;
 using static System.Math;
+using Debug = UnityEngine.Debug;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -166,6 +168,52 @@ namespace RealChute
         /// <param name="message">Message of the PopupDialog</param>
         /// <param name="button">Button text of the PopupDialog</param>
         public static void PopupDialog(string title, string message, string button) => global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, title, message, button, false, HighLogic.UISkin);
+
+        /// <summary>
+        /// Finds the child of a GameObject recursively
+        /// </summary>
+        /// <param name="obj">Object to search from</param>
+        /// <param name="name">Name of the object to find</param>
+        /// <returns>The found child object, or null if none was found</returns>
+        public static GameObject FindChildRecursive(GameObject obj, string name)
+        {
+            static Transform FindTransform(Transform transform, string name)
+            {
+                Transform match = transform.Find(name);
+                if (match) return match;
+
+                foreach (Transform child in transform)
+                {
+                    match = FindTransform(child, name);
+                    if (match) return match;
+                }
+
+                return null;
+            }
+
+            if (obj.name == name) return obj;
+
+            Transform match = FindTransform(obj.transform, name);
+            return match ? match.gameObject : null;
+        }
+
+        [Conditional("DEBUG")]
+        public static void PrintHierarchy(GameObject obj)
+        {
+            static void PrintRecursive(Transform transform, StringBuilder builder, int indent = 0)
+            {
+                builder.Append('|', indent).AppendLine(transform.name);
+                foreach (Transform child in transform)
+                {
+                    PrintRecursive(child, builder, indent + 1);
+                }
+            }
+
+            StringBuilder builder = StringBuilderCache.Acquire();
+            builder.AppendLine($"[RealChute]: Object Hierarchy ({obj.name})");
+            PrintRecursive(obj.transform, builder);
+            Debug.Log(builder.ToStringAndRelease());
+        }
         #endregion
     }
 }
