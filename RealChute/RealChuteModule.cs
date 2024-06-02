@@ -68,7 +68,7 @@ namespace RealChute
         public int chuteCount = 5;
         [KSPField]
         public bool reverseOrientation;
-        [KSPField]
+        [KSPField(guiActive = true, guiName = "Is Safe to Deploy?")]
         public SafeState safeState = SafeState.SAFE;
         #endregion
 
