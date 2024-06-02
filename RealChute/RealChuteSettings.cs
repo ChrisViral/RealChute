@@ -16,11 +16,10 @@ namespace RealChute
     public class RealChuteSettings
     {
         #region Instance
-        private static RealChuteSettings instance;
         /// <summary>
         /// Returns the current RealChute_Settings config file
         /// </summary>
-        public static RealChuteSettings Instance => instance ?? (instance = new RealChuteSettings());
+        public static RealChuteSettings Instance { get; } = new();
         #endregion
 
         #region Propreties
@@ -86,7 +85,7 @@ namespace RealChute
         /// </summary>
         public RealChuteSettings()
         {
-            ConfigNode node = new ConfigNode(), settings = new ConfigNode("REALCHUTE_SETTINGS");
+            ConfigNode node = new(), settings = new("REALCHUTE_SETTINGS");
             Debug.Log("[RealChute]: Loading settings file.");
             if (!File.Exists(RCUtils.SettingsURL))
             {
@@ -97,22 +96,26 @@ namespace RealChute
                 settings.AddValue("engineerLevel", this.engineerLevel);
                 settings.AddValue("activateNyan", this.activateNyan);
                 node.AddNode(settings);
-                this.Presets = new ConfigNode[0];
+                this.Presets = [];
                 node.Save(RCUtils.SettingsURL);
             }
             else
             {
                 node = ConfigNode.Load(RCUtils.SettingsURL);
-                bool mustSave = false;
-                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { SaveSettings(); return; }
-                if (!settings.TryGetValue("autoArm", ref this.autoArm)) { mustSave = true; }
-                if (!settings.TryGetValue("jokeActivated", ref this.jokeActivated)) { mustSave = true; }
+                if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings))
+                {
+                    SaveSettings();
+                    return;
                 }
-                if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; }
-                if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; }
-                if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; }
+
+                bool allValuesFound = settings.TryGetValue("autoArm", ref this.autoArm);
+                allValuesFound     &= settings.TryGetValue("jokeActivated", ref this.jokeActivated);
+                allValuesFound     &= settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer);
+                allValuesFound     &= settings.TryGetValue("engineerLevel", ref this.engineerLevel);
+                allValuesFound     &= settings.TryGetValue("activateNyan", ref this.activateNyan);
                 this.Presets = settings.GetNodes("PRESET");
-                if (mustSave) { SaveSettings(); }
+
+                if (!allValuesFound) SaveSettings();
             }
         }
         #endregion
@@ -123,12 +126,13 @@ namespace RealChute
         /// </summary>
         public static void SaveSettings()
         {
-            ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
+            ConfigNode settings = new("REALCHUTE_SETTINGS"), node = new();
             settings.AddValue("autoArm", Instance.autoArm);
             settings.AddValue("jokeActivated", Instance.jokeActivated);
             settings.AddValue("mustBeEngineer", Instance.mustBeEngineer);
             settings.AddValue("engineerLevel", Instance.engineerLevel);
             settings.AddValue("activateNyan", Instance.activateNyan);
+
             if (PresetsLibrary.Instance.Presets.Count > 0)
             {
                 foreach (Preset preset in PresetsLibrary.Instance.Presets.Values)
@@ -136,6 +140,7 @@ namespace RealChute
                     settings.AddNode(preset.Save());
                 }
             }
+
             node.AddNode(settings);
             node.Save(RCUtils.SettingsURL);
             Debug.Log("[RealChute]: Saved settings file.");
