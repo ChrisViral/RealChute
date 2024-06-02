@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using RealChute.Libraries.Presets;
 using UnityEngine;
 
@@ -23,7 +23,7 @@ namespace RealChute
         #endregion
 
         #region Propreties
-        private bool autoArm;
+        private bool autoArm = true;
         /// <summary>
         /// If parachutes must automatically arm when staged
         /// </summary>
