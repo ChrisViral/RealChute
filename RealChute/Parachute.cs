@@ -267,7 +267,7 @@ namespace RealChute
             this.capOff = true;
             this.cap.gameObject.SetActive(false);
             this.module.UpdateDragCubes();
-            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.LOWDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -283,7 +283,7 @@ namespace RealChute
             this.capOff = true;
             this.cap.gameObject.SetActive(false);
             this.module.UpdateDragCubes();
-            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 1); }
+            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
             else { this.Part.Effect("rcpredeploy"); }
             this.DeploymentState = DeploymentStates.PREDEPLOYED;
             this.parachute.gameObject.SetActive(true);
@@ -296,7 +296,7 @@ namespace RealChute
         public void Deploy()
         {
             this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            if (!RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("rcdeploy"); }
+            if (!RealChuteSettings.Instance.NyanMode) { this.Part.Effect("rcdeploy"); }
             this.DeploymentState = DeploymentStates.DEPLOYED;
             if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation))
             {
@@ -310,7 +310,7 @@ namespace RealChute
         //Parachute cutting
         public void Cut()
         {
-            if (RealChuteSettings.Instance.ActivateNyan) { this.Part.Effect("nyan", 0); }
+            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 0); }
             else { this.Part.Effect("rccut"); }
             this.DeploymentState = DeploymentStates.CUT;
             this.parachute.gameObject.SetActive(false);

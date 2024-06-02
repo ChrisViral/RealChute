@@ -17,11 +17,10 @@ namespace RealChute.Libraries.Presets
     public class PresetsLibrary
     {
         #region Instance
-        private static PresetsLibrary instance;
         /// <summary>
         /// Returns the current PresetsLibrary
         /// </summary>
-        public static PresetsLibrary Instance => instance ?? (instance = new PresetsLibrary());
+        public static PresetsLibrary Instance { get; } = new ();
         #endregion
 
         #region Propreties
@@ -33,16 +32,15 @@ namespace RealChute.Libraries.Presets
         /// <summary>
         /// A dictionary of the number of used chutes as keys and the associated preset names as values
         /// </summary>
-        public Dictionary<int, string[]> Parameters { get; } = new Dictionary<int, string[]>();
+        public Dictionary<int, string[]> Parameters { get; } = new();
         #endregion
 
         #region Constuctor
         /// <summary>
         /// Generates a new PresetsLibrary
         /// </summary>
-        public PresetsLibrary()
+        private PresetsLibrary()
         {
-            this.Presets = RealChuteSettings.Instance.Presets.Select(n => new Preset(n)).ToDictionary(p => p.Name, p => p);
             RefreshData();
         }
         #endregion
