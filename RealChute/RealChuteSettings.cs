@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using RealChute.Libraries.Presets;
 using UnityEngine;
 
@@ -42,16 +42,6 @@ namespace RealChute
         {
             get => this.jokeActivated;
             set => this.jokeActivated = value;
-        }
-
-        private bool guiResizeUpdates;
-        /// <summary>
-        /// Whether or not resizing the parachutes through part GUI updates the canopy diameter
-        /// </summary>
-        public bool GuiResizeUpdates
-        {
-            get => this.guiResizeUpdates;
-            set => this.guiResizeUpdates = value;
         }
 
         private bool mustBeEngineer = true;
@@ -103,7 +93,6 @@ namespace RealChute
                 Debug.LogError("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
                 settings.AddValue("autoArm", this.autoArm);
                 settings.AddValue("jokeActivated", this.jokeActivated);
-                settings.AddValue("guiResizeUpdates", this.guiResizeUpdates);
                 settings.AddValue("mustBeEngineer", this.mustBeEngineer);
                 settings.AddValue("engineerLevel", this.engineerLevel);
                 settings.AddValue("activateNyan", this.activateNyan);
@@ -118,7 +107,7 @@ namespace RealChute
                 if (!node.TryGetNode("REALCHUTE_SETTINGS", ref settings)) { SaveSettings(); return; }
                 if (!settings.TryGetValue("autoArm", ref this.autoArm)) { mustSave = true; }
                 if (!settings.TryGetValue("jokeActivated", ref this.jokeActivated)) { mustSave = true; }
-                if (!settings.TryGetValue("guiResizeUpdates", ref this.guiResizeUpdates)) { mustSave = true; }
+                }
                 if (!settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer)) { mustSave = true; }
                 if (!settings.TryGetValue("engineerLevel", ref this.engineerLevel)) { mustSave = true; }
                 if (!settings.TryGetValue("activateNyan", ref this.activateNyan)) { mustSave = true; }
@@ -137,7 +126,6 @@ namespace RealChute
             ConfigNode settings = new ConfigNode("REALCHUTE_SETTINGS"), node = new ConfigNode();
             settings.AddValue("autoArm", Instance.autoArm);
             settings.AddValue("jokeActivated", Instance.jokeActivated);
-            settings.AddValue("guiResizeUpdates", Instance.guiResizeUpdates);
             settings.AddValue("mustBeEngineer", Instance.mustBeEngineer);
             settings.AddValue("engineerLevel", Instance.engineerLevel);
             settings.AddValue("activateNyan", Instance.activateNyan);

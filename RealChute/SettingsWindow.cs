@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ClickThroughFix;
 using UnityEngine;
 
@@ -90,7 +90,6 @@ namespace RealChute
             RealChuteSettings.Instance.AutoArm = GUILayout.Toggle(RealChuteSettings.Instance.AutoArm, "Automatically arm when staging", GUIUtils.ScaledToggle);
             RealChuteSettings.Instance.JokeActivated = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)", GUIUtils.ScaledToggle);
             RealChuteSettings.Instance.ActivateNyan = GUILayout.Toggle(RealChuteSettings.Instance.ActivateNyan, "Activate NyanMode™", GUIUtils.ScaledToggle);
-            RealChuteSettings.Instance.GuiResizeUpdates = GUILayout.Toggle(RealChuteSettings.Instance.GuiResizeUpdates, "Part GUI resize updates canopy size", GUIUtils.ScaledToggle);
             RealChuteSettings.Instance.MustBeEngineer = GUILayout.Toggle(RealChuteSettings.Instance.MustBeEngineer, "Only engineers can repack in career", GUIUtils.ScaledToggle);
             if (!RealChuteSettings.Instance.MustBeEngineer) { GUI.enabled = false; }
             GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0f, 5f, 100f);
