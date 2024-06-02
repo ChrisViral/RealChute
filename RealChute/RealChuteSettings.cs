@@ -33,16 +33,6 @@ namespace RealChute
             set => this.autoArm = value;
         }
 
-        private bool jokeActivated;
-        /// <summary>
-        /// If April Fools joke is activated
-        /// </summary>
-        public bool JokeActivated
-        {
-            get => this.jokeActivated;
-            set => this.jokeActivated = value;
-        }
-
         private bool mustBeEngineer = true;
         /// <summary>
         /// If a Kerbal must be an engineer to repack a parachute in career
@@ -61,6 +51,16 @@ namespace RealChute
         {
             get => this.engineerLevel;
             set => this.engineerLevel = value;
+        }
+
+        private bool jokeActivated;
+        /// <summary>
+        /// If April Fools joke is activated
+        /// </summary>
+        public bool JokeActivated
+        {
+            get => this.jokeActivated;
+            set => this.jokeActivated = value;
         }
 
         private bool activateNyan;
@@ -91,9 +91,9 @@ namespace RealChute
             {
                 Debug.LogError("[RealChute]: RealChute_Settings.cfg is missing. Creating new.");
                 settings.AddValue("autoArm", this.autoArm);
-                settings.AddValue("jokeActivated", this.jokeActivated);
                 settings.AddValue("mustBeEngineer", this.mustBeEngineer);
                 settings.AddValue("engineerLevel", this.engineerLevel);
+                settings.AddValue("jokeActivated", this.jokeActivated);
                 settings.AddValue("activateNyan", this.activateNyan);
                 node.AddNode(settings);
                 this.Presets = [];
@@ -109,11 +109,11 @@ namespace RealChute
                 }
 
                 bool allValuesFound = settings.TryGetValue("autoArm", ref this.autoArm);
-                allValuesFound     &= settings.TryGetValue("jokeActivated", ref this.jokeActivated);
-                allValuesFound     &= settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer);
-                allValuesFound     &= settings.TryGetValue("engineerLevel", ref this.engineerLevel);
-                allValuesFound     &= settings.TryGetValue("activateNyan", ref this.activateNyan);
-                this.Presets = settings.GetNodes("PRESET");
+                allValuesFound &= settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer);
+                allValuesFound &= settings.TryGetValue("engineerLevel", ref this.engineerLevel);
+                allValuesFound &= settings.TryGetValue("jokeActivated", ref this.jokeActivated);
+                allValuesFound &= settings.TryGetValue("activateNyan", ref this.activateNyan);
+                this.Presets   =  settings.GetNodes("PRESET");
 
                 if (!allValuesFound) SaveSettings();
             }
@@ -128,9 +128,9 @@ namespace RealChute
         {
             ConfigNode settings = new("REALCHUTE_SETTINGS"), node = new();
             settings.AddValue("autoArm", Instance.autoArm);
-            settings.AddValue("jokeActivated", Instance.jokeActivated);
             settings.AddValue("mustBeEngineer", Instance.mustBeEngineer);
             settings.AddValue("engineerLevel", Instance.engineerLevel);
+            settings.AddValue("jokeActivated", Instance.jokeActivated);
             settings.AddValue("activateNyan", Instance.activateNyan);
 
             if (PresetsLibrary.Instance.Presets.Count > 0)
