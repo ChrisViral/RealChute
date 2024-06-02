@@ -415,7 +415,6 @@ namespace RealChute
         internal void CreatePreset()
         {
             PresetsLibrary.Instance.AddPreset(new Preset(this));
-            RealChuteSettings.SaveSettings();
             RCUtils.PopupDialog("Preset saved", "The \"" + this.editorGUI.presetName + "\" preset was successfully saved!", "Close");
             print("[RealChute]: Saved the " + this.editorGUI.presetName + " preset to the settings file.");
         }

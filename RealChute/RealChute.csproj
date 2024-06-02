@@ -88,6 +88,7 @@
     <Compile Include="Extensions\VesselExtensions.cs" />
     <Compile Include="EditorGUI.cs" />
     <Compile Include="GUIUtils.cs" />
+    <Compile Include="Libraries\Presets\DefaultPresets.cs" />
     <Compile Include="RCToolbarManager.cs" />
     <Compile Include="PhysicsWatch.cs" />
     <Compile Include="PersistentManager.cs" />

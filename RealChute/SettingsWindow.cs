@@ -59,7 +59,7 @@ namespace RealChute
         {
             if (!CompatibilityChecker.IsAllCompatible) { return; }
             CloseWindow();
-            RealChuteSettings.SaveSettings();
+            RealChuteSettings.Instance.SaveSettings();
 
             GameEvents.onShowUI.Remove(ShowUI);
             GameEvents.onHideUI.Remove(HideUI);

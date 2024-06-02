@@ -107,14 +107,14 @@ namespace RealChute
         /// <summary>
         /// Saves the RealChute_Settings config into GameData
         /// </summary>
-        public static void SaveSettings()
+        public void SaveSettings()
         {
             ConfigNode settings = new("REALCHUTE_SETTINGS");
-            settings.AddValue("autoArm", Instance.AutoArm);
-            settings.AddValue("mustBeEngineer", Instance.MustBeEngineer);
-            settings.AddValue("engineerLevel", Instance.EngineerLevel);
-            settings.AddValue("jokeActivated", Instance.JokeActivated);
-            settings.AddValue("activateNyan", Instance.NyanMode);
+            settings.AddValue("autoArm", this.AutoArm);
+            settings.AddValue("mustBeEngineer", this.MustBeEngineer);
+            settings.AddValue("engineerLevel", this.EngineerLevel);
+            settings.AddValue("jokeActivated", this.JokeActivated);
+            settings.AddValue("activateNyan", this.NyanMode);
 
             ConfigNode file = new();
             file.AddNode(settings);

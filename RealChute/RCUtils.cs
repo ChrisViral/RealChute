@@ -23,7 +23,7 @@ namespace RealChute
         /// <summary>
         /// Transforms from gees to m/s²
         /// </summary>
-        public const double GeeToAcc = 9.80665;
+        public const double GeeToAcc = 9.80665d;
 
         /// <summary>
         /// Parachute starting temperature
@@ -36,14 +36,19 @@ namespace RealChute
         public const double AbsoluteZero = -273.15d;
 
         /// <summary>
-        /// URL of the RealChute settings config from the GameData folder
-        /// </summary>
-        public const string LocalSettingsURL = "GameData/RealChute/Plugins/PluginData/RealChute_Settings.cfg";
-
-        /// <summary>
         /// URL of the RealChute PluginData folder from the GameData folder
         /// </summary>
         public const string LocalPluginDataURL = "GameData/RealChute/Plugins/PluginData";
+
+        /// <summary>
+        /// Name of the RealChute Settings file
+        /// </summary>
+        public const string SettingsFile = "RealChute_Settings.cfg";
+
+        /// <summary>
+        ///  Name of the RealChute presets file
+        /// </summary>
+        public const string PresetsFile = "Presets.cfg";
 
         /// <summary>
         /// Relative URL to the Nyan Cat parachute texture
@@ -58,19 +63,24 @@ namespace RealChute
         /// <summary>
         /// PopupDialog anchor vector
         /// </summary>
-        private static readonly Vector2 anchor = new Vector2(0.5f, 0.5f);
+        private static readonly Vector2 anchor = new(0.5f, 0.5f);
         #endregion
 
         #region Propreties
         /// <summary>
-        /// String URL to the RealChute settings config
-        /// </summary>
-        public static string SettingsURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalSettingsURL);
-
-        /// <summary>
         /// Returns the RealChute PluginData folder
         /// </summary>
         public static string PluginDataURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalPluginDataURL);
+
+        /// <summary>
+        /// String URL to the RealChute settings config
+        /// </summary>
+        public static string SettingsURL => Path.Combine(KSPUtil.ApplicationRootPath, PluginDataURL, SettingsFile);
+
+        /// <summary>
+        /// String URL to the RealChute presets config
+        /// </summary>
+        public static string PresetsURL => Path.Combine(KSPUtil.ApplicationRootPath, PluginDataURL, PresetsFile);
 
         private static string assemblyVersion;
         /// <summary>
