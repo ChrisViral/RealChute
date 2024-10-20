@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using KSP.UI;
 using KSP.UI.Screens;
 using RealChute.Extensions;
 using RUI.Icons.Selectable;
 using ToolbarControl_NS;
 using UnityEngine;
+using Enumerable = UniLinq.Enumerable;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -38,21 +37,19 @@ namespace RealChute
         private void AddFilter()
         {
             //Loads the RealChute parachutes icon
-            Texture2D normal = new Texture2D(32, 32), selected = new Texture2D(32, 32);
-            normal.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "FilterIcon.png")));
-            selected.LoadImage(File.ReadAllBytes(Path.Combine(RCUtils.PluginDataURL, "FilterIcon_selected.png")));
-            Icon icon = new Icon("RC_Parachutes", normal, selected);
+            GameDatabase.TextureInfo iconInfo         = GameDatabase.Instance.GetTextureInfo(RCUtils.CategorizerIconURL);
+            GameDatabase.TextureInfo iconSelectedInfo = GameDatabase.Instance.GetTextureInfo(RCUtils.CategorizerIconURL + "_selected");
+            Icon icon = new(iconInfo.name, iconInfo.texture, iconSelectedInfo.texture);
 
             //Adds the Parachutes filter to the Filter by Function category
-            PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categorydisplayName == "#autoLOC_453547"); //Filter by Function
-            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon,
-                p => p.moduleInfos.Any(m => m.moduleName == "RealChute" || m.moduleName == "Parachute"));
+            PartCategorizer.Category filterByFunction = PartCategorizer.Instance.filters.Find(f => f.button.categoryName is "Filter by Function");
+            PartCategorizer.AddCustomSubcategoryFilter(filterByFunction, "Parachutes", "Parachutes", icon, p => p.moduleInfos.Any(m => m.moduleName is "RealChute" or "Parachute"));
 
             //Sets the buttons in the Filter by Module category
-            List<PartCategorizer.Category> modules = PartCategorizer.Instance.filters
-                .Find(f => f.button.categorydisplayName == "#autoLOC_453705").subcategories; //Filter by Module
-            modules.Remove(modules.Find(m => m.button.categoryName == "Procedural Chute"));
-            modules.Select(m => m.button).Single(b => b.categoryName == "RealChute").SetIcon(icon);
+            PartCategorizer.Category filterByModule = PartCategorizer.Instance.filters.Find(f => f.button.categoryName is "Filter by Module");
+            List<PartCategorizer.Category> modules = filterByModule.subcategories;
+            filterByModule.subcategories.RemoveAt(modules.FindIndex(m => m.button.categoryName is "Procedural Chute"));
+            filterByModule.subcategories.Select(m => m.button).First(b => b.categoryName is "RealChute").SetIcon(icon);
 
             //Apparently needed to make sure the buttons in Filter by Function show when the editor is loaded
             UIRadioButton button = filterByFunction.button.activeButton;
@@ -64,7 +61,7 @@ namespace RealChute
         {
             if (this.visible) return;
 
-            this.settings = new GameObject("RealChuteSettingsWindow", typeof(SettingsWindow));
+            this.settings = new GameObject(typeof(SettingsWindow).FullName, typeof(SettingsWindow));
             this.visible = true;
         }
 
@@ -90,9 +87,8 @@ namespace RealChute
             }
 
             //Removes RealChute parts from being seen if incompatible
-            PartLoader.LoadedPartsList
-                      .Where(p => p.moduleInfos.Exists(m => m.moduleName == "RealChute" || m.moduleName == "ProceduralChute"))
-                      .ForEach(p => p.category = PartCategories.none);
+            PartLoader.LoadedPartsList.Where(p => p.moduleInfos.Exists(m => m.moduleName is "RealChute" or "ProceduralChute"))
+                                      .ForEach(p => p.category = PartCategories.none);
         }
 
         private void Start()

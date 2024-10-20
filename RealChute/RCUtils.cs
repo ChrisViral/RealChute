@@ -58,12 +58,17 @@ namespace RealChute
         /// <summary>
         /// RealChute toolbar icon URL
         /// </summary>
-        public const string ToolbarIconURL = "RealChute/Plugins/PluginData/RC_Icon.png";
+        public const string ToolbarIconURL = "RealChute/Icons/RealChuteToolbarIcon.png";
+
+        /// <summary>
+        /// RealChute part categorizer icon URL
+        /// </summary>
+        public const string CategorizerIconURL = "RealChute/Icons/RealChuteFilterIcon";
 
         /// <summary>
         /// PopupDialog anchor vector
         /// </summary>
-        private static readonly Vector2 anchor = new(0.5f, 0.5f);
+        private static readonly Vector2 Anchor = new(0.5f, 0.5f);
         #endregion
 
         #region Propreties
@@ -100,6 +105,16 @@ namespace RealChute
                     else { assemblyVersion = "v" + version; }
                 }
                 return assemblyVersion;
+            }
+        }
+        #endregion
+
+        #region Constructor
+        static RCUtils()
+        {
+            if (!Directory.Exists(PluginDataURL))
+            {
+                Directory.CreateDirectory(PluginDataURL);
             }
         }
         #endregion
@@ -175,7 +190,7 @@ namespace RealChute
         /// <param name="title">Title of the PopupDialog</param>
         /// <param name="message">Message of the PopupDialog</param>
         /// <param name="button">Button text of the PopupDialog</param>
-        public static void PopupDialog(string title, string message, string button) => global::PopupDialog.SpawnPopupDialog(anchor, anchor, title, title, message, button, false, HighLogic.UISkin);
+        public static void PopupDialog(string title, string message, string button) => global::PopupDialog.SpawnPopupDialog(Anchor, Anchor, title, title, message, button, false, HighLogic.UISkin);
         #endregion
     }
 }
