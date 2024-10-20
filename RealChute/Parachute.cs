@@ -179,19 +179,19 @@ namespace RealChute
         #region Fields
         //Parachute
         public string material = "Nylon";
-        public float preDeployedDiameter = 1, deployedDiameter = 25;
+        public float preDeployedDiameter = 1f, deployedDiameter = 25f;
         public bool minIsPressure, capOff;
-        public float minDeployment = 25000, minPressure = 0.01f;
-        public float deploymentAlt = 700, cutAlt = -1;
-        public float preDeploymentSpeed = 2, deploymentSpeed = 6;
+        public float minDeployment = 25000f, minPressure = 0.01f;
+        public float deploymentAlt = 700f, cutAlt = -1f;
+        public float preDeploymentSpeed = 2f, deploymentSpeed = 6f;
         public double time;
         public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
         public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
         public float forcedOrientation, maxRotation = 90f;
         public string depState = "STOWED";
-        public double currentArea, chuteTemperature = 300, thermMass;
+        public double currentArea, chuteTemperature = 300d, thermMass;
         public bool ignoreShielded;
-        public float referenceDiameter = -1f;
+        public float referenceDiameter = -1f, maxDiameter = 70f;
         public int canopyCount = 1;
         private double convectiveFlux;
         private SafeState safeState = SafeState.SAFE;
@@ -354,7 +354,9 @@ namespace RealChute
         //Drag force vector
         private Vector3 DragForce(float startArea, float targetArea, float time)
         {
-            return this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient) * this.module.dragVector * (RealChuteSettings.Instance.JokeActivated ? -1 : 1);
+            return this.module.dragVector
+                 * (this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient)
+                  * (RealChuteSettings.Instance.JokeActivated ? -1 : 1));
         }
 
         //Parachute function
@@ -653,6 +655,7 @@ namespace RealChute
             node.TryGetValue("depState", ref this.depState);
             node.TryGetValue("ignoreShielded", ref this.ignoreShielded);
             node.TryGetValue("referenceDiameter", ref this.referenceDiameter);
+            node.TryGetValue("maxDiameter", ref this.maxDiameter);
             node.TryGetValue("canopyCount", ref this.canopyCount);
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
             Transform p = this.Part.FindModelTransform(this.parachuteName);
@@ -664,7 +667,7 @@ namespace RealChute
         /// </summary>
         public ConfigNode Save()
         {
-            ConfigNode node = new ConfigNode("PARACHUTE");
+            ConfigNode node = new("PARACHUTE");
             node.AddValue("material", this.material);
             node.AddValue("preDeployedDiameter", this.preDeployedDiameter);
             node.AddValue("deployedDiameter", this.deployedDiameter);
@@ -687,6 +690,7 @@ namespace RealChute
             node.AddValue("depState", this.depState);
             node.AddValue("ignoreShielded", this.ignoreShielded);
             node.AddValue("referenceDiameter", this.referenceDiameter);
+            node.AddValue("maxDiameter", this.maxDiameter);
             node.AddValue("canopyCount", this.canopyCount);
             return node;
         }

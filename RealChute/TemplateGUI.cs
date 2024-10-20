@@ -50,7 +50,7 @@ namespace RealChute
         {
             get
             {
-                List<string> errors = new List<string>();
+                List<string> errors = [];
                 float f, max = (float)this.Body.GetMaxAtmosphereAltitude();
                 if (this.calcSelect)
                 {
@@ -82,7 +82,7 @@ namespace RealChute
                     if (!float.TryParse(this.preDepDiam, out float p)) { p = 0; }
                     if (!float.TryParse(this.depDiam, out float d)) { d = 0; }
                     if (!GUIUtils.CheckRange(p, 0.5f, d)) { errors.Add("Predeployed diameter"); }
-                    if (!GUIUtils.CheckRange(d, 1, this.PChute.textures == null ? 70 : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
+                    if (!GUIUtils.CheckRange(d, 1, this.PChute.textures is null ? this.Parachute.maxDiameter : this.Model.MaxDiam)) { errors.Add("Deployed diameter"); }
                 }
                 if (!float.TryParse(this.predepClause, out f) || (this.isPressure ? !GUIUtils.CheckRange(f, 0.0001f, (float)this.Body.GetPressureAsl()) : !GUIUtils.CheckRange(f, 10, max)))
                 {
@@ -356,12 +356,12 @@ namespace RealChute
                 if (!float.TryParse(this.depDiam, out float d)) { d = -1; }
 
                 //Predeployed diameter
-                GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.5f, d, 100f);
+                GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.1f, d, 100f);
                 if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
                 else { GUILayout.Label("Resulting predeployed area: --- m²", GUIUtils.ScaledLabel); }
 
                 //Deployed diameter
-                GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, 1f, this.PChute.textures == null ? 70f : this.Model.MaxDiam, 100f);
+                GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, p, this.PChute.textures == null ? this.Parachute.maxDiameter : this.Model.MaxDiam, 100f);
                 if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
                 else { GUILayout.Label("Resulting deployed area: --- m²", GUIUtils.ScaledLabel); }
             }
