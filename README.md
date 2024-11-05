@@ -18,3 +18,8 @@ RealChute is a complete rework of the stock KSP parachute module to fix a few of
 This mod is no longer in active development and has been on life support for quite a while. I release some fixes and patches here and there as necessary for other mod compatibility, but features are no longer being written.
 This mod was written when I was a very young and naive programmer, and some mistakes in code architecture are just too spaghetti'd to simply fix.
 I'm working on a rewrite of the mod that would solve these issues and add a lot of new features, but I will not be saying much about it until it is nearing release.
+
+## License
+> RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
+> If you want to distribute a modified version of RealChute, be it code, textures, configs, or any other asset and piece of work, you must get my explicit permission on the matter through a private channel, and must also distribute it through the attribution clause, and must make it clear to anyone using your modification of my work that they must report any problem related to this usage to you, and not to me.
+> This clause expires if I happen to be inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts back to CC-BY-NC-SA 4.0 INTL.
