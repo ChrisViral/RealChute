@@ -171,6 +171,46 @@ namespace RealChute
         //Gets the total mass of the craft
         internal float GetCraftMass(bool dry) => EditorLogic.SortedShipList.Where(p => p.physicalSignificance != Part.PhysicalSignificance.NONE).Sum(p => dry ? p.mass : p.TotalMass());
 
+        /// <summary>
+        /// Difference between the craft mass as it is currently reported and the mass the parachutes must support once
+        /// the new settings are applied. The canopies about to be resized are taken out of it, and the new ones, whose
+        /// area depends on the very mass they contribute to, are solved for instead of being ignored: a canopy of area
+        /// A supporting a craft of mass m follows A = c(m + σA), which isolates to A = cm / (1 - cσ).
+        /// </summary>
+        /// <param name="toSymmetryCounterparts">If the settings are also applied to the symmetry counterparts</param>
+        private double GetCanopyMassDelta(bool toSymmetryCounterparts)
+        {
+            //Parts whose canopies are about to be resized, restricted to the ones the craft mass accounts for
+            List<Part> parts = [this.part];
+            if (toSymmetryCounterparts) { parts.AddRange(this.part.symmetryCounterparts); }
+            parts.RemoveAll(p => p.physicalSignificance == Part.PhysicalSignificance.NONE || !EditorLogic.SortedShipList.Contains(p));
+            if (parts.Count == 0) { return 0d; }
+
+            //Canopy mass currently counted in the craft mass, and craft mass without it, dry and wet
+            double currentMass = 0d;
+            foreach (Part p in parts)
+            {
+                currentMass += ((RealChuteModule)p.Modules["RealChuteModule"]).parachutes.Sum(c => c.ChuteMass);
+            }
+            double dryMass = GetCraftMass(true) - currentMass, wetMass = GetCraftMass(false) - currentMass;
+
+            //Canopy mass one part would end up with if the mass it has to support did not include the canopies
+            double baseMass = 0d, totalRatio = 0d;
+            foreach (ChuteTemplate chute in this.chutes)
+            {
+                double ratio = chute.CanopyMassRatio;
+                totalRatio += ratio;
+                baseMass += (ratio * (chute.templateGUI.useDry ? dryMass : wetMass)) + chute.FixedCanopyMass;
+            }
+
+            //The canopies would gain weight faster than they gain lift, no finite size can support them
+            double factor = 1d - (parts.Count * totalRatio);
+            if (factor <= 0d) { return double.PositiveInfinity; }
+
+            //Canopy mass the parts settle at, swapped in for the one the craft mass currently counts
+            return (parts.Count * (baseMass / factor)) - currentMass;
+        }
+
         //Lists the errors of a given type
         internal List<string> GetErrors(bool general)
         {
@@ -213,7 +253,8 @@ namespace RealChute
             this.rcModule.spareChutes = GUIUtils.ParseEmpty(this.spares);
             this.rcModule.chuteCount = (int)this.rcModule.spareChutes;
 
-            this.chutes.ForEach(c => c.ApplyChanges(toSymmetryCounterparts));
+            double canopyMassDelta = GetCanopyMassDelta(toSymmetryCounterparts);
+            this.chutes.ForEach(c => c.ApplyChanges(toSymmetryCounterparts, canopyMassDelta));
 
             if (toSymmetryCounterparts)
             {
@@ -238,6 +279,9 @@ namespace RealChute
                     pChute.timer = this.timer;
                     pChute.cutSpeed = this.cutSpeed;
                     pChute.spares = this.spares;
+
+                    //UpdateScale only refreshes the mass of parts which have size nodes
+                    module.UpdateMass();
                 }
             }
             this.rcModule.UpdateMass();

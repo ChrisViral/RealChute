@@ -20,6 +20,41 @@ namespace RealChute
 {
     public class ChuteTemplate
     {
+        /// <summary>
+        /// Parameters of the automatic parachute size calculation
+        /// </summary>
+        internal readonly struct CalculationParameters
+        {
+            #region Properties
+            //Altitude the calculation is made at
+            public double Altitude { get; }
+
+            //Acceleration the parachutes must counter
+            public double Acceleration { get; }
+
+            //Atmospheric density at the calculation altitude
+            public double Density { get; }
+
+            //Square of the targeted speed
+            public double SquaredSpeed { get; }
+
+            //Canopy area needed for each tonne of supported mass
+            public double AreaPerMass { get; }
+            #endregion
+
+            #region Constructor
+            public CalculationParameters(double altitude, double acceleration, double density, double squaredSpeed, double dragCoefficient, double chuteCount)
+            {
+                this.Altitude = altitude;
+                this.Acceleration = acceleration;
+                this.Density = density;
+                this.SquaredSpeed = squaredSpeed;
+                //A = 2ma/(ρ * Cd * v²), with the mass given in tonnes and the load split between all the parachutes
+                this.AreaPerMass = 2000d * acceleration / (density * dragCoefficient * squaredSpeed * chuteCount);
+            }
+            #endregion
+        }
+
         #region Propreties
         //Current part
         private Part Part => this.pChute.part;
@@ -66,6 +101,60 @@ namespace RealChute
         //If this part has more than one chute
         public bool Secondary => this.id != 0;
 
+        //If the size of this chute is calculated from the mass of the craft
+        internal bool SizedFromCraftMass => this.templateGUI.calcSelect && this.templateGUI.getMass;
+
+        //Parameters of the automatic size calculation for this chute
+        internal CalculationParameters Calculation
+        {
+            get
+            {
+                double alt = 0d, acc = 0d;
+                switch (this.templateGUI.Type)
+                {
+                    case ParachuteType.MAIN:
+                    {
+                        alt = double.Parse(this.pChute.landingAlt);
+                        acc = this.Body.GeeASL * RCUtils.GeeToAcc;
+                        break;
+                    }
+                    case ParachuteType.DROGUE:
+                    {
+                        alt = double.Parse(this.templateGUI.refDepAlt);
+                        acc = this.Body.GeeASL * RCUtils.GeeToAcc;
+                        break;
+                    }
+                    case ParachuteType.DRAG:
+                    {
+                        alt = double.Parse(this.pChute.landingAlt);
+                        acc = double.Parse(this.templateGUI.deceleration);
+                        break;
+                    }
+                }
+
+                double density = this.Body.GetDensityAtAlt(alt, this.Body.GetMaxTemperatureAtAlt(alt));
+                double speed = double.Parse(this.templateGUI.landingSpeed);
+                return new CalculationParameters(alt, acc, density, speed * speed, this.material.DragCoefficient, double.Parse(this.templateGUI.chuteCount));
+            }
+        }
+
+        //Fraction of the mass it supports that this chute's canopy will itself account for, zero if its size is not calculated from the craft mass
+        internal double CanopyMassRatio => this.SizedFromCraftMass ? this.Calculation.AreaPerMass * this.material.AreaDensity : 0d;
+
+        //Canopy mass this chute will have once applied, zero if its size is calculated from the craft mass
+        internal double FixedCanopyMass
+        {
+            get
+            {
+                if (this.SizedFromCraftMass) { return 0d; }
+
+                double area = this.templateGUI.calcSelect
+                                  ? this.Calculation.AreaPerMass * double.Parse(this.templateGUI.mass)
+                                  : RCUtils.GetArea(RCUtils.Round(float.Parse(this.templateGUI.depDiam)));
+                return area * this.material.AreaDensity;
+            }
+        }
+
         //GUI
         public EditorGUI EditorGUI => this.pChute.editorGUI;
         #endregion
@@ -104,44 +193,20 @@ namespace RealChute
 
         #region Methods
         //Applies changes to the parachute
-        internal void ApplyChanges(bool toSymmetryCounterparts)
+        internal void ApplyChanges(bool toSymmetryCounterparts, double canopyMassDelta)
         {
             this.parachute.material = this.material.Name;
             this.parachute.mat = this.material;
 
             if (this.templateGUI.calcSelect)
             {
-                double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass);
-                double alt = 0, acc = 0;
-                switch (this.templateGUI.Type)
-                {
-                    case ParachuteType.MAIN:
-                    {
-                        alt = double.Parse(this.pChute.landingAlt);
-                        acc = this.Body.GeeASL * RCUtils.GeeToAcc;
-                        break;
-                    }
-                    case ParachuteType.DROGUE:
-                    {
-                        alt = double.Parse(this.templateGUI.refDepAlt);
-                        acc = this.Body.GeeASL * RCUtils.GeeToAcc;
-                        break;
-                    }
-                    case ParachuteType.DRAG:
-                    {
-                        alt = double.Parse(this.pChute.landingAlt);
-                        acc = double.Parse(this.templateGUI.deceleration);
-                        break;
-                    }
-                }
+                CalculationParameters calc = this.Calculation;
+                //The craft mass includes the canopies which are about to be resized, canopyMassDelta corrects for that
+                double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) + canopyMassDelta : double.Parse(this.templateGUI.mass);
 
-                double density = this.Body.GetDensityAtAlt(alt, this.Body.GetMaxTemperatureAtAlt(alt));
-                double speed = double.Parse(this.templateGUI.landingSpeed);
-                speed *= speed;
+                Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - m: {m}t, alt: {calc.Altitude}m, ρ: {calc.Density}kg/m³, v²: {calc.SquaredSpeed}m²/s², a: {calc.Acceleration}m/s²");
 
-                Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - m: {m}t, alt: {alt}m, ρ: {density}kg/m³, v²: {speed}m²/s², a: {acc}m/s²");
-
-                this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((8000 * m * acc) / (Math.PI * speed * this.material.DragCoefficient * density * double.Parse(this.templateGUI.chuteCount))));
+                this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((4d * calc.AreaPerMass * m) / Math.PI));
                 float maxDiam = (this.Textures != null) && (this.Textures.Models.Count > 0) ? this.model.MaxDiam : this.parachute.maxDiameter;
                 if (this.parachute.deployedDiameter > this.model.MaxDiam)
                 {
