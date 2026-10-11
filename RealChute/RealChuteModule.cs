@@ -128,6 +128,7 @@ namespace RealChute
         private Vector2 scroll;
         private string screenMessage = string.Empty;
         private bool showMessage;
+        private ScreenMessage waitMessage;
         #endregion
 
         #region Part GUI
@@ -460,10 +461,14 @@ namespace RealChute
                 }
             }
 
+            //Reposts the same message object so that the text is updated in place
             if (this.showMessage)
             {
-                ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime * 0.6f, ScreenMessageStyle.UPPER_CENTER);
+                if (this.waitMessage == null) { this.waitMessage = new ScreenMessage(string.Empty, 0.5f, ScreenMessageStyle.UPPER_CENTER); }
+                this.waitMessage.message = this.screenMessage;
+                ScreenMessages.PostScreenMessage(this.waitMessage);
             }
+            else if (this.waitMessage?.textInstance != null) { ScreenMessages.RemoveMessage(this.waitMessage); }
 
             this.Disarm.active = this.armed || this.showDisarm;
             bool canDeploy = !this.staged && this.parachutes.Exists(p => p.DeploymentState != DeploymentStates.CUT);
@@ -555,6 +560,7 @@ namespace RealChute
 
         private void OnDestroy()
         {
+            if (this.waitMessage != null) { ScreenMessages.RemoveMessage(this.waitMessage); }
             if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
             //Hide/show UI event removal
             GameEvents.onHideUI.Remove(HideUI);
