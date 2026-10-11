@@ -99,6 +99,9 @@ namespace RealChute
         //Check if the staging button has been pressed this frame
         public bool PressedStage => !InputLockManager.IsLocked(ControlTypes.STAGING) && GameSettings.LAUNCH_STAGES.GetKeyDown();
 
+        //Message shown while waiting for the vessel to go down
+        private string GoDownMessage => $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
+
         //Quick access to the part GUI events
         private BaseEvent deploy, arm, disarm, cut, repack;
         private BaseEvent Deploy => this.deploy ?? (this.deploy = this.Events["GUIDeploy"]);
@@ -252,7 +255,7 @@ namespace RealChute
                 goesDown = false;
                 if (this.vessel.isActiveVessel)
                 {
-                    this.screenMessage += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
+                    this.screenMessage += this.GoDownMessage;
                 }
             }
 
@@ -519,6 +522,9 @@ namespace RealChute
                 {
                     this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                     if (this.parachutes.Exists(p => p.CanDeploy)) { this.armed = false; }
+                    //The vessel must also go down once the deployment clause is met
+                    this.showMessage = this.mustGoDown && this.vessel.verticalSpeed > 0 && !this.vessel.LandedOrSplashed && this.vessel.isActiveVessel;
+                    if (this.showMessage) { this.screenMessage = this.GoDownMessage; }
                 }
                 //Parachute deployments
                 else
