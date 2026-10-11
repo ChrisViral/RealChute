@@ -285,6 +285,7 @@ namespace RealChute
             this.staged = false;
             if (this.vessel.LandedOrSplashed) { this.launched = false; }
             this.wait = true;
+            this.showMessage = false;
             print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
         }
 
