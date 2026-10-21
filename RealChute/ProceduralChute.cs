@@ -653,7 +653,7 @@ namespace RealChute
 
         public override string GetInfo()
         {
-            return !CompatibilityChecker.IsAllCompatible|| !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : "This RealChute part can be tweaked from the Action Groups window.";
+            return !CompatibilityChecker.IsAllCompatible|| !this.isTweakable || !this.part.Modules.Contains("RealChuteModule") ? string.Empty : "This RealChute part can be tweaked by clicking \"Show Parachute Editor\" in the PAW.";
         }
 
         public override void OnSave(ConfigNode node)

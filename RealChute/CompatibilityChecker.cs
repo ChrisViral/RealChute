@@ -61,7 +61,7 @@ namespace RealChute
             // Even if you don't lock down functionality, you should return true if your users
             // can expect a future update to be available.
             //
-            return Versioning.version_major == 1 && Versioning.version_minor == 12;
+            return Versioning.version_major == 1 && Versioning.version_minor <= 13 && Versioning.version_minor >= 12;
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
@@ -73,7 +73,7 @@ namespace RealChute
             /*-----------------------------------------------*\
             |    BEGIN IMPLEMENTATION-SPECIFIC EDITS HERE.    |
             \*-----------------------------------------------*/
-            return Application.unityVersion == "2019.4.18f1";
+            return true;  //Unity engine checks are probably just going to cause pain today.
 
             /*-----------------------------------------------*\
             | IMPLEMENTERS SHOULD NOT EDIT BEYOND THIS POINT! |
