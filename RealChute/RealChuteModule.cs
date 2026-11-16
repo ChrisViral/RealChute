@@ -147,6 +147,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     private readonly int id = Guid.NewGuid().GetHashCode();
     private Rect window, drag;
     private Vector2 scroll;
+    private List<string> pendingMessages = [];
     private ScreenMessage deploymentPendingMessage = new(string.Empty, 1f, ScreenMessageStyle.UPPER_CENTER);
     #endregion
 
@@ -163,10 +164,8 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Arm parachute", unfocusedRange = 5)]
     public void GUIArm()
     {
-        if (ActivateRC())
-        {
-            this.armed = true;
-        }
+        this.armed = true;
+        ActivateRC();
     }
 
     [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Disarm parachute", unfocusedRange = 5)]
@@ -253,17 +252,28 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     // ReSharper disable once CognitiveComplexity
     public void CheckForWait()
     {
-        bool timerSpent = true, goesDown = true;
-        this.deploymentPendingMessage.message = string.Empty;
+        bool mustWait = false;
+        this.pendingMessages.Clear();
+
+        // Electric power
+        if (!HasElectricPower())
+        {
+            mustWait = true;
+            if (this.vessel.isActiveVessel)
+            {
+                this.pendingMessages.Add("ElectricCharge required to deploy this parachute");
+            }
+        }
+
         //Timer
         if (this.timer > 0 && this.deploymentTimer.Elapsed.TotalSeconds < this.timer)
         {
-            timerSpent = false;
+            mustWait = true;
             if (!this.deploymentTimer.IsRunning) { this.deploymentTimer.Start(); }
             if (this.vessel.isActiveVessel)
             {
                 float time = this.timer - (float)this.deploymentTimer.Elapsed.TotalSeconds;
-                this.deploymentPendingMessage.message = time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}";
+                this.pendingMessages.Add(time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}");
             }
         }
         else if (this.deploymentTimer.IsRunning) { this.deploymentTimer.Stop(); }
@@ -271,38 +281,41 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         //Goes down
         if (this.mustGoDown && this.vessel.verticalSpeed > 0)
         {
-            if (!timerSpent) { this.deploymentPendingMessage.message += "\n"; }
-            goesDown = false;
+            mustWait = true;
             if (this.vessel.isActiveVessel)
             {
-                this.deploymentPendingMessage.message += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
+                this.pendingMessages.Add($"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s");
             }
         }
 
-        //Can deploy or not
-        if (timerSpent && goesDown)
+        if (this.vessel.isActiveVessel && this.pendingMessages.Count > 0)
         {
-            this.wait       = false;
-            this.showDisarm = false;
-            this.deploymentTimer.Reset();
+            this.deploymentPendingMessage.message = string.Join("\n", this.pendingMessages);
+            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage);
+            this.pendingMessages.Clear();
         }
-        else
+
+        //Can deploy or not
+        if (mustWait)
         {
             this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
             this.wait       = true;
             this.showDisarm = true;
         }
+        else
+        {
+            this.wait       = false;
+            this.showDisarm = false;
+            this.deploymentTimer.Reset();
+        }
     }
 
     //Activates the parachute
-    public bool ActivateRC()
+    public void ActivateRC()
     {
-        if (!CheckHasElectricPower()) return false;
-
         this.staged = true;
         if (RealChuteSettings.Instance.AutoArm) { this.armed = true; }
         Debug.Log($"[RealChute]: {this.part.partInfo.name} was activated in stage {this.part.inverseStage}");
-        return true;
     }
 
     //Deactivates the parachute
@@ -315,17 +328,12 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
     }
 
-    private bool CheckHasElectricPower()
+    public bool HasElectricPower()
     {
         if (RealChuteSettings.Instance.RequireChargeToDeploy)
         {
             this.part.GetConnectedResourceTotals(ElectricChargeID, out double amount, out double _);
-            if (amount <= 1E-5)
-            {
-                Debug.Log($"[RealChute]: {this.part.partInfo.name} failed to activate due to insufficient EC");
-                ScreenMessages.PostScreenMessage($"<color=orange>[RealChute]: {this.part.partInfo.title}'s parachute could not be deployed due to a lack of ElectricCharge on the vessel.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
-                return false;
-            }
+            return amount > 1E-5;
         }
 
         return true;
@@ -507,7 +515,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
 
         if (this.ShowDeploymentPendingMessage)
         {
-            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage.message);
+            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage);
         }
 
         this.Disarm.active = this.armed || this.showDisarm;
@@ -557,57 +565,46 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         if (this.atmDensity > 0) { this.parachutes.ForEach(p => p.CalculateConvectiveFlux()); }
         SetSafeToDeploy();
 
-        if (this.staged)
+        if (!this.staged) return;
+
+        //Checks if the parachute must disarm
+        if (this.armed)
         {
-            //Checks if the parachute must disarm
-            if (this.armed)
-            {
-                this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                if (this.parachutes.Exists(p => p.CanDeploy))
-                {
-                    if (!CheckHasElectricPower())
-                    {
-                        StagingReset();
-                        return;
-                    }
+            this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+            if (this.parachutes.Exists(p => p.CanDeploy)) { this.armed = false; }
+            CheckForWait();
+        }
 
-                    this.armed = false;
-                }
+        //Parachute deployments
+        if (this.armed) return;
 
-                CheckForWait();
-            }
-
-            //Parachute deployments
-            if (this.armed) return;
-
+        if (this.wait)
+        {
+            CheckForWait();
             if (this.wait)
             {
-                CheckForWait();
-                if (this.wait)
-                {
-                    this.ShowDeploymentPendingMessage = true;
-                    return;
-                }
-
-                this.ShowDeploymentPendingMessage = false;
+                this.ShowDeploymentPendingMessage = true;
+                return;
             }
 
-            //Parachutes
-            this.parachutes.ForEach(p => p.UpdateParachute());
+            this.ShowDeploymentPendingMessage = false;
+        }
 
-            //If all parachutes must be cut
-            if (this.AllMustStop)
-            {
-                GUICut();
-                SetRepack();
-            }
+        //Parachutes
+        this.parachutes.ForEach(p => p.UpdateParachute());
 
-            //If the parachute can't be deployed
-            if (!this.oneWasDeployed && !RealChuteSettings.Instance.AutoArm)
-            {
-                this.failedTimer.Start();
-                StagingReset();
-            }
+        //If all parachutes must be cut
+        if (this.AllMustStop)
+        {
+            GUICut();
+            SetRepack();
+        }
+
+        //If the parachute can't be deployed
+        if (!this.oneWasDeployed && !RealChuteSettings.Instance.AutoArm)
+        {
+            this.failedTimer.Start();
+            StagingReset();
         }
     }
 

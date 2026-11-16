@@ -114,6 +114,7 @@ public class Parachute
         // ReSharper disable once CognitiveComplexity
         get
         {
+            if (this.state is DeploymentStates.STOWED && !this.module.HasElectricPower()) { return false; }
             if (this.module.GroundStop || this.module.atmPressure == 0 || (this.Part.ShieldedFromAirstream && !this.ignoreShielded)) { return false; }
             if (this.DeploymentState == DeploymentStates.CUT) { return false; }
             if (this.DeploymentClause)
