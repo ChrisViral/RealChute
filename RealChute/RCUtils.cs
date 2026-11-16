@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using UnityEngine;
 using static System.Math;
@@ -75,7 +74,7 @@ namespace RealChute
         /// <summary>
         /// Returns the RealChute PluginData folder
         /// </summary>
-        public static string PluginDataURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalPluginDataURL);
+        private static string PluginDataURL => Path.Combine(KSPUtil.ApplicationRootPath, LocalPluginDataURL);
 
         /// <summary>
         /// String URL to the RealChute settings config
@@ -87,7 +86,6 @@ namespace RealChute
         /// </summary>
         public static string PresetsURL => Path.Combine(KSPUtil.ApplicationRootPath, PluginDataURL, PresetsFile);
 
-        private static string assemblyVersion;
         /// <summary>
         /// Gets the current version of the assembly
         /// </summary>
@@ -95,16 +93,16 @@ namespace RealChute
         {
             get
             {
-                if (string.IsNullOrEmpty(assemblyVersion))
+                if (string.IsNullOrEmpty(field))
                 {
-                    Version version = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
+                    Version version = new(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion);
                     if (version.Revision == 0)
                     {
-                        assemblyVersion = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
+                        field = "v" + (version.Build == 0 ? version.ToString(2) : version.ToString(3));
                     }
-                    else { assemblyVersion = "v" + version; }
+                    else { field = "v" + version; }
                 }
-                return assemblyVersion;
+                return field;
             }
         }
         #endregion
@@ -163,7 +161,7 @@ namespace RealChute
         /// Returns true if the number is a whole number (no decimals)
         /// </summary>
         /// <param name="f">Float to check</param>
-        public static bool IsWholeNumber(float f) => Truncate(f) == f;
+        public static bool IsWholeNumber(float f) => Mathf.Approximately((float)Truncate(f),  f);
 
         /// <summary>
         /// Returns a simplified string for the chute number

@@ -1,5 +1,6 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
+using JetBrains.Annotations;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
 using RealChute.Libraries.Presets;
@@ -18,6 +19,7 @@ using Object = UnityEngine.Object;
 
 namespace RealChute
 {
+    [PublicAPI]
     public class ChuteTemplate
     {
         #region Propreties
@@ -73,10 +75,10 @@ namespace RealChute
         #region Fields
         internal ProceduralChute pChute;
         internal Parachute parachute;
-        internal TemplateGUI templateGUI = new TemplateGUI();
-        internal MaterialDefinition material = new MaterialDefinition();
-        internal CanopyConfig canopy = new CanopyConfig();
-        internal ModelConfig model = new ModelConfig();
+        internal TemplateGUI templateGUI = new();
+        internal MaterialDefinition material = new();
+        internal CanopyConfig canopy = new();
+        internal ModelConfig model = new();
         public Vector3 position = Vector3.zero;
         public int id;
         #endregion
@@ -104,6 +106,7 @@ namespace RealChute
 
         #region Methods
         //Applies changes to the parachute
+        // ReSharper disable once CognitiveComplexity
         internal void ApplyChanges(bool toSymmetryCounterparts)
         {
             this.parachute.material = this.material.Name;
@@ -111,37 +114,37 @@ namespace RealChute
 
             if (this.templateGUI.calcSelect)
             {
-                double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass);
+                double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass, CultureInfo.InvariantCulture);
                 double alt = 0, acc = 0;
                 switch (this.templateGUI.Type)
                 {
                     case ParachuteType.MAIN:
                     {
-                        alt = double.Parse(this.pChute.landingAlt);
+                        alt = double.Parse(this.pChute.landingAlt, CultureInfo.InvariantCulture);
                         acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                         break;
                     }
                     case ParachuteType.DROGUE:
                     {
-                        alt = double.Parse(this.templateGUI.refDepAlt);
+                        alt = double.Parse(this.templateGUI.refDepAlt, CultureInfo.InvariantCulture);
                         acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                         break;
                     }
                     case ParachuteType.DRAG:
                     {
-                        alt = double.Parse(this.pChute.landingAlt);
-                        acc = double.Parse(this.templateGUI.deceleration);
+                        alt = double.Parse(this.pChute.landingAlt, CultureInfo.InvariantCulture);
+                        acc = double.Parse(this.templateGUI.deceleration, CultureInfo.InvariantCulture);
                         break;
                     }
                 }
 
                 double density = this.Body.GetDensityAtAlt(alt, this.Body.GetMaxTemperatureAtAlt(alt));
-                double speed = double.Parse(this.templateGUI.landingSpeed);
+                double speed = double.Parse(this.templateGUI.landingSpeed, CultureInfo.InvariantCulture);
                 speed *= speed;
 
                 Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - m: {m}t, alt: {alt}m, ρ: {density}kg/m³, v²: {speed}m²/s², a: {acc}m/s²");
 
-                this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((8000 * m * acc) / (Math.PI * speed * this.material.DragCoefficient * density * double.Parse(this.templateGUI.chuteCount))));
+                this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((8000 * m * acc) / (Math.PI * speed * this.material.DragCoefficient * density * double.Parse(this.templateGUI.chuteCount, CultureInfo.InvariantCulture))));
                 float maxDiam = (this.Textures != null) && (this.Textures.Models.Count > 0) ? this.model.MaxDiam : this.parachute.maxDiameter;
                 if (this.parachute.deployedDiameter > this.model.MaxDiam)
                 {
@@ -150,23 +153,23 @@ namespace RealChute
                 }
                 else { this.EditorGUI.warning = false; }
                 this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.Type == ParachuteType.MAIN ? this.parachute.deployedDiameter / 20 : this.parachute.deployedDiameter / 2);
-                Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - depDiam: {this.parachute.deployedDiameter}m, preDepDiam: {this.parachute.preDeployedDiameter}m");
             }
 
             else
             {
-                this.parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam));
-                this.parachute.deployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.depDiam));
-                Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - depDiam: {this.parachute.deployedDiameter}m, preDepDiam: {this.parachute.preDeployedDiameter}m");
+                this.parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam, CultureInfo.InvariantCulture));
+                this.parachute.deployedDiameter    = RCUtils.Round(float.Parse(this.templateGUI.depDiam, CultureInfo.InvariantCulture));
             }
 
+            Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - depDiam: {this.parachute.deployedDiameter}m, preDepDiam: {this.parachute.preDeployedDiameter}m");
+
             this.parachute.minIsPressure = this.templateGUI.isPressure;
-            if (this.templateGUI.isPressure) { this.parachute.minPressure = float.Parse(this.templateGUI.predepClause); }
-            else { this.parachute.minDeployment = float.Parse(this.templateGUI.predepClause); }
-            this.parachute.deploymentAlt = float.Parse(this.templateGUI.deploymentAlt);
-            this.parachute.cutAlt = GUIUtils.ParseEmpty(this.templateGUI.cutAlt);
-            this.parachute.preDeploymentSpeed = float.Parse(this.templateGUI.preDepSpeed);
-            this.parachute.deploymentSpeed = float.Parse(this.templateGUI.depSpeed);
+            if (this.templateGUI.isPressure) { this.parachute.minPressure = float.Parse(this.templateGUI.predepClause, CultureInfo.InvariantCulture); }
+            else { this.parachute.minDeployment                           = float.Parse(this.templateGUI.predepClause, CultureInfo.InvariantCulture); }
+            this.parachute.deploymentAlt      = float.Parse(this.templateGUI.deploymentAlt, CultureInfo.InvariantCulture);
+            this.parachute.cutAlt             = GUIUtils.ParseEmpty(this.templateGUI.cutAlt);
+            this.parachute.preDeploymentSpeed = float.Parse(this.templateGUI.preDepSpeed, CultureInfo.InvariantCulture);
+            this.parachute.deploymentSpeed    = float.Parse(this.templateGUI.depSpeed, CultureInfo.InvariantCulture);
 
             if (toSymmetryCounterparts)
             {
@@ -211,7 +214,7 @@ namespace RealChute
         }
 
         //Updates the canopy texture
-        internal void UpdateCanopyTexture()
+        private void UpdateCanopyTexture()
         {
             if (this.Textures == null) { return; }
 
@@ -238,7 +241,7 @@ namespace RealChute
         }
 
         //Updates the canopy model
-        internal void UpdateCanopy()
+        private void UpdateCanopy()
         {
             if (this.Textures == null)
             {
@@ -323,8 +326,8 @@ namespace RealChute
             this.templateGUI.depDiam = parameters.DeployedDiameter;
             this.templateGUI.isPressure = parameters.MinIsPressure;
             this.templateGUI.predepClause = this.templateGUI.isPressure ? parameters.MinPressure : parameters.MinDeployment;
-            if (this.templateGUI.isPressure) { this.parachute.minDeployment = float.Parse(parameters.MinDeployment); }
-            else { this.parachute.minPressure = float.Parse(parameters.MinPressure); }
+            if (this.templateGUI.isPressure) { this.parachute.minDeployment = float.Parse(parameters.MinDeployment, CultureInfo.InvariantCulture); }
+            else { this.parachute.minPressure                               = float.Parse(parameters.MinPressure, CultureInfo.InvariantCulture); }
             this.templateGUI.deploymentAlt = parameters.DeploymentAlt;
             this.templateGUI.cutAlt = parameters.CutAlt;
             this.templateGUI.preDepSpeed = parameters.PreDeploymentSpeed;
@@ -346,6 +349,7 @@ namespace RealChute
         }
 
         //Initializes the chute
+        // ReSharper disable once CognitiveComplexity
         public void Initialize()
         {
             this.parachute = this.pChute.rcModule.parachutes[this.id];
@@ -385,14 +389,14 @@ namespace RealChute
                     this.Textures.TryGetModel(this.templateGUI.modelId, ref this.model);
                 }
 
-                this.templateGUI.preDepDiam = this.parachute.preDeployedDiameter.ToString();
-                this.templateGUI.depDiam = this.parachute.deployedDiameter.ToString();
-                this.templateGUI.isPressure = this.parachute.minIsPressure;
-                this.templateGUI.predepClause = this.templateGUI.isPressure ? this.parachute.minPressure.ToString() : this.parachute.minDeployment.ToString();
-                this.templateGUI.deploymentAlt = this.parachute.deploymentAlt.ToString();
-                this.templateGUI.cutAlt = this.parachute.cutAlt == -1 ? string.Empty : this.parachute.cutAlt.ToString();
-                this.templateGUI.preDepSpeed = this.parachute.preDeploymentSpeed.ToString();
-                this.templateGUI.depSpeed = this.parachute.deploymentSpeed.ToString();
+                this.templateGUI.preDepDiam    = this.parachute.preDeployedDiameter.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.depDiam       = this.parachute.deployedDiameter.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.isPressure    = this.parachute.minIsPressure;
+                this.templateGUI.predepClause  = this.templateGUI.isPressure ? this.parachute.minPressure.ToString(CultureInfo.InvariantCulture) : this.parachute.minDeployment.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.deploymentAlt = this.parachute.deploymentAlt.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.cutAlt        = Mathf.Approximately(this.parachute.cutAlt, -1f) ? string.Empty : this.parachute.cutAlt.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.preDepSpeed   = this.parachute.preDeploymentSpeed.ToString(CultureInfo.InvariantCulture);
+                this.templateGUI.depSpeed      = this.parachute.deploymentSpeed.ToString(CultureInfo.InvariantCulture);
             }
             this.position = this.parachute.parachute.position;
 
@@ -436,7 +440,7 @@ namespace RealChute
         /// </summary>
         public ConfigNode Save()
         {
-            ConfigNode node = new ConfigNode("CHUTE");
+            ConfigNode node = new("CHUTE");
             node.AddValue("chuteID", this.templateGUI.chuteId);
             node.AddValue("modelID", this.templateGUI.modelId);
             node.AddValue("typeID", this.templateGUI.TypeId);

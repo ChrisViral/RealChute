@@ -1,4 +1,5 @@
 ﻿using System;
+using JetBrains.Annotations;
 
 /* RealChute was made by Christophe Savard (stupid_chris). You are free to copy, fork, and modify RealChute as you see
  * fit. However, redistribution is only permitted for unmodified versions of RealChute, and under attribution clause.
@@ -14,42 +15,43 @@ namespace RealChute
     /// <summary>
     /// A generic Stopwatch clone which runs on KSP's internal clock
     /// </summary>
-    public class PhysicsWatch
+    [PublicAPI]
+    public sealed class PhysicsWatch
     {
         #region Constants
         /// <summary>
         /// The amount of ticks in a second
         /// </summary>
-        protected const long TicksPerSecond = 10000000L;
+        private const long TICKS_PER_SECOND = 10000000L;
 
         /// <summary>
         /// The amount of milliseconds in a second
         /// </summary>
-        protected const long MillisecondPerSecond = 1000L;
+        private const long MILLISECOND_PER_SECOND = 1000L;
         #endregion
 
         #region Fields
         /// <summary>
         /// UT of the last frame
         /// </summary>
-        protected double lastCheck;
+        private double lastCheck;
 
         /// <summary>
         /// Total elapsed time calculated by the watch in seconds
         /// </summary>
-        protected double totalSeconds;
+        private double totalSeconds;
         #endregion
 
         #region Propreties
         /// <summary>
         /// If the watch is currently counting down time
         /// </summary>
-        public bool IsRunning { get; protected set; }
+        public bool IsRunning { get; private set; }
 
         /// <summary>
         /// The current elapsed time of the watch
         /// </summary>
-        public TimeSpan Elapsed => new TimeSpan(this.ElapsedTicks);
+        public TimeSpan Elapsed => new(this.ElapsedTicks);
 
         /// <summary>
         /// The amount of milliseconds elapsed to the current watch
@@ -59,7 +61,7 @@ namespace RealChute
             get
             {
                 if (this.IsRunning) { UpdateWatch(); }
-                return (long)Math.Round(this.totalSeconds * MillisecondPerSecond);
+                return (long)Math.Round(this.totalSeconds * MILLISECOND_PER_SECOND);
             }
         }
 
@@ -71,7 +73,7 @@ namespace RealChute
             get
             {
                 if (this.IsRunning) { UpdateWatch(); }
-                return (long)(this.totalSeconds * TicksPerSecond);
+                return (long)(this.totalSeconds * TICKS_PER_SECOND);
             }
         }
         #endregion
@@ -142,7 +144,7 @@ namespace RealChute
         /// <summary>
         /// Updates the time on the watch
         /// </summary>
-        protected virtual void UpdateWatch()
+        private void UpdateWatch()
         {
             double current = Planetarium.GetUniversalTime();
             this.totalSeconds += current - this.lastCheck;
@@ -163,7 +165,7 @@ namespace RealChute
         /// </summary>
         public static PhysicsWatch StartNew()
         {
-            PhysicsWatch watch = new PhysicsWatch();
+            PhysicsWatch watch = new();
             watch.Start();
             return watch;
         }
@@ -174,7 +176,7 @@ namespace RealChute
         /// <param name="seconds">Time to start the watch at, in seconds</param>
         public static PhysicsWatch StartNewFromTime(double seconds)
         {
-            PhysicsWatch watch = new PhysicsWatch(seconds);
+            PhysicsWatch watch = new(seconds);
             watch.Start();
             return watch;
         }

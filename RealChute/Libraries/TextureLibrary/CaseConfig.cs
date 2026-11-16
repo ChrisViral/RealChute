@@ -7,49 +7,48 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries.TextureLibrary
+namespace RealChute.Libraries.TextureLibrary;
+
+public class CaseConfig
 {
-    public class CaseConfig
+    #region Propreties
+    private readonly string name = string.Empty;
+    /// <summary>
+    /// Name of the texture
+    /// </summary>
+    public string Name => this.name;
+
+    /// <summary>
+    /// Types of parachute this texture applies to
+    /// </summary>
+    public string[] Types { get; } = [];
+
+    private readonly string textureURL = string.Empty;
+    /// <summary>
+    /// URL of the texture
+    /// </summary>
+    public string TextureURL => this.textureURL;
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates an empty CaseConfig
+    /// </summary>
+    public CaseConfig() { }
+
+    /// <summary>
+    /// Creates a new CaseConfig from the given ConfigNode
+    /// </summary>
+    /// <param name="node">ConfigNode to get the values from</param>
+    public CaseConfig(ConfigNode node)
     {
-        #region Propreties
-        private readonly string name = string.Empty;
-        /// <summary>
-        /// Name of the texture
-        /// </summary>
-        public string Name => this.name;
-
-        /// <summary>
-        /// Types of parachute this texture applies to
-        /// </summary>
-        public string[] Types { get; } = new string[0];
-
-        private readonly string textureURL = string.Empty;
-        /// <summary>
-        /// URL of the texture
-        /// </summary>
-        public string TextureURL => this.textureURL;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates an empty CaseConfig
-        /// </summary>
-        public CaseConfig() { }
-
-        /// <summary>
-        /// Creates a new CaseConfig from the given ConfigNode
-        /// </summary>
-        /// <param name="node">ConfigNode to get the values from</param>
-        public CaseConfig(ConfigNode node)
+        node.TryGetValue("name", ref this.name);
+        string array = string.Empty;
+        if (node.TryGetValue("types", ref array))
         {
-            node.TryGetValue("name", ref this.name);
-            string array = string.Empty;
-            if (node.TryGetValue("types", ref array))
-            {
-                this.Types = RCUtils.ParseArray(array);
-            }
-            node.TryGetValue("textureURL", ref this.textureURL);
+            this.Types = RCUtils.ParseArray(array);
         }
-        #endregion
+        node.TryGetValue("textureURL", ref this.textureURL);
     }
+    #endregion
 }

@@ -77,7 +77,7 @@ namespace RealChute
         /// <summary>
         /// Loads the RealChute_Settings config to memory
         /// </summary>
-        public RealChuteSettings()
+        private RealChuteSettings()
         {
             Debug.Log("[RealChute]: Loading settings file.");
             if (!File.Exists(RCUtils.SettingsURL))

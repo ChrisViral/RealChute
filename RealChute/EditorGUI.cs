@@ -1,7 +1,9 @@
-﻿﻿using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using ClickThroughFix;
+using JetBrains.Annotations;
 using RealChute.Extensions;
 using RealChute.Libraries;
 using RealChute.Libraries.Presets;
@@ -18,6 +20,7 @@ using UnityEngine;
 
 namespace RealChute
 {
+    [PublicAPI]
     public class EditorGUI
     {
         #region Propreties
@@ -36,17 +39,17 @@ namespace RealChute
         internal Rect presetsWindow, presetsSaveWindow, presetsWarningWindow;
         private readonly int mainId = Guid.NewGuid().GetHashCode(), failedId = Guid.NewGuid().GetHashCode(), successId = Guid.NewGuid().GetHashCode();
         private readonly int presetSaveId = Guid.NewGuid().GetHashCode(), presetWarningId = Guid.NewGuid().GetHashCode();
-        internal int matX = (int)(500 * GameSettings.UI_SCALE), matY = (int)(370 * GameSettings.UI_SCALE);
+        internal int matX = (int)(500f * GameSettings.UI_SCALE), matY = (int)(370f * GameSettings.UI_SCALE);
         private Vector2 mainScroll, failedScroll;
         private Vector2 presetScroll;
         internal string presetName = string.Empty, presetDescription = string.Empty;
-        internal bool warning = false;
-        internal bool visible = false, failedVisible, successfulVisible;
+        internal bool warning;
+        internal bool visible, failedVisible, successfulVisible;
         internal bool presetVisible, presetSaveVisible, presetWarningVisible;
         private bool saveWarning;
-        internal string[] cases = new string[0], canopies = new string[0], models = new string[0];
+        internal string[] cases = [], canopies = [], models = [];
 
-        internal static Rect mainWindow;
+        internal static Rect MainWindow;
         #endregion
 
         #region Constructor
@@ -74,7 +77,7 @@ namespace RealChute
             GUI.skin = HighLogic.Skin;
             if (this.visible)
             {
-                mainWindow = ClickThruBlocker.GUILayoutWindow(this.mainId, mainWindow, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
+                MainWindow = ClickThruBlocker.GUILayoutWindow(this.mainId, MainWindow, Window, "RealChute Parachute Editor " + RCUtils.AssemblyVersion, GUIUtils.ScaledWindow, GUILayout.MaxWidth(420f * GameSettings.UI_SCALE), GUILayout.MaxHeight((Screen.height - 375f) * GameSettings.UI_SCALE));
             }
             foreach (ChuteTemplate chute in this.Chutes)
             {
@@ -107,6 +110,7 @@ namespace RealChute
         }
 
         //Main GUI window
+        // ReSharper disable once CognitiveComplexity
         private void Window(int id)
         {
             //Top right close button
@@ -124,10 +128,10 @@ namespace RealChute
             StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("Selected part: ").AppendLine(this.Part.partInfo.title);
             builder.Append("Symmetry counterparts: ").AppendLine(this.Part.symmetryCounterparts.Count.ToString());
-            builder.Append("Case mass: ").Append(this.RCModule.caseMass.ToString("0.000")).Append("t");
-            if (this.Sizes.Count > 0) { builder.Append("\t\tCase cost: ").Append(this.Sizes[this.pChute.size].Cost.ToString("0.#")).Append("F"); }
-            builder.Append("\nTotal part mass: ").Append(this.Part.TotalMass().ToString("0.000")).Append("t");
-            builder.Append("\tTotal part cost: ").Append(this.Part.TotalCost().ToString("0.#")).Append("F");
+            builder.Append("Case mass: ").Append(this.RCModule.caseMass.ToString("0.000", CultureInfo.InvariantCulture)).Append("t");
+            if (this.Sizes.Count > 0) { builder.Append("\t\tCase cost: ").Append(this.Sizes[this.pChute.size].Cost.ToString("0.#", CultureInfo.InvariantCulture)).Append("F"); }
+            builder.Append("\nTotal part mass: ").Append(this.Part.TotalMass().ToString("0.000", CultureInfo.InvariantCulture)).Append("t");
+            builder.Append("\tTotal part cost: ").Append(this.Part.TotalCost().ToString("0.#", CultureInfo.InvariantCulture)).Append("F");
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
             #endregion
 
@@ -195,10 +199,10 @@ namespace RealChute
             this.Chutes[0].templateGUI.MaterialsSelector();
 
             //MustGoDown
-            GUIUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, mainWindow.width);
+            GUIUtils.CreateTwinToggle("Must go down to deploy:", ref this.pChute.mustGoDown, MainWindow.width);
 
             //DeployOnGround
-            GUIUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, mainWindow.width);
+            GUIUtils.CreateTwinToggle("Deploy on ground contact:", ref this.pChute.deployOnGround, MainWindow.width);
 
             //Timer
             GUIUtils.CreateTimeEntryArea("Deployment timer:", ref this.pChute.timer, 0f, 3600f);
@@ -415,7 +419,7 @@ namespace RealChute
         //Resets the main window location to its default value
         internal static void ResetWindowLocation()
         {
-            mainWindow = new Rect((Screen.width / 2f) - (200f * GameSettings.UI_SCALE), (Screen.height / 2f) - (300f * GameSettings.UI_SCALE), 400f * GameSettings.UI_SCALE, 600f * GameSettings.UI_SCALE);
+            MainWindow = new Rect((Screen.width / 2f) - (200f * GameSettings.UI_SCALE), (Screen.height / 2f) - (300f * GameSettings.UI_SCALE), 400f * GameSettings.UI_SCALE, 600f * GameSettings.UI_SCALE);
         }
         #endregion
     }

@@ -7,17 +7,19 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Extensions
+namespace RealChute.Extensions;
+
+public static class VesselExtensions
 {
-    public static class VesselExtensions
+    #region Methods
+    /// <param name="vessel">Vessel to get the altitude for</param>
+    extension(Vessel vessel)
     {
-        #region Methods
         /// <summary>
         /// Returns the AGL altitude from this vessel at the desired position
         /// </summary>
-        /// <param name="vessel">Vessel to get the altitude for</param>
         /// <param name="asl">Sea level altitude of this vessel</param>
-        public static double GetTrueAlt(this Vessel vessel, double asl)
+        public double GetTrueAlt(double asl)
         {
             if (vessel.mainBody.pqsController == null) { return asl; }
             double terrainAlt = vessel.pqsAltitude;
@@ -27,9 +29,8 @@ namespace RealChute.Extensions
         /// <summary>
         /// If the given vessel is a Kerbal engineer
         /// </summary>
-        /// <param name="vessel">Vessel to test for</param>
-        public static bool IsEngineer(this Vessel vessel) => FlightGlobals.ActiveVessel.evaController.part.protoModuleCrew[0]
-                                                                          .experienceTrait.Config.Name == "Engineer";
-        #endregion
+        public static bool IsEngineer() => FlightGlobals.ActiveVessel.evaController.part.protoModuleCrew[0]
+                                                        .experienceTrait.Config.Name == "Engineer";
     }
+    #endregion
 }

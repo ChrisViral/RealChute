@@ -16,25 +16,24 @@ namespace RealChute.Libraries.TextureLibrary
     public class TextureLibrary
     {
         #region Instance
-        private static TextureLibrary instance;
         /// <summary>
         /// Creates a new instance
         /// </summary>
-        public static TextureLibrary Instance => instance ?? (instance = new TextureLibrary());
+        public static TextureLibrary Instance => field ??= new TextureLibrary();
         #endregion
 
         #region Propreties
         /// <summary>
         /// Name of all the TextureConfigs with the associated objects
         /// </summary>
-        public Dictionary<string, TextureConfig> Configs { get; }
+        private Dictionary<string, TextureConfig> Configs { get; }
         #endregion
 
         #region Constructor
         /// <summary>
         /// Creates a new instance of the library
         /// </summary>
-        public TextureLibrary()
+        private TextureLibrary()
         {
             this.Configs = GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n))
                 .ToDictionary(t => t.Name, t => t);
@@ -46,7 +45,7 @@ namespace RealChute.Libraries.TextureLibrary
         /// Determines if the config of the given name exists in the library.
         /// </summary>
         /// <param name="name">Name of the searched config</param>
-        public bool ContainsConfig(string name) => this.Configs.ContainsKey(name);
+        private bool ContainsConfig(string name) => this.Configs.ContainsKey(name);
 
         /// <summary>
         /// Returns the config of the given name.
@@ -63,6 +62,7 @@ namespace RealChute.Libraries.TextureLibrary
         /// </summary>
         /// <param name="name">Name of the config searched for</param>
         /// <param name="config">Variable to store the result in</param>
+        /// ReSharper disable once UnusedMethodReturnValue.Global
         public bool TryGetConfig(string name, ref TextureConfig config)
         {
             if (ContainsConfig(name))

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
+using JetBrains.Annotations;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
 using RealChute.Libraries.TextureLibrary;
@@ -27,6 +29,7 @@ namespace RealChute
         DRAG
     }
 
+    [PublicAPI]
     public class TemplateGUI
     {
         #region Properties
@@ -48,6 +51,7 @@ namespace RealChute
 
         public List<string> Errors
         {
+            // ReSharper disable once CognitiveComplexity
             get
             {
                 List<string> errors = [];
@@ -131,7 +135,7 @@ namespace RealChute
 
         #region Fields
         private readonly ChuteTemplate template;
-        internal Rect materialsWindow = new Rect(), drag = new Rect();
+        internal Rect materialsWindow, drag;
         internal int matId = Guid.NewGuid().GetHashCode();
         internal bool materialsVisible;
         internal Vector2 parachuteScroll, materialsScroll;
@@ -143,7 +147,7 @@ namespace RealChute
         public string mass = "10", landingSpeed = "6", deceleration = "10", refDepAlt = "700", chuteCount = "1";
         public string deploymentAlt = string.Empty, landingAlt = "0", cutAlt = string.Empty;
         public string preDepSpeed = string.Empty, depSpeed = string.Empty;
-        private static readonly string[] calculationModes = { "Automatic", "Manual" };
+        private static readonly string[] CalculationModes = ["Automatic", "Manual"];
         #endregion
 
         #region Constructor
@@ -205,6 +209,7 @@ namespace RealChute
         }
 
         //Texture selector GUI code
+        // ReSharper disable once CognitiveComplexity
         internal void TextureSelector()
         {
             string[] cases = this.PChute.TextureEntries(ProceduralChute.SelectorType.CASE), chutes = this.PChute.TextureEntries(ProceduralChute.SelectorType.CHUTE), models = this.PChute.TextureEntries(ProceduralChute.SelectorType.MODEL);
@@ -287,11 +292,12 @@ namespace RealChute
         }
 
         //Calculations GUI core
+        // ReSharper disable once CognitiveComplexity
         internal void Calculations()
         {
             #region Calculations
             //Selection mode
-            GUIUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300f, calculationModes);
+            GUIUtils.CreateTwinToggle("Calculations mode:", ref this.calcSelect, 300f, CalculationModes);
             GUILayout.Space(5f * GameSettings.UI_SCALE);
 
             //Calculations
@@ -357,12 +363,12 @@ namespace RealChute
 
                 //Predeployed diameter
                 GUIUtils.CreateEntryArea("Predeployed diameter (m):", ref this.preDepDiam, 0.1f, d, 100f);
-                if (p != -1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
+                if (!Mathf.Approximately(p, -1f)) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(p).ToString("0.00", CultureInfo.InvariantCulture) + "m²", GUIUtils.ScaledLabel); }
                 else { GUILayout.Label("Resulting predeployed area: --- m²", GUIUtils.ScaledLabel); }
 
                 //Deployed diameter
                 GUIUtils.CreateEntryArea("Deployed diameter (m):", ref this.depDiam, p, this.PChute.textures == null ? this.Parachute.maxDiameter : this.Model.MaxDiam, 100f);
-                if (d != 1) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00") + "m²", GUIUtils.ScaledLabel); }
+                if (!Mathf.Approximately(d, 1f)) { GUILayout.Label("Resulting area: " + RCUtils.GetArea(d).ToString("0.00", CultureInfo.InvariantCulture) + "m²", GUIUtils.ScaledLabel); }
                 else { GUILayout.Label("Resulting deployed area: --- m²", GUIUtils.ScaledLabel); }
             }
             #endregion
@@ -379,7 +385,7 @@ namespace RealChute
                 if (!this.isPressure)
                 {
                     this.isPressure = true;
-                    this.predepClause = this.Parachute.minPressure.ToString();
+                    this.predepClause = this.Parachute.minPressure.ToString(CultureInfo.InvariantCulture);
                 }
             }
             GUILayout.FlexibleSpace();
@@ -388,7 +394,7 @@ namespace RealChute
                 if (this.isPressure)
                 {
                     this.isPressure = false;
-                    this.predepClause = this.Parachute.minDeployment.ToString();
+                    this.predepClause = this.Parachute.minDeployment.ToString(CultureInfo.InvariantCulture);
                 }
             }
             GUILayout.FlexibleSpace();
@@ -440,19 +446,16 @@ namespace RealChute
                 MaterialsLibrary.Instance.TryGetMaterial(name, ref material);
             }
 
-            if (material == null)
-            {
-                material = new MaterialDefinition();
-            }
+            material ??= new MaterialDefinition();
 
             StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("Description:  ").AppendLine(material.Description);
-            builder.Append("\nDrag coefficient:  ").AppendLine(material.DragCoefficient.ToString("0.00#"));
+            builder.Append("\nDrag coefficient:  ").AppendLine(material.DragCoefficient.ToString("0.00#", CultureInfo.InvariantCulture));
             builder.Append("\nArea density:  ").Append(material.AreaDensity * 1000).AppendLine("kg/m²");
-            builder.Append("\nArea cost:  ").Append(material.AreaCost.ToString()).Append("F/m²");
-            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.AbsoluteZero).ToString()).Append("°C");
-            builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString()).Append("J/kg∙K");
-            builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString());
+            builder.Append("\nArea cost:  ").Append(material.AreaCost.ToString(CultureInfo.InvariantCulture)).Append("F/m²");
+            builder.Append("\nMax temperature: ").Append((material.MaxTemp + RCUtils.AbsoluteZero).ToString(CultureInfo.InvariantCulture)).Append("°C");
+            builder.Append("\nSpecific heat: ").Append(material.SpecificHeat.ToString(CultureInfo.InvariantCulture)).Append("J/kg∙K");
+            builder.Append("\nEmissivity constant: ").Append(material.Emissivity.ToString(CultureInfo.InvariantCulture));
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();

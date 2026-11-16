@@ -18,18 +18,17 @@ namespace RealChute.Libraries.MaterialsLibrary
     public class MaterialsLibrary
     {
         #region Instance
-        private static MaterialsLibrary instance;
         /// <summary>
         /// Creates an instance of the MaterialsLibrary
         /// </summary>
-        public static MaterialsLibrary Instance => instance ?? (instance = new MaterialsLibrary());
+        public static MaterialsLibrary Instance => field ??= new MaterialsLibrary();
         #endregion
 
         #region Propreties
         /// <summary>
         /// Dictionary containing the name of the materials and their associated MaterialDefinition
         /// </summary>
-        public Dictionary<string, MaterialDefinition> Materials { get; }
+        private Dictionary<string, MaterialDefinition> Materials { get; }
 
         /// <summary>
         /// String array of the materials' names
@@ -46,12 +45,12 @@ namespace RealChute.Libraries.MaterialsLibrary
         /// <summary>
         /// Creates a new instance of the MaterialsLibrary
         /// </summary>
-        public MaterialsLibrary()
+        private MaterialsLibrary()
         {
             this.Materials = GameDatabase.Instance.GetConfigNodes("MATERIAL").Select(n => new MaterialDefinition(n))
                 .ToDictionary(m => m.Name, m => m);
-            this.MaterialNames = this.Materials.Keys.ToArray();
-            this.Count = this.MaterialNames.Length;
+            this.MaterialNames = [..this.Materials.Keys];
+            this.Count         = this.MaterialNames.Length;
         }
         #endregion
 
@@ -60,27 +59,23 @@ namespace RealChute.Libraries.MaterialsLibrary
         /// Returns true if the MaterialLibrary contains a definition for the given material
         /// </summary>
         /// <param name="name">Name of the material</param>
-        public bool ContainsMaterial(string name) => this.Materials.ContainsKey(name);
+        private bool ContainsMaterial(string name) => this.Materials.ContainsKey(name);
 
         /// <summary>
         /// Returns the MaterialDefinition of the given name
         /// </summary>
         /// <param name="name">Name of the material</param>
-        public MaterialDefinition GetMaterial(string name)
-        {
-            if (!ContainsMaterial(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" MaterialDefinition in the library"); }
-            return this.Materials[name];
-        }
+        public MaterialDefinition GetMaterial(string name) => ContainsMaterial(name)
+                                                                  ? this.Materials[name]
+                                                                  : throw new KeyNotFoundException($"Could not find the \"{name}\" MaterialDefinition in the library");
 
         /// <summary>
         /// Returns the MaterialDefinition at the given index
         /// </summary>
         /// <param name="index">Index of the material</param>
-        public MaterialDefinition GetMaterial(int index)
-        {
-            if (!this.MaterialNames.IndexInRange(index)) { throw new IndexOutOfRangeException($"Material index [{index}] is out of range"); }
-            return GetMaterial(this.MaterialNames[index]);
-        }
+        public MaterialDefinition GetMaterial(int index) => this.MaterialNames.IndexInRange(index)
+                                                                ? GetMaterial(this.MaterialNames[index])
+                                                                : throw new IndexOutOfRangeException($"Material index [{index}] is out of range");
 
         /// <summary>
         /// Tries to get the material of the given name and stores it in the out value

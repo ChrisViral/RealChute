@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
 using UnityEngine;
@@ -18,11 +21,12 @@ using Random = System.Random;
 
 namespace RealChute
 {
+    [PublicAPI]
     public class Parachute
     {
         #region Propreties
         //Predeployed area of the chute
-        public float PreDeployedArea => RCUtils.GetArea(this.preDeployedDiameter);
+        private float PreDeployedArea => RCUtils.GetArea(this.preDeployedDiameter);
 
         //Deployed area of the chute
         public float DeployedArea => RCUtils.GetArea(this.deployedDiameter);
@@ -78,7 +82,7 @@ namespace RealChute
         public Vector3 ForcePosition => this.parachute.position;
 
         //If the random deployment timer has been spent
-        public bool RandomDeployment
+        private bool RandomDeployment
         {
             get
             {
@@ -94,7 +98,7 @@ namespace RealChute
         }
 
         //If the parachute has passed the minimum deployment clause
-        public bool DeploymentClause
+        private bool DeploymentClause
         {
             get
             {
@@ -106,13 +110,14 @@ namespace RealChute
         //If the parachute can deploy
         public bool CanDeploy
         {
+            // ReSharper disable once CognitiveComplexity
             get
             {
                 if (this.module.GroundStop || this.module.atmPressure == 0 || (this.Part.ShieldedFromAirstream && !this.ignoreShielded)) { return false; }
                 if (this.DeploymentState == DeploymentStates.CUT) { return false; }
                 if (this.DeploymentClause)
                 {
-                    if (this.cutAlt == -1) { return true; }
+                    if (Mathf.Approximately(this.cutAlt, -1F)) { return true; }
                     if (this.module.trueAlt > this.cutAlt) { return true; }
                 }
                 else if (this.module.SecondaryChute && this.Parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
@@ -126,16 +131,13 @@ namespace RealChute
         {
             get
             {
-                switch (this.DeploymentState)
+                return this.DeploymentState switch
                 {
-                    case DeploymentStates.PREDEPLOYED:
-                    case DeploymentStates.LOWDEPLOYED:
-                    case DeploymentStates.DEPLOYED:
-                        return true;
-
-                    default:
-                        return false;
-                }
+                    DeploymentStates.PREDEPLOYED => true,
+                    DeploymentStates.LOWDEPLOYED => true,
+                    DeploymentStates.DEPLOYED    => true,
+                    _                            => false
+                };
             }
         }
 
@@ -147,7 +149,7 @@ namespace RealChute
             {
                 if (this.check)
                 {
-                    if (this.forcedOrientation >= 90 || this.forcedOrientation <= 0) { this.forced = Vector3.zero; }
+                    if (this.forcedOrientation is <= 0 or >= 90) { this.forced = Vector3.zero; }
                     Vector3 follow = this.ForcePosition - this.module.pos;
                     float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
                     this.forced = follow.normalized * length;
@@ -158,7 +160,7 @@ namespace RealChute
         }
 
         //The parachutes of the associated module
-        public List<Parachute> Parachutes => this.module.parachutes;
+        private List<Parachute> Parachutes => this.module.parachutes;
 
         //Gets/sets the DeploymentState correctly
         public DeploymentStates DeploymentState
@@ -168,7 +170,7 @@ namespace RealChute
                 if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
                 return this.state;
             }
-            set
+            private set
             {
                 this.state = value;
                 this.depState = EnumUtils.GetName(this.state);
@@ -200,12 +202,12 @@ namespace RealChute
         internal RealChuteModule module;
         internal Transform parachute, cap;
         private Rigidbody rigidbody;
-        internal MaterialDefinition mat = new MaterialDefinition();
+        internal MaterialDefinition mat = new();
         internal Vector3 phase = Vector3.zero;
         private Quaternion? lastRotation;
         internal bool played;
-        internal PhysicsWatch randomTimer = new PhysicsWatch(), dragTimer = new PhysicsWatch();
-        private readonly Random random = new Random();
+        internal PhysicsWatch randomTimer = new(), dragTimer = new();
+        private readonly Random random = new();
         internal DeploymentStates state = DeploymentStates.NONE;
         internal float randomX, randomY, randomTime;
         private Vector3 forced;
@@ -336,14 +338,14 @@ namespace RealChute
         }
 
         //Calculates parachute deployed area
-        private float DragDeployment(float time, float debutArea, float endArea)
+        private float DragDeployment(float deployTime, float debutArea, float endArea)
         {
             if (!this.dragTimer.IsRunning) { this.dragTimer.Start(); }
 
             this.time = this.dragTimer.Elapsed.TotalSeconds;
-            if (this.time <= time)
+            if (this.time <= deployTime)
             {
-                float deploymentTime = (float)(Math.Exp(this.time - time) * (this.time / time));
+                float deploymentTime = (float)(Math.Exp(this.time - deployTime) * (this.time / deployTime));
                 this.currentArea =  Mathf.Lerp(debutArea, endArea, deploymentTime);
                 return (float)this.currentArea;
             }
@@ -352,14 +354,15 @@ namespace RealChute
         }
 
         //Drag force vector
-        private Vector3 DragForce(float startArea, float targetArea, float time)
+        private Vector3 DragForce(float startArea, float targetArea, float deployTime)
         {
             return this.module.dragVector
-                 * (this.module.DragCalculation(DragDeployment(time, startArea, targetArea), this.mat.DragCoefficient)
+                 * (this.module.DragCalculation(DragDeployment(deployTime, startArea, targetArea), this.mat.DragCoefficient)
                   * (RealChuteSettings.Instance.JokeActivated ? -1 : 1));
         }
 
         //Parachute function
+        // ReSharper disable once CognitiveComplexity
         internal void UpdateParachute()
         {
             if (this.CanDeploy)
@@ -461,11 +464,13 @@ namespace RealChute
         }
 
         //Initializes the chute
+        // ReSharper disable once CognitiveComplexity
         public void Initialize()
         {
             MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
 
             //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
+            // ReSharper disable once UnusedVariable
             Animation anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
 
             this.cap = this.Part.FindModelTransform(this.capName);
@@ -508,14 +513,15 @@ namespace RealChute
 
         #region GUI
         //Info window GUI
+        // ReSharper disable once CognitiveComplexity
         internal void RenderGUI()
         {
             //Initial label
             StringBuilder builder = StringBuilderCache.Acquire();
             builder.Append("Material: ").AppendLine(this.mat.Name);
-            builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#"));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###")).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###")).Append("m²");
+            builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#", CultureInfo.InvariantCulture));
+            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).AppendLine("m²");
+            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).Append("m²");
             GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
 
             if (HighLogic.LoadedSceneIsFlight)
@@ -531,6 +537,9 @@ namespace RealChute
 
                     case SafeState.DANGEROUS:
                         GUILayout.Label("Deployment safety: dangerous", GUIUtils.RedLabel); break;
+
+                    default:
+                        throw new InvalidEnumArgumentException(nameof(this.safeState), (int)this.safeState, typeof(SafeState));
                 }
 
                 //Temperature info

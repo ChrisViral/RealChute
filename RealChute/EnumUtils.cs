@@ -24,12 +24,12 @@ namespace RealChute
             /// <summary>
             /// Stores the string -> enum conversion
             /// </summary>
-            private readonly Dictionary<string, TEnum> values = new Dictionary<string, TEnum>();
+            private readonly Dictionary<string, TEnum> values = new();
 
             /// <summary>
             /// Stores the enum -> string conversion
             /// </summary>
-            private readonly Dictionary<TEnum, string> names = new Dictionary<TEnum, string>();
+            private readonly Dictionary<TEnum, string> names = new();
 
             /// <summary>
             /// The name of the enum values correctly ordered for index search
@@ -56,7 +56,7 @@ namespace RealChute
                 for (int i = 0; i < val.Length; i++)
                 {
                     TEnum value = (TEnum)val.GetValue(i);
-                    string name = Enum.GetName(enumType, value);
+                    string name = Enum.GetName(enumType, value)!;
                     this.orderedNames[i] = name;
                     this.orderedValues[i] = value;
                     this.values.Add(name, value);
@@ -74,7 +74,7 @@ namespace RealChute
             public void TryGetValue<T>(string name, out T value) where T : struct, TEnum
             {
                 this.values.TryGetValue(name, out TEnum result);
-                value = (T)result;
+                value = (T)result!;
             }
 
             /// <summary>
@@ -90,7 +90,7 @@ namespace RealChute
         /// <summary>
         /// Holds all the known enum converters
         /// </summary>
-        private static readonly Dictionary<Type, EnumConverter> converters = new Dictionary<Type, EnumConverter>();
+        private static readonly Dictionary<Type, EnumConverter> Converters = new();
         #endregion
 
         #region Methods
@@ -101,10 +101,10 @@ namespace RealChute
         private static EnumConverter GetConverter<T>() where T : struct, TEnum
         {
             Type enumType = typeof(T);
-            if (!converters.TryGetValue(enumType, out EnumConverter converter))
+            if (!Converters.TryGetValue(enumType, out EnumConverter converter))
             {
                 converter = new EnumConverter(enumType);
-                converters.Add(enumType, converter);
+                Converters.Add(enumType, converter);
             }
             return converter;
         }
@@ -121,7 +121,7 @@ namespace RealChute
         }
 
         /// <summary>
-        /// Parses the given string to the given Enum type 
+        /// Parses the given string to the given Enum type
         /// </summary>
         /// <typeparam name="T">Type of the enum</typeparam>
         /// <param name="name">String to parse</param>
@@ -183,6 +183,8 @@ namespace RealChute
         #endregion
     }
 
+    // ReSharper disable once ClassCannotBeInstantiated
+    // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class EnumUtils : EnumConstraint<Enum>
     {
         /* Nothing to see here, this is just a dummy class to force T to be an Enum.
