@@ -163,8 +163,10 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Arm parachute", unfocusedRange = 5)]
     public void GUIArm()
     {
-        this.armed = true;
-        ActivateRC();
+        if (ActivateRC())
+        {
+            this.armed = true;
+        }
     }
 
     [KSPEvent(guiActive = true, active = true, externalToEVAOnly = true, guiActiveUnfocused = true, guiName = "Disarm parachute", unfocusedRange = 5)]
@@ -293,7 +295,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     }
 
     //Activates the parachute
-    public void ActivateRC()
+    public bool ActivateRC()
     {
         if (RealChuteSettings.Instance.RequireChargeToDeploy)
         {
@@ -302,13 +304,14 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
             {
                 Debug.Log($"[RealChute]: {this.part.partInfo.name} failed to activate due to insufficient EC");
                 ScreenMessages.PostScreenMessage($"<color=orange>[RealChute]: {this.part.partInfo.title}'s parachute could not be deployed due to a lack of ElectricCharge on the vessel.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
-                return;
+                return false;
             }
         }
 
         this.staged = true;
         if (RealChuteSettings.Instance.AutoArm) { this.armed = true; }
         Debug.Log($"[RealChute]: {this.part.partInfo.name} was activated in stage {this.part.inverseStage}");
+        return true;
     }
 
     //Deactivates the parachute
