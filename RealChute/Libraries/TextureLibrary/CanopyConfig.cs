@@ -7,41 +7,40 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries.TextureLibrary
+namespace RealChute.Libraries.TextureLibrary;
+
+public class CanopyConfig
 {
-    public class CanopyConfig
+    #region Propreties
+    private readonly string name = string.Empty;
+
+    /// <summary>
+    /// The name of the texture
+    /// </summary>
+    public string Name => this.name;
+
+    private readonly string textureURL = string.Empty;
+
+    /// <summary>
+    /// The URL of the texture
+    /// </summary>
+    public string TextureURL => this.textureURL;
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates an empty CanopyConfig
+    /// </summary>
+    public CanopyConfig() { }
+
+    /// <summary>
+    /// Creates a new CanopyConfig from the given ConfigNode
+    /// </summary>
+    /// <param name="node">ConfigNode to make the config from</param>
+    public CanopyConfig(ConfigNode node)
     {
-        #region Propreties
-        private readonly string name = string.Empty;
-
-        /// <summary>
-        /// The name of the texture
-        /// </summary>
-        public string Name => this.name;
-
-        private readonly string textureURL = string.Empty;
-
-        /// <summary>
-        /// The URL of the texture
-        /// </summary>
-        public string TextureURL => this.textureURL;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates an empty CanopyConfig
-        /// </summary>
-        public CanopyConfig() { }
-
-        /// <summary>
-        /// Creates a new CanopyConfig from the given ConfigNode
-        /// </summary>
-        /// <param name="node">ConfigNode to make the config from</param>
-        public CanopyConfig(ConfigNode node)
-        {
-            node.TryGetValue("name", ref this.name);
-            node.TryGetValue("textureURL", ref this.textureURL);
-        }
-        #endregion
+        node.TryGetValue("name", ref this.name);
+        node.TryGetValue("textureURL", ref this.textureURL);
     }
+    #endregion
 }

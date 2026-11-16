@@ -19,690 +19,689 @@ using Random = System.Random;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute
+namespace RealChute;
+
+[PublicAPI]
+public class Parachute
 {
-    [PublicAPI]
-    public class Parachute
+    #region Propreties
+    //Predeployed area of the chute
+    private float PreDeployedArea => RCUtils.GetArea(this.preDeployedDiameter);
+
+    //Deployed area of the chute
+    public float DeployedArea => RCUtils.GetArea(this.deployedDiameter);
+
+    //Mass of the chute
+    public float ChuteMass => this.DeployedArea * this.mat.AreaDensity;
+
+    //The inverse of the thermal mass of the parachute
+    private double InvThermalMass
     {
-        #region Propreties
-        //Predeployed area of the chute
-        private float PreDeployedArea => RCUtils.GetArea(this.preDeployedDiameter);
-
-        //Deployed area of the chute
-        public float DeployedArea => RCUtils.GetArea(this.deployedDiameter);
-
-        //Mass of the chute
-        public float ChuteMass => this.DeployedArea * this.mat.AreaDensity;
-
-        //The inverse of the thermal mass of the parachute
-        private double InvThermalMass
+        get
         {
-            get
+            if (this.thermMass == 0d) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
+            return this.thermMass;
+        }
+    }
+
+    //The current useful convection area
+    private double ConvectionArea
+    {
+        get
+        {
+            if (this.DeploymentState == DeploymentStates.PREDEPLOYED && this.dragTimer.Elapsed.Seconds < this.preDeploymentSpeed)
             {
-                if (this.thermMass == 0d) { this.thermMass = 1d / (this.mat.SpecificHeat * this.ChuteMass); }
-                return this.thermMass;
+                return UtilMath.Lerp(0, this.DeployedArea, this.dragTimer.Elapsed.Seconds / this.preDeploymentSpeed);
             }
+            return this.DeployedArea;
         }
+    }
 
-        //The current useful convection area
-        private double ConvectionArea
+    //The current convective coefficient
+    private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.convectiveFactor) * this.Vessel.mainBody.convectionMultiplier;
+
+    //Newtonian convective coefficient
+    private double ConvectiveCoefficientNewtonian => (this.module.atmDensity > 1.0 ?
+                                                          this.module.atmDensity :
+                                                          Math.Pow(this.module.atmDensity, PhysicsGlobals.NewtonianDensityExponent))
+                                                   * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.speed, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
+
+    //Mach convective coefficient
+    private double ConvectiveCoefficientMach => (this.module.atmDensity > 1.0 ?
+                                                     this.module.atmDensity :
+                                                     Math.Pow(this.module.atmDensity, PhysicsGlobals.MachConvectionDensityExponent))
+                                              * Math.Pow(this.module.speed, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
+
+    //Part this chute is associated with
+    private Part Part => this.module.part;
+
+    //Vessel this chute is associated with
+    private Vessel Vessel => this.module.vessel;
+
+    //Position to apply the force to
+    public Vector3 ForcePosition => this.parachute.position;
+
+    //If the random deployment timer has been spent
+    private bool RandomDeployment
+    {
+        get
         {
-            get
+            if (!this.randomTimer.IsRunning) { this.randomTimer.Start(); }
+
+            if (this.randomTimer.Elapsed.TotalSeconds >= this.randomTime)
             {
-                if (this.DeploymentState == DeploymentStates.PREDEPLOYED && this.dragTimer.Elapsed.Seconds < this.preDeploymentSpeed)
-                {
-                    return UtilMath.Lerp(0, this.DeployedArea, this.dragTimer.Elapsed.Seconds / this.preDeploymentSpeed);
-                }
-                return this.DeployedArea;
+                this.randomTimer.Reset();
+                return true;
             }
+            return false;
         }
+    }
 
-        //The current convective coefficient
-        private double ConvectiveCoefficient => UtilMath.LerpUnclamped(this.ConvectiveCoefficientNewtonian, this.ConvectiveCoefficientMach, this.module.convectiveFactor) * this.Vessel.mainBody.convectionMultiplier;
-
-        //Newtonian convective coefficient
-        private double ConvectiveCoefficientNewtonian => (this.module.atmDensity > 1.0 ?
-                                                            this.module.atmDensity :
-                                                            Math.Pow(this.module.atmDensity, PhysicsGlobals.NewtonianDensityExponent))
-                                                       * (PhysicsGlobals.NewtonianConvectionFactorBase + Math.Pow(this.module.speed, PhysicsGlobals.NewtonianVelocityExponent)) * PhysicsGlobals.NewtonianConvectionFactorTotal;
-
-        //Mach convective coefficient
-        private double ConvectiveCoefficientMach => (this.module.atmDensity > 1.0 ?
-                                                        this.module.atmDensity :
-                                                        Math.Pow(this.module.atmDensity, PhysicsGlobals.MachConvectionDensityExponent))
-                                                  * Math.Pow(this.module.speed, PhysicsGlobals.MachConvectionVelocityExponent) * PhysicsGlobals.MachConvectionFactor * 1E-07;
-
-        //Part this chute is associated with
-        private Part Part => this.module.part;
-
-        //Vessel this chute is associated with
-        private Vessel Vessel => this.module.vessel;
-
-        //Position to apply the force to
-        public Vector3 ForcePosition => this.parachute.position;
-
-        //If the random deployment timer has been spent
-        private bool RandomDeployment
+    //If the parachute has passed the minimum deployment clause
+    private bool DeploymentClause
+    {
+        get
         {
-            get
+            if (this.minIsPressure) { return this.module.atmPressure >= this.minPressure; }
+            return this.minDeployment == 0 ? this.Part.vessel.LandedOrSplashed : this.module.trueAlt <= this.minDeployment;
+        }
+    }
+
+    //If the parachute can deploy
+    public bool CanDeploy
+    {
+        // ReSharper disable once CognitiveComplexity
+        get
+        {
+            if (this.module.GroundStop || this.module.atmPressure == 0 || (this.Part.ShieldedFromAirstream && !this.ignoreShielded)) { return false; }
+            if (this.DeploymentState == DeploymentStates.CUT) { return false; }
+            if (this.DeploymentClause)
             {
-                if (!this.randomTimer.IsRunning) { this.randomTimer.Start(); }
-
-                if (this.randomTimer.Elapsed.TotalSeconds >= this.randomTime)
-                {
-                    this.randomTimer.Reset();
-                    return true;
-                }
-                return false;
+                if (Mathf.Approximately(this.cutAlt, -1F)) { return true; }
+                if (this.module.trueAlt > this.cutAlt) { return true; }
             }
+            else if (this.module.SecondaryChute && this.Parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
+            else if (this.IsDeployed) { return true; }
+            return false;
         }
+    }
 
-        //If the parachute has passed the minimum deployment clause
-        private bool DeploymentClause
+    //If the parachute is deployed
+    public bool IsDeployed
+    {
+        get
         {
-            get
+            return this.DeploymentState switch
             {
-                if (this.minIsPressure) { return this.module.atmPressure >= this.minPressure; }
-                return this.minDeployment == 0 ? this.Part.vessel.LandedOrSplashed : this.module.trueAlt <= this.minDeployment;
-            }
+                DeploymentStates.PREDEPLOYED => true,
+                DeploymentStates.LOWDEPLOYED => true,
+                DeploymentStates.DEPLOYED    => true,
+                _                            => false
+            };
         }
+    }
 
-        //If the parachute can deploy
-        public bool CanDeploy
+    //The added vector to drag to angle the parachute
+    private bool check = true;
+    private Vector3 ForcedVector
+    {
+        get
         {
-            // ReSharper disable once CognitiveComplexity
-            get
+            if (this.check)
             {
-                if (this.module.GroundStop || this.module.atmPressure == 0 || (this.Part.ShieldedFromAirstream && !this.ignoreShielded)) { return false; }
-                if (this.DeploymentState == DeploymentStates.CUT) { return false; }
-                if (this.DeploymentClause)
-                {
-                    if (Mathf.Approximately(this.cutAlt, -1F)) { return true; }
-                    if (this.module.trueAlt > this.cutAlt) { return true; }
-                }
-                else if (this.module.SecondaryChute && this.Parachutes.Exists(p => this.module.trueAlt <= p.cutAlt)) { return true; }
-                else if (this.IsDeployed) { return true; }
-                return false;
+                if (this.forcedOrientation is <= 0 or >= 90) { this.forced = Vector3.zero; }
+                Vector3 follow = this.ForcePosition - this.module.pos;
+                float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
+                this.forced = follow.normalized * length;
+                this.check  = false;
             }
+            return this.forced;
         }
+    }
 
-        //If the parachute is deployed
-        public bool IsDeployed
+    //The parachutes of the associated module
+    private List<Parachute> Parachutes => this.module.parachutes;
+
+    //Gets/sets the DeploymentState correctly
+    public DeploymentStates DeploymentState
+    {
+        get
         {
-            get
-            {
-                return this.DeploymentState switch
-                {
-                    DeploymentStates.PREDEPLOYED => true,
-                    DeploymentStates.LOWDEPLOYED => true,
-                    DeploymentStates.DEPLOYED    => true,
-                    _                            => false
-                };
-            }
+            if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
+            return this.state;
         }
-
-        //The added vector to drag to angle the parachute
-        private bool check = true;
-        private Vector3 ForcedVector
+        private set
         {
-            get
-            {
-                if (this.check)
-                {
-                    if (this.forcedOrientation is <= 0 or >= 90) { this.forced = Vector3.zero; }
-                    Vector3 follow = this.ForcePosition - this.module.pos;
-                    float length = Mathf.Tan(this.forcedOrientation * Mathf.Deg2Rad);
-                    this.forced = follow.normalized * length;
-                    this.check = false;
-                }
-                return this.forced;
-            }
+            this.state    = value;
+            this.depState = EnumUtils.GetName(this.state);
         }
+    }
+    #endregion
 
-        //The parachutes of the associated module
-        private List<Parachute> Parachutes => this.module.parachutes;
+    #region Fields
+    //Parachute
+    public string material = "Nylon";
+    public float preDeployedDiameter = 1f, deployedDiameter = 25f;
+    public bool minIsPressure, capOff;
+    public float minDeployment = 25000f, minPressure = 0.01f;
+    public float deploymentAlt = 700f, cutAlt = -1f;
+    public float preDeploymentSpeed = 2f, deploymentSpeed = 6f;
+    public double time;
+    public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
+    public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
+    public float forcedOrientation, maxRotation = 90f;
+    public string depState = "STOWED";
+    public double currentArea, chuteTemperature = 300d, thermMass;
+    public bool ignoreShielded;
+    public float referenceDiameter = -1f, maxDiameter = 70f;
+    public int canopyCount = 1;
+    private double convectiveFlux;
+    private SafeState safeState = SafeState.SAFE;
 
-        //Gets/sets the DeploymentState correctly
-        public DeploymentStates DeploymentState
+    //Flight
+    internal RealChuteModule module;
+    internal Transform parachute, cap;
+    private Rigidbody rigidbody;
+    internal MaterialDefinition mat = new();
+    internal Vector3 phase = Vector3.zero;
+    private Quaternion? lastRotation;
+    internal bool played;
+    internal PhysicsWatch randomTimer = new(), dragTimer = new();
+    private readonly Random random = new();
+    internal DeploymentStates state = DeploymentStates.NONE;
+    internal float randomX, randomY, randomTime;
+    private Vector3 forced;
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates a parachute object from the given RealChuteModule
+    /// </summary>
+    /// <param name="module">RealChuteModule to create the Parachute from</param>
+    /// <param name="node">ConfigNode to create the parachute from</param>
+    public Parachute(RealChuteModule module, ConfigNode node)
+    {
+        this.module = module;
+        Load(node);
+    }
+    #endregion
+
+    #region Methods
+    //Adds a random noise to the parachute movement
+    private void ParachuteNoise()
+    {
+        this.parachute.Rotate(new Vector3(5f * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5f * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0f));
+    }
+
+    //Lerps the drag vector between upright and the forced angle
+    private Vector3 LerpDrag(Vector3 to)
+    {
+        this.phase = this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f ? Vector3.Lerp(this.phase, to, 0.01f) : to;
+        return this.phase;
+    }
+
+    //Makes the canopy follow drag direction
+    private void FollowDragDirection()
+    {
+        //Smooths the forced vector
+        Vector3 orient = Vector3.zero;
+        if (this.module.SecondaryChute) { orient = LerpDrag(this.module.ManyDeployed ? this.ForcedVector : Vector3.zero); }
+
+        Vector3 follow = this.module.dragVector + orient;
+        if (follow.sqrMagnitude > 0)
         {
-            get
-            {
-                if (this.state == DeploymentStates.NONE) { this.state = EnumUtils.GetValue<DeploymentStates>(this.depState); }
-                return this.state;
-            }
-            private set
-            {
-                this.state = value;
-                this.depState = EnumUtils.GetName(this.state);
-            }
+            Quaternion drag = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, this.parachute.up) : Quaternion.LookRotation(follow.normalized, this.parachute.up);
+            this.parachute.rotation = drag;
         }
-        #endregion
+        ParachuteNoise();
 
-        #region Fields
-        //Parachute
-        public string material = "Nylon";
-        public float preDeployedDiameter = 1f, deployedDiameter = 25f;
-        public bool minIsPressure, capOff;
-        public float minDeployment = 25000f, minPressure = 0.01f;
-        public float deploymentAlt = 700f, cutAlt = -1f;
-        public float preDeploymentSpeed = 2f, deploymentSpeed = 6f;
-        public double time;
-        public string preDeploymentAnimation = "semiDeploy", deploymentAnimation = "fullyDeploy";
-        public string parachuteName = "parachute", capName = "cap", baseParachuteName = string.Empty;
-        public float forcedOrientation, maxRotation = 90f;
-        public string depState = "STOWED";
-        public double currentArea, chuteTemperature = 300d, thermMass;
-        public bool ignoreShielded;
-        public float referenceDiameter = -1f, maxDiameter = 70f;
-        public int canopyCount = 1;
-        private double convectiveFlux;
-        private SafeState safeState = SafeState.SAFE;
-
-        //Flight
-        internal RealChuteModule module;
-        internal Transform parachute, cap;
-        private Rigidbody rigidbody;
-        internal MaterialDefinition mat = new();
-        internal Vector3 phase = Vector3.zero;
-        private Quaternion? lastRotation;
-        internal bool played;
-        internal PhysicsWatch randomTimer = new(), dragTimer = new();
-        private readonly Random random = new();
-        internal DeploymentStates state = DeploymentStates.NONE;
-        internal float randomX, randomY, randomTime;
-        private Vector3 forced;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a parachute object from the given RealChuteModule
-        /// </summary>
-        /// <param name="module">RealChuteModule to create the Parachute from</param>
-        /// <param name="node">ConfigNode to create the parachute from</param>
-        public Parachute(RealChuteModule module, ConfigNode node)
+        if (this.lastRotation != null && this.maxRotation > 0f)
         {
-            this.module = module;
-            Load(node);
+            this.parachute.rotation = Quaternion.RotateTowards(this.lastRotation.Value, this.parachute.rotation, this.maxRotation * Time.fixedDeltaTime);
+            this.lastRotation       = this.parachute.rotation;
         }
-        #endregion
+    }
 
-        #region Methods
-        //Adds a random noise to the parachute movement
-        private void ParachuteNoise()
+    //Parachute low deployment
+    public void LowDeploy()
+    {
+        this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+        this.capOff = true;
+        this.cap.gameObject.SetActive(false);
+        this.module.UpdateDragCubes();
+        if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
+        else { this.Part.Effect("rcdeploy"); }
+        this.DeploymentState = DeploymentStates.LOWDEPLOYED;
+        this.parachute.gameObject.SetActive(true);
+        if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
+        else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
+        this.dragTimer.Start();
+    }
+
+    //Parachute predeployment
+    public void PreDeploy()
+    {
+        this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
+        this.capOff = true;
+        this.cap.gameObject.SetActive(false);
+        this.module.UpdateDragCubes();
+        if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
+        else { this.Part.Effect("rcpredeploy"); }
+        this.DeploymentState = DeploymentStates.PREDEPLOYED;
+        this.parachute.gameObject.SetActive(true);
+        if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.preDeploymentAnimation); }
+        else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
+        this.dragTimer.Start();
+    }
+
+    //Parachute deployment
+    public void Deploy()
+    {
+        this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
+        if (!RealChuteSettings.Instance.NyanMode) { this.Part.Effect("rcdeploy"); }
+        this.DeploymentState = DeploymentStates.DEPLOYED;
+        if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation))
         {
-            this.parachute.Rotate(new Vector3(5f * (Mathf.PerlinNoise(Time.time, this.randomX + Mathf.Sin(Time.time)) - 0.5f), 5f * (Mathf.PerlinNoise(Time.time, this.randomY + Mathf.Sin(Time.time)) - 0.5f), 0f));
+            this.dragTimer.Restart();
+            this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+            this.played = true;
         }
+        else { this.played = false; }
+    }
 
-        //Lerps the drag vector between upright and the forced angle
-        private Vector3 LerpDrag(Vector3 to)
+    //Parachute cutting
+    public void Cut()
+    {
+        if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 0); }
+        else { this.Part.Effect("rccut"); }
+        this.DeploymentState = DeploymentStates.CUT;
+        this.parachute.gameObject.SetActive(false);
+        this.played = false;
+        if (!this.module.SecondaryChute || this.Parachutes.TrueForAll(p => p.DeploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
+        else if (this.module.SecondaryChute && this.Parachutes.Exists(p => p.DeploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
+        this.dragTimer.Reset();
+        this.currentArea      = 0;
+        this.chuteTemperature = RCUtils.StartTemp;
+    }
+
+    //Repack actions
+    public void Repack()
+    {
+        this.DeploymentState = DeploymentStates.STOWED;
+        this.randomTimer.Reset();
+        this.randomTime = (float)this.random.NextDouble();
+        this.dragTimer.Reset();
+        this.time   = 0;
+        this.capOff = false;
+        this.cap.gameObject.SetActive(true);
+        this.lastRotation = null;
+    }
+
+    //Calculates parachute deployed area
+    private float DragDeployment(float deployTime, float debutArea, float endArea)
+    {
+        if (!this.dragTimer.IsRunning) { this.dragTimer.Start(); }
+
+        this.time = this.dragTimer.Elapsed.TotalSeconds;
+        if (this.time <= deployTime)
         {
-            this.phase = this.phase.magnitude < to.magnitude - 0.01f || this.phase.magnitude > to.magnitude + 0.01f ? Vector3.Lerp(this.phase, to, 0.01f) : to;
-            return this.phase;
-        }
-
-        //Makes the canopy follow drag direction
-        private void FollowDragDirection()
-        {
-            //Smooths the forced vector
-            Vector3 orient = Vector3.zero;
-            if (this.module.SecondaryChute) { orient = LerpDrag(this.module.ManyDeployed ? this.ForcedVector : Vector3.zero); }
-
-            Vector3 follow = this.module.dragVector + orient;
-            if (follow.sqrMagnitude > 0)
-            {
-                Quaternion drag = this.module.reverseOrientation ? Quaternion.LookRotation(-follow.normalized, this.parachute.up) : Quaternion.LookRotation(follow.normalized, this.parachute.up);
-                this.parachute.rotation = drag;
-            }
-            ParachuteNoise();
-
-            if (this.lastRotation != null && this.maxRotation > 0f)
-            {
-                this.parachute.rotation = Quaternion.RotateTowards(this.lastRotation.Value, this.parachute.rotation, this.maxRotation * Time.fixedDeltaTime);
-                this.lastRotation = this.parachute.rotation;
-            }
-        }
-
-        //Parachute low deployment
-        public void LowDeploy()
-        {
-            this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            this.capOff = true;
-            this.cap.gameObject.SetActive(false);
-            this.module.UpdateDragCubes();
-            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
-            else { this.Part.Effect("rcdeploy"); }
-            this.DeploymentState = DeploymentStates.LOWDEPLOYED;
-            this.parachute.gameObject.SetActive(true);
-            if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.deploymentAnimation); this.played = true; }
-            else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
-            this.dragTimer.Start();
-        }
-
-        //Parachute predeployment
-        public void PreDeploy()
-        {
-            this.Part.stackIcon.SetIconColor(XKCDColors.BrightYellow);
-            this.capOff = true;
-            this.cap.gameObject.SetActive(false);
-            this.module.UpdateDragCubes();
-            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 1); }
-            else { this.Part.Effect("rcpredeploy"); }
-            this.DeploymentState = DeploymentStates.PREDEPLOYED;
-            this.parachute.gameObject.SetActive(true);
-            if (this.dragTimer.ElapsedMilliseconds != 0) { this.Part.SkipToAnimationEnd(this.preDeploymentAnimation); }
-            else { this.Part.PlayAnimation(this.preDeploymentAnimation, 1f / this.preDeploymentSpeed); }
-            this.dragTimer.Start();
-        }
-
-        //Parachute deployment
-        public void Deploy()
-        {
-            this.Part.stackIcon.SetIconColor(XKCDColors.RadioactiveGreen);
-            if (!RealChuteSettings.Instance.NyanMode) { this.Part.Effect("rcdeploy"); }
-            this.DeploymentState = DeploymentStates.DEPLOYED;
-            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation))
-            {
-                this.dragTimer.Restart();
-                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                this.played = true;
-            }
-            else { this.played = false; }
-        }
-
-        //Parachute cutting
-        public void Cut()
-        {
-            if (RealChuteSettings.Instance.NyanMode) { this.Part.Effect("nyan", 0); }
-            else { this.Part.Effect("rccut"); }
-            this.DeploymentState = DeploymentStates.CUT;
-            this.parachute.gameObject.SetActive(false);
-            this.played = false;
-            if (!this.module.SecondaryChute || this.Parachutes.TrueForAll(p => p.DeploymentState == DeploymentStates.CUT)) { this.module.SetRepack(); }
-            else if (this.module.SecondaryChute && this.Parachutes.Exists(p => p.DeploymentState == DeploymentStates.STOWED)) { this.module.armed = true; }
-            this.dragTimer.Reset();
-            this.currentArea = 0;
-            this.chuteTemperature = RCUtils.StartTemp;
-        }
-
-        //Repack actions
-        public void Repack()
-        {
-            this.DeploymentState = DeploymentStates.STOWED;
-            this.randomTimer.Reset();
-            this.randomTime = (float)this.random.NextDouble();
-            this.dragTimer.Reset();
-            this.time = 0;
-            this.capOff = false;
-            this.cap.gameObject.SetActive(true);
-            this.lastRotation = null;
-        }
-
-        //Calculates parachute deployed area
-        private float DragDeployment(float deployTime, float debutArea, float endArea)
-        {
-            if (!this.dragTimer.IsRunning) { this.dragTimer.Start(); }
-
-            this.time = this.dragTimer.Elapsed.TotalSeconds;
-            if (this.time <= deployTime)
-            {
-                float deploymentTime = (float)(Math.Exp(this.time - deployTime) * (this.time / deployTime));
-                this.currentArea =  Mathf.Lerp(debutArea, endArea, deploymentTime);
-                return (float)this.currentArea;
-            }
-            this.currentArea = endArea;
+            float deploymentTime = (float)(Math.Exp(this.time - deployTime) * (this.time / deployTime));
+            this.currentArea =  Mathf.Lerp(debutArea, endArea, deploymentTime);
             return (float)this.currentArea;
         }
+        this.currentArea = endArea;
+        return (float)this.currentArea;
+    }
 
-        //Drag force vector
-        private Vector3 DragForce(float startArea, float targetArea, float deployTime)
-        {
-            return this.module.dragVector
-                 * (this.module.DragCalculation(DragDeployment(deployTime, startArea, targetArea), this.mat.DragCoefficient)
-                  * (RealChuteSettings.Instance.JokeActivated ? -1 : 1));
-        }
+    //Drag force vector
+    private Vector3 DragForce(float startArea, float targetArea, float deployTime)
+    {
+        return this.module.dragVector
+             * (this.module.DragCalculation(DragDeployment(deployTime, startArea, targetArea), this.mat.DragCoefficient)
+              * (RealChuteSettings.Instance.JokeActivated ? -1 : 1));
+    }
 
-        //Parachute function
-        // ReSharper disable once CognitiveComplexity
-        internal void UpdateParachute()
+    //Parachute function
+    // ReSharper disable once CognitiveComplexity
+    internal void UpdateParachute()
+    {
+        if (this.CanDeploy)
         {
-            if (this.CanDeploy)
+            this.module.oneWasDeployed = true;
+            if (this.IsDeployed)
             {
-                this.module.oneWasDeployed = true;
-                if (this.IsDeployed)
+                if (!CalculateChuteTemp()) { return; }
+                FollowDragDirection();
+            }
+
+            this.Part.GetComponentCached(ref this.rigidbody);
+            switch (this.DeploymentState)
+            {
+                case DeploymentStates.STOWED:
                 {
-                    if (!CalculateChuteTemp()) { return; }
-                    FollowDragDirection();
+                    this.Part.stackIcon.SetIconColor(XKCDColors.LightCyan);
+                    if (this.module.trueAlt > this.deploymentAlt && this.DeploymentClause && this.RandomDeployment) { PreDeploy(); }
+                    else if (this.module.trueAlt <= this.deploymentAlt && this.RandomDeployment) { LowDeploy(); }
+                    break;
                 }
 
-                this.Part.GetComponentCached(ref this.rigidbody);
-                switch (this.DeploymentState)
+                case DeploymentStates.PREDEPLOYED:
                 {
-                    case DeploymentStates.STOWED:
-                        {
-                            this.Part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                            if (this.module.trueAlt > this.deploymentAlt && this.DeploymentClause && this.RandomDeployment) { PreDeploy(); }
-                            else if (this.module.trueAlt <= this.deploymentAlt && this.RandomDeployment) { LowDeploy(); }
-                            break;
-                        }
-
-                    case DeploymentStates.PREDEPLOYED:
-                        {
-                            this.Part.AddForceAtPosition(DragForce(0, this.PreDeployedArea, this.preDeploymentSpeed), this.ForcePosition);
-                            if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
-                            break;
-                        }
-                    case DeploymentStates.LOWDEPLOYED:
-                        {
-                            this.Part.AddForceAtPosition(DragForce(0, this.DeployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.ForcePosition);
-                            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
-                            {
-                                this.dragTimer.Restart();
-                                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                                this.played = true;
-                            }
-                            break;
-                        }
-
-                    case DeploymentStates.DEPLOYED:
-                        {
-                            this.Part.AddForceAtPosition(DragForce(this.PreDeployedArea, this.DeployedArea, this.deploymentSpeed), this.ForcePosition);
-                            if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
-                            {
-                                this.dragTimer.Restart();
-                                this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
-                                this.played = true;
-                            }
-                            break;
-                        }
+                    this.Part.AddForceAtPosition(DragForce(0, this.PreDeployedArea, this.preDeploymentSpeed), this.ForcePosition);
+                    if (this.module.trueAlt <= this.deploymentAlt) { Deploy(); }
+                    break;
                 }
-            }
-            //Deactivation
-            else if (!this.CanDeploy && this.IsDeployed) { Cut(); }
-        }
-
-        //Gets convective flux
-        //Thanks to Starwaster for an overheating fix here
-        public void CalculateConvectiveFlux()
-        {
-            this.convectiveFlux = this.ConvectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
-                (this.Vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / PhysicsGlobals.FullToCrossSectionLerpEnd)
-                * (this.Vessel.externalTemperature - this.chuteTemperature);
-        }
-
-        //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
-        private bool CalculateChuteTemp()
-        {
-            if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.StartTemp; }
-
-            double emissiveFlux = 0;
-            if (this.chuteTemperature > 0)
-            {
-                double temp2 = this.chuteTemperature * this.chuteTemperature;
-                emissiveFlux = 2 * PhysicsGlobals.StefanBoltzmanConstant * this.mat.Emissivity * PhysicsGlobals.RadiationFactor * temp2 * temp2;
-            }
-
-            this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature,
-                this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.InvThermalMass * this.ConvectionArea * TimeWarp.fixedDeltaTime * 0.001));
-            if (this.chuteTemperature > this.mat.MaxTemp)
-            {
-                ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.Part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
-                Cut();
-                return false;
-            }
-            return true;
-        }
-
-        //Returns if the parachute can safely open or not
-        public SafeState GetSafeState()
-        {
-            if (this.Vessel.externalTemperature <= this.mat.MaxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
-            else
-            {
-                this.safeState = this.chuteTemperature + (0.00035 * this.InvThermalMass * this.convectiveFlux * this.DeployedArea) <= this.mat.MaxTemp ? SafeState.RISKY : SafeState.DANGEROUS;
-            }
-            return this.safeState;
-        }
-
-        //Initializes the chute
-        // ReSharper disable once CognitiveComplexity
-        public void Initialize()
-        {
-            MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
-
-            //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
-            // ReSharper disable once UnusedVariable
-            Animation anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
-
-            this.cap = this.Part.FindModelTransform(this.capName);
-            this.parachute = this.Part.FindModelTransform(this.parachuteName);
-            if (this.parachute == null && !string.IsNullOrEmpty(this.baseParachuteName))
-            {
-                this.parachute = this.Part.FindModelTransform(this.baseParachuteName);
-            }
-            this.parachute.gameObject.SetActive(true);
-            this.Part.InitiateAnimation(this.preDeploymentAnimation);
-            this.Part.InitiateAnimation(this.deploymentAnimation);
-            this.parachute.gameObject.SetActive(false);
-
-            if (string.IsNullOrEmpty(this.baseParachuteName)) { this.baseParachuteName = this.parachuteName; }
-
-            if (!this.module.initiated)
-            {
-                this.played = false;
-                this.cap.gameObject.SetActive(true);
-            }
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                this.randomX = (float)((this.random.NextDouble() - 0.5) * 200);
-                this.randomY = (float)((this.random.NextDouble() - 0.5) * 200);
-                this.randomTime = (float)this.random.NextDouble();
-                if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
-                if (this.capOff)
+                case DeploymentStates.LOWDEPLOYED:
                 {
-                    this.Part.stackIcon.SetIconColor(XKCDColors.Red);
-                    this.cap.gameObject.SetActive(false);
-                }
-
-                if (this.module.staged && this.DeploymentState != DeploymentStates.CUT)
-                {
-                    this.DeploymentState = DeploymentStates.STOWED;
-                }
-            }
-        }
-        #endregion
-
-        #region GUI
-        //Info window GUI
-        // ReSharper disable once CognitiveComplexity
-        internal void RenderGUI()
-        {
-            //Initial label
-            StringBuilder builder = StringBuilderCache.Acquire();
-            builder.Append("Material: ").AppendLine(this.mat.Name);
-            builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#", CultureInfo.InvariantCulture));
-            builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).AppendLine("m²");
-            builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).Append("m²");
-            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
-
-            if (HighLogic.LoadedSceneIsFlight)
-            {
-                //DeploymentSafety
-                switch (this.safeState)
-                {
-                    case SafeState.SAFE:
-                        GUILayout.Label("Deployment safety: safe", GUIUtils.ScaledLabel); break;
-
-                    case SafeState.RISKY:
-                        GUILayout.Label("Deployment safety: risky", GUIUtils.YellowLabel); break;
-
-                    case SafeState.DANGEROUS:
-                        GUILayout.Label("Deployment safety: dangerous", GUIUtils.RedLabel); break;
-
-                    default:
-                        throw new InvalidEnumArgumentException(nameof(this.safeState), (int)this.safeState, typeof(SafeState));
-                }
-
-                //Temperature info
-                builder = StringBuilderCache.Acquire();
-                builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
-                builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
-                GUILayout.Label(builder.ToStringAndRelease(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GUIUtils.RedLabel : GUIUtils.ScaledLabel);
-
-
-                //Pressure/altitude predeployment toggle
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Predeployment:", GUIUtils.ScaledLabel);
-                if (GUILayout.Toggle(!this.minIsPressure, "altitude", GUIUtils.ScaledToggle)) { this.minIsPressure = false; }
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Toggle(this.minIsPressure, "pressure", GUIUtils.ScaledToggle)) { this.minIsPressure = true; }
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
-            }
-
-            //Predeployment pressure selection
-            if (this.minIsPressure)
-            {
-                GUILayout.Label($"Predeployment pressure: {this.minPressure}atm", GUIUtils.ScaledLabel);
-                if (HighLogic.LoadedSceneIsFlight)
-                {
-                    //Predeployment pressure slider
-                    this.minPressure = 0.005f * Mathf.Round(GUILayout.HorizontalSlider(this.minPressure / 0.005f, 1f, 200f));
-
-                    //Copy to symmetry counterparts button
-                    CopyToOthers(p =>
+                    this.Part.AddForceAtPosition(DragForce(0, this.DeployedArea, this.preDeploymentSpeed + this.deploymentSpeed), this.ForcePosition);
+                    if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                     {
-                        p.minIsPressure = this.minIsPressure;
-                        p.minPressure = this.minPressure;
-                    });
+                        this.dragTimer.Restart();
+                        this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+                        this.played = true;
+                    }
+                    break;
                 }
-            }
 
-            //Predeployment altitude selection
-            else
-            {
-                GUILayout.Label($"Predeployment altitude: {this.minDeployment}m", GUIUtils.ScaledLabel);
-                if (HighLogic.LoadedSceneIsFlight)
+                case DeploymentStates.DEPLOYED:
                 {
-                    //Predeployment altitude slider
-                    this.minDeployment = 100f * Mathf.Round(GUILayout.HorizontalSlider(this.minDeployment / 100f, 1f, 200f));
-
-                    //Copy to symmetry counterparts button
-                    CopyToOthers(p =>
+                    this.Part.AddForceAtPosition(DragForce(this.PreDeployedArea, this.DeployedArea, this.deploymentSpeed), this.ForcePosition);
+                    if (!this.Part.CheckAnimationPlaying(this.preDeploymentAnimation) && !this.played)
                     {
-                        p.minIsPressure = this.minIsPressure;
-                        p.minDeployment = this.minDeployment;
-                    });
+                        this.dragTimer.Restart();
+                        this.Part.PlayAnimation(this.deploymentAnimation, 1f / this.deploymentSpeed);
+                        this.played = true;
+                    }
+                    break;
                 }
             }
+        }
+        //Deactivation
+        else if (!this.CanDeploy && this.IsDeployed) { Cut(); }
+    }
 
-            //Deployment altitude selection
-            GUILayout.Label($"Deployment altitude: {this.deploymentAlt}m", GUIUtils.ScaledLabel);
+    //Gets convective flux
+    //Thanks to Starwaster for an overheating fix here
+    public void CalculateConvectiveFlux()
+    {
+        this.convectiveFlux = this.ConvectiveCoefficient * UtilMath.Lerp(1d, 1d + (Math.Sqrt(this.Vessel.mach * this.Vessel.mach * this.Vessel.mach)* (this.Vessel.dynamicPressurekPa / 101.325)),
+                                                                         (this.Vessel.mach - PhysicsGlobals.FullToCrossSectionLerpStart) / PhysicsGlobals.FullToCrossSectionLerpEnd)
+                                                         * (this.Vessel.externalTemperature - this.chuteTemperature);
+    }
+
+    //Calculates the temperature of the chute and cuts it if needed. Big thanks to NathanKell
+    private bool CalculateChuteTemp()
+    {
+        if (this.chuteTemperature < PhysicsGlobals.SpaceTemperature) { this.chuteTemperature = RCUtils.StartTemp; }
+
+        double emissiveFlux = 0;
+        if (this.chuteTemperature > 0)
+        {
+            double temp2 = this.chuteTemperature * this.chuteTemperature;
+            emissiveFlux = 2 * PhysicsGlobals.StefanBoltzmanConstant * this.mat.Emissivity * PhysicsGlobals.RadiationFactor * temp2 * temp2;
+        }
+
+        this.chuteTemperature = Math.Max(PhysicsGlobals.SpaceTemperature,
+                                         this.chuteTemperature + ((this.convectiveFlux - emissiveFlux) * this.InvThermalMass * this.ConvectionArea * TimeWarp.fixedDeltaTime * 0.001));
+        if (this.chuteTemperature > this.mat.MaxTemp)
+        {
+            ScreenMessages.PostScreenMessage("<color=orange>[RealChute]: " + this.Part.partInfo.title + "'s parachute has been destroyed due to aero forces and heat.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+            Cut();
+            return false;
+        }
+        return true;
+    }
+
+    //Returns if the parachute can safely open or not
+    public SafeState GetSafeState()
+    {
+        if (this.Vessel.externalTemperature <= this.mat.MaxTemp || this.convectiveFlux < 0) { this.safeState = SafeState.SAFE; }
+        else
+        {
+            this.safeState = this.chuteTemperature + (0.00035 * this.InvThermalMass * this.convectiveFlux * this.DeployedArea) <= this.mat.MaxTemp ? SafeState.RISKY : SafeState.DANGEROUS;
+        }
+        return this.safeState;
+    }
+
+    //Initializes the chute
+    // ReSharper disable once CognitiveComplexity
+    public void Initialize()
+    {
+        MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
+
+        //I know this seems random, but trust me, it's needed, else some parachutes don't animate, because fuck you, that's why.
+        // ReSharper disable once UnusedVariable
+        Animation anim = this.Part.FindModelAnimators(this.capName).FirstOrDefault();
+
+        this.cap       = this.Part.FindModelTransform(this.capName);
+        this.parachute = this.Part.FindModelTransform(this.parachuteName);
+        if (this.parachute == null && !string.IsNullOrEmpty(this.baseParachuteName))
+        {
+            this.parachute = this.Part.FindModelTransform(this.baseParachuteName);
+        }
+        this.parachute.gameObject.SetActive(true);
+        this.Part.InitiateAnimation(this.preDeploymentAnimation);
+        this.Part.InitiateAnimation(this.deploymentAnimation);
+        this.parachute.gameObject.SetActive(false);
+
+        if (string.IsNullOrEmpty(this.baseParachuteName)) { this.baseParachuteName = this.parachuteName; }
+
+        if (!this.module.initiated)
+        {
+            this.played = false;
+            this.cap.gameObject.SetActive(true);
+        }
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+            this.randomX    = (float)((this.random.NextDouble() - 0.5) * 200);
+            this.randomY    = (float)((this.random.NextDouble() - 0.5) * 200);
+            this.randomTime = (float)this.random.NextDouble();
+            if (this.time != 0) { this.dragTimer = new PhysicsWatch(this.time); }
+            if (this.capOff)
+            {
+                this.Part.stackIcon.SetIconColor(XKCDColors.Red);
+                this.cap.gameObject.SetActive(false);
+            }
+
+            if (this.module.staged && this.DeploymentState != DeploymentStates.CUT)
+            {
+                this.DeploymentState = DeploymentStates.STOWED;
+            }
+        }
+    }
+    #endregion
+
+    #region GUI
+    //Info window GUI
+    // ReSharper disable once CognitiveComplexity
+    internal void RenderGUI()
+    {
+        //Initial label
+        StringBuilder builder = StringBuilderCache.Acquire();
+        builder.Append("Material: ").AppendLine(this.mat.Name);
+        builder.Append("Drag coefficient: ").AppendLine(this.mat.DragCoefficient.ToString("0.00#", CultureInfo.InvariantCulture));
+        builder.Append("Predeployed diameter: ").Append(this.preDeployedDiameter).Append("m\n    area: ").Append(this.PreDeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).AppendLine("m²");
+        builder.Append("Deployed diameter: ").Append(this.deployedDiameter).Append("m\n    area: ").Append(this.DeployedArea.ToString("0.###", CultureInfo.InvariantCulture)).Append("m²");
+        GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
+
+        if (HighLogic.LoadedSceneIsFlight)
+        {
+            //DeploymentSafety
+            switch (this.safeState)
+            {
+                case SafeState.SAFE:
+                    GUILayout.Label("Deployment safety: safe", GUIUtils.ScaledLabel); break;
+
+                case SafeState.RISKY:
+                    GUILayout.Label("Deployment safety: risky", GUIUtils.YellowLabel); break;
+
+                case SafeState.DANGEROUS:
+                    GUILayout.Label("Deployment safety: dangerous", GUIUtils.RedLabel); break;
+
+                default:
+                    throw new InvalidEnumArgumentException(nameof(this.safeState), (int)this.safeState, typeof(SafeState));
+            }
+
+            //Temperature info
+            builder = StringBuilderCache.Acquire();
+            builder.Append("Chute max temperature: ").Append(this.mat.MaxTemp + RCUtils.AbsoluteZero).AppendLine("°C");
+            builder.Append("Current chute temperature: ").Append(Math.Round(this.chuteTemperature + RCUtils.AbsoluteZero, 1, MidpointRounding.AwayFromZero)).Append("°C");
+            GUILayout.Label(builder.ToStringAndRelease(), this.chuteTemperature / this.mat.MaxTemp > 0.85 ? GUIUtils.RedLabel : GUIUtils.ScaledLabel);
+
+
+            //Pressure/altitude predeployment toggle
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Predeployment:", GUIUtils.ScaledLabel);
+            if (GUILayout.Toggle(!this.minIsPressure, "altitude", GUIUtils.ScaledToggle)) { this.minIsPressure = false; }
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Toggle(this.minIsPressure, "pressure", GUIUtils.ScaledToggle)) { this.minIsPressure = true; }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+
+        //Predeployment pressure selection
+        if (this.minIsPressure)
+        {
+            GUILayout.Label($"Predeployment pressure: {this.minPressure}atm", GUIUtils.ScaledLabel);
             if (HighLogic.LoadedSceneIsFlight)
             {
-                //Deployment altitude slider
-                this.deploymentAlt = 50f * Mathf.Round(GUILayout.HorizontalSlider(this.deploymentAlt / 50f, 1f, 200f));
+                //Predeployment pressure slider
+                this.minPressure = 0.005f * Mathf.Round(GUILayout.HorizontalSlider(this.minPressure / 0.005f, 1f, 200f));
 
                 //Copy to symmetry counterparts button
-                CopyToOthers(p => p.deploymentAlt = this.deploymentAlt);
-            }
-
-            //Other labels
-            builder = StringBuilderCache.Acquire();
-            if (this.cutAlt > 0) { builder.Append("Autocut altitude: ").Append(this.cutAlt).AppendLine("m"); }
-            builder.Append("Predeployment speed: ").Append(this.preDeploymentSpeed).AppendLine("s");
-            builder.Append("Deployment speed: ").Append(this.deploymentSpeed).Append("s");
-            GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
-        }
-
-        //Copies the given values to the other parachutes
-        private void CopyToOthers(Callback<Parachute> callback)
-        {
-            if (this.module.SecondaryChute)
-            {
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Copy to symmetry counterparts", GUIUtils.ScaledButton, GUILayout.Height(25f * GameSettings.UI_SCALE), GUILayout.Width(250f * GameSettings.UI_SCALE)))
+                CopyToOthers(p =>
                 {
-                    foreach (Parachute p in this.Parachutes)
-                    {
-                        if (p == this) { continue; }
-                        callback(p);
-                    }
-                }
-                GUILayout.FlexibleSpace();
-                GUILayout.EndHorizontal();
+                    p.minIsPressure = this.minIsPressure;
+                    p.minPressure   = this.minPressure;
+                });
             }
         }
-        #endregion
 
-        #region Load/Save
-        /// <summary>
-        /// Loads the Parachute from a ConfigNode.
-        /// </summary>
-        /// <param name="node">Node to load the Parachute from</param>
-        private void Load(ConfigNode node)
+        //Predeployment altitude selection
+        else
         {
-            node.TryGetValue("material", ref this.material);
-            node.TryGetValue("preDeployedDiameter", ref this.preDeployedDiameter);
-            node.TryGetValue("deployedDiameter", ref this.deployedDiameter);
-            node.TryGetValue("minIsPressure", ref this.minIsPressure);
-            node.TryGetValue("capOff", ref this.capOff);
-            node.TryGetValue("minDeployment", ref this.minDeployment);
-            node.TryGetValue("minPressure", ref this.minPressure);
-            node.TryGetValue("deploymentAlt", ref this.deploymentAlt);
-            node.TryGetValue("cutAlt", ref this.cutAlt);
-            node.TryGetValue("preDeploymentSpeed", ref this.preDeploymentSpeed);
-            node.TryGetValue("deploymentSpeed", ref this.deploymentSpeed);
-            node.TryGetValue("time", ref this.time);
-            node.TryGetValue("parachuteName", ref this.parachuteName);
-            node.TryGetValue("baseParachuteName", ref this.baseParachuteName);
-            node.TryGetValue("capName", ref this.capName);
-            node.TryGetValue("preDeploymentAnimation", ref this.preDeploymentAnimation);
-            node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
-            node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
-            node.TryGetValue("maxRotation", ref this.maxRotation);
-            node.TryGetValue("depState", ref this.depState);
-            node.TryGetValue("ignoreShielded", ref this.ignoreShielded);
-            node.TryGetValue("referenceDiameter", ref this.referenceDiameter);
-            node.TryGetValue("maxDiameter", ref this.maxDiameter);
-            node.TryGetValue("canopyCount", ref this.canopyCount);
-            MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
-            Transform p = this.Part.FindModelTransform(this.parachuteName);
-            if (p != null) { p.gameObject.SetActive(false); }
+            GUILayout.Label($"Predeployment altitude: {this.minDeployment}m", GUIUtils.ScaledLabel);
+            if (HighLogic.LoadedSceneIsFlight)
+            {
+                //Predeployment altitude slider
+                this.minDeployment = 100f * Mathf.Round(GUILayout.HorizontalSlider(this.minDeployment / 100f, 1f, 200f));
+
+                //Copy to symmetry counterparts button
+                CopyToOthers(p =>
+                {
+                    p.minIsPressure = this.minIsPressure;
+                    p.minDeployment = this.minDeployment;
+                });
+            }
         }
 
-        /// <summary>
-        /// Saves the Parachute to a ConfigNode and returns this node.
-        /// </summary>
-        public ConfigNode Save()
+        //Deployment altitude selection
+        GUILayout.Label($"Deployment altitude: {this.deploymentAlt}m", GUIUtils.ScaledLabel);
+        if (HighLogic.LoadedSceneIsFlight)
         {
-            ConfigNode node = new("PARACHUTE");
-            node.AddValue("material", this.material);
-            node.AddValue("preDeployedDiameter", this.preDeployedDiameter);
-            node.AddValue("deployedDiameter", this.deployedDiameter);
-            node.AddValue("minIsPressure", this.minIsPressure);
-            node.AddValue("capOff", this.capOff);
-            node.AddValue("minDeployment", this.minDeployment);
-            node.AddValue("minPressure", this.minPressure);
-            node.AddValue("deploymentAlt", this.deploymentAlt);
-            node.AddValue("cutAlt", this.cutAlt);
-            node.AddValue("preDeploymentSpeed", this.preDeploymentSpeed);
-            node.AddValue("deploymentSpeed", this.deploymentSpeed);
-            node.AddValue("time", this.time);
-            node.AddValue("parachuteName", this.parachuteName);
-            node.AddValue("baseParachuteName", this.baseParachuteName);
-            node.AddValue("capName", this.capName);
-            node.AddValue("preDeploymentAnimation", this.preDeploymentAnimation);
-            node.AddValue("deploymentAnimation", this.deploymentAnimation);
-            node.AddValue("forcedOrientation", this.forcedOrientation);
-            node.AddValue("maxRotation", this.maxRotation);
-            node.AddValue("depState", this.depState);
-            node.AddValue("ignoreShielded", this.ignoreShielded);
-            node.AddValue("referenceDiameter", this.referenceDiameter);
-            node.AddValue("maxDiameter", this.maxDiameter);
-            node.AddValue("canopyCount", this.canopyCount);
-            return node;
+            //Deployment altitude slider
+            this.deploymentAlt = 50f * Mathf.Round(GUILayout.HorizontalSlider(this.deploymentAlt / 50f, 1f, 200f));
+
+            //Copy to symmetry counterparts button
+            CopyToOthers(p => p.deploymentAlt = this.deploymentAlt);
         }
-        #endregion
+
+        //Other labels
+        builder = StringBuilderCache.Acquire();
+        if (this.cutAlt > 0) { builder.Append("Autocut altitude: ").Append(this.cutAlt).AppendLine("m"); }
+        builder.Append("Predeployment speed: ").Append(this.preDeploymentSpeed).AppendLine("s");
+        builder.Append("Deployment speed: ").Append(this.deploymentSpeed).Append("s");
+        GUILayout.Label(builder.ToStringAndRelease(), GUIUtils.ScaledLabel);
     }
+
+    //Copies the given values to the other parachutes
+    private void CopyToOthers(Callback<Parachute> callback)
+    {
+        if (this.module.SecondaryChute)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("Copy to symmetry counterparts", GUIUtils.ScaledButton, GUILayout.Height(25f * GameSettings.UI_SCALE), GUILayout.Width(250f * GameSettings.UI_SCALE)))
+            {
+                foreach (Parachute p in this.Parachutes)
+                {
+                    if (p == this) { continue; }
+                    callback(p);
+                }
+            }
+            GUILayout.FlexibleSpace();
+            GUILayout.EndHorizontal();
+        }
+    }
+    #endregion
+
+    #region Load/Save
+    /// <summary>
+    /// Loads the Parachute from a ConfigNode.
+    /// </summary>
+    /// <param name="node">Node to load the Parachute from</param>
+    private void Load(ConfigNode node)
+    {
+        node.TryGetValue("material", ref this.material);
+        node.TryGetValue("preDeployedDiameter", ref this.preDeployedDiameter);
+        node.TryGetValue("deployedDiameter", ref this.deployedDiameter);
+        node.TryGetValue("minIsPressure", ref this.minIsPressure);
+        node.TryGetValue("capOff", ref this.capOff);
+        node.TryGetValue("minDeployment", ref this.minDeployment);
+        node.TryGetValue("minPressure", ref this.minPressure);
+        node.TryGetValue("deploymentAlt", ref this.deploymentAlt);
+        node.TryGetValue("cutAlt", ref this.cutAlt);
+        node.TryGetValue("preDeploymentSpeed", ref this.preDeploymentSpeed);
+        node.TryGetValue("deploymentSpeed", ref this.deploymentSpeed);
+        node.TryGetValue("time", ref this.time);
+        node.TryGetValue("parachuteName", ref this.parachuteName);
+        node.TryGetValue("baseParachuteName", ref this.baseParachuteName);
+        node.TryGetValue("capName", ref this.capName);
+        node.TryGetValue("preDeploymentAnimation", ref this.preDeploymentAnimation);
+        node.TryGetValue("deploymentAnimation", ref this.deploymentAnimation);
+        node.TryGetValue("forcedOrientation", ref this.forcedOrientation);
+        node.TryGetValue("maxRotation", ref this.maxRotation);
+        node.TryGetValue("depState", ref this.depState);
+        node.TryGetValue("ignoreShielded", ref this.ignoreShielded);
+        node.TryGetValue("referenceDiameter", ref this.referenceDiameter);
+        node.TryGetValue("maxDiameter", ref this.maxDiameter);
+        node.TryGetValue("canopyCount", ref this.canopyCount);
+        MaterialsLibrary.Instance.TryGetMaterial(this.material, ref this.mat);
+        Transform p = this.Part.FindModelTransform(this.parachuteName);
+        if (p != null) { p.gameObject.SetActive(false); }
+    }
+
+    /// <summary>
+    /// Saves the Parachute to a ConfigNode and returns this node.
+    /// </summary>
+    public ConfigNode Save()
+    {
+        ConfigNode node = new("PARACHUTE");
+        node.AddValue("material", this.material);
+        node.AddValue("preDeployedDiameter", this.preDeployedDiameter);
+        node.AddValue("deployedDiameter", this.deployedDiameter);
+        node.AddValue("minIsPressure", this.minIsPressure);
+        node.AddValue("capOff", this.capOff);
+        node.AddValue("minDeployment", this.minDeployment);
+        node.AddValue("minPressure", this.minPressure);
+        node.AddValue("deploymentAlt", this.deploymentAlt);
+        node.AddValue("cutAlt", this.cutAlt);
+        node.AddValue("preDeploymentSpeed", this.preDeploymentSpeed);
+        node.AddValue("deploymentSpeed", this.deploymentSpeed);
+        node.AddValue("time", this.time);
+        node.AddValue("parachuteName", this.parachuteName);
+        node.AddValue("baseParachuteName", this.baseParachuteName);
+        node.AddValue("capName", this.capName);
+        node.AddValue("preDeploymentAnimation", this.preDeploymentAnimation);
+        node.AddValue("deploymentAnimation", this.deploymentAnimation);
+        node.AddValue("forcedOrientation", this.forcedOrientation);
+        node.AddValue("maxRotation", this.maxRotation);
+        node.AddValue("depState", this.depState);
+        node.AddValue("ignoreShielded", this.ignoreShielded);
+        node.AddValue("referenceDiameter", this.referenceDiameter);
+        node.AddValue("maxDiameter", this.maxDiameter);
+        node.AddValue("canopyCount", this.canopyCount);
+        return node;
+    }
+    #endregion
 }

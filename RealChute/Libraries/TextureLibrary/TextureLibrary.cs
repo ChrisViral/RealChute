@@ -11,68 +11,67 @@ using UnityEngine;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries.TextureLibrary
+namespace RealChute.Libraries.TextureLibrary;
+
+public class TextureLibrary
 {
-    public class TextureLibrary
+    #region Instance
+    /// <summary>
+    /// Creates a new instance
+    /// </summary>
+    public static TextureLibrary Instance => field ??= new TextureLibrary();
+    #endregion
+
+    #region Propreties
+    /// <summary>
+    /// Name of all the TextureConfigs with the associated objects
+    /// </summary>
+    private Dictionary<string, TextureConfig> Configs { get; }
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates a new instance of the library
+    /// </summary>
+    private TextureLibrary()
     {
-        #region Instance
-        /// <summary>
-        /// Creates a new instance
-        /// </summary>
-        public static TextureLibrary Instance => field ??= new TextureLibrary();
-        #endregion
-
-        #region Propreties
-        /// <summary>
-        /// Name of all the TextureConfigs with the associated objects
-        /// </summary>
-        private Dictionary<string, TextureConfig> Configs { get; }
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates a new instance of the library
-        /// </summary>
-        private TextureLibrary()
-        {
-            this.Configs = GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n))
-                .ToDictionary(t => t.Name, t => t);
-        }
-        #endregion
-
-        #region Methods
-        /// <summary>
-        /// Determines if the config of the given name exists in the library.
-        /// </summary>
-        /// <param name="name">Name of the searched config</param>
-        private bool ContainsConfig(string name) => this.Configs.ContainsKey(name);
-
-        /// <summary>
-        /// Returns the config of the given name.
-        /// </summary>
-        /// <param name="name">Name of the config searched for</param>
-        public TextureConfig GetConfig(string name)
-        {
-            if (!ContainsConfig(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" TextureConfig in the library"); }
-            return this.Configs[name];
-        }
-
-        /// <summary>
-        /// Sees if the config exists and stores it in the ref value if so.
-        /// </summary>
-        /// <param name="name">Name of the config searched for</param>
-        /// <param name="config">Variable to store the result in</param>
-        /// ReSharper disable once UnusedMethodReturnValue.Global
-        public bool TryGetConfig(string name, ref TextureConfig config)
-        {
-            if (ContainsConfig(name))
-            {
-                config = this.Configs[name];
-                return true;
-            }
-            if (!string.IsNullOrEmpty(name) && this.Configs.Count > 0) { Debug.LogError($"[RealChute]: Could not find the TextureConfig \"{name}\" in the GameData folder"); }
-            return false;
-        }
-        #endregion
+        this.Configs = GameDatabase.Instance.GetConfigNodes("TEXTURE_LIBRARY").Select(n => new TextureConfig(n))
+                                   .ToDictionary(t => t.Name, t => t);
     }
+    #endregion
+
+    #region Methods
+    /// <summary>
+    /// Determines if the config of the given name exists in the library.
+    /// </summary>
+    /// <param name="name">Name of the searched config</param>
+    private bool ContainsConfig(string name) => this.Configs.ContainsKey(name);
+
+    /// <summary>
+    /// Returns the config of the given name.
+    /// </summary>
+    /// <param name="name">Name of the config searched for</param>
+    public TextureConfig GetConfig(string name)
+    {
+        if (!ContainsConfig(name)) { throw new KeyNotFoundException($"Could not find the \"{name}\" TextureConfig in the library"); }
+        return this.Configs[name];
+    }
+
+    /// <summary>
+    /// Sees if the config exists and stores it in the ref value if so.
+    /// </summary>
+    /// <param name="name">Name of the config searched for</param>
+    /// <param name="config">Variable to store the result in</param>
+    /// ReSharper disable once UnusedMethodReturnValue.Global
+    public bool TryGetConfig(string name, ref TextureConfig config)
+    {
+        if (ContainsConfig(name))
+        {
+            config = this.Configs[name];
+            return true;
+        }
+        if (!string.IsNullOrEmpty(name) && this.Configs.Count > 0) { Debug.LogError($"[RealChute]: Could not find the TextureConfig \"{name}\" in the GameData folder"); }
+        return false;
+    }
+    #endregion
 }

@@ -119,3 +119,4 @@ Backup*/
 UpgradeLog*.XML
 
 .idea/.idea.RealChute/.idea/
+*.cmdlineargs.json
