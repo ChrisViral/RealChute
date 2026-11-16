@@ -104,6 +104,21 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     //Check if the staging button has been pressed this frame
     public bool PressedStage => !InputLockManager.IsLocked(ControlTypes.STAGING) && GameSettings.LAUNCH_STAGES.GetKeyDown();
 
+    private bool ShowDeploymentPendingMessage
+    {
+        get;
+        set
+        {
+            if (field == value) return;
+
+            field = value;
+            if (!value)
+            {
+                ScreenMessages.RemoveMessage(this.deploymentPendingMessage);
+            }
+        }
+    }
+
     //Quick access to the part GUI events
     private BaseEvent deploy, arm, disarm, cut, repack;
     private BaseEvent Deploy => this.deploy ??= this.Events["GUIDeploy"];
@@ -131,8 +146,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     private readonly int id = Guid.NewGuid().GetHashCode();
     private Rect window, drag;
     private Vector2 scroll;
-    private string screenMessage = string.Empty;
-    private bool showMessage;
+    private ScreenMessage deploymentPendingMessage = new(string.Empty, 1f, ScreenMessageStyle.UPPER_CENTER);
     #endregion
 
     #region Part GUI
@@ -237,7 +251,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     public void CheckForWait()
     {
         bool timerSpent = true, goesDown = true;
-        this.screenMessage = string.Empty;
+        this.deploymentPendingMessage.message = string.Empty;
         //Timer
         if (this.timer > 0 && this.deploymentTimer.Elapsed.TotalSeconds < this.timer)
         {
@@ -246,7 +260,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
             if (this.vessel.isActiveVessel)
             {
                 float time = this.timer - (float)this.deploymentTimer.Elapsed.TotalSeconds;
-                this.screenMessage = time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}";
+                this.deploymentPendingMessage.message = time < 60 ? $"Deployment in {time:0.0}s" : $"Deployment in {RCUtils.ToMinutesSeconds(time)}";
             }
         }
         else if (this.deploymentTimer.IsRunning) { this.deploymentTimer.Stop(); }
@@ -254,11 +268,11 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         //Goes down
         if (this.mustGoDown && this.vessel.verticalSpeed > 0)
         {
-            if (!timerSpent) { this.screenMessage += "\n"; }
+            if (!timerSpent) { this.deploymentPendingMessage.message += "\n"; }
             goesDown = false;
             if (this.vessel.isActiveVessel)
             {
-                this.screenMessage += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
+                this.deploymentPendingMessage.message += $"Deployment awaiting negative vertical velocity\nCurrent vertical velocity: {this.vessel.verticalSpeed:0.0}/s";
             }
         }
 
@@ -302,6 +316,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         this.staged = false;
         if (this.vessel.LandedOrSplashed) { this.launched = false; }
         this.wait = true;
+        this.ShowDeploymentPendingMessage = false;
         print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
     }
 
@@ -479,9 +494,9 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
             }
         }
 
-        if (this.showMessage)
+        if (this.ShowDeploymentPendingMessage)
         {
-            ScreenMessages.PostScreenMessage(this.screenMessage, Time.deltaTime * 0.6f, ScreenMessageStyle.UPPER_CENTER);
+            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage.message);
         }
 
         this.Disarm.active = this.armed || this.showDisarm;
@@ -538,6 +553,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
             {
                 this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
                 if (this.parachutes.Exists(p => p.CanDeploy)) { this.armed = false; }
+                CheckForWait();
             }
             //Parachute deployments
             else
@@ -547,10 +563,11 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
                     CheckForWait();
                     if (this.wait)
                     {
-                        this.showMessage = true;
+                        this.ShowDeploymentPendingMessage = true;
                         return;
                     }
-                    this.showMessage = false;
+
+                    this.ShowDeploymentPendingMessage = false;
                 }
 
                 //Parachutes
@@ -576,9 +593,15 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     private void OnDestroy()
     {
         if (!CompatibilityChecker.IsAllCompatible|| !HighLogic.LoadedSceneIsFlight && !HighLogic.LoadedSceneIsEditor) { return; }
+
         //Hide/show UI event removal
         GameEvents.onHideUI.Remove(HideUI);
         GameEvents.onShowUI.Remove(ShowUI);
+
+        if (this.ShowDeploymentPendingMessage)
+        {
+            ScreenMessages.RemoveMessage(this.deploymentPendingMessage);
+        }
     }
     #endregion
 
