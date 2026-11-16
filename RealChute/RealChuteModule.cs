@@ -507,7 +507,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
 
         if (this.ShowDeploymentPendingMessage)
         {
-            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage.message);
+            ScreenMessages.PostScreenMessage(this.deploymentPendingMessage);
         }
 
         this.Disarm.active = this.armed || this.showDisarm;
