@@ -180,7 +180,7 @@ public class ProceduralChute : PartModule, IPartCostModifier
     }
 
     //Gets the total mass of the craft
-    internal float GetCraftMass(bool dry) => EditorLogic.SortedShipList.Where(p => p.physicalSignificance != Part.PhysicalSignificance.NONE).Sum(p => dry ? p.mass : p.TotalMass());
+    internal float GetCraftMass(bool dry) => EditorLogic.SortedShipList.Sum(p => p.TotalMass(dry));
 
     //Lists the errors of a given type
     // ReSharper disable once CognitiveComplexity
@@ -470,7 +470,7 @@ public class ProceduralChute : PartModule, IPartCostModifier
         }
 
         this.chutes.ForEach(c => c.ApplyPreset(preset));
-        Apply(false);
+        Apply(true);
         print("[RealChute]: Applied the " + preset.Name + " preset on " + this.part.partInfo.title);
     }
 

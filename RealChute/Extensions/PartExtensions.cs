@@ -60,7 +60,12 @@ public static class PartExtensions
         /// <summary>
         /// Returns the total mass of the part
         /// </summary>
-        public float TotalMass() => part.physicalSignificance != Part.PhysicalSignificance.NONE ? part.mass + part.GetResourceMass() : 0f;
+        public float TotalMass(bool dry = false)
+        {
+            if (part.physicalSignificance is Part.PhysicalSignificance.NONE) return 0f;
+
+            return dry ? part.mass : part.mass + part.GetResourceMass();
+        }
 
         /// <summary>
         /// Total cost of this part

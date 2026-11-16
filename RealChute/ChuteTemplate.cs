@@ -1,5 +1,7 @@
 using System;
+using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using JetBrains.Annotations;
 using RealChute.Extensions;
 using RealChute.Libraries.MaterialsLibrary;
@@ -114,38 +116,50 @@ public class ChuteTemplate
 
         if (this.templateGUI.calcSelect)
         {
-            double m = this.templateGUI.getMass ? this.pChute.GetCraftMass(this.templateGUI.useDry) : double.Parse(this.templateGUI.mass, CultureInfo.InvariantCulture);
-            double alt = 0, acc = 0;
+            double mass = this.templateGUI.getMass
+                              ? this.pChute.GetCraftMass(this.templateGUI.useDry)
+                              : double.Parse(this.templateGUI.mass, CultureInfo.InvariantCulture);
+            mass -= this.parachute.ChuteMass;
+            if (toSymmetryCounterparts)
+            {
+                mass -= this.Part.symmetryCounterparts.Sum(p => ((ProceduralChute)p.Modules["ProceduralChute"]).chutes[this.id].parachute.ChuteMass);
+            }
+
+            double alt, acc;
             switch (this.templateGUI.Type)
             {
                 case ParachuteType.MAIN:
-                {
                     alt = double.Parse(this.pChute.landingAlt, CultureInfo.InvariantCulture);
                     acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                     break;
-                }
+
                 case ParachuteType.DROGUE:
-                {
                     alt = double.Parse(this.templateGUI.refDepAlt, CultureInfo.InvariantCulture);
                     acc = this.Body.GeeASL * RCUtils.GeeToAcc;
                     break;
-                }
+
                 case ParachuteType.DRAG:
-                {
                     alt = double.Parse(this.pChute.landingAlt, CultureInfo.InvariantCulture);
                     acc = double.Parse(this.templateGUI.deceleration, CultureInfo.InvariantCulture);
                     break;
-                }
+
+                default:
+                    throw new InvalidEnumArgumentException(nameof(TemplateGUI.Type), (int)this.templateGUI.Type, typeof(ParachuteType));
             }
 
+            int chutesUsed = int.Parse(this.templateGUI.chuteCount, CultureInfo.InvariantCulture);
             double density = this.Body.GetDensityAtAlt(alt, this.Body.GetMaxTemperatureAtAlt(alt));
-            double speed = double.Parse(this.templateGUI.landingSpeed, CultureInfo.InvariantCulture);
-            speed *= speed;
+            double speedSquared = double.Parse(this.templateGUI.landingSpeed, CultureInfo.InvariantCulture);
+            speedSquared *= speedSquared;
 
-            Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - m: {m}t, alt: {alt}m, ρ: {density}kg/m³, v²: {speed}m²/s², a: {acc}m/s²");
+            Debug.Log($"[RealChute]: {this.Part.partInfo.title} {RCUtils.ParachuteNumber(this.id)} - m: {mass}t, alt: {alt}m, ρ: {density}kg/m³, v²: {speedSquared}m²/s², a: {acc}m/s²");
 
-            this.parachute.deployedDiameter = RCUtils.Round(Math.Sqrt((8000 * m * acc) / (Math.PI * speed * this.material.DragCoefficient * density * double.Parse(this.templateGUI.chuteCount, CultureInfo.InvariantCulture))));
-            float maxDiam = (this.Textures != null) && (this.Textures.Models.Count > 0) ? this.model.MaxDiam : this.parachute.maxDiameter;
+            double areaConstant = (2000d * acc) / (speedSquared * this.material.DragCoefficient * density);
+            double area = (areaConstant * mass) / (1d - (areaConstant * this.material.AreaDensity));
+            double areaPerChute = area / chutesUsed;
+            this.parachute.deployedDiameter =  RCUtils.Round(Math.Sqrt((4d * areaPerChute) / Math.PI));
+
+            float maxDiam = this.Textures != null && this.Textures.Models.Count > 0 ? this.model.MaxDiam : this.parachute.maxDiameter;
             if (this.parachute.deployedDiameter > this.model.MaxDiam)
             {
                 this.parachute.deployedDiameter = maxDiam;
@@ -154,7 +168,6 @@ public class ChuteTemplate
             else { this.EditorGUI.warning = false; }
             this.parachute.preDeployedDiameter = RCUtils.Round(this.templateGUI.Type == ParachuteType.MAIN ? this.parachute.deployedDiameter / 20 : this.parachute.deployedDiameter / 2);
         }
-
         else
         {
             this.parachute.preDeployedDiameter = RCUtils.Round(float.Parse(this.templateGUI.preDepDiam, CultureInfo.InvariantCulture));
