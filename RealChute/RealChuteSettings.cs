@@ -52,6 +52,16 @@ public class RealChuteSettings
         set => this.engineerLevel = value;
     }
 
+    private bool requireChargeToDeploy = true;
+    /// <summary>
+    /// If ElectricCharge is required to deploy the parachutes
+    /// </summary>
+    public bool RequireChargeToDeploy
+    {
+        get => this.requireChargeToDeploy;
+        set => this.requireChargeToDeploy = value;
+    }
+
     private bool jokeActivated;
     /// <summary>
     /// If April Fools joke is activated
@@ -98,6 +108,7 @@ public class RealChuteSettings
         settings.TryGetValue("autoArm", ref this.autoArm);
         settings.TryGetValue("mustBeEngineer", ref this.mustBeEngineer);
         settings.TryGetValue("engineerLevel", ref this.engineerLevel);
+        settings.TryGetValue("requireChargeToDeploy", ref this.requireChargeToDeploy);
         settings.TryGetValue("jokeActivated", ref this.jokeActivated);
         settings.TryGetValue("activateNyan", ref this.nyanMode);
     }
@@ -113,6 +124,7 @@ public class RealChuteSettings
         settings.AddValue("autoArm", this.AutoArm);
         settings.AddValue("mustBeEngineer", this.MustBeEngineer);
         settings.AddValue("engineerLevel", this.EngineerLevel);
+        settings.AddValue("requireChargeToDeploy", this.RequireChargeToDeploy);
         settings.AddValue("jokeActivated", this.JokeActivated);
         settings.AddValue("activateNyan", this.NyanMode);
 

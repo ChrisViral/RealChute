@@ -88,12 +88,17 @@ public class SettingsWindow : MonoBehaviour
         GUI.DragWindow(this.drag);
 
         RealChuteSettings.Instance.AutoArm        = GUILayout.Toggle(RealChuteSettings.Instance.AutoArm, "Automatically arm when staging", GUIUtils.ScaledToggle);
-        RealChuteSettings.Instance.JokeActivated  = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)", GUIUtils.ScaledToggle);
-        RealChuteSettings.Instance.NyanMode       = GUILayout.Toggle(RealChuteSettings.Instance.NyanMode, "Activate NyanMode™", GUIUtils.ScaledToggle);
+
         RealChuteSettings.Instance.MustBeEngineer = GUILayout.Toggle(RealChuteSettings.Instance.MustBeEngineer, "Only engineers can repack in career", GUIUtils.ScaledToggle);
         if (!RealChuteSettings.Instance.MustBeEngineer) { GUI.enabled = false; }
         GUIUtils.CreateEntryArea("Engineer minimum level to repack:", ref this.level, 0f, 5f, 100f);
         GUI.enabled = true;
+
+        RealChuteSettings.Instance.RequireChargeToDeploy = GUILayout.Toggle(RealChuteSettings.Instance.RequireChargeToDeploy, "Require Electric Charge to Deploy Parachutes", GUIUtils.ScaledToggle);
+
+        RealChuteSettings.Instance.JokeActivated = GUILayout.Toggle(RealChuteSettings.Instance.JokeActivated, "Activate April Fools' joke (DANGER!!)", GUIUtils.ScaledToggle);
+
+        RealChuteSettings.Instance.NyanMode      = GUILayout.Toggle(RealChuteSettings.Instance.NyanMode, "Activate NyanMode™", GUIUtils.ScaledToggle);
 
         GUIUtils.CenteredButton("Close", CloseWindow, 100f);
     }

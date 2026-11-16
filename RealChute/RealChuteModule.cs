@@ -47,6 +47,8 @@ public enum SafeState
 [PublicAPI]
 public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier, IModuleInfo
 {
+    private static readonly int ElectricChargeID = "ElectricCharge".GetHashCode();
+
     #region Persistent fields
     // Values from the .cfg file
     [KSPField(isPersistant = true)]
@@ -278,9 +280,20 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     //Activates the parachute
     public void ActivateRC()
     {
+        if (RealChuteSettings.Instance.RequireChargeToDeploy)
+        {
+            this.part.GetConnectedResourceTotals(ElectricChargeID, out double amount, out double _);
+            if (amount <= 1E-5)
+            {
+                Debug.Log($"[RealChute]: {this.part.partInfo.name} failed to activate due to insufficient EC");
+                ScreenMessages.PostScreenMessage($"<color=orange>[RealChute]: {this.part.partInfo.title}'s parachute could not be deployed due to a lack of ElectricCharge on the vessel.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+                return;
+            }
+        }
+
         this.staged = true;
         if (RealChuteSettings.Instance.AutoArm) { this.armed = true; }
-        print("[RealChute]: " + this.part.partInfo.name + " was activated in stage " + this.part.inverseStage);
+        Debug.Log($"[RealChute]: {this.part.partInfo.name} was activated in stage {this.part.inverseStage}");
     }
 
     //Deactivates the parachute
