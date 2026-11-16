@@ -297,16 +297,7 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
     //Activates the parachute
     public bool ActivateRC()
     {
-        if (RealChuteSettings.Instance.RequireChargeToDeploy)
-        {
-            this.part.GetConnectedResourceTotals(ElectricChargeID, out double amount, out double _);
-            if (amount <= 1E-5)
-            {
-                Debug.Log($"[RealChute]: {this.part.partInfo.name} failed to activate due to insufficient EC");
-                ScreenMessages.PostScreenMessage($"<color=orange>[RealChute]: {this.part.partInfo.title}'s parachute could not be deployed due to a lack of ElectricCharge on the vessel.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
-                return false;
-            }
-        }
+        if (!CheckHasElectricPower()) return false;
 
         this.staged = true;
         if (RealChuteSettings.Instance.AutoArm) { this.armed = true; }
@@ -322,6 +313,22 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
         this.wait = true;
         this.ShowDeploymentPendingMessage = false;
         print("[RealChute]: " + this.part.partInfo.name + " was deactivated");
+    }
+
+    private bool CheckHasElectricPower()
+    {
+        if (RealChuteSettings.Instance.RequireChargeToDeploy)
+        {
+            this.part.GetConnectedResourceTotals(ElectricChargeID, out double amount, out double _);
+            if (amount <= 1E-5)
+            {
+                Debug.Log($"[RealChute]: {this.part.partInfo.name} failed to activate due to insufficient EC");
+                ScreenMessages.PostScreenMessage($"<color=orange>[RealChute]: {this.part.partInfo.title}'s parachute could not be deployed due to a lack of ElectricCharge on the vessel.</color>", 6f, ScreenMessageStyle.UPPER_LEFT);
+                return false;
+            }
+        }
+
+        return true;
     }
 
     //Copies stats from the info window to the symmetry counterparts
@@ -556,40 +563,50 @@ public class RealChuteModule : PartModule, IPartCostModifier, IPartMassModifier,
             if (this.armed)
             {
                 this.part.stackIcon.SetIconColor(XKCDColors.LightCyan);
-                if (this.parachutes.Exists(p => p.CanDeploy)) { this.armed = false; }
-                CheckForWait();
-            }
-            //Parachute deployments
-            else
-            {
-                if (this.wait)
+                if (this.parachutes.Exists(p => p.CanDeploy))
                 {
-                    CheckForWait();
-                    if (this.wait)
+                    if (!CheckHasElectricPower())
                     {
-                        this.ShowDeploymentPendingMessage = true;
+                        StagingReset();
                         return;
                     }
 
-                    this.ShowDeploymentPendingMessage = false;
+                    this.armed = false;
                 }
 
-                //Parachutes
-                this.parachutes.ForEach(p => p.UpdateParachute());
+                CheckForWait();
+            }
 
-                //If all parachutes must be cut
-                if (this.AllMustStop)
+            //Parachute deployments
+            if (this.armed) return;
+
+            if (this.wait)
+            {
+                CheckForWait();
+                if (this.wait)
                 {
-                    GUICut();
-                    SetRepack();
+                    this.ShowDeploymentPendingMessage = true;
+                    return;
                 }
 
-                //If the parachute can't be deployed
-                if (!this.oneWasDeployed && !RealChuteSettings.Instance.AutoArm)
-                {
-                    this.failedTimer.Start();
-                    StagingReset();
-                }
+                this.ShowDeploymentPendingMessage = false;
+            }
+
+            //Parachutes
+            this.parachutes.ForEach(p => p.UpdateParachute());
+
+            //If all parachutes must be cut
+            if (this.AllMustStop)
+            {
+                GUICut();
+                SetRepack();
+            }
+
+            //If the parachute can't be deployed
+            if (!this.oneWasDeployed && !RealChuteSettings.Instance.AutoArm)
+            {
+                this.failedTimer.Start();
+                StagingReset();
             }
         }
     }
