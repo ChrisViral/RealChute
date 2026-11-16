@@ -7,81 +7,80 @@
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Libraries.MaterialsLibrary
+namespace RealChute.Libraries.MaterialsLibrary;
+
+public class MaterialDefinition
 {
-    public class MaterialDefinition
+    #region Propreties
+    private readonly string name = string.Empty;
+    /// <summary>
+    /// Name of the material
+    /// </summary>
+    public string Name => this.name;
+
+    private readonly string description = "We don't know much about this, it might as well be made of fishnets";
+    /// <summary>
+    /// The description of this material
+    /// </summary>
+    public string Description => this.description;
+
+    private readonly float areaDensity = 5.65E-5f;
+    /// <summary>
+    /// Area density of this material
+    /// </summary>
+    public float AreaDensity => this.areaDensity;
+
+    private readonly float dragCoefficient = 1F;
+    /// <summary>
+    /// Drag coefficient of this material
+    /// </summary>
+    public float DragCoefficient => this.dragCoefficient;
+
+    private readonly float areaCost = 0.075f;
+    /// <summary>
+    /// Cost of a square meter of this material
+    /// </summary>
+    public float AreaCost => this.areaCost;
+
+    private readonly double maxTemp = 493.15;
+    /// <summary>
+    /// Maximum temperature this material can withstand (K)
+    /// </summary>
+    public double MaxTemp => this.maxTemp;
+
+    private readonly double specificHeat = 1700d;
+    /// <summary>
+    /// The specific heat of the material (J/kg∙K)
+    /// </summary>
+    public double SpecificHeat => this.specificHeat;
+
+    private readonly double emissivity = 0.72;
+    /// <summary>
+    /// The emissivity constant of the chute at (20°C)
+    /// </summary>
+    public double Emissivity => this.emissivity;
+    #endregion
+
+    #region Constructor
+    /// <summary>
+    /// Creates an empty material definition
+    /// </summary>
+    public MaterialDefinition() { }
+
+    /// <summary>
+    /// Creates a material definition from a config node
+    /// </summary>
+    /// <param name="node">Node to initiate the material from</param>
+    public MaterialDefinition(ConfigNode node)
     {
-        #region Propreties
-        private readonly string name = string.Empty;
-        /// <summary>
-        /// Name of the material
-        /// </summary>
-        public string Name => this.name;
-
-        private readonly string description = "We don't know much about this, it might as well be made of fishnets";
-        /// <summary>
-        /// The description of this material
-        /// </summary>
-        public string Description => this.description;
-
-        private readonly float areaDensity = 5.65E-5f;
-        /// <summary>
-        /// Area density of this material
-        /// </summary>
-        public float AreaDensity => this.areaDensity;
-
-        private readonly float dragCoefficient = 1F;
-        /// <summary>
-        /// Drag coefficient of this material
-        /// </summary>
-        public float DragCoefficient => this.dragCoefficient;
-
-        private readonly float areaCost = 0.075f;
-        /// <summary>
-        /// Cost of a square meter of this material
-        /// </summary>
-        public float AreaCost => this.areaCost;
-
-        private readonly double maxTemp = 493.15;
-        /// <summary>
-        /// Maximum temperature this material can withstand (K)
-        /// </summary>
-        public double MaxTemp => this.maxTemp;
-
-        private readonly double specificHeat = 1700d;
-        /// <summary>
-        /// The specific heat of the material (J/kg∙K)
-        /// </summary>
-        public double SpecificHeat => this.specificHeat;
-
-        private readonly double emissivity = 0.72;
-        /// <summary>
-        /// The emissivity constant of the chute at (20°C)
-        /// </summary>
-        public double Emissivity => this.emissivity;
-        #endregion
-
-        #region Constructor
-        /// <summary>
-        /// Creates an empty material definition
-        /// </summary>
-        public MaterialDefinition() { }
-
-        /// <summary>
-        /// Creates a material definition from a config node
-        /// </summary>
-        /// <param name="node">Node to initiate the material from</param>
-        public MaterialDefinition(ConfigNode node)
-        {
-            node.TryGetValue("name", ref this.name);
-            node.TryGetValue("description", ref this.description);
-            node.TryGetValue("areaDensity", ref this.areaDensity);
-            node.TryGetValue("dragCoefficient", ref this.dragCoefficient);
-            node.TryGetValue("areaCost", ref this.areaCost);
-            node.TryGetValue("maxTemp", ref this.maxTemp);
-            node.TryGetValue("specificHeat", ref this.specificHeat);
-            node.TryGetValue("emissivity", ref this.emissivity);
-        }
-        #endregion
+        node.TryGetValue("name", ref this.name);
+        node.TryGetValue("description", ref this.description);
+        node.TryGetValue("areaDensity", ref this.areaDensity);
+        node.TryGetValue("dragCoefficient", ref this.dragCoefficient);
+        node.TryGetValue("areaCost", ref this.areaCost);
+        node.TryGetValue("maxTemp", ref this.maxTemp);
+        node.TryGetValue("specificHeat", ref this.specificHeat);
+        node.TryGetValue("emissivity", ref this.emissivity);
     }
+    #endregion
 }

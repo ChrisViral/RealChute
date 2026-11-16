@@ -18,7 +18,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("RealChute")]
-[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2024")]
+[assembly: AssemblyCopyright("Copyright © Christophe Savard (stupid_chris) 2013-2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -41,7 +41,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.4.*")]
-[assembly: AssemblyInformationalVersion("1.4.9.5")]
+[assembly: AssemblyInformationalVersion("1.4.10.0")]
 
 // Add third party mods dependencies
 [assembly: KSPAssemblyDependency("ClickThroughBlocker", 1, 0)]

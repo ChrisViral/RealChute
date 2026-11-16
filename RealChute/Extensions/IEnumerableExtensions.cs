@@ -10,58 +10,49 @@ using System.Collections.Generic;
  * inactive (no connection) for a period of 90 days on the official KSP forums. In that case, the license reverts
  * back to CC-BY-NC-SA 4.0 INTL.*/
 
-namespace RealChute.Extensions
-{
-    public static class EnumerableExtensions
-    {
-        #region Methods
-        /// <summary>
-        /// Finds the index of the first given element. Returns -1 if it fails
-        /// </summary>
-        /// <typeparam name="T">IEnumerable type</typeparam>
-        /// <param name="array">Array to get the index in</param>
-        /// <param name="value">Element to search for</param>
-        public static int IndexOf<T>(this T[] array, T value) => Array.IndexOf(array, value);
+namespace RealChute.Extensions;
 
+public static class EnumerableExtensions
+{
+    #region Methods
+    /// <param name="array">Array to look into</param>
+    /// <typeparam name="T">Type of the array</typeparam>
+    extension<T>(T[] array)
+    {
         /// <summary>
         /// If the given array contains the value looked for
         /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="array">Array to look into</param>
         /// <param name="value">Element to find in the array</param>
-        public static bool Contains<T>(this T[] array, T value) => Array.IndexOf(array, value) != -1;
+        public bool Contains(T value) => Array.IndexOf(array, value) != -1;
 
         /// <summary>
         /// Returns true if one of the elements of the array matches the given predicate
         /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="array">Array to look in</param>
         /// <param name="match">Match for the element to find</param>
-        public static bool Exists<T>(this T[] array, Predicate<T> match) => Array.Exists(array, match);
+        public bool Exists(Predicate<T> match) => Array.Exists(array, match);
 
         /// <summary>
         /// Returns true only if the given index is within the range of the array (above 0 and under the lenght)
         /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="array">Array to get the index in</param>
         /// <param name="index">Index to use</param>
-        public static bool IndexInRange<T>(this T[] array, int index) => index >= 0 && index < array.Length;
+        public bool IndexInRange(int index) => index >= 0 && index < array.Length;
 
         /// <summary>
         /// Executes the given action on all the elements of the array
         /// </summary>
-        /// <typeparam name="T">Type of the array</typeparam>
-        /// <param name="array">Array to apply to</param>
         /// <param name="action">Action to execute on each member of the array</param>
-        public static void ForEach<T>(this T[] array, Action<T> action) => Array.ForEach(array, action);
+        public void ForEach(Action<T> action) => Array.ForEach(array, action);
+    }
 
+    /// <param name="seq">Sequence to execute in</param>
+    /// <typeparam name="T">Type of the elements</typeparam>
+    extension<T>(IEnumerable<T> seq)
+    {
         /// <summary>
         /// Executes the given action on each member of the IEnumerable
         /// </summary>
-        /// <typeparam name="T">Type of the elements</typeparam>
-        /// <param name="seq">Sequence to execute in</param>
         /// <param name="action">Action to execute</param>
-        public static void ForEach<T>(this IEnumerable<T> seq, Action<T> action)
+        public void ForEach(Action<T> action)
         {
             if (seq == null) { throw new ArgumentNullException(nameof(seq)); }
             if (action == null) { throw new ArgumentNullException(nameof(action)); }
@@ -71,6 +62,6 @@ namespace RealChute.Extensions
                 action(t);
             }
         }
-        #endregion
     }
+    #endregion
 }
